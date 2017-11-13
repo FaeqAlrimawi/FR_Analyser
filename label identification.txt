@@ -1,0 +1,5 @@
+-continue working on what you are doing, this includes:
+=Identifying possible actions of a transition and update transition file with labels [implemented]
+=encode special keywords of actions into reaction rules (could be the name of the rules)
+=for each state of a transition, find the keyword that disappears from the source to the target
+ #This involves finding the missing keyword from the nodes identified in a state file (could be in json)

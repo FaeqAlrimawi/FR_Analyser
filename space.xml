@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<environment:EnvironmentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:environment="http://www.example.org/environment">
+  <asset xsi:type="environment:PhysicalStructure" name="2nd_floor" rules="actor_move" containedAssets="control_room hallway server_room toilet"/>
+  <asset xsi:type="environment:PhysicalStructure" connections="E-H" name="entrance" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:PhysicalStructure" connections="H-C H-S H-T E-H" name="hallway" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:PhysicalStructure" connections="H-S" name="server_room" containedAssets="HVAC1 Fire-Alram serverX camera2" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:PhysicalStructure" connections="H-T H-S" name="toilet" containedAssets="light1 light2" parentAsset="2nd_floor">
+  <property name="prop2" value="1"/>
+  <property name="prop1" value="1"/>
+  </asset>
+  <asset xsi:type="environment:PhysicalStructure" connections="H-C" name="control_room" containedAssets="camera1" 
+  parentAsset="2nd_floor">
+  <property name="prop1" value="1"/>
+  
+  </asset>
+  <asset xsi:type="environment:ComputingDevice" connections="SL1-IB" name="light1" parentAsset="person1" canConnect="true">
+    <property name="canConnectTypes" value="wired,wireless"/>
+    <type name="ComputingDevice"/>
+  </asset>
+  <asset xsi:type="environment:Person" name="person1" parentAsset="control_room"/>
+  <asset xsi:type="environment:SmartLight" name="light2" parentAsset="toilet"/>
+  <asset xsi:type="environment:Desktop" connections="WS-DB" name="workstationX" parentAsset="control_room"/>
+  <asset xsi:type="environment:HVAC" connections="HVAC-IB HVAC1-BN" name="HVAC1" parentAsset="server_room"/>
+  <asset xsi:type="environment:Tangible" connections="FA-IB FA-BN" name="Fire-Alram" parentAsset="server_room"/>
+  <asset xsi:type="environment:Server" name="serverX" parentAsset="server_room"/>
+  <asset xsi:type="environment:Process" connections="IB-TempProc TempProc-DB" name="temperature_process"/>
+  <asset xsi:type="environment:Digital" connections="TempProc-DB" name="database"/>
+  <asset xsi:type="environment:Tangible" connections="FA-IB HVAC-IB SL1-IB SL2-IB IB-TempProc" name="installation_bus" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:ComputingDevice" name="bus_gateway"/>
+  <asset xsi:type="environment:Actor" name="visitor" rules="actor_move connect_physical" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:Digital" name="orgnisation's_website"/>
+  <asset xsi:type="environment:Intellectual" name="tradeSecrets" parentAsset="server_room"/>
+  <asset xsi:type="environment:CCTV" name="camera1" parentAsset="control_room"/>
+  <asset xsi:type="environment:CCTV" name="camera2" parentAsset="server_room"/>
+  <asset xsi:type="environment:Digital" name="busNetwork"/>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="hallway" assetSrc="entrance" name="E-H"/>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="toilet" assetSrc="hallway" name="H-T">
+    <port name="Port1"/>
+  </connection>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="server_room" assetSrc="hallway" name="H-S">
+    <port name="serverRoomDoor">
+      <credential key="access" value="keycard"/>
+    </port>
+  </connection>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="control_room" assetSrc="hallway" name="H-C" type=""/>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="installation_bus" assetSrc="light1" name="SL1-IB" type="twisted pair cable"/>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="installation_bus" assetSrc="HVAC1" name="HVAC-IB" type="twisted pair cable"/>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="installation_bus" assetSrc="Fire-Alram" name="FA-IB" type="twisted pair cable"/>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="installation_bus" assetSrc="light2" name="SL2-IB" type="twisted pair cable"/>
+  <connection xsi:type="environment:DigitalConnection" assetDes="temperature_process" assetSrc="installation_bus" name="IB-TempProc" type="bus_network">
+    <port asset="bus_gateway" name="Port-bus"/>
+  </connection>
+  <connection xsi:type="environment:DigitalConnection" assetDes="database" assetSrc="temperature_process" name="TempProc-DB" type="IP_network"/>
+  <connection xsi:type="environment:DigitalConnection" assetDes="busNetwork" assetSrc="light1" name="SL1-BN" type="bus_network"/>
+  <connection xsi:type="environment:DigitalConnection" assetDes="busNetwork" assetSrc="HVAC1" name="HVAC1-BN" type="bus_network"/>
+  <connection xsi:type="environment:DigitalConnection" assetDes="busNetwork" assetSrc="Fire-Alram" name="FA-BN" type="bus_network"/>
+  <connection xsi:type="environment:DigitalConnection" assetDes="database" assetSrc="workstationX" name="WS-DB" type="IP_network"/>
+  <connection xsi:type="environment:PhysicalConnection" assetDes="installation_bus" name="serverDoorAccessControlDevice-IB" type="twisted pair cable"/>
+  <connection xsi:type="environment:DigitalConnection" name="digitalConnection1"/>
+  <connection xsi:type="environment:PhysicalConnection" name="physicalConnection1"/>
+  <rule name="actor_move">
+    <preconditions>astSrc.?Actor | astDes</preconditions>
+    <postconditions>astSrc | astDes.?Actor</postconditions>
+  </rule>
+  <rule name="send_data">
+    <preconditions>astSrc.DATA</preconditions>
+    <preconditions>astDes[?DigitalConnection]</preconditions>
+    <preconditions>astSrc[?DigitalConnection]</preconditions>
+    <postconditions>astDes.DATA</postconditions>
+  </rule>
+  <rule name="connect_physical">
+    <preconditions>?SmartDevice | ?SmartDevice</preconditions>
+    <postconditions>?SmartDevice[?PhysicalConnection] | ?SmartDevice[?PhysicalConnection]</postconditions>
+  </rule>
+  <rule name="connect_digital">
+    <preconditions>?SmartDevice[?PhysicalConnection] | ?SmartDevice[?PhysicalConnection]</preconditions>
+    <postconditions>?SmartDevice[?DigitalConnection] | ?SmartDevice[?DigitalConnection]</postconditions>
+  </rule>
+  <rule name="actor_send_data">
+    <preconditions>?Actor.?SmartDevice(?DigitalConnection).?Digital || ?SmartDevice(?DigitalConnection)</preconditions>
+    <postconditions>?Actor.?SmartDevice(?DigitalConnection) || ?SmartDevice(?DigitalConnection).?Digital</postconditions>
+  </rule>
+</environment:EnvironmentDiagram>

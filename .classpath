@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/Saxon9/saxon9he.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/Saxon9/saxon9-test.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/Saxon9/saxon9-xqj.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/batik-1.9/batik-1.9.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/batik-1.9/batik-rasterizer-1.9.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/batik-1.9/batik-slideshow-1.9.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/batik-1.9/batik-squiggle-1.9.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/batik-1.9/batik-svgpp-1.9.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/batik-1.9/batik-ttf2svg-1.9.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/franalyser/lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

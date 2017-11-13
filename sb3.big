@@ -1,0 +1,112 @@
+#Smart Building
+
+#constants 
+int devicesLinks = 3;
+
+#controls
+ctrl Room = 1; #represents a room, the integer (i.e. 1) means the number of names (or links) it has
+ctrl Floor = 1; #represents a floor
+ctrl Hallway = 4;
+ctrl Entrance = 1;
+ctrl Actor = 0; #actor in building, atomic means cannot contain other controls
+ctrl Laptop = 2;
+atomic ctrl Malware = 0;
+atomic ctrl Wokrstation = 1;
+atomic ctrl Servers = 0;
+ctrl SmartLight = 2;
+ctrl HVAC = 2;
+atomic ctrl FireDetector = 2;
+atomic ctrl ControlProcess = 1;
+atomic ctrl Database = 1;
+atomic ctrl PhysicalConnection=0;
+
+#######################################################################
+#inital state(s)
+
+big serverRoom = Room{server}.(HVAC{installationBus, busNetwork}.1 | FireDetector{installationBus, busNetwork} | Servers);
+
+big toiletRoom = Room{toilet}.SmartLight{installationBus, busNetwork}.1;
+
+big controlRoom = Room{control}.Wokrstation{ip_network}; 
+
+big s0=
+  Floor{second}.(Entrance{ent}.(Actor.(/a /b Laptop{a,b}.Malware) | FireDetector{a,b}) | Hallway{ent,toilet,server,control}.1 | serverRoom | toiletRoom | controlRoom ) || ControlProcess{ip_network} || Database{ip_network};
+
+#################################
+#predicates -result of pred is found through having the option -l file (for labels) set in the command
+big pred1 = 
+ /installationBus Room{toilet}.(Actor.(/busNetwork Laptop{installationBus, busNetwork}) | SmartLight{installationBus, busNetwork});
+ #Hallway{a,b,c,d}.(Actor | id);
+
+#######################################################################
+#reaction rules
+
+react enter_floor = 
+Entrance{ent}.(Actor.id |id) | Hallway{ent,toilet,server,control}.id 
+-> 
+Entrance{ent}.id | Hallway{ent,toilet,server,control}.(Actor.id | id)
+@[1,0,2]; #instantiation mapping depends on the order of the sites (id if stated) in the right hand side
+
+react exit_floor = 
+Hallway{a,b,c,d}.(Actor.id | id) | Entrance{a}.id 
+-> 
+Hallway{a,b,c,d}.id | Entrance{a}.(Actor.id | id)
+@[1,0,2];
+
+react actor_enter_room=
+Hallway{a,b,c,d}.(Actor.id | id) | Room{a}.id 
+-> 
+Hallway{a,b,c,d}.id | Room{a}.(Actor.id | id)
+@[1,0,2];
+
+react actor_exit_room=
+Room{a}.(Actor.(/c1 /c2 Laptop{c1,c2}.id | id) | id) | Hallway{a,b,c,d}.id 
+-> 
+Room{a}.id | Hallway{a,b,c,d}.(Actor.(/c1 /c2 Laptop{c1,c2}.id | id) | id)
+@[2,0,1,3];
+
+react connect_smartLight_physical = 
+Room{toilet}.(Actor.(/installationBus /busNetwork Laptop{installationBus, busNetwork}) | SmartLight{installationBus, busNetwork}) 
+->
+Room{toilet}.(Actor.(/busNetwork Laptop{installationBus, busNetwork}) | SmartLight{installationBus, busNetwork}) | {installationBus};
+
+react connect_smartLight_digital = 
+Room{toilet}.(Actor.(/b Laptop{installationBus, b}) | SmartLight{installationBus, busNetwork}) 
+->
+Room{toilet}.(Actor.(Laptop{installationBus, busNetwork}) | SmartLight{installationBus, busNetwork});
+
+big lhs_disconnect = Room{toilet}.(SmartLight{installationBus, busNetwork} | Actor.(Laptop{installationBus, busNetwork}));
+
+react disconnect_smartLight_digital = 
+lhs_disconnect
+->
+Room{toilet}.(SmartLight{installationBus, busNetwork} | Actor.(/busNetwork Laptop{installationBus, busNetwork})); 
+
+#disconnect physically when connected physically & digital 
+react disconnect_smartLight_physical1 = 
+lhs_disconnect
+->
+Room{toilet}.( SmartLight{installationBus, busNetwork} | Actor.(/busNetwork /installationBus Laptop{installationBus, busNetwork}) ); 
+
+#disconnect physically when connected physically only 
+react disconnect_smartLight_physical2 = 
+Room{toilet}.(SmartLight{installationBus, busNetwork} | Actor.( /busNetwork Laptop{installationBus, busNetwork}))
+->
+Room{toilet}.(SmartLight{installationBus, busNetwork} | Actor.(/busNetwork /installationBus Laptop{installationBus, busNetwork})); 
+
+react actor_send_malware = 
+Room{toilet}.(SmartLight{installationBus, busNetwork} | Actor.Laptop{installationBus, busNetwork}.(Malware | id)) || Room{srvr}.(HVAC{installationBus, busNetwork}.1 | id)
+->
+Room{toilet}.(SmartLight{installationBus, busNetwork} | Actor.Laptop{installationBus, busNetwork}.(Malware | id) ) ||  Room{srvr}.(HVAC{installationBus, busNetwork}.Malware | id);
+
+#######################################################################
+#BRS definition 
+begin brs
+init s0;
+rules = [{enter_floor, exit_floor, actor_enter_room, actor_exit_room, 
+connect_smartLight_physical, 
+connect_smartLight_digital, disconnect_smartLight_digital, disconnect_smartLight_physical1, 
+disconnect_smartLight_physical2, actor_send_malware}];
+
+preds = {pred1};
+end
