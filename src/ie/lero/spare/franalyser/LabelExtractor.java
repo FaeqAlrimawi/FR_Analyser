@@ -23,6 +23,7 @@ public class LabelExtractor {
 	// private String predicateFilePath = outputPath+"/pred";
 	// private ArrayList<ReactionRule> reactionRules;
 	private String rulesKeywordsFileName = "rules_keywords.txt";
+	private String [] rulesKeywords;
 	TransitionSystem transitionSystem;
 
 	public LabelExtractor() {
@@ -72,12 +73,14 @@ public class LabelExtractor {
 	 * target state The Digraph in the TransitionSystem class is updated after
 	 * this with the labels name
 	 */
-	public void extractLabels() {
+	public Digraph<Integer> extractLabels() {
 
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		ArrayList<String> labels = new ArrayList<String>();
 		String label = "";
 
+		rulesKeywords = FileManipulator.readFileNewLine(outputPath + "/" + rulesKeywordsFileName);
+		
 		for (Integer stateSrc : digraph.getNodes()) {
 			System.out.println(stateSrc);
 			System.out.println(digraph.outboundNeighbors(stateSrc));
@@ -87,8 +90,9 @@ public class LabelExtractor {
 				digraph.setLabel(stateSrc, stateDes, label);
 			}
 		}
-
-		System.out.println(digraph.toString());
+		
+		System.out.println(digraph);
+		return digraph;
 
 	}
 
@@ -115,7 +119,6 @@ public class LabelExtractor {
 		boolean isLabelFound = false;
 
 		try {
-			String[] rulesKeywords = FileManipulator.readFileNewLine(outputPath + "/" + rulesKeywordsFileName);
 			JSONObject src = (JSONObject) parser.parse(new FileReader(outputPath + "/" + stateSrc + ".json"));
 			JSONObject des = (JSONObject) parser.parse(new FileReader(outputPath + "/" + stateDes + ".json"));
 
@@ -177,7 +180,6 @@ public class LabelExtractor {
 		}
 
 		return label;
-
 	}
 
 	public void createNewLabelledTransitionFile() {
@@ -221,6 +223,31 @@ public class LabelExtractor {
 			e1.printStackTrace();
 		}
 	}
+
+	public String getOutputPath() {
+		return outputPath;
+	}
+
+	public void setOutputPath(String outputPath) {
+		this.outputPath = outputPath;
+	}
+
+	public String getTransitionFileName() {
+		return transitionFileName;
+	}
+
+	public void setTransitionFileName(String transitionFileName) {
+		this.transitionFileName = transitionFileName;
+	}
+
+	public String getRulesKeywordsFileName() {
+		return rulesKeywordsFileName;
+	}
+
+	public void setRulesKeywordsFileName(String rulesKeywordsFileName) {
+		this.rulesKeywordsFileName = rulesKeywordsFileName;
+	}
+	
 	
 	/*
 	 * public void getRulesStates() {
