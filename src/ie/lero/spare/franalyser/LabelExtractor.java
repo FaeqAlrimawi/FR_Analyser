@@ -7,13 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
@@ -224,6 +221,7 @@ public class LabelExtractor {
 			e1.printStackTrace();
 		}
 	}
+	
 	/*
 	 * public void getRulesStates() {
 	 * 
