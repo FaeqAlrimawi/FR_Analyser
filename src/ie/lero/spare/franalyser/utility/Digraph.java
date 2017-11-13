@@ -148,12 +148,27 @@ public class Digraph<V> {
         return -1;
     }
     
+    public List<V> getNodes() {
+    	List<V> inList = new ArrayList<V>();
+        for (V to : neighbors.keySet()) {
+                   inList.add(to);
+        }
+        return inList;
+    }
+    
     public String getLabel(V from, V to) {
         for(Edge<V> e :  neighbors.get(from)){
             if(e.vertex.equals(to))
                 return e.label;
         }
         return null;
+    }
+    
+    public void setLabel(V from, V to, String label) {
+        for(Edge<V> e :  neighbors.get(from)){
+            if(e.vertex.equals(to))
+                e.label = label;
+        }
     }
     
 }

@@ -1,61 +1,181 @@
 package ie.lero.spare.franalyser;
 
-import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
 public class LabelExtractor {
 
-	private String[] predicatesFileLines;
+//	private String[] predicatesFileLines;
 	private String outputPath = "output";
-	private String transitionFilePath = outputPath+"/transitions";
-	private String predicateFilePath = outputPath+"/pred";
-	private ArrayList<ReactionRule> reactionRules;
+	private String transitionFileName = "transitions";
+//	private String predicateFilePath = outputPath+"/pred";
+//	private ArrayList<ReactionRule> reactionRules;
+	private String rulesKeywordsFileName = "rules_keywords.txt";
 	TransitionSystem transitionSystem;
 
 	public LabelExtractor() {
-		reactionRules = new ArrayList<ReactionRule>();
-		TransitionSystem.setFileName(transitionFilePath);
+//		reactionRules = new ArrayList<ReactionRule>();
+		TransitionSystem.setFileName(outputPath+"/"+transitionFileName);
+		
 		transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
-
+	
+	public LabelExtractor(String outputFolder) {
+		//	reactionRules = new ArrayList<ReactionRule>();
+			this.outputPath = outputFolder;
+			System.out.println(outputPath);
+			this.transitionFileName = this.outputPath+"/"+transitionFileName;
+			this.rulesKeywordsFileName = this.outputPath+"/rules_keywords.txt";
+			TransitionSystem.setFileName(this.transitionFileName);
+			transitionSystem = TransitionSystem.getTransitionSystemInstance();
+		}
+	
 	public static void main(String[] args) {
 
-		LabelExtractor ex = new LabelExtractor();
+		LabelExtractor ex = new LabelExtractor("output");
 
+		//one way to identify the labels is by using the redex and reactum of rules as predicates
+		//however, this is requires more computational power and it can assign more than one label
+		//to a single transition
 		/*ex.getRulesStates();
 		ex.removeNoneImmediateTransitionStates();
 		ex.updateTransitionFile();
 		*/
-		ex.extractLabel(0, 1);
-	/*	for(ReactionRule r : ex.reactionRules) {
-			System.out.println(r);
-		}*/
+		//ex.extractLabel(1, 4);
 		
-		
-	/*	
-		System.out.println("\n\n");
-		for(ReactionRule r : ex.reactionRules) {
-			System.out.println(r);
-		}*/
+		//another way is to define a keyword for each such as its name as a control which is then
+		//used to identify transitions
+		//it requires adding controls that identify the action in each reaction rule
+		ex.extractLabels();
 
-		
 	}
 
-	public void getRulesStates() {
+	/**
+	 * Extracts labels for each state and its edges defined in the digraph.
+	 * This is based on the assumption that all reaction rules have a unique keyword
+	 * such as its name that defines each rule. 
+	 * Extraction is done based on the presence of a keyword in a source state and it being missing in the target state
+	 * The Digraph in the TransitionSystem class is updated after this with the labels name
+	 */
+	public void extractLabels() {
+		
+		Digraph<Integer> digraph = transitionSystem.getDigraph();
+		ArrayList<String> labels = new ArrayList<String>();
+		String label="";
+		
+		for(Integer stateSrc : digraph.getNodes()) {
+			System.out.println(stateSrc);
+			System.out.println(digraph.outboundNeighbors(stateSrc));
+			for(Integer stateDes : digraph.outboundNeighbors(stateSrc)){
+				label = extractLabel(stateSrc, stateDes);
+				labels.add(label);
+				digraph.setLabel(stateSrc, stateDes, label);
+			}
+		}
+		
+		System.out.println(digraph.toString());
+		
+	}
+	
+	/**
+	 * Extracts labels for state transitions based on the assumption that all reaction rules have a unique keyword
+	 * such as its name that defines each rule. 
+	 * Extraction is done based on the presence of a keyword in a source state and it 
+	 * being missing in the target state.
+	 * It is assumed that there is a txt file in the output folder holding the keywords for rules (named "rules_keywords")
+	 * in which each rule keyword is on new line. Also the states are in json format
+	 * 
+	 */
+	public String extractLabel(Integer stateSrc, Integer stateDes) {
+		
+		JSONParser parser = new JSONParser();
+		String tmp;
+		ArrayList<String> srcControlNames = new ArrayList<String>();
+		ArrayList<String> desControlNames = new ArrayList<String>();
+		ArrayList<String> missingControls = new ArrayList<String>();
+		String label="";
+		int index=0;
+		
+		boolean isLabelFound = false;
+		
+		try {
+			String [] rulesKeywords = FileManipulator.readFileNewLine(rulesKeywordsFileName);
+			JSONObject src = (JSONObject)parser.parse(new FileReader(outputPath+"/"+stateSrc+".json"));
+			JSONObject des = (JSONObject)parser.parse(new FileReader(outputPath+"/"+stateDes+".json"));
+			
+			JSONArray arSrc = (JSONArray)src.get("nodes");
+			Iterator<JSONObject> itSrc = arSrc.iterator();
+			
+			JSONArray arDes = (JSONArray)des.get("nodes");
+			Iterator<JSONObject> itDes = arDes.iterator();
+			
+			//get controls in the source state file
+			while(itSrc.hasNext()) {
+				tmp = (String)((JSONObject)itSrc.next().get("control")).get("control_id");
+				srcControlNames.add(tmp);
+			}
+			
+			//get controls in the destination state file
+			while(itDes.hasNext()) {
+				tmp = (String)((JSONObject)itDes.next().get("control")).get("control_id");
+				desControlNames.add(tmp);
+				
+			}
+			
+			//find controls of source state that are missing in the destination state
+			for(String controlName : srcControlNames) {
+				if(!desControlNames.contains(controlName)) {
+					missingControls.add(controlName);
+					//check if the control name is a rule keyword
+					for(String ruleKeyword : rulesKeywords) {
+						if(ruleKeyword.equalsIgnoreCase(controlName)) {
+							label = controlName;
+							isLabelFound = true;
+							break;
+						}
+					}
+				} else {
+					index = desControlNames.indexOf(controlName);
+					if(index != -1) {
+						desControlNames.remove(index);
+					}
+					
+				}
+				
+				if(isLabelFound) {
+					break;
+				}
+			}
+			
+			
+		//	System.out.println(state.toString());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return label;
+		
+	}
+/*	public void getRulesStates() {
 
 		if (predicatesFileLines == null || predicatesFileLines.length == 0) {
 			// remove "sb3_" after testing
@@ -128,18 +248,18 @@ public class LabelExtractor {
 		}
 
 	}
-
-	public void removeNoneImmediateTransitionStates() {
+*/
+/*	public void removeNoneImmediateTransitionStates() {
 		
 		for(ReactionRule r : reactionRules) {
 			removeNoneImmediateTransitionStates(r);
 		}
-	}
+	}*/
 	/**
 	 * Removes all states from the redex and reactum of each rule that has no
 	 * direct transition to the redex or reactum
 	 */
-	public void removeNoneImmediateTransitionStates(ReactionRule rule) {
+/*	public void removeNoneImmediateTransitionStates(ReactionRule rule) {
 
 		ArrayList<Integer> newRedex = new ArrayList<Integer>();
 		ArrayList<Integer> newReactum = new ArrayList<Integer>();
@@ -189,8 +309,8 @@ public class LabelExtractor {
 		rule.setReactumStates(newReactum);
 		
 	}
-	
-	public void updateTransitionFile() {
+	*/
+	/*public void updateTransitionFile() {
 		
 		StringBuilder res = new StringBuilder();
 		Integer st1;
@@ -258,53 +378,6 @@ public class LabelExtractor {
 		}
 		
 	}
-
-	/**
-	 * Extracts labels for state transitions based on the assumption that all reaction rules have a unique keyword
-	 * such as its name that defines each rule. Extraction is done based on the presence of a keyword in a source state and it being missing in the target state
-	 */
-	public void extractLabel(Integer stateSrc, Integer stateDes) {
-		
-		JSONParser parser = new JSONParser();
-		JSONObject controlName;
-		JSONArray tmpArray;
-		try {
-			JSONObject src = (JSONObject)parser.parse(new FileReader(outputPath+"/"+stateSrc+".json"));
-			JSONObject des = (JSONObject)parser.parse(new FileReader(outputPath+"/"+stateDes+".json"));
-			
-			JSONArray arSrc = (JSONArray)src.get("nodes");
-			Iterator<JSONObject> itSrc = arSrc.iterator();
-			
-			JSONArray arDes = (JSONArray)des.get("nodes");
-			Iterator<JSONObject> itDes = arDes.iterator();
-			
-			while(itSrc.hasNext()) {
-				//tmp = it.next();
-				//get control name for all the nodes
-				controlName = (JSONObject)itSrc.next().get("control");
-				System.out.println(controlName.get("control_id"));
-				
-			}
-			
-			System.out.println("\n\n");
-			while(itDes.hasNext()) {
-				//tmp = it.next();
-				//get control name for all the nodes
-				controlName = (JSONObject)itDes.next().get("control");
-				System.out.println(controlName.get("control_id"));
-				
-			}
-		//	System.out.println(state.toString());
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
+*/
+	
 }

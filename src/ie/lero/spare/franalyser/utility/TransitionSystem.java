@@ -216,4 +216,7 @@ public class TransitionSystem {
 		transitionSystem = null;
 	}
 	
+	public Digraph<Integer> getDigraph() {
+		return transitionGraph;
+	}
 }
