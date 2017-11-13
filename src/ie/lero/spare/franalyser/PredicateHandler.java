@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.xml.xquery.XQException;
 
+import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import javafx.scene.shape.Line;
@@ -21,10 +22,12 @@ public class PredicateHandler {
 
 	private HashMap<String, Predicate> predicates;
 	private HashMap<String, IncidentActivity> incidentActivities;
-
+	private Digraph<IncidentActivity> activitiesGraph;
+	
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
 		incidentActivities = new HashMap<String, IncidentActivity>();
+		
 	}
 
 	public HashMap<String, Predicate> getPredicates() {
@@ -424,4 +427,70 @@ public class PredicateHandler {
 		System.out.println(p2.toSimpleString());
 	}
 */
+	
+	public void createActivitiesDigraph() {
+		activitiesGraph = new Digraph<IncidentActivity>();
+		
+		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
+		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
+		IncidentActivity tmp;
+		
+		acts.add(getInitialActivity());
+		
+		while(!acts.isEmpty()) {
+			tmp = acts.pop();
+			
+			if(tmp == null || actsVisited.contains(tmp)) {
+				continue;
+			}
+			
+			for(IncidentActivity act : tmp.getNextActivities()) {
+				activitiesGraph.add(tmp, act, -1);
+				if(!acts.contains(act)) {
+					acts.add(act);
+				}
+			}
+			
+			actsVisited.add(tmp);
+		}
+		
+		System.out.println(activitiesGraph);
+	}
+	
+	public void printAll() {
+		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
+		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
+		IncidentActivity tmp;
+
+		acts.add(getInitialActivity());
+		
+		while(!acts.isEmpty()) {
+			tmp = acts.pop();
+			
+			if(tmp == null || actsVisited.contains(tmp)) {
+				continue;
+			}
+			
+			System.out.println("Activity name: " + tmp.getName());
+			if(tmp.getNextActivities() != null && tmp.getNextActivities().size()>0) {
+			for(IncidentActivity act : tmp.getNextActivities()) {
+				System.out.println("Paths to next activity ["+act.getName()+"] are:");
+				for(GraphPath p : tmp.getIntraInterPaths(act)) {
+					System.out.println(p);
+					if(!acts.contains(act)) {
+						acts.add(act);
+					}
+				}
+			}
+			} else {
+				System.out.println("Paths from preconditions to postconditions are:");
+				for(GraphPath p : tmp.getPathsBetweenPredicates()) {
+					System.out.println(p);
+				}
+			}
+			System.out.println();
+			
+			actsVisited.add(tmp);
+		}
+	}
 }

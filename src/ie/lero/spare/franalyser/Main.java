@@ -17,6 +17,7 @@ public class Main {
 			AssetMap am = m.findMatches();
 			PredicateGenerator pred = new PredicateGenerator(am);
 			PredicateHandler predic = pred.generatePredicates();
+			//predic.insertPredicatesIntoBigraphFile("sb3.big");
 			predic.updateNextPreviousActivities();	
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, "sb3.big");
 			analyser.setBigrapherExecutionOutputFolder("sb3_"+BigraphAnalyser.getBigrapherExecutionOutputFolder());
@@ -41,11 +42,13 @@ public class Main {
 			
 			System.out.println("pr: "+pr);
 			System.out.println(inc.getRandomPath());*/
-			LinkedList<GraphPath> ps = inc.getAllPaths();
+			/*LinkedList<GraphPath> ps = inc.getAllPaths();
 			
 			for(GraphPath p : ps) {
 				System.out.println(p);
-			}
+			}*/
+			//predic.createActivitiesDigraph();
+			predic.printAll();
 			//predic.getPathsForIncident();
 			/*getCombinedPaths(act1, act2);
 			getCombinedPaths(act2, act3);

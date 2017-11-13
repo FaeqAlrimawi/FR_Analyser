@@ -401,4 +401,9 @@ public class IncidentActivity {
 	    
 	    return false;
 	}
+	
+	public String toString() {
+		
+		return name;
+	}
 }
