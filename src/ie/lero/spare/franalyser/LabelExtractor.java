@@ -79,7 +79,13 @@ public class LabelExtractor {
 		ArrayList<String> labels = new ArrayList<String>();
 		String label = "";
 
-		rulesKeywords = FileManipulator.readFileNewLine(outputPath + "/" + rulesKeywordsFileName);
+		rulesKeywords = FileManipulator.readFile(outputPath + "/" + rulesKeywordsFileName);
+		
+		//remove any unnecessary spaces
+		for(int i=0;i<rulesKeywords.length; i++) {
+			rulesKeywords[i]=rulesKeywords[i].trim();
+		}
+		
 		
 		for (Integer stateSrc : digraph.getNodes()) {
 			System.out.println(stateSrc);
@@ -102,7 +108,7 @@ public class LabelExtractor {
 	 * rule. Extraction is done based on the presence of a keyword in a source
 	 * state and it being missing in the target state. It is assumed that there
 	 * is a txt file in the output folder holding the keywords for rules (named
-	 * "rules_keywords") in which each rule keyword is on new line. Also the
+	 * "rules_keywords") in which each rule keyword is separated by a semicolon. Also the
 	 * states are in json format
 	 * 
 	 */

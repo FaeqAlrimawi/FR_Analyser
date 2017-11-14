@@ -19,14 +19,16 @@ atomic ctrl FireDetector = 2;
 atomic ctrl ControlProcess = 1;
 atomic ctrl Database = 1;
 atomic ctrl PhysicalConnection=0;
-atomic fun ctrl Test=0;
 
 #########################Generated Predicates##############################
+big pre3_Precondition_activity2 = /r control_room.person1 | entrance;
+big pre4_Precondition_activity3 = /r control_room.person1 | entrance;
+big pre5_Precondition_activity4 = /r entrance.person1 | control_room;
 big pre1_Precondition_activity1 = /r control_room.person1 | entrance;
-big post1_Postcondition_activity1 = hallway.control_room;
-big pre1_Precondition_activity2 = /r control_room.person1 | entrance;
-big pre1_Precondition_activity3 = /r control_room.person1 | entrance;
-big pre1_Precondition_activity4 = /r entrance.person1 | control_room;
+big post4_Postcondition_activity3 = /r control_room.person1 | entrance;
+big post5_Postcondition_activity4 = /r control_room.person1 | entrance;
+big post3_Postcondition_activity2 = /r control_room.person1 | entrance;
+big post1_Postcondition_activity1 = 2nd_floor.control_room;
 
 #########################Generated Predicates##############################
 
@@ -121,6 +123,6 @@ disconnect_smartLight_physical2, actor_send_malware}];
 
 
 ####updated predicates#######
-preds = {p1, p2,p3, p5, pre1_Precondition_activity1, post1_Postcondition_activity1, pre1_Precondition_activity2, pre1_Precondition_activity3, pre1_Precondition_activity4 };
+preds = {pred1, pre3_Precondition_activity2, pre4_Precondition_activity3, pre5_Precondition_activity4, pre1_Precondition_activity1, post4_Postcondition_activity3, post5_Postcondition_activity4, post3_Postcondition_activity2, post1_Postcondition_activity1 };
 ###########################
 end
