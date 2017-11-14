@@ -1,15 +1,11 @@
 package ie.lero.spare.franalyser;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Random;
-import java.util.Set;
 
 import javax.xml.xquery.XQException;
 
@@ -17,7 +13,6 @@ import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
-import javafx.scene.shape.Line;
 
 public class PredicateHandler {
 

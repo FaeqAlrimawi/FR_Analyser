@@ -44,7 +44,7 @@ public class LabelExtractor {
 
 		LabelExtractor ex = new LabelExtractor("output");
 		
-		// one way to identify the labels is by using the redex and reactum of
+		//##### one way to identify the labels is by using the redex and reactum of
 		// rules as predicates
 		// however, this is requires more computational power and it can assign
 		// more than one label
@@ -55,11 +55,9 @@ public class LabelExtractor {
 		 */
 		// ex.extractLabel(1, 4);
 
-		// another way is to define a keyword for each such as its name as a
-		// control which is then
-		// used to identify transitions
-		// it requires adding controls that identify the action in each reaction
-		// rule
+		//##### another way is to define a keyword for each such as its name as a
+		// control which is then used to identify transitions
+		// it requires adding controls that identify the action in each reaction rule
 		ex.extractLabels();
 		ex.createNewLabelledTransitionFile();
 
@@ -81,7 +79,7 @@ public class LabelExtractor {
 
 		rulesKeywords = FileManipulator.readFile(outputPath + "/" + rulesKeywordsFileName);
 		
-		//remove any unnecessary spaces
+		//remove any unnecessary white spaces
 		for(int i=0;i<rulesKeywords.length; i++) {
 			rulesKeywords[i]=rulesKeywords[i].trim();
 		}
