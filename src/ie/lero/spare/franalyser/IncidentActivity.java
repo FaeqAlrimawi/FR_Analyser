@@ -86,6 +86,14 @@ public class IncidentActivity {
 		return pathsToNextActivities;
 	}
 
+	public LinkedList<GraphPath> getPathsToNextActivity(IncidentActivity nextActivity) {
+		if(pathsToNextActivities == null || pathsToNextActivities.size() ==0) {
+			return getIntraInterPaths(nextActivity);
+		}
+		return pathsToNextActivities.get(nextActivity.getName());
+	}
+
+	
 	public void setPathsToNextActivities(HashMap<String, LinkedList<GraphPath>> distincPaths) {
 		this.pathsToNextActivities = distincPaths;
 	}

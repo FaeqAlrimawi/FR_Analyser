@@ -82,6 +82,7 @@ public class TransitionSystem {
 					predicateDes.addIntraSatisfiedState(startState);
 					tmp = new LinkedList<Integer>();
 					tmp.add(startState);
+					tmp.add(startState);
 					tmpG.setStateTransitions(tmp);
 					paths.add(tmpG);
 					

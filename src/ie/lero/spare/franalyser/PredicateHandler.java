@@ -452,22 +452,36 @@ public class PredicateHandler {
 			}
 
 			System.out.println("Activity name: " + tmp.getName());
+			System.out.println("**Paths from preconditions to postconditions within the activity");
+			/*for(Predicate p : tmp.getPredicates(PredicateType.Precondition)) {
+				System.out.println("predicate name: "+p.getName());
+				for(GraphPath pa : p.getPaths()) {
+					System.out.println(pa);
+				}
+			}*/
+			for(GraphPath p : tmp.getPathsBetweenPredicates()) {
+				System.out.println(p);
+			}
 			if (tmp.getNextActivities() != null && tmp.getNextActivities().size() > 0) {
+				
 				for (IncidentActivity act : tmp.getNextActivities()) {
-					System.out.println("Paths to next activity [" + act.getName() + "] are:");
-					for (GraphPath p : tmp.getIntraInterPaths(act)) {
+					System.out.println("**Paths from postconditions of current activity to preconditions of"
+							+ " next activity [" + act.getName() + "] are:");
+					for (GraphPath p : tmp.findPathsToNextActivity(act)) {
 						System.out.println(p);
 						if (!acts.contains(act)) {
 							acts.add(act);
 						}
 					}
+					
+					System.out.println("**Paths from preconditions of current activity to preconditions of next"
+							+ "activity are:");
+					for(GraphPath p : tmp.getPathsToNextActivity(act)) {
+						System.out.println(p);
+					}
 				}
-			} else {
-				System.out.println("Paths from preconditions to postconditions are:");
-				for (GraphPath p : tmp.getPathsBetweenPredicates()) {
-					System.out.println(p);
-				}
-			}
+				
+			} 
 			System.out.println();
 
 			actsVisited.add(tmp);
