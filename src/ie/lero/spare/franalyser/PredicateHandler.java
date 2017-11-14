@@ -343,7 +343,7 @@ public class PredicateHandler {
 		return paths;
 	}
 
-	public LinkedList<HashMap<String, LinkedList<GraphPath>>> getPathsForIncident() {
+	/*public LinkedList<HashMap<String, LinkedList<GraphPath>>> getPathsForIncident() {
 
 		LinkedList<IncidentActivity> activities = new LinkedList<IncidentActivity>();
 		LinkedList<IncidentActivity> visitedActivities = new LinkedList<IncidentActivity>();
@@ -354,7 +354,7 @@ public class PredicateHandler {
 		activities.add(initialActivity);
 
 		while (!activities.isEmpty()) {
-			tmp = activities.pop();
+			tmp = activities.pop(); 
 
 			if (tmp != null) {
 
@@ -373,7 +373,7 @@ public class PredicateHandler {
 		}
 
 		return paths;
-	}
+	}*/
 
 	/*
 	 * public void findAllPossiblePaths() {
