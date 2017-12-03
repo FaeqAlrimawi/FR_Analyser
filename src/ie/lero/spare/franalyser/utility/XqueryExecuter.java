@@ -18,7 +18,7 @@ public class XqueryExecuter {
 
 	public static String NS_DECELERATION = "declare namespace cyberPhysical_Incident = \"http://www.example.org/cyberPhysical_Incident\"; "
 			+ "declare namespace environment = \"http://www.example.org/environment\";";
-	public static String INCIDENT_DOC = "incident.xml";
+	public static String INCIDENT_DOC = "incident.cpi";
 	public static String SPACE_DOC = "space.xml";
 	public static String INCIDENT_ROOT_ELEMENT = "cyberPhysical_Incident:IncidentDiagram";
 	public static String SPACE_ROOT_ELEMENT = "";

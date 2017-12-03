@@ -18,14 +18,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
 import org.eclipse.wb.swing.FocusTraversalOnArray;
+import javax.swing.border.TitledBorder;
+import java.awt.Color;
+import java.awt.GridLayout;
+import java.awt.FlowLayout;
 
 public class MainGUI extends JFrame {
 
 	private JPanel contentPane;
-	private JTextField textField;
+	private JTextField txtEnterDomainindependentIncident;
 	private String incidentFileName;
 	private String spaceFileName;
 	private JTextField textField_1;
+	private JTextField textField;
+	private String bigrapherFileName;
 	/**
 	 * Launch the application.
 	 */
@@ -54,16 +60,44 @@ public class MainGUI extends JFrame {
 	 */
 	public MainGUI() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1000, 622);
+		setBounds(100, 100, 1000, 914);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
+		JPanel panel = new JPanel();
+		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Input", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
+		panel.setBounds(23, 58, 310, 269);
+		contentPane.add(panel);
+		panel.setLayout(null);
+		
+		Box verticalBox_1 = Box.createVerticalBox();
+		verticalBox_1.setBounds(13, 40, 284, 58);
+		panel.add(verticalBox_1);
+		
+		JLabel lblDomainindependentIncident = new JLabel("Domain-Independent Incident");
+		verticalBox_1.add(lblDomainindependentIncident);
+		lblDomainindependentIncident.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		lblDomainindependentIncident.setAlignmentX(Component.CENTER_ALIGNMENT);
+		
+		Box horizontalBox_1 = Box.createHorizontalBox();
+		verticalBox_1.add(horizontalBox_1);
+		
+		txtEnterDomainindependentIncident = new JTextField();
+		txtEnterDomainindependentIncident.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		horizontalBox_1.add(txtEnterDomainindependentIncident);
+		txtEnterDomainindependentIncident.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		txtEnterDomainindependentIncident.setColumns(10);
+		
+		JButton btnChooseFile = new JButton("...");
+		horizontalBox_1.add(btnChooseFile);
+		btnChooseFile.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		
 		Box verticalBox = Box.createVerticalBox();
+		verticalBox.setBounds(13, 111, 284, 58);
+		panel.add(verticalBox);
 		verticalBox.setFont(null);
-		verticalBox.setBounds(18, 141, 285, 58);
-		contentPane.add(verticalBox);
 		
 		JLabel lblEnvironmentModel = new JLabel("Environment Model");
 		verticalBox.add(lblEnvironmentModel);
@@ -88,30 +122,35 @@ public class MainGUI extends JFrame {
 		button.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		verticalBox.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{lblEnvironmentModel, horizontalBox, textField_1, button}));
 		
-		Box verticalBox_1 = Box.createVerticalBox();
-		verticalBox_1.setBounds(18, 66, 288, 58);
-		contentPane.add(verticalBox_1);
+		Box verticalBox_2 = Box.createVerticalBox();
+		verticalBox_2.setBounds(13, 181, 284, 60);
+		panel.add(verticalBox_2);
 		
-		JLabel lblDomainindependentIncident = new JLabel("Domain-Independent Incident");
-		verticalBox_1.add(lblDomainindependentIncident);
-		lblDomainindependentIncident.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		lblDomainindependentIncident.setAlignmentX(Component.CENTER_ALIGNMENT);
+		JLabel lblEnvironmentBigrapherFile = new JLabel("Environment Bigrapher File");
+		verticalBox_2.add(lblEnvironmentBigrapherFile);
+		lblEnvironmentBigrapherFile.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		
-		Box horizontalBox_1 = Box.createHorizontalBox();
-		verticalBox_1.add(horizontalBox_1);
+		Box horizontalBox_2 = Box.createHorizontalBox();
+		verticalBox_2.add(horizontalBox_2);
 		
 		textField = new JTextField();
 		textField.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		horizontalBox_1.add(textField);
-		textField.setAlignmentX(Component.RIGHT_ALIGNMENT);
 		textField.setColumns(10);
+		textField.setAlignmentX(1.0f);
+		horizontalBox_2.add(textField);
 		
-		JButton btnChooseFile = new JButton("...");
-		horizontalBox_1.add(btnChooseFile);
-		btnChooseFile.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		JButton button_1 = new JButton("...");
+		button_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				bigrapherFileName = getFileFromFileChooser(textField);
+			}
+		});
+		button_1.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		horizontalBox_2.add(button_1);
+		panel.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{verticalBox_1, lblDomainindependentIncident, horizontalBox_1, txtEnterDomainindependentIncident, btnChooseFile, verticalBox, lblEnvironmentModel, horizontalBox, textField_1, button}));
 		btnChooseFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				incidentFileName = getFileFromFileChooser(textField);
+				incidentFileName = getFileFromFileChooser(txtEnterDomainindependentIncident);
 			}
 		});
 		
@@ -127,7 +166,6 @@ public class MainGUI extends JFrame {
 		int returnVal = chooser.showOpenDialog(this);
 		if(returnVal == JFileChooser.APPROVE_OPTION) {
 			 name = chooser.getSelectedFile().getName();
-		   System.out.println("You chose to open this file: " + name);
 		   ((JTextField)(comp)).setText(name);
 		}
 		
