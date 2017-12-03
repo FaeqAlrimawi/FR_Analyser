@@ -362,8 +362,11 @@ public class IncidentActivity {
 	public LinkedList<GraphPath> getIntraInterPaths(IncidentActivity nextActivity) {
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 		LinkedList<GraphPath> tmpPaths = new LinkedList<GraphPath>();
-		LinkedList<GraphPath> intraPaths = getPathsBetweenPredicates();
-		LinkedList<GraphPath> interNextPaths = findPathsToNextActivity(nextActivity);
+		LinkedList<GraphPath> intraPaths;
+		LinkedList<GraphPath> interNextPaths;
+		
+		intraPaths = getPathsBetweenPredicates();
+		interNextPaths = findPathsToNextActivity(nextActivity);
 
 		//if initial state
 		if(previousActivities == null || previousActivities.isEmpty()) {

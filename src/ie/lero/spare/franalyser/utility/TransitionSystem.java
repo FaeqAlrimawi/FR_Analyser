@@ -42,18 +42,29 @@ public class TransitionSystem {
 		Integer st1;
 		Integer st2;
 		float probability = -1;
+		String label = null;
 		String[] tmp;
 
 		transitionsFileLines = FileManipulator.readFileNewLine(fileName);
 
 		for (int i = 1; i < transitionsFileLines.length; i++) {
+			probability = -1;
+			label = null;
 			tmp = transitionsFileLines[i].split(" ");
 			st1 = new Integer(Integer.parseInt(tmp[0]));
 			st2 = new Integer(Integer.parseInt(tmp[1]));
-			if (tmp.length == 3) { // if bigraph is probabilistic
-				probability = Float.parseFloat(tmp[2]);
+			if (tmp.length >= 3) { // if bigraph is probabilistic
+				if (tmp[2].matches("^(?:(?:\\-{1})?\\d+(?:\\.{1}\\d+)?)$")) { //if the 3rd element is a probability
+					probability = Float.parseFloat(tmp[2]);
+					if(tmp.length == 4) { //if it has labels
+						label = tmp[3];
+				}
+				
+				} else { //if there is no probab
+					label = tmp[2];
+				}
 			}
-			transitionGraph.add(st1, st2, probability);	
+			transitionGraph.add(st1, st2, probability, label);	
 		}
 		
 	}
@@ -219,5 +230,15 @@ public class TransitionSystem {
 	
 	public Digraph<Integer> getDigraph() {
 		return transitionGraph;
+	}
+	
+	public String getLabel(Integer srcState, Integer desState) {
+		
+		return transitionGraph.getLabel(srcState, desState);
+	}
+	
+	public float getProbability(Integer srcState, Integer desState) {
+		
+		return transitionGraph.getProbability(srcState, desState);
 	}
 }

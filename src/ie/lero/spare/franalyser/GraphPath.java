@@ -1,8 +1,11 @@
 package ie.lero.spare.franalyser;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.apache.xmlgraphics.xmp.merge.ArrayAddPropertyMerger;
+
+import ie.lero.spare.franalyser.utility.TransitionSystem;
 
 public class GraphPath {
 
@@ -60,12 +63,24 @@ public class GraphPath {
 		//e.g., pre1_Precondition_activity1:post1_Postcondition_activity1=0,1,2
 		res.append(predicateSrc.getBigraphPredicateName()).append(":");
 		res.append(predicateDes.getBigraphPredicateName()).append("=");
+		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+		String label;
 		
-		for(Integer state: stateTransitions) {
-			res.append(state).append(",");
+		for(int i=0;i<stateTransitions.size();i++) {
+			if(i<stateTransitions.size()-1) {
+				if((label = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1))) != null) {
+					res.append(stateTransitions.get(i)).append("-["+label+"]>");
+				} else {
+					res.append(stateTransitions.get(i)).append("->");
+				}
+			} else {
+				res.append(stateTransitions.get(i));
+			}
+			
+			
 		}
-		res.deleteCharAt(res.length()-1); //remove last added comma
-		
+		/*res.deleteCharAt(res.length()-1); //remove last added comma
+		res.deleteCharAt(res.length()-1);*/
 		return res.toString();
 		
 	}
@@ -240,5 +255,32 @@ public class GraphPath {
 		result.setStateTransitions(tmp);
 		
 		return result;
+	}
+	
+	public LinkedList<String> getPathActions(){
+		
+		LinkedList<String> actions = new LinkedList<String>();
+		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+		
+		for(int i=0;i<stateTransitions.size()-1;i++){
+			actions.add(t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1)));
+		}
+		
+		return actions;
+	}
+	
+	public float getPathProbability() {
+		
+		float prob = -1;
+		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+		
+		if(stateTransitions.size()>1) {
+			prob = t.getProbability(stateTransitions.get(0), stateTransitions.get(1));
+		}
+		for(int i=2;i<stateTransitions.size()-1;i++){
+			prob *= t.getProbability(stateTransitions.get(i), stateTransitions.get(i+1));
+		}
+		
+		return prob;
 	}
 }

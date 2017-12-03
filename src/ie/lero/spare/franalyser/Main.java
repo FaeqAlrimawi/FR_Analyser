@@ -1,10 +1,7 @@
 package ie.lero.spare.franalyser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 
-import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
 public class Main {
@@ -17,7 +14,12 @@ public class Main {
 			AssetMap am = m.findMatches();
 			PredicateGenerator pred = new PredicateGenerator(am);
 			PredicateHandler predic = pred.generatePredicates();
-			//predic.insertPredicatesIntoBigraphFile("sb3.big");
+			
+			//if there are incident assets with no matches from space model then exit
+			if(predic == null) {
+				return;
+			}
+			predic.insertPredicatesIntoBigraphFile("sb3.big");
 			predic.updateNextPreviousActivities();	
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, "sb3.big");
 			analyser.setBigrapherExecutionOutputFolder("sb3_"+BigraphAnalyser.getBigrapherExecutionOutputFolder());
@@ -30,7 +32,7 @@ public class Main {
 			if(predic != null) {
 				System.out.println(predic.toString());
 			}
-			predic.insertPredicatesIntoBigraphFile("sb3.big");	
+			predic.insertPredicatesIntoBigraphFile("sb3.big");
 /*			IncidentActivity act1 = predic.getIncidentActivities().get("activity1");
 			
 			IncidentActivity act2 = predic.getIncidentActivities().get("activity2");
@@ -47,12 +49,19 @@ public class Main {
 			for(GraphPath p : ps) {
 				System.out.println(p);
 			}*/
+		/*	IncidentActivity t = predic.getIncidentActivities().get("activity1");
+			
+			if(t != null) {
+				for(GraphPath p : t.getPathsBetweenPredicates()) {
+					System.out.println(p);
+				}
+			}*/
+			//TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
 			//predic.createActivitiesDigraph();
-			predic.printAll();
+			//predic.printAll();
 			//predic.getPathsForIncident();
 			/*getCombinedPaths(act1, act2);
 			getCombinedPaths(act2, act3);
-			
 			LinkedList<HashMap<String, LinkedList<GraphPath>>> paths = predic.getPathsForIncident();
 			
 			for(HashMap<String, LinkedList<GraphPath>> ls : paths) {
