@@ -129,15 +129,16 @@ public class AssetMap {
 	
 	private  boolean containsDuplicate(String str) {
 		boolean isDuplicate=false;
-		Map<String, Integer> charMap = new HashMap<String, Integer>();
+		Map<String, Boolean> charMap = new HashMap<String, Boolean>();
+		str = str.trim();
 		String [] strs = str.split(",");
-		
-		for(String value: strs) {
-			 if (charMap.containsKey(value)) {
+	
+		for(String key: strs) {
+			 if (charMap.containsKey(key)) {
 	               return true;
 
 	           } else {
-	               charMap.put(value, 1);
+	               charMap.put(key, true);
 	           }
 		}
 		return isDuplicate;
@@ -218,7 +219,7 @@ public class AssetMap {
 		String set="";
 		int stopLimit = 0;
 		
-		while(!isUnique & stopLimit <10000) {
+		while(!isUnique & stopLimit <100000) {
 		for(int i=0;i<result.length;i++) {
 		//	System.out.println(r);
 			result[i] = spaceAssetMatches[i][rand.nextInt(spaceAssetMatches[i].length)];
@@ -233,8 +234,11 @@ public class AssetMap {
 		}
 		
 		//failed to get a unique set 
-		if(stopLimit == 10000)
+		if(stopLimit == 100000) {
+			System.out.println("AssetMap:getRandomSapceAssetMatches() = no sequence found");
 			return null;
+		}
+
 		
 		return result;
 	}

@@ -19,6 +19,7 @@
 	
   </asset>
 
+
   <asset connections="walkway1" parentEntity="floorX" name="mainLocation">
     <type name="PhysicalStructure"/>
   </asset>

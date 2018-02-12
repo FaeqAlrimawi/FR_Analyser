@@ -10,13 +10,20 @@ public class Main {
 		try {
 			
 			//######### basic execution ########################################################################################
-			Mapper m = new Mapper("match_query.xq");
-			AssetMap am = m.findMatches();
-			PredicateGenerator pred = new PredicateGenerator(am);
-			PredicateHandler predic = pred.generatePredicates();
+			Mapper m = new Mapper("match_query.xq"); 
+			AssetMap am = m.findMatches(); //finds components in a system representation (space.xml) that match the entities identified in an incident
+			System.out.println("Asset map=======");
+			System.out.println(am.toString());
+			PredicateGenerator pred = new PredicateGenerator(am); 
+			PredicateHandler predic = pred.generatePredicates();//convert entities in the pre-/post-conditions of an activity into components matched from the previous step
 			
 			//if there are incident assets with no matches from space model then exit
 			if(predic == null) {
+				System.out.println("Some incident Assets have no matches in the space asset, these are:");
+				String [] asts = am.getIncidentAssetsWithNoMatch(); 
+				for(String s: asts) {
+					System.out.println(s);
+				}
 				return;
 			}
 			predic.insertPredicatesIntoBigraphFile("sb3.big");

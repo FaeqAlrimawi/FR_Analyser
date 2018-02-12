@@ -59,11 +59,11 @@ public class PredicateGenerator {
 		
 		//if an incident asset has no matches then the generation of predicates is stopped
 		if(assetMap.hasAssetsWithNoMatch()) {
-			System.out.println("Some incident Assets have no matches in the space asset, these are:");
+			/*System.out.println("Some incident Assets have no matches in the space asset, these are:");
 			String [] asts = assetMap.getIncidentAssetsWithNoMatch(); 
 			for(String s: asts) {
 				System.out.println(s);
-			}
+			}*/
 			return null;
 		}
 		
@@ -110,11 +110,12 @@ public class PredicateGenerator {
 
 	public String matchConditionAssetsToSpaceAssets(String condition) {
 		String result = condition;
-				
+
 		//assuming a well formatted Bigraph statement
 		for (int i=0;i<incidentAssetNames.length;i++) {
 			//if the condition contains the name of an incident asset then replace with 
 			if(condition.contains(incidentAssetNames[i])) {
+		
 				result=result.replaceAll(incidentAssetNames[i], spaceAssetSet[i]);
 			}
 		}
