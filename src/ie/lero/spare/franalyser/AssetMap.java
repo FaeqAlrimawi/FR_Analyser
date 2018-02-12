@@ -1,7 +1,6 @@
 package ie.lero.spare.franalyser;
 
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -15,13 +14,11 @@ import ie.lero.spare.franalyser.utility.XqueryExecuter;
 public class AssetMap {
 	private String[] incidentAssetNames;
 	private String[][] spaceAssetMatches;
-	private StringBuilder sets;
 	private LinkedList<String[]> uniqueCombinations;
 	public int numberOfSets;
 	
 	public AssetMap(){
 		numberOfSets=0;
-		sets = new StringBuilder();
 		incidentAssetNames = null;
 		spaceAssetMatches = null;
 	}
@@ -46,6 +43,14 @@ public class AssetMap {
  
 	public void setSpaceAssetMatches(String[][] spaceAssetMatches) {
 		this.spaceAssetMatches = spaceAssetMatches;
+	}
+	
+	public LinkedList<String[]> getUniqueCombinations() {
+		return uniqueCombinations;
+	}
+
+	public void setUniqueCombinations(LinkedList<String[]> uniqueCombinations) {
+		this.uniqueCombinations = uniqueCombinations;
 	}
 	
 	public String[] getSpaceAssetMatches(int incidentAssetIndex) {
@@ -98,45 +103,15 @@ public class AssetMap {
 		
 		return result.toString();
 	}
-
-	public String getCombinations(){
-		StringBuilder sets = new StringBuilder();
-		//sets.setLength(0);
-		//numberOfSets=0;
-		//add incident asset names as the first set {incidentAsset1, ..., incidentAssetN}
-		sets.append("{");
-		for(String e: incidentAssetNames) {
-			sets.append(e).append(",");
-		}
-		sets.deleteCharAt(sets.length()-1);
-		sets.append("}\n");
-		
-		findCombinations(spaceAssetMatches, 0, "",sets);
-
-		return sets.toString();
-	}
 	
-	private void findCombinations(String[][] sets, int indexLower, String prefix, StringBuilder str){
-        if(indexLower >= sets.length){
-        	String set = prefix.substring(0,prefix.length()-1);
-        	if(!containsDuplicate(set)){
-        	//add found set {spaceAsset1, ..., spaceAsset2}
-             str.append("{").append(set).append("}\n");
-             numberOfSets++;
-        	}
-            return;
-        }
-        for(String s : sets[indexLower]) {
-        
-            findCombinations(sets, indexLower+1, prefix+s+",", str);
-        }
-    }
-	
-	private  boolean containsDuplicate(String str) {
+	/**
+	 * Checks if there are any duplicate names in the given array
+	 * @param strs String array containing the system assets
+	 * @return true if two strings in the array are equal
+	 */
+	private  boolean containsDuplicate(String [] strs) {
 		boolean isDuplicate=false;
 		Map<String, Boolean> charMap = new HashMap<String, Boolean>();
-		str = str.trim();
-		String [] strs = str.split(",");
 	
 		for(String key: strs) {
 			 if (charMap.containsKey(key)) {
@@ -161,6 +136,10 @@ public class AssetMap {
 		return isNotMatched;
 	}
 	
+	/**
+	 * Returns all incident entities that have no matches
+	 * @return array of strings that hold the names of the incident entities
+	 */
 	public String[] getIncidentAssetsWithNoMatch() {
 		String [] assetNames;
 		StringBuilder names = new StringBuilder("");
@@ -217,53 +196,38 @@ public class AssetMap {
 		return info;
 	}
 	
+	/**
+	 * Returns a random unique sequence of system assets
+	 * @return array of strings holding the names of the system assets
+	 */
 	public String[] getRandomSpaceAssetMatches() {
-		String [] result = new String[spaceAssetMatches.length];
-		boolean isUnique = false;
-		Random rand = new Random();
-		String set="";
-		int stopLimit = 0;
-		
-		while(!isUnique & stopLimit <100000) {
-		for(int i=0;i<result.length;i++) {
-		//	System.out.println(r);
-			result[i] = spaceAssetMatches[i][rand.nextInt(spaceAssetMatches[i].length)];
-			set+=result[i]+",";
-		}
-		set = set.substring(0, set.length()-1);
-		if(!containsDuplicate(set)) {
-			isUnique = true;
-		}
-			stopLimit++;
-			set="";
-		}
-		
-		//failed to get a unique set 
-		if(stopLimit == 100000) {
-			System.out.println("AssetMap:getRandomSapceAssetMatches() = no sequence found");
-			return null;
-		}
 
+		if(uniqueCombinations == null) {
+			generateUniqueCombinations();
+		}
+		Random rand = new Random();
+		int index = rand.nextInt(uniqueCombinations.size());
+		return uniqueCombinations.get(index);
 		
-		return result;
 	}
 
-	public void generateCombinations() {
+	/**
+	 * Generates all unique combinations of system assets that correspond to the set of incident assets
+	 *@return LinkedList<String[]> containing all unique combinations
+	 */
+	public void generateUniqueCombinations() {
+		
 		Iterable<String[]> it = () -> new CartesianIterator<>(spaceAssetMatches, String[]::new);
 		uniqueCombinations = new LinkedList<String[]>();
 		
 		for (String[] s : it) {
-		   uniqueCombinations.add(s);
+				if(!containsDuplicate(s)) {
+					uniqueCombinations.add(s);	
+				}
 		}
 	}
 
-	public LinkedList<String[]> getUniqueCombinations() {
-		return uniqueCombinations;
-	}
 
-	public void setUniqueCombinations(LinkedList<String[]> uniqueCombinations) {
-		this.uniqueCombinations = uniqueCombinations;
-	}
 	
 	
 	 

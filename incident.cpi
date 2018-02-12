@@ -47,6 +47,7 @@
   <actor parentEntity="entrance" role="offender" name="offender1">
     <type name="Person"/>
   </actor>
+ 
   <connection name="walkway1" entitySrc="entrance" entityDes="mainLocation">
   	<type name="PhysicalConnection"/>
   </connection>

@@ -15,13 +15,9 @@ public class Main {
 			AssetMap am = m.findMatches(); //finds components in a system representation (space.xml) that match the entities identified in an incident
 			System.out.println("Asset map=======");
 			System.out.println(am.toString());
-			am.generateCombinations();
 			
-			LinkedList<String[]> lst = am.getUniqueCombinations();
-			System.out.println(lst.size());	
-			/*for(String [] s : lst) {
-				System.out.println(Arrays.toString(s));
-			}*/
+			//LinkedList<String[]> lst = am.getUniqueCombinations(); //generates unique combinations of system assets
+			
 			PredicateGenerator pred = new PredicateGenerator(am); 
 			PredicateHandler predic = pred.generatePredicates();//convert entities in the pre-/post-conditions of an activity into components matched from the previous step
 			
