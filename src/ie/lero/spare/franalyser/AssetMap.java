@@ -1,17 +1,22 @@
 package ie.lero.spare.franalyser;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
 
 import javax.xml.xquery.XQException;
+
+import ie.lero.spare.franalyser.utility.CartesianIterator;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class AssetMap {
 	private String[] incidentAssetNames;
 	private String[][] spaceAssetMatches;
 	private StringBuilder sets;
+	private LinkedList<String[]> uniqueCombinations;
 	public int numberOfSets;
 	
 	public AssetMap(){
@@ -242,5 +247,24 @@ public class AssetMap {
 		
 		return result;
 	}
+
+	public void generateCombinations() {
+		Iterable<String[]> it = () -> new CartesianIterator<>(spaceAssetMatches, String[]::new);
+		uniqueCombinations = new LinkedList<String[]>();
+		
+		for (String[] s : it) {
+		   uniqueCombinations.add(s);
+		}
+	}
+
+	public LinkedList<String[]> getUniqueCombinations() {
+		return uniqueCombinations;
+	}
+
+	public void setUniqueCombinations(LinkedList<String[]> uniqueCombinations) {
+		this.uniqueCombinations = uniqueCombinations;
+	}
 	
+	
+	 
 }
