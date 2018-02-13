@@ -1,0 +1,2 @@
+looking at it from the Complex Event Processing (CEP) perspective
+aggregating events depending on rules identified before hand
