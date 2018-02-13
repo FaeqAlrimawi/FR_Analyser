@@ -3,7 +3,6 @@ package ie.lero.spare.franalyser.utility;
 import java.util.LinkedList;
 import java.util.List;
 
-import ie.lero.spare.franalyser.BigraphAnalyser;
 import ie.lero.spare.franalyser.GraphPath;
 import ie.lero.spare.franalyser.Predicate;
 

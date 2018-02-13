@@ -25,7 +25,7 @@ public class IncidentPatternInstantiator {
 		
 		//execute, as threads, all possible unique combinations of system assets
 		PotentialIncidentInstance ins = new PotentialIncidentInstance(
-				am.getRandomSpaceAssetMatches(), am.getIncidentAssetNames(),1);
+				am.getRandomSpaceAssetMatches(), am.getIncidentAssetNames(),1, "sb3.big");
 		ins.start();
 		/*PredicateGenerator pred = new PredicateGenerator(am.getRandomSpaceAssetMatches(), am.getIncidentAssetNames()); 
 		PredicateHandler predic = pred.generatePredicates();//convert entities in the pre-/post-conditions of an activity into components matched from the previous step
@@ -65,18 +65,27 @@ public class IncidentPatternInstantiator {
 			incidentAssetNames = ia;
 			threadID = id;
 		}
+		
+		public PotentialIncidentInstance(String [] sa, String [] ia, long id, String fileName) {
+			// TODO Auto-generated constructor stub
+			systemAssetNames = sa;
+			incidentAssetNames = ia;
+			threadID = id;
+			BRSFileName = fileName;
+		}
+		
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
 			PredicateGenerator pred = new PredicateGenerator(systemAssetNames, incidentAssetNames); 
 			PredicateHandler predic = pred.generatePredicates();//convert entities in the pre-/post-conditions of an activity into components matched from the previous step
-		
+			String outputFolder = BRSFileName.split("\\.")[0]+"_"+threadID+"_output";
 			predic.insertPredicatesIntoBigraphFile(BRSFileName);
 			predic.updateNextPreviousActivities();	
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, BRSFileName);
-			analyser.setBigrapherExecutionOutputFolder(BRSFileName+"_"+threadID+"_"+BigraphAnalyser.getBigrapherExecutionOutputFolder());
-			TransitionSystem.setFileName(BigraphAnalyser.getBigrapherExecutionOutputFolder() + "/transitions");
-			analyser.analyse(false); //set to true to execute the bigrapher file or use the function without parameters
+			analyser.setBigrapherExecutionOutputFolder(outputFolder);
+			analyser.analyse(true); //set to true to execute the bigrapher file or use the function without parameters
+			//TransitionSystem.setFileName(BigraphAnalyser.getBigrapherExecutionOutputFolder() + "/transitions");
 			IncidentPath inc = new IncidentPath(predic);
 			inc.generateDistinctPaths();
 			
@@ -90,5 +99,31 @@ public class IncidentPatternInstantiator {
 		         t.start ();
 		      }
 		   }
+		public String[] getSystemAssetNames() {
+			return systemAssetNames;
+		}
+		public void setSystemAssetNames(String[] systemAssetNames) {
+			this.systemAssetNames = systemAssetNames;
+		}
+		public String[] getIncidentAssetNames() {
+			return incidentAssetNames;
+		}
+		public void setIncidentAssetNames(String[] incidentAssetNames) {
+			this.incidentAssetNames = incidentAssetNames;
+		}
+		public long getThreadID() {
+			return threadID;
+		}
+		public void setThreadID(long threadID) {
+			this.threadID = threadID;
+		}
+		public String getBRSFileName() {
+			return BRSFileName;
+		}
+		public void setBRSFileName(String bRSFileName) {
+			BRSFileName = bRSFileName;
+		}
+		
+		
 	}
 }

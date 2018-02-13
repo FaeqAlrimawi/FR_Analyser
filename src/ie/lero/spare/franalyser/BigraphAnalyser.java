@@ -176,7 +176,7 @@ public class BigraphAnalyser {
 
 	public String createDefaultBigrapherExecutionCmd() {
 		StringBuilder res = new StringBuilder();
-		bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0] + "_Execution_Output";
+		//bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0] + "_Execution_Output";
 		res.append("bigrapher full -q -M ").append(maximumNumberOfStates).append(" -t ")
 				.append(bigrapherExecutionOutputFolder).append("/transitionSystem -s ")
 				.append(bigrapherExecutionOutputFolder).append(" -l ").append(bigrapherExecutionOutputFolder)
