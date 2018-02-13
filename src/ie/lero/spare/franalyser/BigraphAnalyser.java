@@ -29,7 +29,7 @@ public class BigraphAnalyser {
 										// format for different parts (e.g.,
 										// states, transitions) formats: svg,
 										// json, dot, and txt
-		bigrapherExecutionOutputFolder = "Execution_Output";
+		bigrapherExecutionOutputFolder = "Output";
 		bigrapherValidateCmd = "bigrapher validate -n ";
 		predicateHandler = null;
 

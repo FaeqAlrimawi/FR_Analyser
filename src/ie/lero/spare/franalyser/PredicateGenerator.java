@@ -27,6 +27,12 @@ public class PredicateGenerator {
 		assetMap = map;
 		incidentAssetNames = map.getIncidentAssetNames();
 	}
+	
+	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName) {
+		this();
+		spaceAssetSet = systemAsset;
+		this.incidentAssetNames = incidentAssetName;
+	}
 
 	public HashMap<String, IncidentActivity> createIncidentActivities() {
 		String[] tmp;
@@ -58,17 +64,17 @@ public class PredicateGenerator {
 		String[] postconditions = null;
 		
 		//if an incident asset has no matches then the generation of predicates is stopped
-		if(assetMap.hasAssetsWithNoMatch()) {
-			/*System.out.println("Some incident Assets have no matches in the space asset, these are:");
+		/*if(assetMap.hasAssetsWithNoMatch()) {
+			System.out.println("Some incident Assets have no matches in the space asset, these are:");
 			String [] asts = assetMap.getIncidentAssetsWithNoMatch(); 
 			for(String s: asts) {
 				System.out.println(s);
-			}*/
+			}
 			return null;
-		}
+		}*/
 		
 		//should be changed in the future to acquire individual sequences of the matched space assets for multiprocessing
-		spaceAssetSet = assetMap.getRandomSpaceAssetMatches();
+		//spaceAssetSet = assetMap.getRandomSpaceAssetMatches();
 		
 		try {
 				HashMap<String, IncidentActivity> activities = createIncidentActivities();
@@ -123,14 +129,14 @@ public class PredicateGenerator {
 		return result;
 	}
 
-	public AssetMap getAssetMap() {
+	/*public AssetMap getAssetMap() {
 		return assetMap;
 	}
 
 	public void setAssetMap(AssetMap assetMap) {
 		this.assetMap = assetMap;
 	}
-
+*/
 	public PredicateHandler getPredHandler() {
 		return predHandler;
 	}

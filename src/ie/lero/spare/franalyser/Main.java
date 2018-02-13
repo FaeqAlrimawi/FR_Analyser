@@ -43,7 +43,7 @@ public class Main {
 			if(predic != null) {
 				System.out.println(predic.toString());
 			}
-			predic.insertPredicatesIntoBigraphFile("sb3.big");
+			//predic.insertPredicatesIntoBigraphFile("sb3.big");
 /*			IncidentActivity act1 = predic.getIncidentActivities().get("activity1");
 			
 			IncidentActivity act2 = predic.getIncidentActivities().get("activity2");
