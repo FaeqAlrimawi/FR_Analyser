@@ -83,9 +83,10 @@ public class IncidentPatternInstantiator {
 			predic.insertPredicatesIntoBigraphFile(BRSFileName);
 			predic.updateNextPreviousActivities();	
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, BRSFileName);
+			TransitionSystem.setFileName(outputFolder+"/transitions");
 			analyser.setBigrapherExecutionOutputFolder(outputFolder);
 			analyser.analyse(true); //set to true to execute the bigrapher file or use the function without parameters
-			//TransitionSystem.setFileName(BigraphAnalyser.getBigrapherExecutionOutputFolder() + "/transitions");
+			
 			IncidentPath inc = new IncidentPath(predic);
 			inc.generateDistinctPaths();
 			
