@@ -85,7 +85,11 @@ public class IncidentPatternInstantiator {
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, BRSFileName);
 			TransitionSystem.setFileName(outputFolder+"/transitions");
 			analyser.setBigrapherExecutionOutputFolder(outputFolder);
-			analyser.analyse(true); //set to true to execute the bigrapher file or use the function without parameters
+			
+			//in the execution of the bigrapher file there is NO need to create the states and the transtion
+			//files again..only needed is the new predicates file containing the states that satisfy a predicate
+			//
+			analyser.analyse(false); //set to true to execute the bigrapher file or use the function without parameters
 			
 			IncidentPath inc = new IncidentPath(predic);
 			inc.generateDistinctPaths();

@@ -181,7 +181,18 @@ public class BigraphAnalyser {
 				.append(bigrapherExecutionOutputFolder).append("/transitionSystem -s ")
 				.append(bigrapherExecutionOutputFolder).append(" -l ").append(bigrapherExecutionOutputFolder)
 				.append("/predicates -p ").append(bigrapherExecutionOutputFolder).append("/transitions -f ")
-				.append(bigrapherOutputFormat).append(" ").append(bigrapherFileName);
+				.append(bigrapherOutputFormat).append(" ").append(bigrapherFileName); //bigrapher file name should be changed to the generated one
+
+		return res.toString();
+	}
+	
+	//only generates the predicate file from executing the bigrapher file
+	public String createBigrapherExecutionCmd() {
+		StringBuilder res = new StringBuilder();
+		//bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0] + "_Execution_Output";
+		res.append("bigrapher full -q -M ").append(maximumNumberOfStates)
+				.append(" -l ").append(bigrapherExecutionOutputFolder).append("/predicates ")
+				.append(bigrapherFileName);
 
 		return res.toString();
 	}
