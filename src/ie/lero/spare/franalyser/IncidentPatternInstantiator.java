@@ -101,7 +101,7 @@ public class IncidentPatternInstantiator {
 		      System.out.println("Starting " +  threadID );
 		      if (t == null) {
 		         t = new Thread (this, ""+threadID);
-		         t.start ();
+		         t.start();
 		      }
 		   }
 		public String[] getSystemAssetNames() {
