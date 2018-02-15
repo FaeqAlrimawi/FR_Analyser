@@ -1,3 +1,4 @@
+package ie.lero.spare.franalyser;
 import java.util.LinkedList;
 
 import it.uniud.mads.jlibbig.core.std.*;
