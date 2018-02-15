@@ -12,6 +12,7 @@
 	<classpathentry kind="lib" path="lib/batik-1.9/batik-squiggle-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/batik-1.9/batik-svgpp-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/batik-1.9/batik-ttf2svg-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/Bigraph Reactive Systems/jlibbig.core-0.1.jar"/>
+	<classpathentry kind="lib" path="lib/jlibbig/jlibbig.core-0.1.jar"/>
+	<classpathentry kind="lib" path="lib/choco-2.1.5/choco-solver-2.1.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
