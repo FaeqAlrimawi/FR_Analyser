@@ -61,7 +61,7 @@ public class TestBigLib {
 		bi = new BigraphBuilder(sig);
 		Node ro = bi.addNode("Room", bi.addRoot(0), bi.addOuterName("p1"));
 		bi.addSite(ro);
-		bi.addNode("Server", ro, bi.addOuterName());
+		bi.addNode("Server", ro, bi.addOuterName() );
 		Bigraph redex = bi.makeBigraph();
 		
 		//match
