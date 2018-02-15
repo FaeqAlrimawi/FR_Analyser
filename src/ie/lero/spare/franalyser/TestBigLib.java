@@ -2,9 +2,17 @@ package ie.lero.spare.franalyser;
 
 import java.util.LinkedList;
 
-import it.uniud.mads.jlibbig.core.attachedProperties.Property;
-import it.uniud.mads.jlibbig.core.std.*;
-import it.uniud.mads.jlibbig.core.util.BidMap;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
+import it.uniud.mads.jlibbig.core.std.Control;
+import it.uniud.mads.jlibbig.core.std.InnerName;
+import it.uniud.mads.jlibbig.core.std.Match;
+import it.uniud.mads.jlibbig.core.std.Matcher;
+import it.uniud.mads.jlibbig.core.std.Node;
+import it.uniud.mads.jlibbig.core.std.OuterName;
+import it.uniud.mads.jlibbig.core.std.Root;
+import it.uniud.mads.jlibbig.core.std.Signature;
+import it.uniud.mads.jlibbig.core.std.Site;
 
 public class TestBigLib {
 	
