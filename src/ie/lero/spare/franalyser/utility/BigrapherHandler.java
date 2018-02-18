@@ -17,11 +17,20 @@ public class BigrapherHandler {
 	private static String validBigrapherString = "model file parsed correctly";
 			
 
+	public static String executeBigraph(String BRSFileName, String outputFolder){
+		bigrapherExecutionOutputFolder = outputFolder;
+		return executeBigraph(BRSFileName);
+	}
+	
+	
 	public static String executeBigraph(String BRSFileName){
-		boolean isExecuted = false;
 		
 		bigrapherFileName = BRSFileName;
-		bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0]+"_output";
+		
+		if(bigrapherExecutionOutputFolder == null) {
+			bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0]+"_output";
+		}
+		
 		
 			if (validateBigraph()) {
 				
@@ -45,10 +54,8 @@ public class BigrapherHandler {
 						if (!result.toLowerCase().isEmpty()) {
 							System.out.println("Execution could not be completed. Please see possible issues below:");
 							System.out.println(result);
-							isExecuted = false;
 						} else {
 							System.out.println("Execution is Done");
-							isExecuted = true;
 
 							// should be a step taken by the main program
 							// createDigraph();
@@ -106,7 +113,7 @@ public class BigrapherHandler {
 				.append(bigrapherExecutionOutputFolder).append("/transitionSystem -s ")
 				.append(bigrapherExecutionOutputFolder).append(" -l ").append(bigrapherExecutionOutputFolder)
 				.append("/predicates -p ").append(bigrapherExecutionOutputFolder).append("/transitions -f ")
-				.append(bigrapherOutputFormat).append(" ").append(bigrapherFileName); //bigrapher file name should be changed to the generated one
+				.append(bigrapherOutputFormat).append(" ").append(bigrapherFileName);
 
 		return res.toString();
 	}
@@ -126,6 +133,17 @@ public class BigrapherHandler {
 	public static void setBigrapherOutputFormat(String bigrapherOutputFormat) {
 		BigrapherHandler.bigrapherOutputFormat = bigrapherOutputFormat;
 	}
+
+
+	public static String getBigrapherExecutionOutputFolder() {
+		return bigrapherExecutionOutputFolder;
+	}
+
+
+	public static void setBigrapherExecutionOutputFolder(String bigrapherExecutionOutputFolder) {
+		BigrapherHandler.bigrapherExecutionOutputFolder = bigrapherExecutionOutputFolder;
+	}
+	
 	
 
 

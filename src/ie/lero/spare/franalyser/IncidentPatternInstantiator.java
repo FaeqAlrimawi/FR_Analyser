@@ -28,11 +28,18 @@ public class IncidentPatternInstantiator {
 		String BRSFileName = "sb3.big";
 		
 		//execute BRS using Bigrapher tool
+		//the default output folder is in the format: [fileName]_output e.g., sb3_output
+		//output folder can be set in the executeBigraph method
 		String outputFolder = BigrapherHandler.executeBigraph(BRSFileName);
 		
-		if(outputFolder!= null) {
-			System.out.println(outputFolder);
-		}
+		//load the state transition system instance
+		TransitionSystem.setFileName(outputFolder+"/transitions");
+		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+		
+		System.out.println(t.toString());
+		
+		//load states (includes converting them into LibBig format for matching)
+		/**some method needed here*/
 		
 		//execute, as threads, all possible unique combinations of system assets
 		/*PotentialIncidentInstance ins = new PotentialIncidentInstance(

@@ -240,4 +240,8 @@ public class TransitionSystem {
 		
 		return transitionGraph.getProbability(srcState, desState);
 	}
+	
+	public String toString() {
+		return transitionGraph.toString();
+	}
 }
