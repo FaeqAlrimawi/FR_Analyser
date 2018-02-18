@@ -34,6 +34,7 @@ public class IncidentPatternInstantiator {
 						// no matching
 			}
 
+			//should be done before that for all incident patterns that apply to the system
 			initializeSystem();
 
 			// execute, as threads, all possible unique combinations of system
