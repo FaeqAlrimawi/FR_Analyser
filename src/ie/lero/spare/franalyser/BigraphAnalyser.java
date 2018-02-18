@@ -2,12 +2,16 @@ package ie.lero.spare.franalyser;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
 
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.Match;
+import it.uniud.mads.jlibbig.core.std.Matcher;
 
 public class BigraphAnalyser {
 
@@ -47,115 +51,14 @@ public class BigraphAnalyser {
 	}
 
 	public PredicateHandler analyse() {
+		
+		identifyRelevantStates();
+		return identifyStateTransitions();
 
-		if (validateBigraph()) { // validate the bigrapher file through commands
-			if (executeBigraph()) { // execute the bigrapher file
-				identifyRelevantStates(); // for all activities identify states
-											// that satisfy their predicates
-											// from the [predicates] file
-			//	if (createDigraph()) { // create a digraph from the
-										// [transitions] file
-					return identifyStateTransitions();
-			//	}
-			}
-		}
-
-		return null;
 	}
 
-	public PredicateHandler analyse(boolean validateAndExecute) {
+	
 
-		boolean isExecuted = false;
-
-		if (validateAndExecute) {
-			if (validateBigraph()) {
-				isExecuted = executeBigraph();
-			}
-		}
-
-		if (!validateAndExecute || (validateAndExecute && isExecuted)) {
-			identifyRelevantStates(); // for all activities identify states that
-										// satisfy their predicates from the
-										// [predicates] file
-		//	if (createDigraph()) { // create a digraph from the [transitions]
-									// file
-				return identifyStateTransitions();
-	//		}
-		}
-
-		return null;
-	}
-
-	public boolean validateBigraph() {
-		boolean isValid = false;
-		Process proc;
-		Runtime r = Runtime.getRuntime();
-		try {
-
-			proc = r.exec(bigrapherValidateCmd + bigrapherFileName);
-
-			Scanner s = new Scanner(proc.getInputStream()).useDelimiter("\\A");
-			String result = s.hasNext() ? s.next() : "";
-
-			if (result != null) {
-				if (result.toLowerCase().contains(validBigrapherString)) {
-					System.out.println(bigrapherFileName + " is valid");
-					isValid = true;
-				} else {
-					System.out.println(bigrapherFileName + " is not valid. Please see possible issues below:");
-					System.out.println(result + "");
-					isValid = false;
-
-				}
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			isValid = false;
-		}
-		return isValid;
-	}
-
-	public boolean executeBigraph() {
-		boolean isExecuted = false;
-		Process proc;
-		String cmd = createDefaultBigrapherExecutionCmd();
-
-		Runtime r = Runtime.getRuntime();
-		try {
-			r.exec("mkdir " + bigrapherExecutionOutputFolder);
-
-			// for future development this could run in own thread for
-			// multiprocessing
-			proc = r.exec(cmd);
-
-			// check the output of the command, if it has something then there
-			// are errors otherwise its ok
-			Scanner s = new Scanner(proc.getInputStream()).useDelimiter("\\A");
-			String result = s.hasNext() ? s.next() : "";
-
-			if (result != null) {
-				if (!result.toLowerCase().isEmpty()) {
-					System.out.println("Execution could not be completed. Please see possible issues below:");
-					System.out.println(result);
-					isExecuted = false;
-				} else {
-					System.out.println("Execution is Done");
-					isExecuted = true;
-
-					// should be a step taken by the main program
-					// createDigraph();
-
-				}
-			}
-
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return isExecuted;
-	}
 
 	/*
 	 * public String createBigrapherExecutionCmd(String bigrapherFileName,
@@ -173,29 +76,6 @@ public class BigraphAnalyser {
 	 * 
 	 * return res.toString(); }
 	 */
-
-	public String createDefaultBigrapherExecutionCmd() {
-		StringBuilder res = new StringBuilder();
-		//bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0] + "_Execution_Output";
-		res.append("bigrapher full -q -M ").append(maximumNumberOfStates).append(" -t ")
-				.append(bigrapherExecutionOutputFolder).append("/transitionSystem -s ")
-				.append(bigrapherExecutionOutputFolder).append(" -l ").append(bigrapherExecutionOutputFolder)
-				.append("/predicates -p ").append(bigrapherExecutionOutputFolder).append("/transitions -f ")
-				.append(bigrapherOutputFormat).append(" ").append(bigrapherFileName); //bigrapher file name should be changed to the generated one
-
-		return res.toString();
-	}
-	
-	//only generates the predicate file from executing the bigrapher file
-	public String createBigrapherExecutionCmd() {
-		StringBuilder res = new StringBuilder();
-		//bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0] + "_Execution_Output";
-		res.append("bigrapher full -q -M ").append(maximumNumberOfStates)
-				.append(" -l ").append(bigrapherExecutionOutputFolder).append("/predicates ")
-				.append(bigrapherFileName);
-
-		return res.toString();
-	}
 
 	public String getBigrapherFileName() {
 		return bigrapherFileName;
@@ -267,7 +147,7 @@ public class BigraphAnalyser {
 	}
 
 	// could be transfered to predicateHandler class
-	public boolean identifyRelevantStates(Predicate pred) {
+/*	public boolean identifyRelevantStates(Predicate pred) {
 		
 		boolean areStatesIdentified = false;
 
@@ -310,6 +190,28 @@ public class BigraphAnalyser {
 			tmp = null;
 		}
 
+		return areStatesIdentified;
+	}*/
+	
+	public boolean identifyRelevantStates(Predicate pred) {
+		boolean areStatesIdentified = false;
+		Iterable<Match> m;
+		
+		//method to convert predicate to required format
+		Bigraph redex = pred.convertPredicateToBigraph();
+		
+		//null should be replaced with the function that returns states
+		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates(); 
+		
+		//matcher object
+		Matcher matcher = new Matcher();
+		
+		for(int i =0; i<states.size();i++) {
+			if(matcher.match(states.get(i), redex).iterator().hasNext()){
+				pred.addBigraphState(i);
+			}
+		}
+		
 		return areStatesIdentified;
 	}
 

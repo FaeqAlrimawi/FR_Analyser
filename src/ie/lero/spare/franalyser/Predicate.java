@@ -3,6 +3,10 @@ package ie.lero.spare.franalyser;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import ie.lero.spare.franalyser.utility.PredicateType;
+import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
+import it.uniud.mads.jlibbig.core.std.Signature;
 
 public class Predicate {
 	
@@ -279,6 +283,16 @@ public class Predicate {
 		}
 		
 		return ps;
+	}
+	
+	public Bigraph convertPredicateToBigraph() {
+		SignatureBuilder sigbuilder = new SignatureBuilder();
+		
+		//convert predicate to bigraph
+		
+		BigraphBuilder bigraphBuilder = new BigraphBuilder(sigbuilder.makeSignature());
+		
+		return bigraphBuilder.makeBigraph();
 	}
 }
 

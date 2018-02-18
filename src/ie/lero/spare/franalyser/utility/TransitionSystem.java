@@ -16,6 +16,7 @@ public class TransitionSystem {
 	private Predicate predicateSrc;
 	private LinkedList<GraphPath> paths;
 	private static String fileName;
+	private int numberOfStates;
 	
 	private TransitionSystem() {
 		transitionGraph = new Digraph<Integer>();
@@ -46,6 +47,8 @@ public class TransitionSystem {
 
 		transitionsFileLines = FileManipulator.readFileNewLine(fileName);
 
+		numberOfStates = new Integer(transitionsFileLines[0].split(" ")[0]); //gets the number of states
+		
 		for (int i = 1; i < transitionsFileLines.length; i++) {
 			probability = -1;
 			label = null;
@@ -241,6 +244,14 @@ public class TransitionSystem {
 		return transitionGraph.getProbability(srcState, desState);
 	}
 	
+	public int getNumberOfStates() {
+		return numberOfStates;
+	}
+
+	public void setNumberOfStates(int numberOfStates) {
+		this.numberOfStates = numberOfStates;
+	}
+
 	public String toString() {
 		return transitionGraph.toString();
 	}

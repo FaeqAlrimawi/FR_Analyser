@@ -87,7 +87,8 @@ public class IncidentPatternInstantiator {
 	public static void main(String[] args) {
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
-		ins.execute();
+		//ins.execute();
+		SystemInstanceHandler.loadStates();
 	}
 
 	class PotentialIncidentInstance implements Runnable {
@@ -123,22 +124,24 @@ public class IncidentPatternInstantiator {
 			PredicateHandler predic = pred.generatePredicates();
 			// String outputFolder =
 			// BRSFileName.split("\\.")[0]+"_"+threadID+"_output";
-			//predic.insertPredicatesIntoBigraphFile(BRSFileName);
-			/*predic.updateNextPreviousActivities();
+			//predic.insertPredicatesIntoBigraphFile(BRSFileName);//not required anymore
+			predic.updateNextPreviousActivities();
+			//this object should convert predicates to the format required, then search for
+			//state matches
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, BRSFileName);
-			TransitionSystem.setFileName(outputFolder + "/transitions");
-			analyser.setBigrapherExecutionOutputFolder(outputFolder);*/
+			//TransitionSystem.setFileName(outputFolder + "/transitions");//not required
+			//analyser.setBigrapherExecutionOutputFolder(outputFolder);//not required
 
 			// in the execution of the bigrapher file there is NO need to create
 			// the states and the transtion
 			// files again..only needed is the new predicates file containing
 			// the states that satisfy a predicate
 			//
-			/*analyser.analyse(false); // set to true to execute the bigrapher
+			//analyser.analyse(); // set to true to execute the bigrapher
 										// file or use the function without
 										// parameters
 
-			IncidentPath inc = new IncidentPath(predic);
+			/*IncidentPath inc = new IncidentPath(predic);
 			inc.generateDistinctPaths();*/
 
 			//System.out.println(predic.toString());

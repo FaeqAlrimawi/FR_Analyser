@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import ie.lero.spare.franalyser.utility.FileManipulator;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
 
@@ -58,5 +59,6 @@ public class Converter {
 		Converter c = new Converter();
 		
 		c.convertJSONtoLibBiG();
+
 	}
 }
