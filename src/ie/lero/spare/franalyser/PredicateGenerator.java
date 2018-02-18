@@ -63,19 +63,6 @@ public class PredicateGenerator {
 		String[] preconditions = null;
 		String[] postconditions = null;
 		
-		//if an incident asset has no matches then the generation of predicates is stopped
-		/*if(assetMap.hasAssetsWithNoMatch()) {
-			System.out.println("Some incident Assets have no matches in the space asset, these are:");
-			String [] asts = assetMap.getIncidentAssetsWithNoMatch(); 
-			for(String s: asts) {
-				System.out.println(s);
-			}
-			return null;
-		}*/
-		
-		//should be changed in the future to acquire individual sequences of the matched space assets for multiprocessing
-		//spaceAssetSet = assetMap.getRandomSpaceAssetMatches();
-		
 		try {
 				HashMap<String, IncidentActivity> activities = createIncidentActivities();
 				

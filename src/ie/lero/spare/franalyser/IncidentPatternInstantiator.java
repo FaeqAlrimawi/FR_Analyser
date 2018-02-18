@@ -1,5 +1,6 @@
 package ie.lero.spare.franalyser;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
@@ -11,19 +12,13 @@ public class IncidentPatternInstantiator {
 		
 		try {
 			//should be done before that for all incident patterns that apply to the system
-			initializeSystem();
+			//initializeSystem();
 			
 			Mapper m = new Mapper("match_query.xq");
 			//finds components in a system representation (space.xml) that
 			//match the entities identified in an incident (incident.xml)
 			AssetMap am = m.findMatches(); 
-								
-		/*	System.out.println("Asset map=======");
-			System.out.println(am.toString());*/
 
-			//generate all possible unique combinations of system assets
-			LinkedList<String[]> lst = am.getUniqueCombinations();
-		
 			// if there are incident assets with no matches from space model
 			// then exit
 			if (am.hasAssetsWithNoMatch()) {
@@ -36,6 +31,28 @@ public class IncidentPatternInstantiator {
 						// no matching
 			}
 
+				System.out.println("Asset map=======");
+			System.out.println(am.toString());
+
+			//generate all possible unique combinations of system assets
+			LinkedList<String[]> lst = am.generateUniqueCombinations();
+			if(lst != null) {
+				System.out.println(lst.size());
+			} else {
+				System.out.println("no unique combinations found.... terminating execution");
+				return;
+			}
+			
+			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+			
+			//create threads that handle each sequence generated from asset matching
+			//currently 1 sequence is tested
+			for(int i=0; i<2;i++) {
+				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), am.getIncidentAssetNames(), i);
+				incidentInstances[i].start();
+			}
+			
+			
 			// execute, as threads, all possible unique combinations of system
 			// assets
 
@@ -61,9 +78,6 @@ public class IncidentPatternInstantiator {
 		
 		boolean issuccessful = SystemInstanceHandler.analyseSystem(BRSFileName, bigrapher);
 
-		if(issuccessful) {
-			System.out.println(SystemInstanceHandler.getTransitionSystem().toString());
-		}
 		
 		// load states (includes converting them into LibBig format for
 		// matching)
@@ -106,41 +120,33 @@ public class IncidentPatternInstantiator {
 		public void run() {
 			// TODO Auto-generated method stub
 			PredicateGenerator pred = new PredicateGenerator(systemAssetNames, incidentAssetNames);
-			PredicateHandler predic = pred.generatePredicates();// convert
-																// entities in
-																// the
-																// pre-/post-conditions
-																// of an
-																// activity into
-																// components
-																// matched from
-																// the previous
-																// step
+			PredicateHandler predic = pred.generatePredicates();
 			// String outputFolder =
 			// BRSFileName.split("\\.")[0]+"_"+threadID+"_output";
-			predic.insertPredicatesIntoBigraphFile(BRSFileName);
-			predic.updateNextPreviousActivities();
+			//predic.insertPredicatesIntoBigraphFile(BRSFileName);
+			/*predic.updateNextPreviousActivities();
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, BRSFileName);
 			TransitionSystem.setFileName(outputFolder + "/transitions");
-			analyser.setBigrapherExecutionOutputFolder(outputFolder);
+			analyser.setBigrapherExecutionOutputFolder(outputFolder);*/
 
 			// in the execution of the bigrapher file there is NO need to create
 			// the states and the transtion
 			// files again..only needed is the new predicates file containing
 			// the states that satisfy a predicate
 			//
-			analyser.analyse(false); // set to true to execute the bigrapher
+			/*analyser.analyse(false); // set to true to execute the bigrapher
 										// file or use the function without
 										// parameters
 
 			IncidentPath inc = new IncidentPath(predic);
-			inc.generateDistinctPaths();
+			inc.generateDistinctPaths();*/
 
-			System.out.println(predic.toString());
+			//System.out.println(predic.toString());
 		}
 
 		public void start() {
 			System.out.println("Starting " + threadID);
+			System.out.println("system assets: " + Arrays.toString(systemAssetNames));
 			if (t == null) {
 				t = new Thread(this, "" + threadID);
 				t.start();

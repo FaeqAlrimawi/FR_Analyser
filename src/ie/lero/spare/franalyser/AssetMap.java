@@ -215,7 +215,7 @@ public class AssetMap {
 	 * Generates all unique combinations of system assets that correspond to the set of incident assets
 	 *@return LinkedList<String[]> containing all unique combinations
 	 */
-	public void generateUniqueCombinations() {
+	public LinkedList<String[]> generateUniqueCombinations() {
 		
 		Iterable<String[]> it = () -> new CartesianIterator<>(spaceAssetMatches, String[]::new);
 		uniqueCombinations = new LinkedList<String[]>();
@@ -225,6 +225,8 @@ public class AssetMap {
 					uniqueCombinations.add(s);	
 				}
 		}
+		
+		return uniqueCombinations;
 	}
 
 

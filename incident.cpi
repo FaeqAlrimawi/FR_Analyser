@@ -27,19 +27,7 @@
   <asset name="floorX">
     <type name="PhysicalStructure"/>
   </asset>
-   <asset name="floorX2">
-    <type name="PhysicalStructure"/>
-  </asset>
-    <asset name="floorX3">
-    <type name="PhysicalStructure"/>
-  </asset>
-    <asset name="floorX4">
-    <type name="PhysicalStructure"/>
-  </asset>
-   
-
-
-
+  
   <resource parentEntity="offender1" name="laptopX">
     <type name="ComputingDevice"/>
   </resource>
