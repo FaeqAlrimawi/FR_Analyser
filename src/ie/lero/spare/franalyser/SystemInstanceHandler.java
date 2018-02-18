@@ -12,11 +12,16 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import ie.lero.spare.franalyser.utility.BigraphNode;
-import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
+import it.uniud.mads.jlibbig.core.std.Handle;
+import it.uniud.mads.jlibbig.core.std.InnerName;
+import it.uniud.mads.jlibbig.core.std.Node;
+import it.uniud.mads.jlibbig.core.std.OuterName;
+import it.uniud.mads.jlibbig.core.std.Root;
 import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
+import it.uniud.mads.jlibbig.core.std.Site;
 
 public class SystemInstanceHandler {
 
@@ -25,8 +30,9 @@ public class SystemInstanceHandler {
 	private static TransitionSystem transitionSystem;
 	private static String fileName;
 	private static boolean isSystemAnalysed = false;
-	private static HashMap<Integer, Bigraph> states;
+	private static HashMap<Integer, Bigraph> states = new HashMap<Integer, Bigraph>();
 	
+
 	public static boolean analyseSystem(String fileName) {
 		
 
@@ -111,7 +117,6 @@ public class SystemInstanceHandler {
 	}
 	
 	public static HashMap<Integer, Bigraph> loadStates() {
-		HashMap<Integer, Bigraph> states = new HashMap<Integer, Bigraph>();
 		
 		//for testing
 		outputFolder = "sb3_output";
@@ -132,7 +137,7 @@ public class SystemInstanceHandler {
 				e.printStackTrace();
 			}
 		}
-		
+		System.out.println("States successfully loaded");
 		
 		//convert them to bigraph format
 		//add them with state number to the hash map
@@ -150,12 +155,25 @@ public class SystemInstanceHandler {
 		HashMap<Integer,BigraphNode> nodes = new HashMap<Integer, BigraphNode>();
 		BigraphNode node;
 		JSONArray ary;
+		JSONArray innerAry;
+		JSONArray outerAry;
+		JSONArray portAry;
 		Iterator<JSONObject> it;
+		Iterator<JSONObject> itInner;
+		Iterator<JSONObject> itOuter;
+		Iterator<JSONObject> itPort;
 		int src, target;
-		
 		SignatureBuilder sigBuilder = new SignatureBuilder();
 		LinkedList<String> outerNames = new LinkedList<String>();
 		LinkedList<String> innerNames = new LinkedList<String>();
+		LinkedList<String> outerNamesFull = new LinkedList<String>();
+		LinkedList<String> innerNamesFull = new LinkedList<String>();
+		
+		HashMap<String, OuterName> libBigOuterNames = new HashMap<String, OuterName>();
+		HashMap<String, InnerName> libBigInnerNames = new HashMap<String, InnerName>();
+		HashMap<Integer, Node> libBigNodes = new HashMap<Integer, Node>();
+		LinkedList<Root> libBigRoots = new LinkedList<Root>();
+		LinkedList<Site> libBigSites = new LinkedList<Site>();
 		
 		// number of roots, sites, and nodes respectively
 		int numOfRoots = Integer.parseInt(((JSONObject)state.get("place_graph")).get("regions").toString());
@@ -207,12 +225,99 @@ public class SystemInstanceHandler {
 		
 		}
 		
-		for(BigraphNode n : nodes.values()) {
-			System.out.println(n.toString());
+		//get outer names and inner names for the nodes. Currently, focus on outer names
+		//while inner names are extracted they are not updated in the nodes
+		ary = (JSONArray)(state.get("link_graph"));
+		it = ary.iterator();
+		while(it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); //gets hold of node info
+			outerNames.clear();
+			innerNames.clear();
+			
+			//get inner names
+			innerAry = (JSONArray)(tmpObj.get("inner"));
+			itInner = innerAry.iterator();
+			while(itInner.hasNext()) {
+				innerNames.add(itInner.next().get("name").toString());
+				innerNamesFull.addAll(innerNames);
+			}
+			
+			//get outer names
+			outerAry = (JSONArray)(tmpObj.get("outer"));
+			itOuter = outerAry.iterator();
+			while(itOuter.hasNext()) {
+				outerNames.add(itOuter.next().get("name").toString());
+				outerNamesFull.addAll(outerNames);
+			}
+			
+			//get nodes connected to outer names. Inner names should be considered
+			portAry = (JSONArray)(tmpObj.get("ports"));
+			itPort = portAry.iterator();
+			while(itPort.hasNext()) {
+				node = nodes.get(Integer.parseInt(itPort.next().get("node_id").toString()));
+				node.addOuterNames(outerNames);
+				node.addInnerNames(innerNames);
+			}
 		}
+		
 		BigraphBuilder biBuilder = new BigraphBuilder(sigBuilder.makeSignature());
 		
-		return result;
+		//create roots for the bigraph
+		for(int i=0;i<numOfRoots;i++) {
+			libBigRoots.add(biBuilder.addRoot(i));
+		}
+		
+		//create outer names
+		for(String outer : outerNamesFull) {
+			libBigOuterNames.put(outer, biBuilder.addOuterName(outer));
+		}
+		
+		//create inner names
+		for(String inner : innerNamesFull) {
+			libBigInnerNames.put(inner, biBuilder.addInnerName(inner));
+		}
+		
+		//initial creation of nodes
+		LinkedList<Integer> visited = new LinkedList<Integer>();
+		
+		for(BigraphNode nd : nodes.values()) {
+			if(visited.contains(nd.getId())) {
+				System.out.println("skipped for " + nd.getId());
+				continue;
+			}
+			
+			createNodeParent(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes, visited);	
+		}
+		
+		return biBuilder.makeBigraph();
+	}
+	
+	private static Node createNodeParent(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
+			HashMap<String, OuterName> outerNames, HashMap<Integer, Node> nodes, LinkedList<Integer> visitedNodes) {
+		visitedNodes.add(node.getId());
+		
+		LinkedList<Handle> names = new LinkedList<Handle>();
+		for(String n : node.getOuterNames()) {
+			names.add(outerNames.get(n));
+		}
+		
+		//if the parent is a root
+		if(node.getParent() == null) { //if the parent is a root	
+			Node  n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
+			nodes.put(node.getId(), n);
+			return n;
+		}
+		
+		
+		//if the parent is already created as a node in the bigraph
+		if(nodes.containsKey(node.getParent().getId())) {
+			Node  n = biBuilder.addNode(node.getControl(), nodes.get(node.getParent().getId()), names);
+			nodes.put(node.getId(), n);
+			return n;
+		}
+		
+		return biBuilder.addNode(node.getControl(), createNodeParent(node.getParent(), biBuilder, libBigRoots, outerNames, nodes, visitedNodes), names);
+			
 	}
 	
 	public static void clearSystem(){
@@ -228,14 +333,10 @@ public class SystemInstanceHandler {
 		JSONObject state;
 		JSONParser parser = new JSONParser();
 		
-		try {
-			state = (JSONObject) parser.parse(new FileReader("output/1.json"));
-			convertJSONtoBigraph(state);
+			//state = (JSONObject) parser.parse(new FileReader("output/1.json"));
+			//convertJSONtoBigraph(state);
+		loadStates();
 		
-		} catch (IOException | ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 		
 }

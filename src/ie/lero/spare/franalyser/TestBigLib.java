@@ -49,7 +49,7 @@ public class TestBigLib {
 		// i.e. addNode("Control name" [should exist in the signature], parent
 		// node, [outerNames it could be connected to])
 		Node r2 = bi.addNode("Room", root, a1);
-		
+
 		Node r4 = bi.addNode("Hallway", root, a1);
 		Node r3 = bi.addNode("Server", r2, serv);
 		Node r5 = bi.addNode("Server", r4);

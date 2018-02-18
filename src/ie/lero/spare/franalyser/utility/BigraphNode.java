@@ -18,6 +18,8 @@ public class BigraphNode {
 		innerNames = new LinkedList<String>();
 		sites = new LinkedList<Integer>();
 		nodes = new LinkedList<BigraphNode>();
+		parentRoot = -1;
+		parent = null;
 	}
 
 	public void addOuterName(String name) {
@@ -27,10 +29,28 @@ public class BigraphNode {
 		
 	}
 	
+	public void addOuterNames(LinkedList<String> names) {
+		if(names != null && !names.isEmpty()){
+			for(String n : names) {
+				addOuterName(n);
+			}
+		}
+		
+	}
+	
 	public void addInnerName(String name) {
 		if(!innerNames.contains(name)) {
 			innerNames.add(name);
 		}
+	}
+	
+	public void addInnerNames(LinkedList<String> names) {
+		if(names != null && !names.isEmpty()){
+			for(String n : names) {
+				addInnerName(n);
+			}
+		}
+		
 	}
 	
 	public void addSite(int site) {
@@ -130,14 +150,26 @@ public class BigraphNode {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		
-		res.append("id:").append(getId()).append(",");
+		res.append("id:").append(getId()).append(",")
+			.append("control:").append(getControl()).append(",");
 		
 		if(parent == null) {
-			res.append("parent:").append(getParentRoot());
+			res.append("parentRoot:").append(getParentRoot());
 		} else {
 			res.append("parent:").append(getParent().getId());
 		}
 		
+		//append outer names
+		if(outerNames != null && outerNames.size()>0) {
+		res.append(",outerNames:{");
+		for(int i=0;i<outerNames.size();i++) {
+			res.append(outerNames.get(i));
+			if(i != outerNames.size()-1) {
+				res.append(",");
+			}	
+		}
+		res.append("}");
+		}
 		res.append("\n");
 		
 		return res.toString();
