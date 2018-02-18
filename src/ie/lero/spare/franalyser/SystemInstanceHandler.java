@@ -11,6 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -145,25 +146,70 @@ public class SystemInstanceHandler {
 		String tmp;
 		String tmpArity;
 		JSONObject tmpObj;
-		SignatureBuilder sigBuilder = new SignatureBuilder();
-		int numOfRoots = Integer.parseInt(((JSONObject)state.get("place_graph")).get("regions").toString());
-	
+		JSONObject tmpCtrl;
+		HashMap<Integer,BigraphNode> nodes = new HashMap<Integer, BigraphNode>();
+		BigraphNode node;
+		JSONArray ary;
+		Iterator<JSONObject> it;
+		int src, target;
 		
-		//get controls & their arity [defines signature]
-		JSONArray ary = (JSONArray) state.get("nodes");
-		Iterator<JSONObject> it = ary.iterator();
+		SignatureBuilder sigBuilder = new SignatureBuilder();
+		LinkedList<String> outerNames = new LinkedList<String>();
+		LinkedList<String> innerNames = new LinkedList<String>();
+		
+		// number of roots, sites, and nodes respectively
+		int numOfRoots = Integer.parseInt(((JSONObject)state.get("place_graph")).get("regions").toString());
+		int numOfSites = Integer.parseInt(((JSONObject)state.get("place_graph")).get("sites").toString());
+		int numOfNodes = Integer.parseInt(((JSONObject)state.get("place_graph")).get("nodes").toString());
+		
+		//get controls & their arity [defines signature]. Controls are assumed to be active (i.e. true)
+		ary = (JSONArray) state.get("nodes");
+		it = ary.iterator();
 		while(it.hasNext()) {
-			tmpObj = (JSONObject) it.next().get("control");
-			tmp = tmpObj.get("control_id").toString();
-			tmpArity = tmpObj.get("control_arity").toString();
+			node = new BigraphNode();
+			tmpObj = (JSONObject) it.next(); //gets hold of node info
+			
+			
+			tmpCtrl = (JSONObject)tmpObj.get("control");			
+			tmp = tmpCtrl.get("control_id").toString();
+			tmpArity = tmpCtrl.get("control_arity").toString();
 		
 			if(!controls.contains(tmp)) {
 				controls.add(tmp); //to avoid duplicates
 				sigBuilder.add(tmp,true, Integer.parseInt(tmpArity));
 			}
 			
+			//set node id
+			node.setId(Integer.parseInt(tmpObj.get("node_id").toString()));
+			//set node control
+			node.setControl(tmp);
+			nodes.put(node.getId(), node);
 		}
 		
+		//get parents for nodes from the place_graph=> dag. Caution using the roots and sites numbers
+		ary = (JSONArray)((JSONObject)state.get("place_graph")).get("dag");
+		it = ary.iterator();
+		while(it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); //gets hold of node info
+			src = Integer.parseInt(tmpObj.get("source").toString());
+			target = Integer.parseInt(tmpObj.get("target").toString());
+			
+			if(src >= numOfRoots) {
+				//set parent node in the target node
+				nodes.get(target).setParent(nodes.get(src-numOfRoots));
+				//add child node to source node
+				nodes.get(src).addBigraphNode(nodes.get(target));
+			} else { //target parent is a root
+				nodes.get(target).setParentRoot(src);
+			}
+			
+			//should pay attention to sites
+		
+		}
+		
+		for(BigraphNode n : nodes.values()) {
+			System.out.println(n.toString());
+		}
 		BigraphBuilder biBuilder = new BigraphBuilder(sigBuilder.makeSignature());
 		
 		return result;
@@ -178,15 +224,14 @@ public class SystemInstanceHandler {
 	}
 
 	public static void main(String [] args) {
-		JSONParser parser = new JSONParser();
+		
 		JSONObject state;
+		JSONParser parser = new JSONParser();
 		
 		try {
-			state = (JSONObject) parser.parse(new FileReader("output/0.json"));
-			
-			int numOfRoots =Integer.parseInt(((JSONObject)state.get("place_graph")).get("regions").toString());
-			System.out.println(numOfRoots);
-			
+			state = (JSONObject) parser.parse(new FileReader("output/1.json"));
+			convertJSONtoBigraph(state);
+		
 		} catch (IOException | ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
