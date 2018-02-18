@@ -30,12 +30,16 @@ public class IncidentPatternInstantiator {
 		//execute BRS using Bigrapher tool
 		String outputFolder = BigrapherHandler.executeBigraph(BRSFileName);
 		
+		if(outputFolder!= null) {
+			System.out.println(outputFolder);
+		}
+		
 		//execute, as threads, all possible unique combinations of system assets
-		PotentialIncidentInstance ins = new PotentialIncidentInstance(
+		/*PotentialIncidentInstance ins = new PotentialIncidentInstance(
 				am.getRandomSpaceAssetMatches(), am.getIncidentAssetNames(),1, "sb3.big");
 		
 		ins.setOutputFolder(outputFolder);
-		ins.start();
+		ins.start();*/
 		/*PredicateGenerator pred = new PredicateGenerator(am.getRandomSpaceAssetMatches(), am.getIncidentAssetNames()); 
 		PredicateHandler predic = pred.generatePredicates();//convert entities in the pre-/post-conditions of an activity into components matched from the previous step
 	

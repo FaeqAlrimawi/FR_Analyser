@@ -10,22 +10,21 @@ import ie.lero.spare.franalyser.PredicateHandler;
 public class BigrapherHandler {
 	
 	private static String bigrapherFileName;
-	private static String bigrapherValidateCmd;
+	private static String bigrapherValidateCmd = "bigrapher validate -n ";
 	private static String bigrapherExecutionOutputFolder;
 	private static String bigrapherOutputFormat = "json";
 	private static int maximumNumberOfStates = 1000;
 	private static String validBigrapherString = "model file parsed correctly";
-	
-	public BigrapherHandler() {
-	
-	}		
+			
 
 	public static String executeBigraph(String BRSFileName){
 		boolean isExecuted = false;
 		
+		bigrapherFileName = BRSFileName;
+		bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0]+"_output";
+		
 			if (validateBigraph()) {
-				bigrapherFileName = BRSFileName;
-				bigrapherExecutionOutputFolder = BRSFileName.split("\\.")[0]+"_output";
+				
 				Process proc;
 				String cmd = createDefaultBigrapherExecutionCmd();
 
@@ -110,6 +109,22 @@ public class BigrapherHandler {
 				.append(bigrapherOutputFormat).append(" ").append(bigrapherFileName); //bigrapher file name should be changed to the generated one
 
 		return res.toString();
+	}
+
+	public static int getMaximumNumberOfStates() {
+		return maximumNumberOfStates;
+	}
+
+	public static void setMaximumNumberOfStates(int maximumNumberOfStates) {
+		BigrapherHandler.maximumNumberOfStates = maximumNumberOfStates;
+	}
+
+	public static String getBigrapherOutputFormat() {
+		return bigrapherOutputFormat;
+	}
+
+	public static void setBigrapherOutputFormat(String bigrapherOutputFormat) {
+		BigrapherHandler.bigrapherOutputFormat = bigrapherOutputFormat;
 	}
 	
 
