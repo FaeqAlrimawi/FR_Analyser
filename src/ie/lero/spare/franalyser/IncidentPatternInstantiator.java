@@ -1,5 +1,6 @@
 package ie.lero.spare.franalyser;
 
+import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
 public class IncidentPatternInstantiator {
@@ -23,9 +24,17 @@ public class IncidentPatternInstantiator {
 			return; //execution stops if there are incident enitties with no matching
 		}
 		
+		//create the name of the output folder
+		String BRSFileName = "sb3.big";
+		
+		//execute BRS using Bigrapher tool
+		String outputFolder = BigrapherHandler.executeBigraph(BRSFileName);
+		
 		//execute, as threads, all possible unique combinations of system assets
 		PotentialIncidentInstance ins = new PotentialIncidentInstance(
 				am.getRandomSpaceAssetMatches(), am.getIncidentAssetNames(),1, "sb3.big");
+		
+		ins.setOutputFolder(outputFolder);
 		ins.start();
 		/*PredicateGenerator pred = new PredicateGenerator(am.getRandomSpaceAssetMatches(), am.getIncidentAssetNames()); 
 		PredicateHandler predic = pred.generatePredicates();//convert entities in the pre-/post-conditions of an activity into components matched from the previous step
@@ -59,6 +68,8 @@ public class IncidentPatternInstantiator {
 		private Thread t;
 		private long threadID;
 		private String BRSFileName;
+		private String outputFolder;
+		
 		public PotentialIncidentInstance(String [] sa, String [] ia, long id) {
 			// TODO Auto-generated constructor stub
 			systemAssetNames = sa;
@@ -66,6 +77,7 @@ public class IncidentPatternInstantiator {
 			threadID = id;
 		}
 		
+		//could be removed as this class will be handling states from the memory
 		public PotentialIncidentInstance(String [] sa, String [] ia, long id, String fileName) {
 			// TODO Auto-generated constructor stub
 			systemAssetNames = sa;
@@ -79,7 +91,7 @@ public class IncidentPatternInstantiator {
 			// TODO Auto-generated method stub
 			PredicateGenerator pred = new PredicateGenerator(systemAssetNames, incidentAssetNames); 
 			PredicateHandler predic = pred.generatePredicates();//convert entities in the pre-/post-conditions of an activity into components matched from the previous step
-			String outputFolder = BRSFileName.split("\\.")[0]+"_"+threadID+"_output";
+			//String outputFolder = BRSFileName.split("\\.")[0]+"_"+threadID+"_output";
 			predic.insertPredicatesIntoBigraphFile(BRSFileName);
 			predic.updateNextPreviousActivities();	
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, BRSFileName);
@@ -127,6 +139,14 @@ public class IncidentPatternInstantiator {
 		}
 		public void setBRSFileName(String bRSFileName) {
 			BRSFileName = bRSFileName;
+		}
+
+		public String getOutputFolder() {
+			return outputFolder;
+		}
+
+		public void setOutputFolder(String outputFolder) {
+			this.outputFolder = outputFolder;
 		}
 		
 		

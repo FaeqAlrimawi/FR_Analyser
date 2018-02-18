@@ -21,14 +21,14 @@ atomic ctrl Database = 1;
 atomic ctrl PhysicalConnection=0;
 
 #########################Generated Predicates##############################
-big pre3_Precondition_activity2 = /r control_room.person1 | hallway;
-big pre4_Precondition_activity3 = /r control_room.person1 | hallway;
-big pre5_Precondition_activity4 = /r hallway.person1 | control_room;
-big pre1_Precondition_activity1 = /r control_room.person1 | hallway;
-big post4_Postcondition_activity3 = /r control_room.person1 | hallway;
-big post5_Postcondition_activity4 = /r control_room.person1 | hallway;
-big post3_Postcondition_activity2 = /r control_room.person1 | hallway;
-big post1_Postcondition_activity1 = entrance.control_room;
+big pre3_Precondition_activity2 = /r control_room.person1 | server_room;
+big pre4_Precondition_activity3 = /r control_room.person1 | server_room;
+big pre5_Precondition_activity4 = /r server_room.person1 | control_room;
+big pre1_Precondition_activity1 = /r control_room.person1 | server_room;
+big post4_Postcondition_activity3 = /r control_room.person1 | server_room;
+big post5_Postcondition_activity4 = /r control_room.person1 | server_room;
+big post3_Postcondition_activity2 = /r control_room.person1 | server_room;
+big post1_Postcondition_activity1 = 2nd_floor.control_room;
 
 #########################Generated Predicates##############################
 
