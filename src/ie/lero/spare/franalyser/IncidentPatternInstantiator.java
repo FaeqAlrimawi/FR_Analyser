@@ -47,7 +47,7 @@ public class IncidentPatternInstantiator {
 			
 			//create threads that handle each sequence generated from asset matching
 			//currently 1 sequence is tested
-			for(int i=0; i<2;i++) {
+			for(int i=0; i<incidentInstances.length;i++) {
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), am.getIncidentAssetNames(), i);
 				incidentInstances[i].start();
 			}
