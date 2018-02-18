@@ -8,20 +8,28 @@ public class SystemInstanceHandler {
 	private static SystemExecutor executor;
 	private static TransitionSystem transitionSystem;
 	private static String fileName;
+	private static boolean isSystemAnalysed = false;
 	
 	public static boolean analyseSystem(String fileName) {
 		
-		if(executor == null) {
-			return false;
+
+		if(executor == null || fileName == null) {
+			return isSystemAnalysed = false;
 		}
 		
-		outputFolder = executor.execute(fileName);
-		
-		if(outputFolder!= null) {
+		if(isSystemAnalysed && fileName.equals(SystemInstanceHandler.fileName)) {
 			return true;
 		}
 		
-		return false;
+		SystemInstanceHandler.fileName = fileName;
+		
+		outputFolder = executor.execute(fileName);
+		
+		if(outputFolder != null) {
+			return isSystemAnalysed = true;
+		}
+		
+		return isSystemAnalysed = false;
 	}
 	
 	public static boolean analyseSystem(String fileName, SystemExecutor exec) {
@@ -66,6 +74,18 @@ public class SystemInstanceHandler {
 
 	public static void setFileName(String fileName) {
 		SystemInstanceHandler.fileName = fileName;
+		isSystemAnalysed = false;
+		outputFolder = null;
 	}
+
+	public static boolean isSystemAnalysed() {
+		return isSystemAnalysed;
+	}
+
+	public static void setSystemAnalysed(boolean isSystemAnalysed) {
+		SystemInstanceHandler.isSystemAnalysed = isSystemAnalysed;
+	}
+	
+	
 		
 }

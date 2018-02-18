@@ -20,12 +20,9 @@ public class BigrapherHandler implements SystemExecutor {
 	}
 
 	public String execute(String BRSFileName) {
-
+		
 		bigrapherFileName = BRSFileName;
-
-		if (bigrapherExecutionOutputFolder == null) {
-			bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0] + "_output";
-		}
+		bigrapherExecutionOutputFolder = bigrapherFileName.split("\\.")[0] + "_output";
 
 		if (validateBigraph()) {
 

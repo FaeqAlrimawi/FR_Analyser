@@ -10,14 +10,16 @@ public class IncidentPatternInstantiator {
 	public void execute() {
 		
 		try {
+			//should be done before that for all incident patterns that apply to the system
+			initializeSystem();
 			
 			Mapper m = new Mapper("match_query.xq");
 			//finds components in a system representation (space.xml) that
 			//match the entities identified in an incident (incident.xml)
 			AssetMap am = m.findMatches(); 
 								
-			System.out.println("Asset map=======");
-			System.out.println(am.toString());
+		/*	System.out.println("Asset map=======");
+			System.out.println(am.toString());*/
 
 			//generate all possible unique combinations of system assets
 			LinkedList<String[]> lst = am.getUniqueCombinations();
@@ -30,12 +32,9 @@ public class IncidentPatternInstantiator {
 				for (String s : asts) {
 					System.out.println(s);
 				}
-				return; // execution stops if there are incident enitties with
+				return; // execution stops if there are incident entities with
 						// no matching
 			}
-
-			//should be done before that for all incident patterns that apply to the system
-			initializeSystem();
 
 			// execute, as threads, all possible unique combinations of system
 			// assets
@@ -50,7 +49,8 @@ public class IncidentPatternInstantiator {
 	// instantiation
 	// does not need to execute a bigrapher file
 	public void initializeSystem() {
-		// create the name of the output folder
+		
+		// set the name of the output folder
 		String BRSFileName = "sb3.big";
 
 		// execute BRS using Bigrapher tool as a systemExecutor
@@ -64,7 +64,7 @@ public class IncidentPatternInstantiator {
 		if(issuccessful) {
 			System.out.println(SystemInstanceHandler.getTransitionSystem().toString());
 		}
-
+		
 		// load states (includes converting them into LibBig format for
 		// matching)
 		/** some method needed here */
