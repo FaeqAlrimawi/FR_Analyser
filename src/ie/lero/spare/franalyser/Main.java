@@ -35,7 +35,7 @@ public class Main {
 			BigraphAnalyser analyser = new BigraphAnalyser(predic, "sb3.big");
 			analyser.setBigrapherExecutionOutputFolder("sb3_"+BigraphAnalyser.getBigrapherExecutionOutputFolder());
 			TransitionSystem.setFileName(BigraphAnalyser.getBigrapherExecutionOutputFolder() + "/transitions");
-			analyser.analyse(false); //set to true to execute the bigrapher file or use the function without parameters
+			//analyser.analyse(false); //set to true to execute the bigrapher file or use the function without parameters
 			IncidentPath inc = new IncidentPath(predic);
 			inc.generateDistinctPaths();
 			//######### basic execution ########################################################################################

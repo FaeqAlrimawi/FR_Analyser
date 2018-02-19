@@ -375,7 +375,7 @@ public class BasicWindow {
 				screenOutput.append("<br/>>For the moment the original fle [sb3.big] is used for validation and execution since the generated cannot be executed because inserted predicates do not match the defined controls<br/>");
 				screenOutput.append("<br/>>Validation command used is: <font color=\"yellow\">bigrapher validate -n ").append(bigraphAnalyser.getBigrapherFileName()).append("</font>");
 				bigraphAnalyser.setBigrapherFileName("sb3.big");	
-				if(bigraphAnalyser.validateBigraph()) {
+				/*if(bigraphAnalyser.validateBigraph()) {
 					screenOutput.append("<br/><font color=\"white\"><br/>>Bigrapher file ["+ bigraphAnalyser.getBigrapherFileName() +"] is valide. Proceeding to file execution.<br/>");
 					screenOutput.append("<br/>>Bigrapher command used is:<br/></font> <font color=\"yellow\">").append(bigraphAnalyser.createDefaultBigrapherExecutionCmd()).append("</font><br/>");
 					if (bigraphAnalyser.executeBigraph()){
@@ -386,7 +386,7 @@ public class BasicWindow {
 					}
 				} else {
 					screenOutput.append("<br/>>Bigrapher file ["+ outputFileName +"] is <font color=\"red\"> NOT </font> <font color=\"white\">valide. See logs for more information on the issue.<br/></font</p>");
-				}
+				}*/
 				
 				dtrpnTest.setContentType("text/html");
 				dtrpnTest.setText(screenOutput.toString());

@@ -201,7 +201,6 @@ public class BigraphAnalyser {
 	
 	public boolean identifyRelevantStates(Predicate pred) {
 		boolean areStatesIdentified = false;
-		Iterable<Match> m;
 		
 		//method to convert predicate to required format
 		//Bigraph redex = pred.convertPredicateToBigraph();
