@@ -5,7 +5,8 @@ int devicesLinks = 3;
 
 #controls
 ctrl Room = 1; #represents a room, the integer (i.e. 1) means the number of names (or links) it has
-ctrl Floor = 1; #represents a floor
+ctrl Floor = 1
+; #represents a floor
 ctrl Hallway = 4;
 ctrl Entrance = 1;
 ctrl Actor = 0; #actor in building, atomic means cannot contain other controls

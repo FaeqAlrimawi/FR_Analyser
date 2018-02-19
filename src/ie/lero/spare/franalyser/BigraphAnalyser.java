@@ -1,15 +1,21 @@
 package ie.lero.spare.franalyser;
 
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Scanner;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Match;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 
@@ -198,18 +204,31 @@ public class BigraphAnalyser {
 		Iterable<Match> m;
 		
 		//method to convert predicate to required format
-		Bigraph redex = pred.convertPredicateToBigraph();
+		//Bigraph redex = pred.convertPredicateToBigraph();
+		JSONParser parser = new JSONParser();
+		try {
+			SystemInstanceHandler.setFileName("sb3.big");
+			SystemInstanceHandler.buildSignature();
+			Bigraph redex = SystemInstanceHandler.convertJSONtoBigraph((JSONObject) parser.parse(new FileReader("sb3_output/0.json")));
 		
 		//null should be replaced with the function that returns states
-		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates(); 
+		HashMap<Integer, Bigraph> states = SystemInstanceHandler.loadStates(); 
 		
 		//matcher object
 		Matcher matcher = new Matcher();
-		
+		System.out.println(states.size());
+		//System.out.println(redex.toString());
 		for(int i =0; i<states.size();i++) {
+			//System.out.println(states.get(i).toString());
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){
-				pred.addBigraphState(i);
+				//pred.addBigraphState(i);
+				System.out.println("state " +i+ " matched");		
 			}
+		}
+		
+		} catch (IOException | ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return areStatesIdentified;
@@ -288,5 +307,11 @@ public class BigraphAnalyser {
 		}
 		
 	}*/
+	
+	public static void main(String[] args){
+		BigraphAnalyser a = new BigraphAnalyser();
+		Predicate p = null;
+		a.identifyRelevantStates(p);
+	}
 
 }
