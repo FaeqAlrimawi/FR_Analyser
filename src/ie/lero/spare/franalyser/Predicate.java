@@ -377,14 +377,7 @@ public class Predicate {
 			
 			//get sites
 			if(!tmpObj.isNull("site")) {	
-				if (JSONArray.class.isAssignableFrom(tmpObj.get("site").getClass())){
-					JSONArray tmpAry = tmpObj.getJSONArray("site");
-					for(int j = 0;j<tmpAry.length();j++) {
-						node.setSite(Integer.parseInt(((JSONObject)tmpAry.get(j)).get("name").toString()));
-					}
-				} else {
-					node.addSite(Integer.parseInt(((JSONObject)tmpObj.get("site")).get("name").toString()));
-				}
+					node.setSite(true);
 			}
 			
 			//get childern
@@ -429,14 +422,7 @@ public class Predicate {
 			
 			//get sites
 			if(!tmpObj.isNull("site")) {	
-				if (JSONArray.class.isAssignableFrom(tmpObj.get("site").getClass())){
-					JSONArray tmpAry = tmpObj.getJSONArray("site");
-					for(int j = 0;j<tmpAry.length();j++) {
-						node.addSite(Integer.parseInt(((JSONObject)tmpAry.get(j)).get("name").toString()));
-					}
-				} else {
-					node.addSite(Integer.parseInt(((JSONObject)tmpObj.get("site")).get("name").toString()));
-				}
+					node.setSite(true);
 			}
 			
 			//get childern
@@ -471,11 +457,9 @@ public class Predicate {
 				}	
 			}
 			
-			if()
-			
 		}
 	
-		//initial creation of nodes
+		//initial creation of bigraph nodes
 		LinkedList<String> visited = new LinkedList<String>();
 		
 		for(BigraphNode nd : nodes.values()) {
@@ -486,10 +470,23 @@ public class Predicate {
 			createNodeParent(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes, visited);	
 		}
 		
+		//add sites to bigraph
+		for(BigraphNode n : nodes.values()) {
+			if(n.getSite()) {
+				biBuilder.addSite(libBigNodes.get(n.getId()));
+			}
+		}
+		
 		return biBuilder.makeBigraph();
 	}
 	
+	/**
+	 * loops the given json object to return internal tags (children) info
+	 * @param obj JSONObject
+	 * @param nodes BigraphNode objects holding the inner tags info
+	 */
 	private void getChildren(JSONObject obj, HashMap<String,BigraphNode> nodes) {
+		
 		if (JSONArray.class.isAssignableFrom(obj.get("child").getClass())){
 			JSONArray tmpAry = (JSONArray)obj.get("child");
 			for(int j=0;j<tmpAry.length();j++) {
@@ -498,6 +495,7 @@ public class Predicate {
 				nodeTmp.setControl(tmpObj2.get("control").toString());
 				nodeTmp.setId(tmpObj2.get("name").toString());
 				nodeTmp.setParent(nodes.get(obj.get("name")));
+				
 				nodes.put(nodeTmp.getId(), nodeTmp);
 				
 				//get outer names	
@@ -526,20 +524,14 @@ public class Predicate {
 				
 				//get sites
 				if(!tmpObj2.isNull("site")) {	
-					if (JSONArray.class.isAssignableFrom(tmpObj2.get("site").getClass())){
-						JSONArray tmpAry2 = tmpObj2.getJSONArray("site");
-						for(int k = 0;k<tmpAry2.length();k++) {
-							nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));
-						}
-					} else {
-						nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));;
-					}
+						nodeTmp.setSite(true);
 				}
 				
 				//iterate over other children
 				if (!tmpObj2.isNull("child")){
-					getChildren(tmpObj2, nodes);
+					getChildren( tmpObj2, nodes);
 				}
+
 			}
 		} else {
 			BigraphNode nodeTmp = new BigraphNode();
@@ -573,22 +565,16 @@ public class Predicate {
 				}
 			}
 			
-			//get sites
+			///get sites
 			if(!tmpObj2.isNull("site")) {	
-				if (JSONArray.class.isAssignableFrom(tmpObj2.get("site").getClass())){
-					JSONArray tmpAry2 = tmpObj2.getJSONArray("site");
-					for(int k = 0;k<tmpAry2.length();k++) {
-						nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));
-					}
-				} else {
-					nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));;
-				}
+				nodeTmp.setSite(true);
 			}
 			
 			//iterate over other children
 			if (!tmpObj2.isNull("child")){
 				getChildren(tmpObj2, nodes);
 			}
+
 		}
 	}
 	
@@ -616,10 +602,10 @@ public class Predicate {
 			return n;
 		}
 		
-		return biBuilder.addNode(node.getControl(), createNodeParent(node.getParent(), biBuilder, libBigRoots, outerNames, nodes, visitedNodes), names);
-			
+		Node n = biBuilder.addNode(node.getControl(), createNodeParent(node.getParent(), biBuilder, libBigRoots, outerNames, nodes, visitedNodes), names);
+		nodes.put(node.getId(), n);
+		return n;
 	}
-	
 	
 	public static void main(String[] args){
 		Predicate p = new Predicate();

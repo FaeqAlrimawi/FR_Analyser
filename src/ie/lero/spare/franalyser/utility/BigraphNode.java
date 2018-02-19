@@ -101,11 +101,11 @@ public class BigraphNode {
 		this.innerNames = innerNames;
 	}
 
-	public boolean getSites() {
+	public boolean getSite() {
 		return site;
 	}
 
-	public void setSites(boolean site) {
+	public void setSite(boolean site) {
 		this.site = site;
 	}
 

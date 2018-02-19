@@ -381,7 +381,9 @@ public class SystemInstanceHandler {
 			return n;
 		}
 		
-		return biBuilder.addNode(node.getControl(), createNodeParent(node.getParent(), biBuilder, libBigRoots, outerNames, nodes, visitedNodes), names);
+		Node n = biBuilder.addNode(node.getControl(), createNodeParent(node.getParent(), biBuilder, libBigRoots, outerNames, nodes, visitedNodes), names);
+		nodes.put(node.getId(), n);
+		return n;
 			
 	}
 	
