@@ -4,13 +4,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQDataSource;
 import javax.xml.xquery.XQException;
 import javax.xml.xquery.XQPreparedExpression;
 import javax.xml.xquery.XQResultSequence;
+
+import org.json.JSONObject;
+import org.json.XML;
 
 import com.saxonica.xqj.SaxonXQDataSource;
 
@@ -88,6 +90,21 @@ public class XqueryExecuter {
 		return conditions;
 	}
 	
+	public static JSONObject getBigraphConditions(String activityName, PredicateType type) throws FileNotFoundException, XQException{
+
+		String res=null; 
+		String query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
+				+ "condition[@xsi:type=\"cyberPhysical_Incident:"+type.toString()+"\"]/expression/entity";
+		
+		res = executeQuery(query);
+		
+		JSONObject conditions = XML.toJSONObject(res);
+		System.out.println(conditions.toString(4));
+		
+		return conditions;
+	}
+	
+	
 	//result format: activityName##NextActivities_[space separated]!!PreviousActivities_[comma separated], e.g., activity5##activity6 activity7
 	public static String[] returnNextPreviousActivities() throws FileNotFoundException, XQException{
 		String [] nextActivities = null;
@@ -120,6 +137,17 @@ public class XqueryExecuter {
 		return previousActivities;
 	}
 	
+	
+	public static void main(String[] args) {
+		
+		try {
+		getBigraphConditions("activity1", PredicateType.Precondition);
+		} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 		 
 }

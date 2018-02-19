@@ -368,13 +368,13 @@ public class BasicWindow {
 		});
 		button_2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				bigraphAnalyser = new BigraphAnalyser(outputFileName);
+			//	bigraphAnalyser = new BigraphAnalyser(outputFileName);
 				
 				screenOutput.append("<p><font color=\"white\"><br/><br/>---------------------------Bigraph Analysis---------------------------<br/>");
 				screenOutput.append("<p><font color=\"white\">>>Analysis phase using Bigrapher: currently includes validating and executing the generated bigrapher file: <a href=\"file:///").append(outputFileName).append("\">").append(outputFileName).append("</a><br/>");
 				screenOutput.append("<br/>>For the moment the original fle [sb3.big] is used for validation and execution since the generated cannot be executed because inserted predicates do not match the defined controls<br/>");
-				screenOutput.append("<br/>>Validation command used is: <font color=\"yellow\">bigrapher validate -n ").append(bigraphAnalyser.getBigrapherFileName()).append("</font>");
-				bigraphAnalyser.setBigrapherFileName("sb3.big");	
+				screenOutput.append("<br/>>Validation command used is: <font color=\"yellow\">bigrapher validate -n ");//.append(bigraphAnalyser.getBigrapherFileName()).append("</font>");
+			//	bigraphAnalyser.setBigrapherFileName("sb3.big");	
 				/*if(bigraphAnalyser.validateBigraph()) {
 					screenOutput.append("<br/><font color=\"white\"><br/>>Bigrapher file ["+ bigraphAnalyser.getBigrapherFileName() +"] is valide. Proceeding to file execution.<br/>");
 					screenOutput.append("<br/>>Bigrapher command used is:<br/></font> <font color=\"yellow\">").append(bigraphAnalyser.createDefaultBigrapherExecutionCmd()).append("</font><br/>");

@@ -115,8 +115,8 @@ public class SVGViewer {
 			am = m.findMatches();
 			PredicateGenerator pred = new PredicateGenerator(am);
 			predicateHandler = pred.generatePredicates();
-			analyser = new BigraphAnalyser(predicateHandler, "sb3.big");
-			analyser.setBigrapherExecutionOutputFolder("sb3_Execution_Output");
+			/*analyser = new BigraphAnalyser(predicateHandler, "sb3.big");
+			analyser.setBigrapherExecutionOutputFolder("sb3_Execution_Output");*/
 			//analyser.analyse(false);
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block

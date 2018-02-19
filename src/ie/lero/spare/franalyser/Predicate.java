@@ -11,6 +11,7 @@ import it.uniud.mads.jlibbig.core.std.Signature;
 public class Predicate {
 	
 	private String predicate; //Bigrapher format
+	private Bigraph bigraphPredicate;
 	private PredicateType predicateType; //precondition, postcondition
 	private String name;
 	private ArrayList<Integer> bigraphStates; //what states from the execution of a bigrapher the pred satisfies
@@ -286,11 +287,11 @@ public class Predicate {
 	}
 	
 	public Bigraph convertPredicateToBigraph() {
-		SignatureBuilder sigbuilder = new SignatureBuilder();
+		
 		
 		//convert predicate to bigraph
 		
-		BigraphBuilder bigraphBuilder = new BigraphBuilder(sigbuilder.makeSignature());
+		BigraphBuilder bigraphBuilder = new BigraphBuilder(SystemInstanceHandler.getBigraphSignature());
 		
 		return bigraphBuilder.makeBigraph();
 	}

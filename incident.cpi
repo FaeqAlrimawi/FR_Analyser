@@ -54,6 +54,12 @@
 	<condition xsi:type="cyberPhysical_Incident:Precondition" name="pre1">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>/r entrance.offender1 | mainLocation</exp>
+		<entity name="floorX" control="PhysicalStructure">
+          <child name="entrance" control="PhysicalStructure">
+            <child name="offender1" control="Actor"/>
+          </child>
+          <child name="mainLocation" control="PhysicalStructure"/>
+        </entity>
       </expression>
     </condition>
 	
@@ -70,7 +76,13 @@
     <postconditions> locationSD1(offender1 | smartDevice1)</postconditions>
   <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre3">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>/r entrance.offender1 | mainLocation</exp>
+        <exp>floor.(entrance.offender1 | mainLocation)</exp>
+		<entity name="floorX" control="PhysicalStructure">
+          <child name="entrance" control="PhysicalStructure">
+            <child name="offender1" control="Actor"/>
+          </child>
+          <child name="mainLocation" control="PhysicalStructure"/>
+        </entity>
       </expression>
     </condition>
 	<condition xsi:type="cyberPhysical_Incident:Postcondition" name="post3">

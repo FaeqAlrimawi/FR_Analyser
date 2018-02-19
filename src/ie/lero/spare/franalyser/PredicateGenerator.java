@@ -58,7 +58,6 @@ public class PredicateGenerator {
 	}
 	
 	public PredicateHandler generatePredicates() {
-		// start with one activity
 		
 		String[] preconditions = null;
 		String[] postconditions = null;

@@ -128,7 +128,7 @@ public class IncidentPatternInstantiator {
 			predic.updateNextPreviousActivities();
 			//this object should convert predicates to the format required, then search for
 			//state matches
-			BigraphAnalyser analyser = new BigraphAnalyser(predic, BRSFileName);
+			BigraphAnalyser analyser = new BigraphAnalyser(predic);
 			//TransitionSystem.setFileName(outputFolder + "/transitions");//not required
 			//analyser.setBigrapherExecutionOutputFolder(outputFolder);//not required
 
