@@ -1,0 +1,54 @@
+{"entity": [
+    {
+        "xmlns:cyberPhysical_Incident": "http://www.example.org/cyberPhysical_Incident",
+        "name": "floorX",
+        "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+        "control": "PhysicalStructure",
+        "xmlns:xmi": "http://www.omg.org/XMI",
+        "child": [
+            {
+                "name": "entrance",
+                "control": "PhysicalStructure",
+                "outername": {"name": "ent"},
+                "child": {
+                    "name": "offender1",
+                    "control": "Actor"
+                }
+            },
+            {
+                "name": "mainLocation",
+                "control": "PhysicalStructure",
+                "outername": [
+                    {"name": "ent"},
+                    {"name": "out2"}
+                ]
+            }
+        ]
+    },
+    {
+        "xmlns:cyberPhysical_Incident": "http://www.example.org/cyberPhysical_Incident",
+        "name": "floorX",
+        "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+        "control": "PhysicalStructure",
+        "xmlns:xmi": "http://www.omg.org/XMI",
+        "child": [
+            {
+                "name": "entrance",
+                "control": "PhysicalStructure",
+                "outername": {"name": "ent"},
+                "child": {
+                    "name": "offender1",
+                    "control": "Actor"
+                }
+            },
+            {
+                "name": "mainLocation",
+                "control": "PhysicalStructure",
+                "outername": [
+                    {"name": "ent"},
+                    {"name": "out2"}
+                ]
+            }
+        ]
+    }
+]}

@@ -219,7 +219,7 @@ public class SystemInstanceHandler {
 		String tmpArity;
 		JSONObject tmpObj;
 		JSONObject tmpCtrl;
-		HashMap<Integer,BigraphNode> nodes = new HashMap<Integer, BigraphNode>();
+		HashMap<String,BigraphNode> nodes = new HashMap<String, BigraphNode>();
 		BigraphNode node;
 		JSONArray ary;
 		JSONArray innerAry;
@@ -237,7 +237,7 @@ public class SystemInstanceHandler {
 		
 		HashMap<String, OuterName> libBigOuterNames = new HashMap<String, OuterName>();
 		HashMap<String, InnerName> libBigInnerNames = new HashMap<String, InnerName>();
-		HashMap<Integer, Node> libBigNodes = new HashMap<Integer, Node>();
+		HashMap<String, Node> libBigNodes = new HashMap<String, Node>();
 		LinkedList<Root> libBigRoots = new LinkedList<Root>();
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 		
@@ -264,7 +264,7 @@ public class SystemInstanceHandler {
 			}*/
 			
 			//set node id
-			node.setId(Integer.parseInt(tmpObj.get("node_id").toString()));
+			node.setId(tmpObj.get("node_id").toString());
 			//set node control
 			node.setControl(tmp);
 			nodes.put(node.getId(), node);
@@ -280,11 +280,11 @@ public class SystemInstanceHandler {
 			
 			if(src >= numOfRoots) {
 				//set parent node in the target node
-				nodes.get(target).setParent(nodes.get(src-numOfRoots));
+				nodes.get(Integer.toString(target)).setParent(nodes.get(Integer.toString(src-numOfRoots)));
 				//add child node to source node
-				nodes.get(src).addBigraphNode(nodes.get(target));
+				nodes.get(Integer.toString(src)).addBigraphNode(nodes.get(Integer.toString(target)));
 			} else { //target parent is a root
-				nodes.get(target).setParentRoot(src);
+				nodes.get(Integer.toString(target)).setParentRoot(src);
 			}
 			
 			//should pay attention to sites
@@ -320,7 +320,7 @@ public class SystemInstanceHandler {
 			portAry = (JSONArray)(tmpObj.get("ports"));
 			itPort = portAry.iterator();
 			while(itPort.hasNext()) {
-				node = nodes.get(Integer.parseInt(itPort.next().get("node_id").toString()));
+				node = nodes.get(itPort.next().get("node_id").toString());
 				node.addOuterNames(outerNames);
 				node.addInnerNames(innerNames);
 			}
@@ -344,22 +344,21 @@ public class SystemInstanceHandler {
 		}
 		
 		//initial creation of nodes
-		LinkedList<Integer> visited = new LinkedList<Integer>();
+		LinkedList<String> visited = new LinkedList<String>();
 		
 		for(BigraphNode nd : nodes.values()) {
 			if(visited.contains(nd.getId())) {
-				System.out.println("skipped for " + nd.getId());
 				continue;
 			}
 			
 			createNodeParent(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes, visited);	
 		}
-		
+
 		return biBuilder.makeBigraph();
 	}
 	
 	private static Node createNodeParent(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
-			HashMap<String, OuterName> outerNames, HashMap<Integer, Node> nodes, LinkedList<Integer> visitedNodes) {
+			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes, LinkedList<String> visitedNodes) {
 		visitedNodes.add(node.getId());
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
@@ -395,8 +394,13 @@ public class SystemInstanceHandler {
 	}
 
 	public static void main(String [] args) {
+
+		fileName = "sb3.big";
+		outputFolder = "sb3_output";
 		
 		buildSignature();
+		loadStates();
+		System.out.println(states.get(5).toString());
 		
 	}
 		

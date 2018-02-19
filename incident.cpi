@@ -56,10 +56,25 @@
         <exp>/r entrance.offender1 | mainLocation</exp>
 		<entity name="floorX" control="PhysicalStructure">
           <child name="entrance" control="PhysicalStructure">
+		  <outername name="ent"/>
             <child name="offender1" control="Actor"/>
           </child>
-          <child name="mainLocation" control="PhysicalStructure"/>
+          <child name="mainLocation" control="PhysicalStructure">
+		  <outername name="ent"/>
+		  <outername name="out2"/>
+		  </child>
         </entity>
+		<entity name="floorX" control="PhysicalStructure">
+          <child name="entrance" control="PhysicalStructure">
+		  <outername name="ent"/>
+            <child name="offender1" control="Actor"/>
+          </child>
+          <child name="mainLocation" control="PhysicalStructure">
+		  <outername name="ent"/>
+		  <outername name="out2"/>
+		  </child>
+        </entity>
+		
       </expression>
     </condition>
 	

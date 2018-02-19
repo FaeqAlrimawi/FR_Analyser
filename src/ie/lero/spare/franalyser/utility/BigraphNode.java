@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class BigraphNode {
 	
-	private int id;
+	private String id;
 	private LinkedList<String> outerNames;
 	private LinkedList<String> innerNames;
 	private LinkedList<Integer> sites;
@@ -76,18 +76,18 @@ public class BigraphNode {
 	    final BigraphNode other = (BigraphNode) obj;
 	    
 	    //if both nodes have the same id they are equal
-	    if(other.getId() == this.id) {
+	    if(other.getId().equals(this.id)) {
 	    	return true;
 	    }
 	    
 	    return false;
 	}
 	
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
