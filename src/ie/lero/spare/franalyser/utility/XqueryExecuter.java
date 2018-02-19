@@ -99,7 +99,7 @@ public class XqueryExecuter {
 		res = executeQuery(query);
 		
 		JSONObject conditions = XML.toJSONObject(res);
-		System.out.println(conditions.toString(4));
+		//System.out.println(conditions.toString(4));
 		
 		return conditions;
 	}

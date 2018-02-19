@@ -1,15 +1,19 @@
 package ie.lero.spare.franalyser;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import javax.xml.xquery.XQException;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.PredicateType;
+import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
 import it.uniud.mads.jlibbig.core.std.Site;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -309,108 +313,137 @@ public class Predicate {
 		return bigraphBuilder.makeBigraph();
 	}
 	
-	public static Bigraph convertJSONtoBigraph(JSONObject redex){
+	public Bigraph convertJSONtoBigraph(JSONObject redex){
 
-		String tmp;
-		String tmpArity;
 		JSONObject tmpObj;
-		JSONObject tmpCtrl;
-		HashMap<Integer,BigraphNode> nodes = new HashMap<Integer, BigraphNode>();
+		HashMap<String,BigraphNode> nodes = new HashMap<String, BigraphNode>();
 		BigraphNode node;
 		JSONArray ary;
-		JSONArray innerAry;
-		JSONArray outerAry;
-		JSONArray portAry;
-		Iterator<JSONObject> it;
-		Iterator<JSONObject> itInner;
-		Iterator<JSONObject> itOuter;
-		Iterator<JSONObject> itPort;
-		int src, target;
 		LinkedList<String> outerNames = new LinkedList<String>();
 		LinkedList<String> innerNames = new LinkedList<String>();
-		LinkedList<String> outerNamesFull = new LinkedList<String>();
-		LinkedList<String> innerNamesFull = new LinkedList<String>();
 		
 		HashMap<String, OuterName> libBigOuterNames = new HashMap<String, OuterName>();
 		HashMap<String, InnerName> libBigInnerNames = new HashMap<String, InnerName>();
-		HashMap<Integer, Node> libBigNodes = new HashMap<Integer, Node>();
+		HashMap<String, Node> libBigNodes = new HashMap<String, Node>();
 		LinkedList<Root> libBigRoots = new LinkedList<Root>();
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 		
-		// number of roots, sites, and nodes respectively
-		//int numOfRoots = Integer.parseInt(((JSONObject)redex.get("place_graph")).get("regions").toString());
-		int numOfSites = 0;//Integer.parseInt(((JSONObject)redex.get("place_graph")).get("sites").toString());
-		int numOfNodes = 0;//Integer.parseInt(((JSONObject)redex.get("place_graph")).get("nodes").toString());
+		// number of roots
+		int numOfRoots = 0;
 		
 		//get all entities (they are divided by || as Bigraph)
+		if (JSONArray.class.isAssignableFrom(redex.get("entity").getClass())){
+			
 		ary = (JSONArray) redex.get("entity");
-		it = ary.iterator();
-		while(it.hasNext()) {
+
+		for(int i=0;i<ary.length();i++) {
+
 			node = new BigraphNode();
-			tmpObj = (JSONObject) it.next(); //gets hold of node info
+			tmpObj = ary.getJSONObject(i); //gets hold of node info
 			
 			//set node id
 			//node.setId(Integer.parseInt(tmpObj.get("node_id").toString()));
 			//set node control
+
 			node.setControl(tmpObj.get("control").toString());
-			node.setControl(tmpObj.get("control").toString());
+			node.setId(tmpObj.get("name").toString());
+			node.setParentRoot(numOfRoots);
+			numOfRoots++;
 			nodes.put(node.getId(), node);
-		}
-		
-		//get parents for nodes from the place_graph=> dag. Caution using the roots and sites numbers
-		ary = (JSONArray)((JSONObject)redex.get("place_graph")).get("dag");
-		it = ary.iterator();
-		while(it.hasNext()) {
-			tmpObj = (JSONObject) it.next(); //gets hold of node info
-			src = Integer.parseInt(tmpObj.get("source").toString());
-			target = Integer.parseInt(tmpObj.get("target").toString());
-			
-			if(src >= numOfRoots) {
-				//set parent node in the target node
-				nodes.get(target).setParent(nodes.get(src-numOfRoots));
-				//add child node to source node
-				nodes.get(src).addBigraphNode(nodes.get(target));
-			} else { //target parent is a root
-				nodes.get(target).setParentRoot(src);
-			}
-			
-			//should pay attention to sites
-		
-		}
-		
-		//get outer names and inner names for the nodes. Currently, focus on outer names
-		//while inner names are extracted they are not updated in the nodes
-		ary = (JSONArray)(redex.get("link_graph"));
-		it = ary.iterator();
-		while(it.hasNext()) {
-			tmpObj = (JSONObject) it.next(); //gets hold of node info
-			outerNames.clear();
-			innerNames.clear();
-			
-			//get inner names
-			innerAry = (JSONArray)(tmpObj.get("inner"));
-			itInner = innerAry.iterator();
-			while(itInner.hasNext()) {
-				innerNames.add(itInner.next().get("name").toString());
-				innerNamesFull.addAll(innerNames);
-			}
 			
 			//get outer names
-			outerAry = (JSONArray)(tmpObj.get("outer"));
-			itOuter = outerAry.iterator();
-			while(itOuter.hasNext()) {
-				outerNames.add(itOuter.next().get("name").toString());
-				outerNamesFull.addAll(outerNames);
+			if(!tmpObj.isNull("outername")) {	
+			if (JSONArray.class.isAssignableFrom(tmpObj.get("outername").getClass())){
+				JSONArray tmpAry = tmpObj.getJSONArray("outername");
+				for(int j = 0;j<tmpAry.length();j++) {
+					node.addOuterName(((JSONObject)tmpAry.get(j)).get("name").toString());
+				}
+			} else {
+				node.addOuterName(((JSONObject)tmpObj.get("outername")).get("name").toString());
+			}
 			}
 			
-			//get nodes connected to outer names. Inner names should be considered
-			portAry = (JSONArray)(tmpObj.get("ports"));
-			itPort = portAry.iterator();
-			while(itPort.hasNext()) {
-				node = nodes.get(Integer.parseInt(itPort.next().get("node_id").toString()));
-				node.addOuterNames(outerNames);
-				node.addInnerNames(innerNames);
+			//get inner names
+			if(!tmpObj.isNull("innername")) {	
+				if (JSONArray.class.isAssignableFrom(tmpObj.get("innername").getClass())){
+					JSONArray tmpAry = tmpObj.getJSONArray("innername");
+					for(int j = 0;j<tmpAry.length();j++) {
+						node.addInnerName(((JSONObject)tmpAry.get(j)).get("name").toString());
+					}
+				} else {
+					node.addInnerName(((JSONObject)tmpObj.get("innername")).get("name").toString());
+				}
 			}
+			
+			//get sites
+			if(!tmpObj.isNull("site")) {	
+				if (JSONArray.class.isAssignableFrom(tmpObj.get("site").getClass())){
+					JSONArray tmpAry = tmpObj.getJSONArray("site");
+					for(int j = 0;j<tmpAry.length();j++) {
+						node.setSite(Integer.parseInt(((JSONObject)tmpAry.get(j)).get("name").toString()));
+					}
+				} else {
+					node.addSite(Integer.parseInt(((JSONObject)tmpObj.get("site")).get("name").toString()));
+				}
+			}
+			
+			//get childern
+			if(!tmpObj.isNull("child")) {
+				getChildren(tmpObj, nodes);
+			}
+			
+		}
+		} else { //if there is only one entity
+			node = new BigraphNode();
+			tmpObj = (JSONObject)redex.get("entity");
+			
+			node.setControl(tmpObj.get("control").toString());
+			node.setId(tmpObj.get("name").toString());
+			node.setParentRoot(numOfRoots);
+			numOfRoots++;
+			nodes.put(node.getId(), node);
+			
+			//get outer names
+			if(!tmpObj.isNull("outername")) {	
+			if (JSONArray.class.isAssignableFrom(tmpObj.get("outername").getClass())){
+				JSONArray tmpAry = tmpObj.getJSONArray("outername");
+				for(int j = 0;j<tmpAry.length();j++) {
+					node.addOuterName(((JSONObject)tmpAry.get(j)).get("name").toString());
+				}
+			} else {
+				node.addOuterName(((JSONObject)tmpObj.get("outername")).get("name").toString());
+			}
+			}
+			
+			//get inner names
+			if(!tmpObj.isNull("innername")) {	
+				if (JSONArray.class.isAssignableFrom(tmpObj.get("innername").getClass())){
+					JSONArray tmpAry = tmpObj.getJSONArray("innername");
+					for(int j = 0;j<tmpAry.length();j++) {
+						node.addInnerName(((JSONObject)tmpAry.get(j)).get("name").toString());
+					}
+				} else {
+					node.addInnerName(((JSONObject)tmpObj.get("innername")).get("name").toString());
+				}
+			}
+			
+			//get sites
+			if(!tmpObj.isNull("site")) {	
+				if (JSONArray.class.isAssignableFrom(tmpObj.get("site").getClass())){
+					JSONArray tmpAry = tmpObj.getJSONArray("site");
+					for(int j = 0;j<tmpAry.length();j++) {
+						node.addSite(Integer.parseInt(((JSONObject)tmpAry.get(j)).get("name").toString()));
+					}
+				} else {
+					node.addSite(Integer.parseInt(((JSONObject)tmpObj.get("site")).get("name").toString()));
+				}
+			}
+			
+			//get childern
+			if(!tmpObj.isNull("child")) {
+				getChildren(tmpObj, nodes);
+			}
+			
 		}
 		
 		BigraphBuilder biBuilder = new BigraphBuilder(SystemInstanceHandler.getBigraphSignature());
@@ -420,18 +453,30 @@ public class Predicate {
 			libBigRoots.add(biBuilder.addRoot(i));
 		}
 		
-		//create outer names
-		for(String outer : outerNamesFull) {
-			libBigOuterNames.put(outer, biBuilder.addOuterName(outer));
+		for(BigraphNode n : nodes.values()) {
+			
+			//create bigraph outer names
+			for(String out : n.getOuterNames()) {
+				if(!outerNames.contains(out)) {
+					libBigOuterNames.put(out, biBuilder.addOuterName(out));
+					outerNames.add(out);
+				}	
+			}
+			
+			//create bigraph inner names
+			for(String in : n.getInnerNames()) {
+				if(!innerNames.contains(in)) {
+					libBigInnerNames.put(in, biBuilder.addInnerName(in));
+					innerNames.add(in);
+				}	
+			}
+			
+			if()
+			
 		}
-		
-		//create inner names
-		for(String inner : innerNamesFull) {
-			libBigInnerNames.put(inner, biBuilder.addInnerName(inner));
-		}
-		
+	
 		//initial creation of nodes
-		LinkedList<Integer> visited = new LinkedList<Integer>();
+		LinkedList<String> visited = new LinkedList<String>();
 		
 		for(BigraphNode nd : nodes.values()) {
 			if(visited.contains(nd.getId())) {
@@ -444,8 +489,111 @@ public class Predicate {
 		return biBuilder.makeBigraph();
 	}
 	
-	private static Node createNodeParent(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
-			HashMap<String, OuterName> outerNames, HashMap<Integer, Node> nodes, LinkedList<Integer> visitedNodes) {
+	private void getChildren(JSONObject obj, HashMap<String,BigraphNode> nodes) {
+		if (JSONArray.class.isAssignableFrom(obj.get("child").getClass())){
+			JSONArray tmpAry = (JSONArray)obj.get("child");
+			for(int j=0;j<tmpAry.length();j++) {
+				BigraphNode nodeTmp = new BigraphNode();
+				JSONObject tmpObj2 = (JSONObject)tmpAry.getJSONObject(j);
+				nodeTmp.setControl(tmpObj2.get("control").toString());
+				nodeTmp.setId(tmpObj2.get("name").toString());
+				nodeTmp.setParent(nodes.get(obj.get("name")));
+				nodes.put(nodeTmp.getId(), nodeTmp);
+				
+				//get outer names	
+				if(!tmpObj2.isNull("outername")) {
+				if (JSONArray.class.isAssignableFrom(tmpObj2.get("outername").getClass())){
+					JSONArray tmpAry2 = tmpObj2.getJSONArray("outername");
+					for(int k = 0;k<tmpAry2.length();k++) {
+						nodeTmp.addOuterName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+					}
+				} else {
+					nodeTmp.addOuterName(((JSONObject)tmpObj2.get("outername")).get("name").toString());
+				}
+				}
+				
+				//get inner names
+				if(!tmpObj2.isNull("innername")) {	
+					if (JSONArray.class.isAssignableFrom(tmpObj2.get("innername").getClass())){
+						JSONArray tmpAry2 = tmpObj2.getJSONArray("innername");
+						for(int k = 0;k<tmpAry2.length();k++) {
+							nodeTmp.addInnerName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+						}
+					} else {
+						nodeTmp.addInnerName(((JSONObject)tmpObj2.get("innername")).get("name").toString());
+					}
+				}
+				
+				//get sites
+				if(!tmpObj2.isNull("site")) {	
+					if (JSONArray.class.isAssignableFrom(tmpObj2.get("site").getClass())){
+						JSONArray tmpAry2 = tmpObj2.getJSONArray("site");
+						for(int k = 0;k<tmpAry2.length();k++) {
+							nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));
+						}
+					} else {
+						nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));;
+					}
+				}
+				
+				//iterate over other children
+				if (!tmpObj2.isNull("child")){
+					getChildren(tmpObj2, nodes);
+				}
+			}
+		} else {
+			BigraphNode nodeTmp = new BigraphNode();
+			JSONObject tmpObj2 = (JSONObject)obj.get("child");
+			nodeTmp.setControl(tmpObj2.get("control").toString());
+			nodeTmp.setId(tmpObj2.get("name").toString());
+			nodeTmp.setParent(nodes.get(obj.get("name")));
+			nodes.put(nodeTmp.getId(), nodeTmp);
+
+			//get outer names	
+			if(!tmpObj2.isNull("outername")) {
+			if (JSONArray.class.isAssignableFrom(tmpObj2.get("outername").getClass())){
+				JSONArray tmpAry2 = obj.getJSONArray("outername");
+				for(int k = 0;k<tmpAry2.length();k++) {
+					nodeTmp.addOuterName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+				}
+			} else {
+				nodeTmp.addOuterName(((JSONObject)tmpObj2.get("outername")).get("name").toString());
+			}
+			}
+			
+			//get inner names
+			if(!tmpObj2.isNull("innername")) {	
+				if (JSONArray.class.isAssignableFrom(tmpObj2.get("innername").getClass())){
+					JSONArray tmpAry2 = tmpObj2.getJSONArray("innername");
+					for(int k = 0;k<tmpAry2.length();k++) {
+						nodeTmp.addInnerName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+					}
+				} else {
+					nodeTmp.addInnerName(((JSONObject)tmpObj2.get("innername")).get("name").toString());
+				}
+			}
+			
+			//get sites
+			if(!tmpObj2.isNull("site")) {	
+				if (JSONArray.class.isAssignableFrom(tmpObj2.get("site").getClass())){
+					JSONArray tmpAry2 = tmpObj2.getJSONArray("site");
+					for(int k = 0;k<tmpAry2.length();k++) {
+						nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));
+					}
+				} else {
+					nodeTmp.addSite(Integer.parseInt(((JSONObject)tmpObj2.get("site")).get("name").toString()));;
+				}
+			}
+			
+			//iterate over other children
+			if (!tmpObj2.isNull("child")){
+				getChildren(tmpObj2, nodes);
+			}
+		}
+	}
+	
+	private Node createNodeParent(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
+			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes, LinkedList<String> visitedNodes) {
 		visitedNodes.add(node.getId());
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
@@ -470,6 +618,21 @@ public class Predicate {
 		
 		return biBuilder.addNode(node.getControl(), createNodeParent(node.getParent(), biBuilder, libBigRoots, outerNames, nodes, visitedNodes), names);
 			
+	}
+	
+	
+	public static void main(String[] args){
+		Predicate p = new Predicate();
+		try {
+			JSONObject o = XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition);
+			SystemInstanceHandler.setFileName("sb3.big");
+			SystemInstanceHandler.buildSignature();
+			Bigraph b = p.convertJSONtoBigraph(o);
+			System.out.println(b.toString());
+		} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
 

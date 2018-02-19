@@ -7,7 +7,7 @@ public class BigraphNode {
 	private String id;
 	private LinkedList<String> outerNames;
 	private LinkedList<String> innerNames;
-	private LinkedList<Integer> sites;
+	private boolean site;
 	private LinkedList<BigraphNode> nodes;
 	private String control;
 	private BigraphNode parent;
@@ -16,7 +16,7 @@ public class BigraphNode {
 	public BigraphNode() {
 		outerNames = new LinkedList<String>();
 		innerNames = new LinkedList<String>();
-		sites = new LinkedList<Integer>();
+		site = false;
 		nodes = new LinkedList<BigraphNode>();
 		parentRoot = -1;
 		parent = null;
@@ -51,12 +51,6 @@ public class BigraphNode {
 			}
 		}
 		
-	}
-	
-	public void addSite(int site) {
-		if(!sites.contains(site)) {
-			sites.add(site);
-		}
 	}
 	
 	public void addBigraphNode(BigraphNode node) {
@@ -107,12 +101,12 @@ public class BigraphNode {
 		this.innerNames = innerNames;
 	}
 
-	public LinkedList<Integer> getSites() {
-		return sites;
+	public boolean getSites() {
+		return site;
 	}
 
-	public void setSites(LinkedList<Integer> sites) {
-		this.sites = sites;
+	public void setSites(boolean site) {
+		this.site = site;
 	}
 
 	public LinkedList<BigraphNode> getNodes() {
@@ -170,6 +164,22 @@ public class BigraphNode {
 		}
 		res.append("}");
 		}
+		
+		//append inner names
+				if(innerNames != null && innerNames.size()>0) {
+				res.append(",innerNames:{");
+				for(int i=0;i<innerNames.size();i++) {
+					res.append(innerNames.get(i));
+					if(i != innerNames.size()-1) {
+						res.append(",");
+					}	
+				}
+				res.append("}");
+				}
+		
+		//append site
+		res.append("site:"+site);
+		
 		res.append("\n");
 		
 		return res.toString();

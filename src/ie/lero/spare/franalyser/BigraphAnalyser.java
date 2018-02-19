@@ -6,11 +6,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import javax.xml.xquery.XQException;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import ie.lero.spare.franalyser.utility.PredicateType;
+import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 
@@ -71,13 +74,18 @@ public class BigraphAnalyser {
 		boolean areStatesIdentified = false;
 		
 		//method to convert predicate to required format
+		
 		//Bigraph redex = pred.convertPredicateToBigraph();
 		JSONParser parser = new JSONParser();
 		try {
 			SystemInstanceHandler.setFileName("sb3.big");
 			SystemInstanceHandler.setOutputFolder("sb3_output");
 			SystemInstanceHandler.buildSignature();
-			Bigraph redex = SystemInstanceHandler.convertJSONtoBigraph((JSONObject) parser.parse(new FileReader("sb3_output/0.json")));
+			Predicate p = new Predicate();
+			
+			org.json.JSONObject o = XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition);
+			Bigraph redex = p.convertJSONtoBigraph(o);
+			//Bigraph redex = SystemInstanceHandler.convertJSONtoBigraph((JSONObject) parser.parse(new FileReader("sb3_output/0.json")));
 		
 		//null should be replaced with the function that returns states
 		HashMap<Integer, Bigraph> states = SystemInstanceHandler.loadStates(); 
@@ -93,7 +101,10 @@ public class BigraphAnalyser {
 			}
 		}
 		
-		} catch (IOException | ParseException e) {
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
