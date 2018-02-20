@@ -4,6 +4,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -540,6 +541,7 @@ public class SystemInstanceHandler {
 
 	}
 
+	
 	public static void main(String[] args) {
 
 		fileName = "sav/savannah-general.big";
@@ -550,8 +552,8 @@ public class SystemInstanceHandler {
 		JSONParser parser = new JSONParser();
 
 		Bigraph redex;
-
-		loadStates();
+//		createSignatureFromStates();
+		//loadStates();
 		//print(""+getTransitionSystem().loadNumberOfStates());
 
 		try {
@@ -559,16 +561,65 @@ public class SystemInstanceHandler {
 				return;
 			}
 			redex = convertJSONtoBigraph((JSONObject) parser.parse(new FileReader(outputFolder + "/99.json")));
-			for (int i = 0; i < states.size(); i++) {
+			/*for (int i = 0; i < states.size(); i++) {
 				if (matcher.match(states.get(i), redex).iterator().hasNext()) {
-					System.out.println("state " + i + " matched");
+					print("state " + i + " matched");
 				}
+			}*/
+			int numberOFThreads = 15;
+			int size = 10000/numberOFThreads;
+			BigraphMatcherThread [] threads = new BigraphMatcherThread[numberOFThreads];
+			print("matching started at " + dtf.format(LocalDateTime.now()));
+			for(int i=0;i<numberOFThreads;i++) {
+//				print((i*size)+ " "+((i*size)+size));
+				threads[i] = new BigraphMatcherThread(i*size, (i*size)+size, redex);
+				threads[i].start();
 			}
 		} catch (IOException | ParseException e) {
 			e.printStackTrace();
 		}
-		 
 
 	}
+
+}
+
+class BigraphMatcherThread implements Runnable {
+
+	private int startIndex;
+	private int endIndex;
+	private LinkedList<Integer> statesMatched;
+	private Bigraph redex;
+	private String threadID;
+	private Thread t;
+	
+	 public BigraphMatcherThread(int start, int end, Bigraph redex) {
+		startIndex = start;
+		endIndex = end;
+		statesMatched = new LinkedList<Integer>();		
+		this.redex = redex;
+		threadID= "bla";
+	}
+	 
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		Matcher matcher = new Matcher();
+		
+		for(int i=startIndex;i<endIndex;i++) {
+			if (matcher.match(SystemInstanceHandler.getStates().get(i), redex).iterator().hasNext()) {
+				statesMatched.add(i);
+				System.out.println("state " + i + " matched");
+		}
+		}
+	}
+	
+	public void start() {
+		//System.out.println("Starting " + threadID);
+		if (t == null) {
+			t = new Thread(this, "" + threadID);
+			t.start();
+		}
+	}
+
 
 }
