@@ -460,19 +460,17 @@ public class Predicate {
 		}
 	
 		//initial creation of bigraph nodes
-		LinkedList<String> visited = new LinkedList<String>();
-		
 		for(BigraphNode nd : nodes.values()) {
-			if(visited.contains(nd.getId())) {
+			if(libBigNodes.containsKey(nd.getId())) {
 				continue;
 			}
 			
-			createNodeParent(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes, visited);	
+			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);	
 		}
 		
 		//add sites to bigraph
 		for(BigraphNode n : nodes.values()) {
-			if(n.getSite()) {
+			if(n.hasSite()) {
 				biBuilder.addSite(libBigNodes.get(n.getId()));
 			}
 		}
@@ -578,9 +576,8 @@ public class Predicate {
 		}
 	}
 	
-	private Node createNodeParent(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
-			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes, LinkedList<String> visitedNodes) {
-		visitedNodes.add(node.getId());
+	private Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
+			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
 		for(String n : node.getOuterNames()) {
@@ -588,7 +585,7 @@ public class Predicate {
 		}
 		
 		//if the parent is a root
-		if(node.getParent() == null) { //if the parent is a root	
+		if(node.isParentRoot()) { //if the parent is a root	
 			Node  n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
 			nodes.put(node.getId(), n);
 			return n;
@@ -602,9 +599,10 @@ public class Predicate {
 			return n;
 		}
 		
-		Node n = biBuilder.addNode(node.getControl(), createNodeParent(node.getParent(), biBuilder, libBigRoots, outerNames, nodes, visitedNodes), names);
+		Node n = biBuilder.addNode(node.getControl(), createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
 		nodes.put(node.getId(), n);
 		return n;
+			
 	}
 	
 	public static void main(String[] args){

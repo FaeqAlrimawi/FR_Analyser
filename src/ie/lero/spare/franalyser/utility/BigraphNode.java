@@ -8,7 +8,7 @@ public class BigraphNode {
 	private LinkedList<String> outerNames;
 	private LinkedList<String> innerNames;
 	private boolean site;
-	private LinkedList<BigraphNode> nodes;
+	private LinkedList<BigraphNode> childNodes;
 	private String control;
 	private BigraphNode parent;
 	private int parentRoot;
@@ -17,7 +17,7 @@ public class BigraphNode {
 		outerNames = new LinkedList<String>();
 		innerNames = new LinkedList<String>();
 		site = false;
-		nodes = new LinkedList<BigraphNode>();
+		childNodes = new LinkedList<BigraphNode>();
 		parentRoot = -1;
 		parent = null;
 	}
@@ -53,9 +53,9 @@ public class BigraphNode {
 		
 	}
 	
-	public void addBigraphNode(BigraphNode node) {
-		if(!nodes.contains(node)) {
-			nodes.add(node);
+	public void addChildNode(BigraphNode node) {
+		if(!childNodes.contains(node)) {
+			childNodes.add(node);
 		}
 	}
 	
@@ -101,7 +101,7 @@ public class BigraphNode {
 		this.innerNames = innerNames;
 	}
 
-	public boolean getSite() {
+	public boolean hasSite() {
 		return site;
 	}
 
@@ -109,12 +109,12 @@ public class BigraphNode {
 		this.site = site;
 	}
 
-	public LinkedList<BigraphNode> getNodes() {
-		return nodes;
+	public LinkedList<BigraphNode> getChildNodes() {
+		return childNodes;
 	}
 
-	public void setNodes(LinkedList<BigraphNode> nodes) {
-		this.nodes = nodes;
+	public void setChildNodes(LinkedList<BigraphNode> nodes) {
+		this.childNodes = nodes;
 	}
 
 	public String getControl() {
@@ -141,6 +141,30 @@ public class BigraphNode {
 		this.parentRoot = parentRoot;
 	}
 	
+	public boolean hasParent() {
+		
+		if(parent != null) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	public boolean isParentRoot() {
+		if(parent == null && parentRoot != -1) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isLeaf() {
+		if(childNodes == null || childNodes.size() == 0) {
+			return true;
+		}
+		
+		return false;
+	}
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		
