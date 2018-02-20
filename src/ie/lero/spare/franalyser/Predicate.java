@@ -313,7 +313,7 @@ public class Predicate {
 		return bigraphBuilder.makeBigraph();
 	}
 	
-	public Bigraph convertJSONtoBigraph(JSONObject redex){
+	public Bigraph convertJSONtoBigraph(JSONObject redex, Bigraph bigraph){
 
 		JSONObject tmpObj;
 		HashMap<String,BigraphNode> nodes = new HashMap<String, BigraphNode>();
@@ -432,7 +432,7 @@ public class Predicate {
 			
 		}
 		
-		BigraphBuilder biBuilder = new BigraphBuilder(SystemInstanceHandler.getBigraphSignature());
+		BigraphBuilder biBuilder = new BigraphBuilder(bigraph.getSignature());
 		
 		//create roots for the bigraph
 		for(int i=0;i<numOfRoots;i++) {
@@ -611,7 +611,7 @@ public class Predicate {
 			JSONObject o = XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition);
 			SystemInstanceHandler.setFileName("sb3.big");
 			SystemInstanceHandler.buildSignature();
-			Bigraph b = p.convertJSONtoBigraph(o);
+			Bigraph b = p.convertJSONtoBigraph(o, null);
 			System.out.println(b.toString());
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block

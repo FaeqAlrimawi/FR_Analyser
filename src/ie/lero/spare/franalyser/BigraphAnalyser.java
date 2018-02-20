@@ -84,7 +84,7 @@ public class BigraphAnalyser {
 			Predicate p = new Predicate();
 			
 			org.json.JSONObject o = XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition);
-			Bigraph redex = p.convertJSONtoBigraph(o);
+			
 			//Bigraph redex = SystemInstanceHandler.convertJSONtoBigraph((JSONObject) parser.parse(new FileReader("sb3_output/0.json")));
 		
 		//null should be replaced with the function that returns states
@@ -94,6 +94,7 @@ public class BigraphAnalyser {
 		Matcher matcher = new Matcher();
 	
 		for(int i =0; i<states.size();i++) {
+			Bigraph redex = p.convertJSONtoBigraph(o, states.get(i));
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;

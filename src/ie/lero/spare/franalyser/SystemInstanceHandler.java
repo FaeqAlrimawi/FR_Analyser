@@ -81,7 +81,7 @@ public class SystemInstanceHandler {
 	public static TransitionSystem getTransitionSystem() {
 		if (transitionSystem == null) {
 			if (outputFolder != null) {
-				TransitionSystem.setFileName(outputFolder + "/transitions");
+				TransitionSystem.setFileName(outputFolder + "/transitions.txt");
 				transitionSystem = TransitionSystem.getTransitionSystemInstance();
 			}
 		}
@@ -135,6 +135,8 @@ public class SystemInstanceHandler {
 		// outputFolder = "sb3_output";
 
 		states = new HashMap<Integer, Bigraph>();
+		
+		//should rethink how to know how many states are there/ Currently depends on the transition file
 		int numOfStates = getTransitionSystem().getNumberOfStates();
 
 		JSONObject state;
@@ -160,6 +162,39 @@ public class SystemInstanceHandler {
 		return states;
 	}
 
+	/**
+	 * creates a state signature based on the provied JSONObject
+	 * @param state the JSONObject holding the state information
+	 * @return Signature object 
+	 */
+	public static Signature createStateSignature(JSONObject state) {
+		
+		SignatureBuilder sigBuilder = new SignatureBuilder();
+		JSONArray ary;
+		Iterator<?> it;
+		JSONObject tmpObj, tmpCtrl;
+		String tmp, tmpArity;
+		LinkedList<String> controls = new LinkedList<String>();
+		
+		ary = (JSONArray) state.get("nodes");
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+
+			tmpCtrl = (JSONObject) tmpObj.get("control");
+			tmp = tmpCtrl.get("control_id").toString();
+			tmpArity = tmpCtrl.get("control_arity").toString();
+
+			 if(!controls.contains(tmp)) { 
+				 //to avoid  duplicates 
+				 controls.add(tmp);
+				 sigBuilder.add(tmp,true, Integer.parseInt(tmpArity)); 
+			 }
+			 }
+		
+		return sigBuilder.makeSignature();
+	}
+	
 	/**
 	 * creates a signature from the Bigrapher file provided (i.e. fileName set
 	 * by method setFileName)
@@ -196,10 +231,21 @@ public class SystemInstanceHandler {
 				tmp = tmp.replace(";", "");
 				tmp = tmp.trim();
 				String[] tmp2 = tmp.split("=");
+				
+				//get control arity
 				String controlArity = tmp2[1].trim();
+				
+				//get control name
 				String[] tmp3 = tmp2[0].split(" ");
 				String controlName = tmp3[tmp3.length - 1];
-
+				
+				//if control holds brackets () remove them
+				if(controlName.contains("(")) {
+					controlName = controlName.substring(0, controlName.indexOf("("));
+				}
+				controlName.trim();
+				
+				//create signature
 				sigBuilder.add(controlName, true, Integer.parseInt(controlArity));
 
 			}
@@ -263,12 +309,6 @@ public class SystemInstanceHandler {
 			tmpCtrl = (JSONObject) tmpObj.get("control");
 			tmp = tmpCtrl.get("control_id").toString();
 			tmpArity = tmpCtrl.get("control_arity").toString();
-
-			/*
-			 * if(!controls.contains(tmp)) { controls.add(tmp); //to avoid
-			 * duplicates sigBuilder.add(tmp,true, Integer.parseInt(tmpArity));
-			 * }
-			 */
 
 			// set node id
 			node.setId(tmpObj.get("node_id").toString());
@@ -337,7 +377,8 @@ public class SystemInstanceHandler {
 			}
 		}
 
-		BigraphBuilder biBuilder = new BigraphBuilder(bigraphSignature);
+		
+		BigraphBuilder biBuilder = new BigraphBuilder(createStateSignature(state));
 
 		// create roots for the bigraph
 		for (int i = 0; i < numOfRoots; i++) {
@@ -368,7 +409,7 @@ public class SystemInstanceHandler {
 				biBuilder.addSite(libBigNodes.get(n.getId()));
 			}
 		}
-
+		
 		return biBuilder.makeBigraph();
 	}
 
@@ -411,22 +452,22 @@ public class SystemInstanceHandler {
 
 	public static void main(String[] args) {
 
-		fileName = "actors.big";
-		outputFolder = "sb3_output";
+		fileName = "sav/savannah-general.big";
+		outputFolder = "sav/output";
 
-		buildSignature();
+		//buildSignature();
 		JSONObject state;
 		JSONParser parser = new JSONParser();
-		try {
+		/*try {
 			// read state from file
-			state = (JSONObject) parser.parse(new FileReader("output/6.json"));
+			state = (JSONObject) parser.parse(new FileReader(outputFolder+"/0.json"));
 			Bigraph bigraph = convertJSONtoBigraph(state);
 			System.out.println(bigraph);
 		} catch (IOException | ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		// loadStates();
+		}*/
+		loadStates();
 		// System.out.println(states.get(0).toString());
 
 	}
