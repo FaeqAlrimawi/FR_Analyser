@@ -53,12 +53,18 @@
     <postconditions>entrance | mainLocation.offender1</postconditions>
 	<condition xsi:type="cyberPhysical_Incident:Precondition" name="pre1">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <entity name="floorX" control="A">
-		<outername name="ent3"/>
-		<child name="ts" control="Snd">
-		<site name="1"/>
-		</child>
-        </entity>
+        <exp>/r entrance.offender1 | mainLocation</exp>
+		<entity name="floorX" control="Floor">	
+		<site name="2"/>		
+		  <child name="entrance" control="Room">
+		  <outername name="ent"/>
+		  <site name="1"/>
+            <child name="offender1" control="Actor">
+			<child name="laptop1" control="Laptop"/>
+			</child>
+          </child>
+ 
+        </entity>		
       </expression>
     </condition>
 	
@@ -99,23 +105,11 @@
 <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre4">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>/r entrance.offender1 | mainLocation</exp>
-		<entity name="floorX" control="A">
-		<outername name="ent3"/>
-		<child name="ts" control="Snd">
-		<site name="1"/>
-		</child>
-        </entity>
       </expression>
     </condition> 
 	<condition xsi:type="cyberPhysical_Incident:Postcondition" name="post4">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>/r entrance.offender1 | mainLocation</exp>
-		<entity name="floorX" control="A">
-		<outername name="ent3"/>
-		<child name="ts" control="Snd">
-		<site name="1"/>
-		</child>
-        </entity>
       </expression>
     </condition>
  </activity>
@@ -125,23 +119,11 @@
   <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre5">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>/r mainLocation.offender1 | entrance</exp>
-		<entity name="floorX" control="A">
-		<outername name="ent3"/>
-		<child name="ts" control="Snd">
-		<site name="1"/>
-		</child>
-        </entity>
       </expression>
     </condition>
 	<condition xsi:type="cyberPhysical_Incident:Postcondition" name="post5">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>/r entrance.offender1 | mainLocation</exp>
-		<entity name="floorX" control="A">
-		<outername name="ent3"/>
-		<child name="ts" control="Snd">
-		<site name="1"/>
-		</child>
-        </entity>
       </expression>
     </condition>
   </activity>

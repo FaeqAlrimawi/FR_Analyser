@@ -14,11 +14,11 @@ public class IncidentPatternInstantiator {
 			Mapper m = new Mapper("match_query.xq");
 			//finds components in a system representation (space.xml) that
 			//match the entities identified in an incident (incident.xml)
-			AssetMap am = m.findMatches(); 
+			//AssetMap am = m.findMatches(); 
 
 			// if there are incident assets with no matches from space model
 			// then exit
-			if (am.hasAssetsWithNoMatch()) {
+			/*if (am.hasAssetsWithNoMatch()) {
 				System.out.println("Some incident Assets have no matches in the space asset, these are:");
 				String[] asts = am.getIncidentAssetsWithNoMatch();
 				for (String s : asts) {
@@ -30,7 +30,7 @@ public class IncidentPatternInstantiator {
 
 				System.out.println("Asset map=======");
 			System.out.println(am.toString());
-
+*/
 			//generate all possible unique combinations of system assets
 			LinkedList<String[]> lst = am.generateUniqueCombinations();
 			if(lst != null) {
@@ -64,8 +64,8 @@ public class IncidentPatternInstantiator {
 	public void initializeSystem() {
 		
 		// set the name of the output folder
-		String BRSFileName = "sb3.big";
-		String outputFolder = "sb3_output";
+		String BRSFileName = "actors.big";
+		String outputFolder = "output";
 		
 		// execute BRS using Bigrapher tool as a systemExecutor
 		// the default output folder is in the format: [fileName]_output e.g.,
