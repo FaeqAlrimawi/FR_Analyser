@@ -3,16 +3,13 @@ package ie.lero.spare.franalyser;
 import java.util.Arrays;
 import java.util.LinkedList;
 
-import ie.lero.spare.franalyser.utility.BigrapherHandler;
-import ie.lero.spare.franalyser.utility.TransitionSystem;
-
 public class IncidentPatternInstantiator {
 
 	public void execute() {
 		
 		try {
 			//should be done before that for all incident patterns that apply to the system
-			//initializeSystem();
+			initializeSystem();
 			
 			Mapper m = new Mapper("match_query.xq");
 			//finds components in a system representation (space.xml) that
@@ -52,7 +49,6 @@ public class IncidentPatternInstantiator {
 				incidentInstances[i].start();
 			}
 			
-			
 			// execute, as threads, all possible unique combinations of system
 			// assets
 
@@ -69,15 +65,19 @@ public class IncidentPatternInstantiator {
 		
 		// set the name of the output folder
 		String BRSFileName = "sb3.big";
-
+		String outputFolder = "sb3_output";
+		
 		// execute BRS using Bigrapher tool as a systemExecutor
 		// the default output folder is in the format: [fileName]_output e.g.,
 		// sb3_output
 		// output folder can be set in the executeBigraph method
-		BigrapherHandler bigrapher = new BigrapherHandler();
+		//BigrapherHandler bigrapher = new BigrapherHandler();
 		
-		boolean issuccessful = SystemInstanceHandler.analyseSystem(BRSFileName, bigrapher);
-
+		SystemInstanceHandler.setFileName(BRSFileName);
+		SystemInstanceHandler.setOutputFolder(outputFolder);
+		SystemInstanceHandler.loadStates();
+		//boolean issuccessful = SystemInstanceHandler.analyseSystem(BRSFileName, bigrapher);
+		
 		
 		// load states (includes converting them into LibBig format for
 		// matching)

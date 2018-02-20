@@ -1,19 +1,10 @@
 package ie.lero.spare.franalyser;
 
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import javax.xml.xquery.XQException;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
 import ie.lero.spare.franalyser.utility.PredicateType;
-import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 
@@ -21,7 +12,7 @@ public class BigraphAnalyser {
 
 	private PredicateHandler predicateHandler;
 	private LinkedList<GraphPath> paths;
-
+	private boolean isDebugging = true;
 
 	public BigraphAnalyser() {
 		predicateHandler = null;
@@ -73,7 +64,7 @@ public class BigraphAnalyser {
 	public boolean identifyRelevantStates(Predicate pred) {
 		boolean areStatesIdentified = false;
 		
-		//method to convert predicate to required format
+/*		//method to convert predicate to required format
 		
 		//Bigraph redex = pred.convertPredicateToBigraph();
 		JSONParser parser = new JSONParser();
@@ -93,22 +84,17 @@ public class BigraphAnalyser {
 		//matcher object
 		Matcher matcher = new Matcher();
 		Bigraph redex = Predicate.convertJSONtoBigraph(o);
+		*/
+		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
+		Matcher matcher = new Matcher();
 		
 		for(int i =0; i<states.size();i++) {
 			
-			if(matcher.match(states.get(i), redex).iterator().hasNext()){
+			if(matcher.match(states.get(i), pred.getBigraphPredicate()).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;
-				System.out.println("state " + i + " matched");		
+				print("state " + i + " matched");		
 			}
-		}
-		
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
 		return areStatesIdentified;
@@ -143,7 +129,12 @@ public class BigraphAnalyser {
 		}
 
 	}
-
+	
+	private void print(String msg) {
+		if(isDebugging) {
+			System.out.println(""+msg);
+		}
+	}
 	public static void main(String[] args){
 		BigraphAnalyser a = new BigraphAnalyser();
 		Predicate p = null;
