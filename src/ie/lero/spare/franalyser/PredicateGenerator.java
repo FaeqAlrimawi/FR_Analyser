@@ -115,7 +115,7 @@ public class PredicateGenerator {
 						JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
 						Predicate p = new Predicate();
 						p.setIncidentActivity(activities.get(activity));
-						p.setPredicateType(PredicateType.Precondition);
+						p.setPredicateType(type);
 						p.setName(activity+"_pre");
 						condition = convertToMatchedAssets(condition);
 						p.setBigraphPredicate(Predicate.convertJSONtoBigraph(condition));

@@ -566,7 +566,7 @@ public class SystemInstanceHandler {
 					print("state " + i + " matched");
 				}
 			}*/
-			int numberOFThreads = 15;
+			int numberOFThreads = 10;
 			int size = 10000/numberOFThreads;
 			BigraphMatcherThread [] threads = new BigraphMatcherThread[numberOFThreads];
 			print("matching started at " + dtf.format(LocalDateTime.now()));
