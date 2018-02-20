@@ -80,21 +80,22 @@ public class BigraphAnalyser {
 		try {
 			SystemInstanceHandler.setFileName("sb3.big");
 			SystemInstanceHandler.setOutputFolder("sb3_output");
-			SystemInstanceHandler.buildSignature();
-			Predicate p = new Predicate();
+			if(SystemInstanceHandler.createSignatureFromBRS() == null) {
+				SystemInstanceHandler.createSignatureFromStates();
+			}
 			
 			org.json.JSONObject o = XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition);
 			
 			//Bigraph redex = SystemInstanceHandler.convertJSONtoBigraph((JSONObject) parser.parse(new FileReader("sb3_output/0.json")));
 		
-		//null should be replaced with the function that returns states
 		HashMap<Integer, Bigraph> states = SystemInstanceHandler.loadStates(); 
 		
 		//matcher object
 		Matcher matcher = new Matcher();
-	
+		Bigraph redex = Predicate.convertJSONtoBigraph(o);
+		
 		for(int i =0; i<states.size();i++) {
-			Bigraph redex = p.convertJSONtoBigraph(o, states.get(i));
+			
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;

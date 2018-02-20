@@ -3,6 +3,8 @@ package ie.lero.spare.franalyser;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -90,7 +92,7 @@ public class SystemInstanceHandler {
 	public static TransitionSystem getTransitionSystem() {
 		if (transitionSystem == null) {
 			if (outputFolder != null) {
-				TransitionSystem.setFileName(outputFolder + "/transitions.json");
+				TransitionSystem.setFileName(outputFolder + "/transitions.txt");
 				transitionSystem = TransitionSystem.getTransitionSystemInstance();
 			}
 		}
@@ -154,8 +156,7 @@ public class SystemInstanceHandler {
 		// should rethink how to know how many states are there/ Currently
 		// depends on the transition file
 
-		int numOfStates = getTransitionSystem().loadNumberOfStates();
-		print(numOfStates+"");
+		int numOfStates = getTransitionSystem().getNumberOfStates();
 	
 		JSONObject state;
 		JSONParser parser = new JSONParser();
@@ -550,29 +551,28 @@ public class SystemInstanceHandler {
 		fileName = "sav/savannah-general.big";
 		outputFolder = "sav/output10000";
 		//fileName = "sb3.big";
-		
 		//outputFolder = "sb3_output";
 		Matcher matcher = new Matcher();
 		JSONParser parser = new JSONParser();
 
 		Bigraph redex;
 
-		//loadStates();
-		print(""+getTransitionSystem().loadNumberOfStates());
-		
-//		try {
-//			if (loadStates() == null) {
-//				return;
-//			}
-//			redex = convertJSONtoBigraph((JSONObject) parser.parse(new FileReader(outputFolder + "/0.json")));
-//			for (int i = 0; i < states.size(); i++) {
-//				if (matcher.match(states.get(i), redex).iterator().hasNext()) {
-//					System.out.println("state " + i + " matched");
-//				}
-//			}
-//		} catch (IOException | ParseException e) {
-//			e.printStackTrace();
-//		}
+		loadStates();
+		//print(""+getTransitionSystem().loadNumberOfStates());
+
+		try {
+			if (loadStates() == null) {
+				return;
+			}
+			redex = convertJSONtoBigraph((JSONObject) parser.parse(new FileReader(outputFolder + "/99.json")));
+			for (int i = 0; i < states.size(); i++) {
+				if (matcher.match(states.get(i), redex).iterator().hasNext()) {
+					System.out.println("state " + i + " matched");
+				}
+			}
+		} catch (IOException | ParseException e) {
+			e.printStackTrace();
+		}
 		 
 
 	}

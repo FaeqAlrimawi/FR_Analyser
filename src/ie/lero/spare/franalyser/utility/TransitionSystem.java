@@ -28,7 +28,7 @@ public class TransitionSystem {
 		numberOfStates = -1;
 		
 		//fileName = BigraphAnalyser.getBigrapherExecutionOutputFolder() + "/transitions";
-		//createDigraph();
+		createDigraph();
 	}
 	
 	public static TransitionSystem getTransitionSystemInstance() {
@@ -54,6 +54,55 @@ public class TransitionSystem {
 
 		transitionsFileLines = FileManipulator.readFileNewLine(fileName);
 
+		numberOfStates = new Integer(transitionsFileLines[0].split(" ")[0]); //gets the number of states
+		
+		for (int i = 1; i < transitionsFileLines.length; i++) {
+			probability = -1;
+			label = null;
+			tmp = transitionsFileLines[i].split(" ");
+			st1 = new Integer(Integer.parseInt(tmp[0]));
+			st2 = new Integer(Integer.parseInt(tmp[1]));
+			if (tmp.length >= 3) { // if bigraph is probabilistic
+				if (tmp[2].matches("^(?:(?:\\-{1})?\\d+(?:\\.{1}\\d+)?)$")) { //if the 3rd element is a probability
+					probability = Float.parseFloat(tmp[2]);
+					if(tmp.length == 4) { //if it has labels
+						label = tmp[3];
+				}
+				
+				} else { //if there is no probab
+					label = tmp[2];
+				}
+			}
+			transitionGraph.add(st1, st2, probability, label);	
+		}
+		
+	}
+	
+	private void createDigraphFromJSON() {
+
+		//to be done************
+		
+		String[] transitionsFileLines = null;
+		Integer st1;
+		Integer st2;
+		float probability = -1;
+		String label = null;
+		String[] tmp;
+
+		//transitionsFileLines = FileManipulator.readFileNewLine(fileName);
+
+		JSONParser parser = new JSONParser();
+		JSONObject obj;
+		
+		try {
+			obj = (JSONObject)parser.parse(new FileReader(fileName));
+			JSONArray ary = (JSONArray)obj.get("transition_system");
+			numberOfStates = ary.size();
+			
+		} catch(Exception ie) {
+			ie.printStackTrace();
+		}
+		
 		//numberOfStates = new Integer(transitionsFileLines[0].split(" ")[0]); //gets the number of states
 		
 		for (int i = 1; i < transitionsFileLines.length; i++) {

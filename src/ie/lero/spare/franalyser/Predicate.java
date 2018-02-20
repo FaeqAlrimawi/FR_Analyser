@@ -3,7 +3,6 @@ package ie.lero.spare.franalyser;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import javax.xml.xquery.XQException;
@@ -14,16 +13,15 @@ import org.json.JSONObject;
 import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
-import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
-import it.uniud.mads.jlibbig.core.std.Site;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
 import it.uniud.mads.jlibbig.core.std.InnerName;
+import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
 import it.uniud.mads.jlibbig.core.std.Root;
-import it.uniud.mads.jlibbig.core.std.Signature;
+import it.uniud.mads.jlibbig.core.std.Site;
 
 public class Predicate {
 	
@@ -37,6 +35,8 @@ public class Predicate {
 	private IncidentActivity incidentActivity;
 	private ArrayList<Integer> statesIntraSatisfied;
 	private ArrayList<Integer> statesInterSatisfied;
+	private boolean isDebugging = true;
+	
 	public Predicate(){
 		predicate="";
 		predicateType = PredicateType.Precondition;
@@ -98,6 +98,14 @@ public class Predicate {
 
 	public ArrayList<Integer> getStatesIntraSatisfied() {
 		return statesIntraSatisfied;
+	}
+
+	public Bigraph getBigraphPredicate() {
+		return bigraphPredicate;
+	}
+
+	public void setBigraphPredicate(Bigraph bigraphPredicate) {
+		this.bigraphPredicate = bigraphPredicate;
 	}
 
 	public void setStatesIntraSatisfied(ArrayList<Integer> statesIntraSatisfied) {
@@ -308,12 +316,12 @@ public class Predicate {
 		
 		//convert predicate to bigraph
 		
-		BigraphBuilder bigraphBuilder = new BigraphBuilder(SystemInstanceHandler.getBigraphSignature());
+		BigraphBuilder bigraphBuilder = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		
 		return bigraphBuilder.makeBigraph();
 	}
 	
-	public Bigraph convertJSONtoBigraph(JSONObject redex, Bigraph bigraph){
+	public static 	Bigraph convertJSONtoBigraph(JSONObject redex){
 
 		JSONObject tmpObj;
 		HashMap<String,BigraphNode> nodes = new HashMap<String, BigraphNode>();
@@ -432,7 +440,7 @@ public class Predicate {
 			
 		}
 		
-		BigraphBuilder biBuilder = new BigraphBuilder(bigraph.getSignature());
+		BigraphBuilder biBuilder = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		
 		//create roots for the bigraph
 		for(int i=0;i<numOfRoots;i++) {
@@ -483,7 +491,7 @@ public class Predicate {
 	 * @param obj JSONObject
 	 * @param nodes BigraphNode objects holding the inner tags info
 	 */
-	private void getChildren(JSONObject obj, HashMap<String,BigraphNode> nodes) {
+	private static void getChildren(JSONObject obj, HashMap<String,BigraphNode> nodes) {
 		
 		if (JSONArray.class.isAssignableFrom(obj.get("child").getClass())){
 			JSONArray tmpAry = (JSONArray)obj.get("child");
@@ -542,7 +550,7 @@ public class Predicate {
 			//get outer names	
 			if(!tmpObj2.isNull("outername")) {
 			if (JSONArray.class.isAssignableFrom(tmpObj2.get("outername").getClass())){
-				JSONArray tmpAry2 = obj.getJSONArray("outername");
+				JSONArray tmpAry2 = tmpObj2.getJSONArray("outername");
 				for(int k = 0;k<tmpAry2.length();k++) {
 					nodeTmp.addOuterName(((JSONObject)tmpAry2.get(k)).get("name").toString());
 				}
@@ -576,7 +584,7 @@ public class Predicate {
 		}
 	}
 	
-	private Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
+	private static Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
@@ -590,7 +598,6 @@ public class Predicate {
 			nodes.put(node.getId(), n);
 			return n;
 		}
-		
 		
 		//if the parent is already created as a node in the bigraph
 		if(nodes.containsKey(node.getParent().getId())) {
@@ -607,15 +614,30 @@ public class Predicate {
 	
 	public static void main(String[] args){
 		Predicate p = new Predicate();
+		Matcher matcher = new Matcher();
+		
 		try {
-			JSONObject o = XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition);
-			SystemInstanceHandler.setFileName("sb3.big");
-			SystemInstanceHandler.buildSignature();
-			Bigraph b = p.convertJSONtoBigraph(o, null);
-			System.out.println(b.toString());
+			JSONObject o = XqueryExecuter.getBigraphConditions("activity2", PredicateType.Precondition);
+			SystemInstanceHandler.setFileName("actors.big");
+			SystemInstanceHandler.setOutputFolder("output");
+			//SystemInstanceHandler.createSignatureFromBRS();
+			SystemInstanceHandler.loadStates();
+			Bigraph redex = p.convertJSONtoBigraph(o);
+			p.print(redex.toString());
+			for (int i = 0; i < SystemInstanceHandler.getStates().size(); i++) {
+				if (matcher.match(SystemInstanceHandler.getStates().get(i), redex).iterator().hasNext()) {
+					System.out.println("state " + i + " matched");
+				}
+			}
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private void print(String msg) {
+		if(isDebugging) {
+			System.out.println(""+msg);
 		}
 	}
 }

@@ -55,22 +55,15 @@
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>/r entrance.offender1 | mainLocation</exp>
 		<entity name="floorX" control="Floor">	
-<site name="1"/>		
+		<site name="2"/>		
 		  <child name="entrance" control="Room">
 		  <outername name="ent"/>
 		  <site name="1"/>
             <child name="offender1" control="Actor">
-			<site name="1"/>
+			<child name="laptop1" control="Laptop"/>
 			</child>
           </child>
-          <child name="mainLocation" control="Hallway">
-		  <site name="1"/>
-		  <outername name="ent"/>
-		  <outername name="ent2"/>
-		  <outername name="ent3"/>
-		  <outername name="ent4"/>
-		  
-		  </child>
+ 
         </entity>		
       </expression>
     </condition>
@@ -89,11 +82,11 @@
   <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre3">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>floor.(entrance.offender1 | mainLocation)</exp>
-		<entity name="floorX" control="PhysicalStructure">
-          <child name="entrance" control="PhysicalStructure">
-            <child name="offender1" control="Actor"/>
-          </child>
-          <child name="mainLocation" control="PhysicalStructure"/>
+		<entity name="floorX" control="A">
+		<outername name="ent3"/>
+		<child name="ts" control="Snd">
+		<site name="1"/>
+		</child>
         </entity>
       </expression>
     </condition>
