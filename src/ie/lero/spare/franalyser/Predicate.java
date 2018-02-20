@@ -339,6 +339,10 @@ public class Predicate {
 		// number of roots
 		int numOfRoots = 0;
 		
+		if(redex.isNull("entity")) {
+			return null;
+		}
+		
 		//get all entities (they are divided by || as Bigraph)
 		if (JSONArray.class.isAssignableFrom(redex.get("entity").getClass())){
 			

@@ -32,7 +32,7 @@ public class IncidentPatternInstantiator {
 			System.out.println(am.toString());
 */
 			//generate all possible unique combinations of system assets
-			LinkedList<String[]> lst = am.generateUniqueCombinations();
+			/*LinkedList<String[]> lst = am.generateUniqueCombinations();
 			if(lst != null) {
 				System.out.println(lst.size());
 			} else {
@@ -47,12 +47,14 @@ public class IncidentPatternInstantiator {
 			for(int i=0; i<incidentInstances.length;i++) {
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), am.getIncidentAssetNames(), i);
 				incidentInstances[i].start();
-			}
+			}*/
 			
 			// execute, as threads, all possible unique combinations of system
 			// assets
 
-
+			PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
+			incidentInstances.start();
+			
 		} catch (Exception e) {
 			System.out.println(e.toString());
 		}
@@ -87,8 +89,8 @@ public class IncidentPatternInstantiator {
 	public static void main(String[] args) {
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
-		//ins.execute();
-		SystemInstanceHandler.loadStates();
+		ins.execute();
+		//SystemInstanceHandler.loadStates();
 	}
 
 	class PotentialIncidentInstance implements Runnable {
@@ -129,6 +131,8 @@ public class IncidentPatternInstantiator {
 			//this object should convert predicates to the format required, then search for
 			//state matches
 			BigraphAnalyser analyser = new BigraphAnalyser(predic);
+			 PredicateHandler hndlr = analyser.analyse();
+			 System.out.println(hndlr.getActivitNames());
 			//TransitionSystem.setFileName(outputFolder + "/transitions");//not required
 			//analyser.setBigrapherExecutionOutputFolder(outputFolder);//not required
 
