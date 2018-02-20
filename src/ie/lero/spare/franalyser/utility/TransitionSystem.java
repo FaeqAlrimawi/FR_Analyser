@@ -1,7 +1,12 @@
 package ie.lero.spare.franalyser.utility;
 
+import java.io.FileReader;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import ie.lero.spare.franalyser.GraphPath;
 import ie.lero.spare.franalyser.Predicate;
@@ -20,8 +25,10 @@ public class TransitionSystem {
 	
 	private TransitionSystem() {
 		transitionGraph = new Digraph<Integer>();
+		numberOfStates = -1;
+		
 		//fileName = BigraphAnalyser.getBigrapherExecutionOutputFolder() + "/transitions";
-		createDigraph();
+		//createDigraph();
 	}
 	
 	public static TransitionSystem getTransitionSystemInstance() {
@@ -47,7 +54,7 @@ public class TransitionSystem {
 
 		transitionsFileLines = FileManipulator.readFileNewLine(fileName);
 
-		numberOfStates = new Integer(transitionsFileLines[0].split(" ")[0]); //gets the number of states
+		//numberOfStates = new Integer(transitionsFileLines[0].split(" ")[0]); //gets the number of states
 		
 		for (int i = 1; i < transitionsFileLines.length; i++) {
 			probability = -1;
@@ -69,6 +76,23 @@ public class TransitionSystem {
 			transitionGraph.add(st1, st2, probability, label);	
 		}
 		
+	}
+	
+	public int loadNumberOfStates() {
+		
+		JSONParser parser = new JSONParser();
+		JSONObject obj;
+		
+		try {
+			obj = (JSONObject)parser.parse(new FileReader(fileName));
+			JSONArray ary = (JSONArray)obj.get("transition_system");
+			numberOfStates = ary.size();
+			
+		} catch(Exception ie) {
+			ie.printStackTrace();
+		}
+		
+		return numberOfStates;
 	}
 	
 	public LinkedList<GraphPath> getPaths(Predicate predSrc, Predicate predDes) {

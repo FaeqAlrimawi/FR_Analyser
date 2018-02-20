@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
 
 
 public class FileManipulator {
@@ -130,5 +130,6 @@ public class FileManipulator {
 		
 		return result.toString().split("\n");
 	}
+	
 	
 }
