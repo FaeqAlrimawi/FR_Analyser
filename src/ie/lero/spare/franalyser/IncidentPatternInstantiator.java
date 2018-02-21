@@ -52,8 +52,8 @@ public class IncidentPatternInstantiator {
 			// execute, as threads, all possible unique combinations of system
 			// assets
 
-//			PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
-//			incidentInstances.start();
+			PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
+			incidentInstances.start();
 			
 		} catch (Exception e) {
 			System.out.println(e.toString());
@@ -66,8 +66,8 @@ public class IncidentPatternInstantiator {
 	public void initializeSystem() {
 		
 		// set the name of the output folder
-		String BRSFileName = "hospital/hospital.big";
-		String outputFolder = "hospital/output100";
+		String BRSFileName = "actors.big";
+		String outputFolder = "output";
 		
 		// execute BRS using Bigrapher tool as a systemExecutor
 		// the default output folder is in the format: [fileName]_output e.g.,
@@ -132,7 +132,16 @@ public class IncidentPatternInstantiator {
 			//state matches
 			BigraphAnalyser analyser = new BigraphAnalyser(predic);
 			 PredicateHandler hndlr = analyser.analyse();
-			 System.out.println(hndlr.getActivitNames());
+			 hndlr.createActivitiesDigraph();
+			 hndlr.getActivitiesSequences();
+			 //print all possible state transitions satisfying conditions
+			 if(!hndlr.areAllSatisfied()){
+				 System.out.println("activities are not satisfied:" + 
+						 hndlr.getActivitiesNotSatisfied());
+			 }
+			 hndlr.printAll();
+			 System.out.println(hndlr.getIncidentActivities().get("activity3").getFullPathsToNextActivities());
+			 
 			//TransitionSystem.setFileName(outputFolder + "/transitions");//not required
 			//analyser.setBigrapherExecutionOutputFolder(outputFolder);//not required
 
@@ -153,7 +162,7 @@ public class IncidentPatternInstantiator {
 
 		public void start() {
 			System.out.println("Starting " + threadID);
-			System.out.println("system assets: " + Arrays.toString(systemAssetNames));
+			//System.out.println("system assets: " + Arrays.toString(systemAssetNames));
 			if (t == null) {
 				t = new Thread(this, "" + threadID);
 				t.start();

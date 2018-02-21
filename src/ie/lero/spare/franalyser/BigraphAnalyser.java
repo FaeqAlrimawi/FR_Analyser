@@ -12,7 +12,7 @@ public class BigraphAnalyser {
 
 	private PredicateHandler predicateHandler;
 	private LinkedList<GraphPath> paths;
-	private boolean isDebugging = true;
+	private boolean isDebugging = false;
 
 	public BigraphAnalyser() {
 		predicateHandler = null;

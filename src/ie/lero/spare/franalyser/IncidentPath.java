@@ -42,7 +42,7 @@ public class IncidentPath {
 				if (visitedActivities.contains(tmp)) {
 					continue;
 				}
-				distinctPaths.add(tmp.getIntraInterPaths());
+				distinctPaths.add(tmp.getFullPathsToNextActivities());
 				for (IncidentActivity act : tmp.getNextActivities()) {
 					activities.add(act);
 				}

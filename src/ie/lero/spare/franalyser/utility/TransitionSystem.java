@@ -238,7 +238,7 @@ public class TransitionSystem {
 		GraphPath tmpG;
 		LinkedList<Integer> tmp;
 		
-		if(srcState.compareTo(desState) == 0) {
+		if(srcState.equals(desState)) {
 			tmpG = new GraphPath();
 			tmpG.setPredicateSrc(null);
 			tmpG.setPredicateDes(null);
@@ -268,7 +268,7 @@ public class TransitionSystem {
 			if (visited.contains(node)) {
 				continue;
 			}
-			if (node.compareTo(endState) == 0) {
+			if (node.equals(endState)) {
 				visited.add(node);
 				addTransitiontoList(visited);
 				visited.removeLast();
@@ -276,7 +276,7 @@ public class TransitionSystem {
 			}
 		}
 		for (Integer node : nodes) {
-			if (visited.contains(node) || node.compareTo(endState) == 0) {
+			if (visited.contains(node) || node.equals(endState) ) {
 				continue;
 			}
 			visited.addLast(node);

@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.xquery.XQException;
 
@@ -18,11 +19,13 @@ public class PredicateHandler {
 
 	private HashMap<String, Predicate> predicates;
 	private HashMap<String, IncidentActivity> incidentActivities;
-	private Digraph<IncidentActivity> activitiesGraph;
-
+	private Digraph<String> activitiesGraph;
+	private LinkedList<LinkedList<String>> activitySequences;
+	
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
 		incidentActivities = new HashMap<String, IncidentActivity>();
+		activitySequences = new LinkedList<LinkedList<String>>();
 
 	}
 
@@ -412,12 +415,13 @@ public class PredicateHandler {
 	 */
 
 	public void createActivitiesDigraph() {
-		activitiesGraph = new Digraph<IncidentActivity>();
+		activitiesGraph = new Digraph<String>();
 
 		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
 		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
 		IncidentActivity tmp;
 
+		//assuming there is only one initial activity. can be extended to multi-initials
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
@@ -428,8 +432,8 @@ public class PredicateHandler {
 			}
 
 			for (IncidentActivity act : tmp.getNextActivities()) {
-				activitiesGraph.add(tmp, act, -1);
-				if (!acts.contains(act)) {
+				activitiesGraph.add(tmp.getName(), act.getName(), -1);
+				if (!acts.contains(act.getName())) {
 					acts.add(act);
 				}
 			}
@@ -437,9 +441,83 @@ public class PredicateHandler {
 			actsVisited.add(tmp);
 		}
 
-		System.out.println(activitiesGraph);
 	}
 
+	private void depthFirst(String endActivity, LinkedList<String> visited) {
+		List<String> nodes = activitiesGraph.outboundNeighbors(visited.getLast());
+
+		// examine adjacent nodes
+		for (String node : nodes) {
+			if (visited.contains(node)) {
+				continue;
+			}
+			if (node.equals(endActivity)) {
+				visited.add(node);
+				//addTransitiontoList(visited);
+				LinkedList<String> newList = new LinkedList<String>();
+				newList.addAll(visited);
+				activitySequences.add(newList);
+				visited.removeLast();
+				break;
+			}
+		}
+		for (String node : nodes) {
+			if (visited.contains(node) || node.equals(endActivity) ) {
+				continue;
+			}
+			visited.addLast(node);
+			depthFirst(endActivity, visited);
+			visited.removeLast();
+		}
+	}
+	
+	/*private void addTransitiontoList(List<String> transition, LinkedList<>) {
+		LinkedList<String> newList = new LinkedList<String>();
+		GraphPath path = new GraphPath();
+
+		newList.addAll(transition);
+		activitySequences.add(path);
+
+	}
+	*/
+	
+	public LinkedList<LinkedList<String>> getActivitiesSequences(){
+		return getActivitiesSequences(getInitialActivity().getName(), getFinalActivity().getName());
+	}
+	
+	public LinkedList<LinkedList<String>> getActivitiesSequences(String initialActivity, String finalActivity) {
+		LinkedList<String> visited = new LinkedList<String>();
+		visited.add(initialActivity);
+		
+		if(activitySequences == null || activitySequences.size() == 0) {
+			depthFirst(finalActivity, visited);
+		}
+		
+		return activitySequences;
+	}
+	
+	public boolean areAllSatisfied() {
+		
+		for(IncidentActivity act : incidentActivities.values()) {
+			if(!act.isActivitySatisfied()) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public LinkedList<String> getActivitiesNotSatisfied() {
+		LinkedList<String> names = new LinkedList<String>();
+		
+		for(IncidentActivity act : incidentActivities.values()) {
+			if(!act.isActivitySatisfied()) {
+				names.add(act.getName());
+			}
+		}
+		
+		return names;
+	}
 	public void printAll() {
 		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
 		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();

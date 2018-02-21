@@ -81,14 +81,14 @@ public class IncidentActivity {
 	
 	public HashMap<String, LinkedList<GraphPath>> getPathsToNextActivities() {
 		if(pathsToNextActivities == null || pathsToNextActivities.size() ==0) {
-			return getIntraInterPaths();
+			return getFullPathsToNextActivities();
 		}
 		return pathsToNextActivities;
 	}
 
 	public LinkedList<GraphPath> getPathsToNextActivity(IncidentActivity nextActivity) {
 		if(pathsToNextActivities == null || pathsToNextActivities.size() ==0) {
-			return getIntraInterPaths(nextActivity);
+			return getFullPathsToNextActivities(nextActivity);
 		}
 		return pathsToNextActivities.get(nextActivity.getName());
 	}
@@ -205,7 +205,7 @@ public class IncidentActivity {
 	 * of next activities. Currently, it finds whatever it can i.e. no restrictions
 	 * @return LinkedList of GraphPath objects that contain possible paths. Empty List if there are none
 	 */
-	public LinkedList<GraphPath> findPathsToNextActivities() {
+	private LinkedList<GraphPath> findPathsToNextActivities() {
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 		LinkedList<GraphPath> tmp;
 		
@@ -339,12 +339,12 @@ public class IncidentActivity {
 	 * @return a HashMap containing all possible paths to next activities as next activity names are used
 	 * as keys to store the LinkedList containing the paths
 	 */
-	public HashMap<String, LinkedList<GraphPath>> getIntraInterPaths() {
+	public HashMap<String, LinkedList<GraphPath>> getFullPathsToNextActivities() {
 		HashMap<String, LinkedList<GraphPath>> paths = new HashMap<String, LinkedList<GraphPath>>();
 		
 		for(IncidentActivity act : nextActivities) {
 			if(act != null) {
-				paths.put(act.getName(), getIntraInterPaths(act));
+				paths.put(act.getName(), getFullPathsToNextActivities(act));
 			}
 			
 		}
@@ -359,7 +359,7 @@ public class IncidentActivity {
 	 * @param nextActivity the next activity
 	 * @return a LinkedList of GraphPath objects that contain all possible paths specified before
 	 */
-	public LinkedList<GraphPath> getIntraInterPaths(IncidentActivity nextActivity) {
+	public LinkedList<GraphPath> getFullPathsToNextActivities(IncidentActivity nextActivity) {
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 		LinkedList<GraphPath> tmpPaths = new LinkedList<GraphPath>();
 		LinkedList<GraphPath> intraPaths;

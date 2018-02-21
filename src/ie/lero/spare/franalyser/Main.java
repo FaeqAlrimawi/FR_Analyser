@@ -354,34 +354,34 @@ public class Main {
 	}
 	
 	private static void getCombinedPaths(IncidentActivity activity, IncidentActivity nextActivity) {
-		LinkedList<GraphPath> ps2 = activity.findPathsToNextActivities();
-		LinkedList<GraphPath> ps3 = activity.getPathsBetweenPredicates();
-		
-		LinkedList<GraphPath> ps = activity.getIntraInterPaths(nextActivity);
-		
-		System.out.println("\n\nActivity: "+ activity.getName());
-		System.out.println("\nPredicates");
-		for(Predicate p : activity.getPredicates()) {
-			System.out.println(p.getName());
-			System.out.println("states: "+p.getBigraphStates());
-			System.out.println("intra states: " + p.getStatesIntraSatisfied());
-			System.out.println("inter states: " + p.getStatesInterSatisfied());
-		}
-		
-		System.out.println("\nintra paths");
-		for(GraphPath p : ps3) {
-			System.out.println(p);
-		}
-		
-		System.out.println("\ninter next paths");
-		for(GraphPath p : ps2) {
-			System.out.println(p);
-		}
-		
-		System.out.println("\ncombined paths");
-		for(GraphPath p : ps) {
-			System.out.println(p);
-		}
+//		LinkedList<GraphPath> ps2 = activity.findPathsToNextActivities();
+//		LinkedList<GraphPath> ps3 = activity.getPathsBetweenPredicates();
+//		
+//		LinkedList<GraphPath> ps = activity.getIntraInterPaths(nextActivity);
+//		
+//		System.out.println("\n\nActivity: "+ activity.getName());
+//		System.out.println("\nPredicates");
+//		for(Predicate p : activity.getPredicates()) {
+//			System.out.println(p.getName());
+//			System.out.println("states: "+p.getBigraphStates());
+//			System.out.println("intra states: " + p.getStatesIntraSatisfied());
+//			System.out.println("inter states: " + p.getStatesInterSatisfied());
+//		}
+//		
+//		System.out.println("\nintra paths");
+//		for(GraphPath p : ps3) {
+//			System.out.println(p);
+//		}
+//		
+//		System.out.println("\ninter next paths");
+//		for(GraphPath p : ps2) {
+//			System.out.println(p);
+//		}
+//		
+//		System.out.println("\ncombined paths");
+//		for(GraphPath p : ps) {
+//			System.out.println(p);
+//		}
 	}
 	
 }
