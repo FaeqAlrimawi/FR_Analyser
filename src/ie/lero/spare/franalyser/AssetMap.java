@@ -323,15 +323,15 @@ public LinkedList<String[]> generateUniqueCombinations2() {
 		m.setSpaceAssetMatches(tst);
 		m2.setSpaceAssetMatches(tst);
 		
-		/*System.out.println("Testing [The generation of unqiue sequences USING threads] using a "+rows+""
+		System.out.println("Testing [The generation of unqiue sequences USING threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
 		LinkedList<String[]> seq = m.generateUniqueCombinations2();
-		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]\n\n");*/
+		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]\n\n");
 		
-		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
+	/*	System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
 		LinkedList<String[]> seq2 = m2.generateUniqueCombinations();
-		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]");
+		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]");*/
 		
 		//size (if all unique) = columns^rows
 		//System.out.println(seq.size());
