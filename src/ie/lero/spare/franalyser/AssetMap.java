@@ -235,14 +235,16 @@ public LinkedList<String[]> generateUniqueCombinations2() {
 		//LinkedList<String> [] arys = new LinkedList<String>()[5];
 		LinkedList<String> ary1 = new LinkedList<String>();
 		LinkedList<String> ary2 = new LinkedList<String>();
+		//number of segments required
 		int num = 2;
-		int columns = 2;
-		String [][][] seq1 = new String [num][columns][];
+		//number of space assets each segment should take
+		int rows = 2;
+		String [][][] seq1 = new String [num][rows][];
 		
 		for(int i=0;i<num;i++) {
-			for(int j=0;j<columns;j++) {
-				seq1[i][j] = new String[spaceAssetMatches[j+(i*columns)].length];
-				seq1[i][j] = spaceAssetMatches[j+(i*columns)];
+			for(int j=0;j<rows;j++) {
+				seq1[i][j] = new String[spaceAssetMatches[j+(i*rows)].length];
+				seq1[i][j] = spaceAssetMatches[j+(i*rows)];
 			}
 			
 		}
@@ -251,9 +253,12 @@ public LinkedList<String[]> generateUniqueCombinations2() {
 		SetsGeneratorThread [] setsGenerators = new SetsGeneratorThread [num];
 		
 		for(int i=0;i<num;i++) {
-			setsGenerators[i] = new SetsGeneratorThread(seq1[i], ary1);
+			setsGenerators[i] = new SetsGeneratorThread(seq1[i], new LinkedList<String>());
+			setsGenerators[i].start();
 		}
 		
+		System.out.println(ary1);
+		System.out.println(ary2);
 		
 		return uniqueCombinations;
 	}
@@ -263,25 +268,26 @@ public LinkedList<String[]> generateUniqueCombinations2() {
 		AssetMap m = new AssetMap();
 		
 		//represents number of system assets that match each incident asset assuming
-		int rows = 3;
+		int rows = 4;
 		//represents number of incident assets
-		int columns = 5;
-		String [] a = {"a", "b", "c"};
-		System.out.println(Arrays.toString(a));
+		int columns = 4;
+//		String [] a = {"a", "b", "c"};
+//		System.out.println(Arrays.toString(a));
 		String [][] tst = new String[rows][columns];
-		
+		int cnt = 0;
 		//generate dummy array assuming they are all unique
 		for(int i = 0;i<rows;i++) {
 			for(int j=0;j<columns;j++) {
-				tst[i][j] = "this is test [" +i+""+j+"]";
+				tst[i][j] = ""+cnt;
+				cnt++;
 			}
 		}
 		
 		m.setSpaceAssetMatches(tst);
-		LinkedList<String[]> seq = m.generateUniqueCombinations();
+		LinkedList<String[]> seq = m.generateUniqueCombinations2();
 		
 		//size (if all unique) = columns^rows
-		System.out.println(seq.size());
+		//System.out.println(seq.size());
 		
 	}	 
 }
@@ -306,10 +312,13 @@ class SetsGeneratorThread implements Runnable {
 		for (String[] s : it) {
 				if(!containsDuplicate(s)) {
 					resultArray.add( Arrays.toString(s));
-		
 					//uniqueCombinations.add(s);	
 				}
-		}	
+		}
+		
+		if(resultArray != null)
+		System.out.println(threadID+" size:"+resultArray.size());
+		System.out.println(resultArray.toString());
 	}
 	
 	public void start() {
