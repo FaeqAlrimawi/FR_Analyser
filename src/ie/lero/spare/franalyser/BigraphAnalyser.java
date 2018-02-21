@@ -85,18 +85,26 @@ public class BigraphAnalyser {
 		Matcher matcher = new Matcher();
 		Bigraph redex = Predicate.convertJSONtoBigraph(o);
 		*/
+		if(pred == null) {
+			return false;
+		}
+		
+		Bigraph redex = pred.getBigraphPredicate();
+		
+		if(redex == null) {
+			return false;
+		}
+		
 		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
 		Matcher matcher = new Matcher();
 		
-		for(int i =0; i<states.size();i++) {
-			
-			if(matcher.match(states.get(i), pred.getBigraphPredicate()).iterator().hasNext()){
+		for(int i =0; i<states.size();i++) {	
+			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;
 				print("state " + i + " matched");		
 			}
 		}
-		
 		return areStatesIdentified;
 	}
 
@@ -132,7 +140,7 @@ public class BigraphAnalyser {
 	
 	private void print(String msg) {
 		if(isDebugging) {
-			System.out.println(""+msg);
+			System.out.println("BigraphAnalyser: "+msg);
 		}
 	}
 	public static void main(String[] args){

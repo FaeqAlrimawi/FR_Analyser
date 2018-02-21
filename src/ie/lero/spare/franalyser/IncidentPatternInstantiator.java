@@ -52,8 +52,8 @@ public class IncidentPatternInstantiator {
 			// execute, as threads, all possible unique combinations of system
 			// assets
 
-			PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
-			incidentInstances.start();
+//			PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
+//			incidentInstances.start();
 			
 		} catch (Exception e) {
 			System.out.println(e.toString());
@@ -66,8 +66,8 @@ public class IncidentPatternInstantiator {
 	public void initializeSystem() {
 		
 		// set the name of the output folder
-		String BRSFileName = "actors.big";
-		String outputFolder = "output";
+		String BRSFileName = "hospital/hospital.big";
+		String outputFolder = "hospital/output100";
 		
 		// execute BRS using Bigrapher tool as a systemExecutor
 		// the default output folder is in the format: [fileName]_output e.g.,

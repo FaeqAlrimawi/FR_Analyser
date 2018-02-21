@@ -641,7 +641,7 @@ public class Predicate {
 	
 	private void print(String msg) {
 		if(isDebugging) {
-			System.out.println(""+msg);
+			System.out.println("Predicate: "+msg);
 		}
 	}
 }

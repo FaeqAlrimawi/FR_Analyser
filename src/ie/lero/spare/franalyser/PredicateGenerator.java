@@ -18,6 +18,7 @@ public class PredicateGenerator {
 	private PredicateHandler predHandler;
 	private String [] spaceAssetSet;
 	private String [] incidentAssetNames;
+	private boolean isDebugging = true;
 	
 	public PredicateGenerator() {
 		predHandler = new PredicateHandler();
@@ -60,7 +61,7 @@ public class PredicateGenerator {
 	}
 	
 	//might go absolute because of the new one
-	public PredicateHandler generatePredicates2() {
+/*	public PredicateHandler generatePredicates2() {
 		
 		String[] preconditions = null;
 		String[] postconditions = null;
@@ -102,12 +103,13 @@ public class PredicateGenerator {
 		}
 		return predHandler;
 	}
-	
+	*/
 	public PredicateHandler generatePredicates() {
 
 		PredicateType [] types = {PredicateType.Precondition, PredicateType.Postcondition};
 		
 		try {
+			
 				HashMap<String, IncidentActivity> activities = createIncidentActivities();
 				
 				for (String activity : activities.keySet()) {
@@ -140,7 +142,7 @@ public class PredicateGenerator {
 		return obj;
 	}
 	
-	public String matchConditionAssetsToSpaceAssets(String condition) {
+/*	public String matchConditionAssetsToSpaceAssets(String condition) {
 		String result = condition;
 
 		//assuming a well formatted Bigraph statement
@@ -153,7 +155,7 @@ public class PredicateGenerator {
 		}
 
 		return result;
-	}
+	}*/
 
 	/*public AssetMap getAssetMap() {
 		return assetMap;
@@ -169,6 +171,12 @@ public class PredicateGenerator {
 
 	public void setPredHandler(PredicateHandler predHandler) {
 		this.predHandler = predHandler;
+	}
+	
+	private void print(String msg) {
+		if(isDebugging) {
+			System.out.println("PredicateGenerator"+msg);
+		}
 	}
 	
 
