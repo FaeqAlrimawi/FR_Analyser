@@ -1,6 +1,7 @@
 package ie.lero.spare.franalyser;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -110,18 +111,17 @@ public class AssetMap {
 	 * @return true if two strings in the array are equal
 	 */
 	private  boolean containsDuplicate(String [] strs) {
-		boolean isDuplicate=false;
-		Map<String, Boolean> charMap = new HashMap<String, Boolean>();
-	
+		
+		LinkedList<String> list = new LinkedList<String>();
+
 		for(String key: strs) {
-			 if (charMap.containsKey(key)) {
+			 if (list.contains(key)) {
 	               return true;
 
-	           } else {
-	               charMap.put(key, true);
-	           }
+	           } 
+			 list.add(key);
 		}
-		return isDuplicate;
+		return false;
 	}
 	
 	public boolean hasAssetsWithNoMatch(){
@@ -228,9 +228,110 @@ public class AssetMap {
 		
 		return uniqueCombinations;
 	}
-
-
 	
+public LinkedList<String[]> generateUniqueCombinations2() {
+		
+		//multi-threading is requried to speed up the process of finding all possible combinations
+		//LinkedList<String> [] arys = new LinkedList<String>()[5];
+		LinkedList<String> ary1 = new LinkedList<String>();
+		LinkedList<String> ary2 = new LinkedList<String>();
+		int num = 2;
+		int columns = 2;
+		String [][][] seq1 = new String [num][columns][];
+		
+		for(int i=0;i<num;i++) {
+			for(int j=0;j<columns;j++) {
+				seq1[i][j] = new String[spaceAssetMatches[j+(i*columns)].length];
+				seq1[i][j] = spaceAssetMatches[j+(i*columns)];
+			}
+			
+		}
+		
+		//create threads
+		SetsGeneratorThread [] setsGenerators = new SetsGeneratorThread [num];
+		
+		for(int i=0;i<num;i++) {
+			setsGenerators[i] = new SetsGeneratorThread(seq1[i], ary1);
+		}
+		
+		
+		return uniqueCombinations;
+	}
+
+	public static void main(String [] args){
+		
+		AssetMap m = new AssetMap();
+		
+		//represents number of system assets that match each incident asset assuming
+		int rows = 3;
+		//represents number of incident assets
+		int columns = 5;
+		String [] a = {"a", "b", "c"};
+		System.out.println(Arrays.toString(a));
+		String [][] tst = new String[rows][columns];
+		
+		//generate dummy array assuming they are all unique
+		for(int i = 0;i<rows;i++) {
+			for(int j=0;j<columns;j++) {
+				tst[i][j] = "this is test [" +i+""+j+"]";
+			}
+		}
+		
+		m.setSpaceAssetMatches(tst);
+		LinkedList<String[]> seq = m.generateUniqueCombinations();
+		
+		//size (if all unique) = columns^rows
+		System.out.println(seq.size());
+		
+	}	 
+}
+
+class SetsGeneratorThread implements Runnable {
+
+	private int threadID;
+	private Thread t;
+	private String [][] array;
+	private LinkedList<String> resultArray;
 	
-	 
+	public SetsGeneratorThread(String [][] ary, LinkedList<String> result) {
+		// TODO Auto-generated constructor stub
+		array = ary;
+		resultArray = result;
+	}
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		Iterable<String[]> it = () -> new CartesianIterator<>(array, String[]::new);
+		int i=0;
+		for (String[] s : it) {
+				if(!containsDuplicate(s)) {
+					resultArray.add( Arrays.toString(s));
+		
+					//uniqueCombinations.add(s);	
+				}
+		}	
+	}
+	
+	public void start() {
+		System.out.println("Starting " + threadID);
+		if (t == null) {
+			t = new Thread(this, "" + threadID);
+			t.start();
+		}
+	}
+	
+private  boolean containsDuplicate(String [] strs) {
+		
+		LinkedList<String> list = new LinkedList<String>();
+
+		for(String key: strs) {
+			 if (list.contains(key)) {
+	               return true;
+
+	           } 
+			 list.add(key);
+		}
+		return false;
+	}
+
 }

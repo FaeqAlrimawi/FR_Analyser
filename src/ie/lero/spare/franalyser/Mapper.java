@@ -17,10 +17,16 @@ public class Mapper {
 		this.xqueryFilePath = xqueryFilePath;
 	}
 
-	public AssetMap findMatches() throws FileNotFoundException, XQException {
+	public AssetMap findMatches() {
 		String res = null;
 		
-		res = XqueryExecuter.executeQueryFromFile(xqueryFilePath);
+		try {
+			res = XqueryExecuter.executeQueryFromFile(xqueryFilePath);
+		} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		if(res == null) {
 			return null;
 		}

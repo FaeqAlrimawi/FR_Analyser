@@ -282,7 +282,7 @@ public class BasicWindow {
 		
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
+				
 					
 					screenOutput.append("<p><font color=\"white\">---------------------------Matching Assets---------------------------<br/>");
 					screenOutput.append(">Matching between entities of an incident model in file <a href=\"file:///incident.xml\">incident.xml</a> and entities of a space model in file <a href=\"file:///space.xml\">space.xml</a>.<br/>");
@@ -309,13 +309,7 @@ public class BasicWindow {
 					//enable the predicate generation button
 					button.setEnabled(true);
 					
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (XQException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+	
 			}
 		});
 		frmForensicReadinessAnalysis.getContentPane().setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{btnNewButton, button, button_1, button_2}));

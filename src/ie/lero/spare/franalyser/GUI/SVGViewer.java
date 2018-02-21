@@ -111,17 +111,13 @@ public class SVGViewer {
     private void initialize() {
     	Mapper m = new Mapper("match_query.xq");
 		AssetMap am;
-		try {
+		
 			am = m.findMatches();
 			PredicateGenerator pred = new PredicateGenerator(am);
 			predicateHandler = pred.generatePredicates();
 			/*analyser = new BigraphAnalyser(predicateHandler, "sb3.big");
 			analyser.setBigrapherExecutionOutputFolder("sb3_Execution_Output");*/
 			//analyser.analyse(false);
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		//JFrame frame = new JFrame();
     	frame.getContentPane().setBackground(SystemColor.window);

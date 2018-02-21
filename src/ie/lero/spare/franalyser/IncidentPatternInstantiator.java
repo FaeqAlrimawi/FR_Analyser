@@ -1,24 +1,21 @@
 package ie.lero.spare.franalyser;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class IncidentPatternInstantiator {
 
 	public void execute() {
 		
-		try {
-			//should be done before that for all incident patterns that apply to the system
-			initializeSystem();
+		
+			//handles system representation: analysing system output (states, transitions) to generate bigraphs
+			initialiseSystem();
 			
 			Mapper m = new Mapper("match_query.xq");
-			//finds components in a system representation (space.xml) that
-			//match the entities identified in an incident (incident.xml)
-			//AssetMap am = m.findMatches(); 
+			//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
+			AssetMap am = m.findMatches(); 
 
-			// if there are incident assets with no matches from space model
-			// then exit
-			/*if (am.hasAssetsWithNoMatch()) {
+			// if there are incident assets with no matches from space model then exit
+			if (am.hasAssetsWithNoMatch()) {
 				System.out.println("Some incident Assets have no matches in the space asset, these are:");
 				String[] asts = am.getIncidentAssetsWithNoMatch();
 				for (String s : asts) {
@@ -28,11 +25,10 @@ public class IncidentPatternInstantiator {
 						// no matching
 			}
 
-				System.out.println("Asset map=======");
-			System.out.println(am.toString());
-*/
 			//generate all possible unique combinations of system assets
-			/*LinkedList<String[]> lst = am.generateUniqueCombinations();
+			//the generation might take a while!
+			LinkedList<String[]> lst = am.generateUniqueCombinations();
+			
 			if(lst != null) {
 				System.out.println(lst.size());
 			} else {
@@ -43,27 +39,17 @@ public class IncidentPatternInstantiator {
 			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 			
 			//create threads that handle each sequence generated from asset matching
-			//currently 1 sequence is tested
 			for(int i=0; i<incidentInstances.length;i++) {
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), am.getIncidentAssetNames(), i);
 				incidentInstances[i].start();
-			}*/
+			}
 			
-			// execute, as threads, all possible unique combinations of system
-			// assets
-
-			PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
-			incidentInstances.start();
-			
-		} catch (Exception e) {
-			System.out.println(e.toString());
-		}
 	}
 
 	// this method can be later changed to another location since pattern
 	// instantiation
 	// does not need to execute a bigrapher file
-	public void initializeSystem() {
+	public void initialiseSystem() {
 		
 		// set the name of the output folder
 		String BRSFileName = "actors.big";
@@ -84,6 +70,15 @@ public class IncidentPatternInstantiator {
 		// load states (includes converting them into LibBig format for
 		// matching)
 		/** some method needed here */
+	}
+	
+	public void test() {
+		initialiseSystem();
+		Mapper m = new Mapper("match_query.xq");
+		AssetMap am = m.findMatches();
+		
+		PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
+		incidentInstances.start();
 	}
 
 	public static void main(String[] args) {
