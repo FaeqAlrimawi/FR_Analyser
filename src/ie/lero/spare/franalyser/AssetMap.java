@@ -14,6 +14,7 @@ import javax.xml.xquery.XQException;
 
 import ie.lero.spare.franalyser.utility.CartesianIterator;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
+import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 
 public class AssetMap {
 	private String[] incidentAssetNames;
@@ -24,6 +25,7 @@ public class AssetMap {
 	private static LocalDateTime now;
 	private int numberOfSegments = 2;
 	private int sizeofSegment = 3;
+	private LinkedList<String> systemAssets;
 	
 	public AssetMap(){
 		numberOfSets=0;
@@ -149,6 +151,20 @@ public class AssetMap {
 		return false;
 	}
 	
+private  boolean containsDuplicate(Integer [] strs) {
+		
+		LinkedList<Integer> list = new LinkedList<Integer>();
+
+		for(Integer key: strs) {
+			 if (list.contains(key)) {
+	               return true;
+
+	           } 
+			 list.add(key);
+		}
+		return false;
+	}
+	
 	public boolean hasAssetsWithNoMatch(){
 		boolean isNotMatched = false;
 		
@@ -240,8 +256,44 @@ public class AssetMap {
 	 * Generates all unique combinations of system assets that correspond to the set of incident assets
 	 *@return LinkedList<String[]> containing all unique combinations
 	 */
-	public LinkedList<String[]> generateUniqueCombinations() {
+	public LinkedList<Integer[]> generateUniqueCombinationsUsingIntegers() {
 		
+		Integer [][] matches = new Integer [spaceAssetMatches.length][];
+		systemAssets = new LinkedList<String>();
+		
+		//convert strings to integers to generate combinations
+		for(int i=0;i<matches.length;i++) {
+			matches[i] = new Integer [spaceAssetMatches[i].length];
+			for(int j=0;j<matches[i].length;j++) {
+				if(!systemAssets.contains(spaceAssetMatches[i][j])) {
+					systemAssets.add(spaceAssetMatches[i][j]);
+				}
+				matches[i][j] = systemAssets.indexOf(spaceAssetMatches[i][j]);
+			}
+		}
+		
+/*		
+		for(int i=0;i<matches.length;i++) {
+			for(int j=0;j<matches[i].length;j++) {
+			System.out.println(matches[i][j]+"==="+ spaceAssetMatches[i][j]);	
+			}
+		}*/
+			
+		Iterable<Integer[]> it = () -> new CartesianIterator<>(matches, Integer[]::new);
+		LinkedList<Integer[]> tmp = new LinkedList<Integer[]>();
+		
+		for (Integer[] s : it) {
+				if(!containsDuplicate(s)) {
+					tmp.add(s);	
+				}
+		}
+		
+		System.out.println("size "+tmp.size());
+		return tmp;
+	}
+	
+public LinkedList<String[]> generateUniqueCombinations() {
+
 		Iterable<String[]> it = () -> new CartesianIterator<>(spaceAssetMatches, String[]::new);
 		uniqueCombinations = new LinkedList<String[]>();
 		
@@ -251,11 +303,10 @@ public class AssetMap {
 				}
 		}
 		
-		System.out.println("size "+uniqueCombinations.size());
 		return uniqueCombinations;
 	}
 	
-public LinkedList<String[]> generateUniqueCombinations2() {
+public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		
 		//multi-threading is requried to speed up the process of finding all possible combinations
 		//LinkedList<String> [] arys = new LinkedList<String>()[5];
@@ -349,8 +400,11 @@ public LinkedList<String[]> generateUniqueCombinations2() {
 		
 		AssetMap m = new AssetMap();
 		AssetMap m2 = new AssetMap();
+		String [] dummy = {"a","b","c","d","e","f","g","h","i","j"};
+		Random rand = new Random();
+		
 		//represents number of system assets that match each incident asset assuming
-		int rows = 6;
+		int rows = 8;
 		//represents number of incident assets
 		int columns = 10;
 //		String [] a = {"a", "b", "c"};
@@ -360,7 +414,7 @@ public LinkedList<String[]> generateUniqueCombinations2() {
 		//generate dummy array assuming they are all unique
 		for(int i = 0;i<rows;i++) {
 			for(int j=0;j<columns;j++) {
-				tst[i][j] = ""+cnt;
+				tst[i][j] = ""+cnt;//dummy[rand.nextInt(dummy.length)];
 				cnt++;
 			}
 		}
@@ -384,15 +438,15 @@ public LinkedList<String[]> generateUniqueCombinations2() {
 		m.setSpaceAssetMatches(tst);
 		m2.setSpaceAssetMatches(tst);
 		
-		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
+/*		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
 		LinkedList<String[]> seq = m.generateUniqueCombinations2();
-		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]\n\n");
+		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]\n\n");*/
 		
-//		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
-//				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
-//		LinkedList<String[]> seq2 = m2.generateUniqueCombinations();
-//		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]");
+		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
+				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
+		LinkedList<String[]> seq2 = m2.generateUniqueCombinations();
+		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]");
 		
 		//size (if all unique) = columns^rows
 		//System.out.println(seq.size());
