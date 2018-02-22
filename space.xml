@@ -4,7 +4,7 @@
   <asset xsi:type="environment:PhysicalStructure" connections="E-H" name="entrance" parentAsset="2nd_floor"/>
   <asset xsi:type="environment:PhysicalStructure" connections="H-C H-S H-T E-H" name="hallway" parentAsset="2nd_floor"/>
   <asset xsi:type="environment:PhysicalStructure" connections="H-S" name="server_room" containedAssets="HVAC1 Fire-Alram serverX camera2" parentAsset="2nd_floor"/>
-  <asset xsi:type="environment:PhysicalStructure" connections="H-T H-S" name="toilet" containedAssets="light1 light2" parentAsset="2nd_floor">
+  <asset xsi:type="environment:PhysicalStructure" control ="A" connections="H-T H-S" name="toilet" containedAssets="light1 light2" parentAsset="2nd_floor">
   <property name="prop2" value="1"/>
   <property name="prop1" value="1"/>
   </asset>

@@ -2,13 +2,16 @@ package ie.lero.spare.franalyser;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.xquery.XQException;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
@@ -19,6 +22,7 @@ public class PredicateGenerator {
 	private String [] spaceAssetSet;
 	private String [] incidentAssetNames;
 	private boolean isDebugging = true;
+	private String [] systemAssetControls;
 	
 	public PredicateGenerator() {
 		predHandler = new PredicateHandler();
@@ -134,14 +138,92 @@ public class PredicateGenerator {
 
 	private JSONObject convertToMatchedAssets(JSONObject obj) {
 		
-		/**
-		 * it should replace each entity/child in the condition with the matched asset
-		 * so the name of the entity/child changes to the corresponding asset name and the control 
-		 * changes to the type of the that asset
-		 */
+		JSONArray ary;
+		JSONObject tmpObj;
+		
+		try {
+			systemAssetControls = XqueryExecuter.getSystemAssetControls(new String[]{"",""});
+			//get all entities (they are divided by || as Bigraph)
+			if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())){	
+			ary = (JSONArray) obj.get("entity");
+
+			for(int i=0;i<ary.length();i++) {
+				tmpObj = ary.getJSONObject(i); //gets hold of node info
+				for(int j=0;j<incidentAssetNames.length;j++) {
+					if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+						tmpObj.put("name", spaceAssetSet[j]);
+						tmpObj.put("control", systemAssetControls[j]);
+						break;
+					}
+				}
+				
+				//get childern
+				if(!tmpObj.isNull("child")) {
+					getChildren(tmpObj);
+				}
+				
+			}
+			} else { //if there is only one entity
+				tmpObj = (JSONObject)obj.get("entity");; //gets hold of node info
+				for(int j=0;j<incidentAssetNames.length;j++) {
+					if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+						tmpObj.put("name", spaceAssetSet[j]);
+						tmpObj.put("control", systemAssetControls[j]);
+						break;
+					}
+				}
+				//get childern
+				if(!tmpObj.isNull("child")) {
+					getChildren(tmpObj);
+				}	
+			
+			}
+
+			} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return obj;
 	}
 	
+private  void getChildren(JSONObject obj) {
+		
+		if (JSONArray.class.isAssignableFrom(obj.get("child").getClass())){
+			JSONArray tmpAry = (JSONArray)obj.get("child");
+			for(int i=0;i<tmpAry.length();i++) {
+				JSONObject tmpObj = tmpAry.getJSONObject(i); //gets hold of node info
+				for(int j=0;j<incidentAssetNames.length;j++) {
+					if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+						tmpObj.put("name", spaceAssetSet[j]);
+						tmpObj.put("control", systemAssetControls[j]);
+						break;
+						}
+					}
+				
+				//iterate over other children
+				if (!tmpObj.isNull("child")){
+					getChildren( tmpObj);
+				}
+
+			}
+		} else {
+			JSONObject tmpObj = (JSONObject)obj.get("child");
+			for(int j=0;j<incidentAssetNames.length;j++) {
+				if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+					tmpObj.put("name", spaceAssetSet[j]);
+					tmpObj.put("control", systemAssetControls[j]);
+					break;
+					}
+				}
+			
+			//iterate over other children
+			if (!tmpObj.isNull("child")){
+				getChildren( tmpObj);
+			}
+		}
+	}
+
 /*	public String matchConditionAssetsToSpaceAssets(String condition) {
 		String result = condition;
 
@@ -179,5 +261,16 @@ public class PredicateGenerator {
 		}
 	}
 	
+	
+	public static void main(String [] args) {
+		PredicateGenerator pred = new PredicateGenerator();
+		
+		try {
+			pred.convertToMatchedAssets(XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition));
+		} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 }

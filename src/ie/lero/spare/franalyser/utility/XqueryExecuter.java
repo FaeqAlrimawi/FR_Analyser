@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQDataSource;
@@ -65,6 +66,59 @@ public class XqueryExecuter {
 		String [] names = null;
 		String res=null; 
 		String query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity/concat(data(@name), \"%%\")";
+		
+		res = executeQuery(query);
+		
+		if(res != null) {
+			names = res.split("%%");
+		}
+		
+		return names;
+	}
+	
+	public static String[] getSystemAssetControls(String asset) throws FileNotFoundException, XQException{
+		String [] names = null;
+		String res=null; 
+	
+		String query = NS_DECELERATION+"doc(\""+SPACE_DOC+"\")//asset[@name=(\""+asset+"\")]/concat(data(@control), \"%%\")";
+		
+		res = executeQuery(query);
+		
+		if(res != null) {
+			names = res.split("%%");
+		}
+		
+		return names;
+	}
+	
+	public static String[] getSystemAssetControls(String [] assets) throws FileNotFoundException, XQException{
+		String [] names = null;
+		String res=null; 
+		String asts = "";
+		for(int i=0;i<assets.length;i++) {
+			if(i<assets.length-1) {
+				asts+="\""+assets[i]+"\",";	
+			} else {
+				asts+="\""+assets[i]+"\"";	
+			}
+			
+		}
+	
+		String query = NS_DECELERATION+"doc(\""+SPACE_DOC+"\")//asset[@name=("+asts+")]/concat(data(@control), \"%%\")";
+		
+		res = executeQuery(query);
+		
+		if(res != null) {
+			names = res.split("%%");
+		}
+		
+		return names;
+	}
+	
+	public static String[] getSystemAssetControls() throws FileNotFoundException, XQException{
+		String [] names = null;
+		String res=null; 
+		String query = NS_DECELERATION+"doc(\""+SPACE_DOC+"\")//asset/concat(data(@control), \"%%\")";
 		
 		res = executeQuery(query);
 		
@@ -141,7 +195,9 @@ public class XqueryExecuter {
 	public static void main(String[] args) {
 		
 		try {
-		getBigraphConditions("activity1", PredicateType.Precondition);
+			String [] ast = {"toilet", "light1"};
+			
+		System.out.println(Arrays.toString(getSystemAssetControls("a")));
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
