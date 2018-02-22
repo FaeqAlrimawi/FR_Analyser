@@ -131,11 +131,9 @@ public class IncidentPatternInstantiator {
 			 hndlr.getActivitiesSequences();
 			 //print all possible state transitions satisfying conditions
 			 if(!hndlr.areAllSatisfied()){
-				 System.out.println("activities are not satisfied:" + 
+				 System.out.println("thread ["+threadID+"] activities are not satisfied:" + 
 						 hndlr.getActivitiesNotSatisfied());
 			 }
-			 hndlr.printAll();
-			 System.out.println(hndlr.getIncidentActivities().get("activity3").getFullPathsToNextActivities());
 			 
 			//TransitionSystem.setFileName(outputFolder + "/transitions");//not required
 			//analyser.setBigrapherExecutionOutputFolder(outputFolder);//not required

@@ -112,8 +112,7 @@ public class PredicateGenerator {
 
 		PredicateType [] types = {PredicateType.Precondition, PredicateType.Postcondition};
 		
-		try {
-			
+		try {		
 				HashMap<String, IncidentActivity> activities = createIncidentActivities();
 				
 				for (String activity : activities.keySet()) {
@@ -142,7 +141,13 @@ public class PredicateGenerator {
 		JSONObject tmpObj;
 		
 		try {
-			systemAssetControls = XqueryExecuter.getSystemAssetControls(new String[]{"",""});
+			
+			if(obj.isNull("entity")) {
+				return obj;
+			}
+			
+			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
+			
 			//get all entities (they are divided by || as Bigraph)
 			if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())){	
 			ary = (JSONArray) obj.get("entity");

@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <environment:EnvironmentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:environment="http://www.example.org/environment">
-  <asset xsi:type="environment:PhysicalStructure" name="2nd_floor" rules="actor_move" containedAssets="control_room hallway server_room toilet"/>
-  <asset xsi:type="environment:PhysicalStructure" connections="E-H" name="entrance" parentAsset="2nd_floor"/>
-  <asset xsi:type="environment:PhysicalStructure" connections="H-C H-S H-T E-H" name="hallway" parentAsset="2nd_floor"/>
-  <asset xsi:type="environment:PhysicalStructure" connections="H-S" name="server_room" containedAssets="HVAC1 Fire-Alram serverX camera2" parentAsset="2nd_floor"/>
-  <asset xsi:type="environment:PhysicalStructure" control ="A" connections="H-T H-S" name="toilet" containedAssets="light1 light2" parentAsset="2nd_floor">
+  <asset xsi:type="environment:PhysicalStructure" control="A" name="2nd_floor" rules="actor_move" containedAssets="control_room hallway server_room toilet"/>
+  <asset xsi:type="environment:PhysicalStructure" control="Snd" connections="E-H" name="entrance" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:PhysicalStructure" control="Snd" connections="H-C H-S H-T E-H" name="hallway" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:PhysicalStructure" control="Snd" connections="H-S" name="server_room" containedAssets="HVAC1 Fire-Alram serverX camera2" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:PhysicalStructure" control="Snd" connections="H-T H-S" name="toilet" containedAssets="light1 light2" parentAsset="2nd_floor">
   <property name="prop2" value="1"/>
   <property name="prop1" value="1"/>
   </asset>
-  <asset xsi:type="environment:PhysicalStructure" connections="H-C" name="control_room" containedAssets="camera1" 
+  <asset xsi:type="environment:PhysicalStructure" control="Ready" connections="H-C" name="control_room" containedAssets="camera1" 
   parentAsset="2nd_floor">
   <property name="prop1" value="1"/>
   
   </asset>
-  <asset xsi:type="environment:ComputingDevice" connections="SL1-IB" name="light1" parentAsset="person1" canConnect="true">
+  <asset xsi:type="environment:ComputingDevice" control ="Ready" connections="SL1-IB" name="light1" parentAsset="person1" canConnect="true">
     <property name="canConnectTypes" value="wired,wireless"/>
     <type name="ComputingDevice"/>
   </asset>
-  <asset xsi:type="environment:Person" name="person1" parentAsset="control_room"/>
-  <asset xsi:type="environment:SmartLight" name="light2" parentAsset="toilet"/>
-  <asset xsi:type="environment:Desktop" connections="WS-DB" name="workstationX" parentAsset="control_room"/>
-  <asset xsi:type="environment:HVAC" connections="HVAC-IB HVAC1-BN" name="HVAC1" parentAsset="server_room"/>
-  <asset xsi:type="environment:Tangible" connections="FA-IB FA-BN" name="Fire-Alram" parentAsset="server_room"/>
-  <asset xsi:type="environment:Server" name="serverX" parentAsset="server_room"/>
-  <asset xsi:type="environment:Process" connections="IB-TempProc TempProc-DB" name="temperature_process"/>
-  <asset xsi:type="environment:Digital" connections="TempProc-DB" name="database"/>
-  <asset xsi:type="environment:Tangible" connections="FA-IB HVAC-IB SL1-IB SL2-IB IB-TempProc" name="installation_bus" parentAsset="2nd_floor"/>
-  <asset xsi:type="environment:ComputingDevice" name="bus_gateway"/>
-  <asset xsi:type="environment:Actor" name="visitor" rules="actor_move connect_physical" parentAsset="2nd_floor"/>
-  <asset xsi:type="environment:Digital" name="orgnisation's_website"/>
-  <asset xsi:type="environment:Intellectual" name="tradeSecrets" parentAsset="server_room"/>
-  <asset xsi:type="environment:CCTV" name="camera1" parentAsset="control_room"/>
-  <asset xsi:type="environment:CCTV" name="camera2" parentAsset="server_room"/>
-  <asset xsi:type="environment:Digital" name="busNetwork"/>
+  <asset xsi:type="environment:Person" control="Mail" name="person1" parentAsset="control_room"/>
+  <asset xsi:type="environment:SmartLight" control="M" name="light2" parentAsset="toilet"/>
+  <asset xsi:type="environment:Desktop" control="Mail" connections="WS-DB" name="workstationX" parentAsset="control_room"/>
+  <asset xsi:type="environment:HVAC" control="Mail" connections="HVAC-IB HVAC1-BN" name="HVAC1" parentAsset="server_room"/>
+  <asset xsi:type="environment:Tangible" control="Mail" connections="FA-IB FA-BN" name="Fire-Alram" parentAsset="server_room"/>
+  <asset xsi:type="environment:Server" name="serverX" control="Mail" parentAsset="server_room"/>
+  <asset xsi:type="environment:Process" control="Mail" connections="IB-TempProc TempProc-DB" name="temperature_process"/>
+  <asset xsi:type="environment:Digital" control="Mail" connections="TempProc-DB" name="database"/>
+  <asset xsi:type="environment:Tangible" control="Mail" connections="FA-IB HVAC-IB SL1-IB SL2-IB IB-TempProc" name="installation_bus" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:ComputingDevice" control="Mail" name="bus_gateway"/>
+  <asset xsi:type="environment:Actor" control="Mail" name="visitor" rules="actor_move connect_physical" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:Digital" control="Mail" name="orgnisation's_website"/>
+  <asset xsi:type="environment:Intellectual" control="Mail" name="tradeSecrets" parentAsset="server_room"/>
+  <asset xsi:type="environment:CCTV" control="Mail" name="camera1" parentAsset="control_room"/>
+  <asset xsi:type="environment:CCTV" control="Mail" name="camera2" parentAsset="server_room"/>
+  <asset xsi:type="environment:Digital" control="Mail" name="busNetwork"/>
   <connection xsi:type="environment:PhysicalConnection" assetDes="hallway" assetSrc="entrance" name="E-H"/>
   <connection xsi:type="environment:PhysicalConnection" assetDes="toilet" assetSrc="hallway" name="H-T">
     <port name="Port1"/>
