@@ -298,9 +298,9 @@ public LinkedList<String[]> generateUniqueCombinations() {
 		uniqueCombinations = new LinkedList<String[]>();
 		
 		for (String[] s : it) {
-				if(!containsDuplicate(s)) {
+				//if(!containsDuplicate(s)) {
 					uniqueCombinations.add(s);	
-				}
+			//	}
 		}
 		
 		return uniqueCombinations;
@@ -414,7 +414,7 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		//generate dummy array assuming they are all unique
 		for(int i = 0;i<rows;i++) {
 			for(int j=0;j<columns;j++) {
-				tst[i][j] = ""+cnt;//dummy[rand.nextInt(dummy.length)];
+				tst[i][j] = ""+j;//cnt;//dummy[rand.nextInt(dummy.length)];
 				cnt++;
 			}
 		}
@@ -446,6 +446,10 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
 		LinkedList<String[]> seq2 = m2.generateUniqueCombinations();
+
+		for(String [] s: seq2) {
+			System.out.println(Arrays.toString(s));
+		}
 		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]");
 		
 		//size (if all unique) = columns^rows

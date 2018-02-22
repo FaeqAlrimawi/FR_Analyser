@@ -2,6 +2,7 @@ package ie.lero.spare.franalyser.utility;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.IntFunction;
@@ -12,7 +13,8 @@ public class CartesianIterator<T> implements Iterator<T[]> {
 
     private int count = 0;
     private T[] next = null;
-
+    private T previous = null;
+    
     public CartesianIterator(T[][] sets, IntFunction<T[]> arrayConstructor) {
         Objects.requireNonNull(sets);
         Objects.requireNonNull(arrayConstructor);
@@ -21,6 +23,7 @@ public class CartesianIterator<T> implements Iterator<T[]> {
         this.arrayConstructor = arrayConstructor;
     }
 
+    
     private static <T> T[][] copySets(T[][] sets) {
         // If any of the arrays are empty, then the entire iterator is empty.
         // This prevents division by zero in `hasNext`.
@@ -38,7 +41,7 @@ public class CartesianIterator<T> implements Iterator<T[]> {
         if (next != null) {
             return true;
         }
-
+        
         int tmp = count;
         T[] value = arrayConstructor.apply(sets.length);
         for (int i = 0; i < value.length; i++) {
@@ -46,9 +49,9 @@ public class CartesianIterator<T> implements Iterator<T[]> {
 
             int radix = set.length;
             int index = tmp % radix;
-
+            
             value[i] = set[index];
-
+          
             tmp /= radix;
         }
 
@@ -63,14 +66,96 @@ public class CartesianIterator<T> implements Iterator<T[]> {
         return true;
     }
 
+    public LinkedList<LinkedList<T>> iterateElements() {
+    	
+    	 int tmp = count;
+         boolean isDuplicate =  false;
+         LinkedList<T> value = new LinkedList<T>();
+         int num = calculateNumberOfElements();
+         LinkedList<LinkedList<T>> results = new LinkedList<LinkedList<T>>();
+         
+         for(;count<num;count++) {
+        	 isDuplicate = false;
+        	// previous = null;
+        	 tmp = count;
+        	value = new LinkedList<T>();
+        	// T[] value = arrayConstructor.apply(sets.length);
+         for (int i = 0; i < sets.length; i++) {
+             T[] set = sets[i];
+
+             int radix = set.length;
+             int index = tmp % radix;
+             
+             if(value.contains(set[index])) {
+            	 isDuplicate = true;
+      			break;
+             }
+             value.add(set[index]);
+             tmp /= radix;
+         }
+    
+         if(!isDuplicate) {
+        	results.add(value);
+         }
+         }
+
+       return results;
+    }
+    
+    private int calculateNumberOfElements() {
+    	
+    	return (int) Math.pow(sets[0].length, sets.length);
+    }
+private  boolean containsDuplicate(T [] strs) {
+		
+		LinkedList<T> list = new LinkedList<T>();
+
+		for(T key: strs) {
+			 if (key != null && list.contains(key)) {
+	               return true;
+
+	           } 
+
+			 list.add(key);
+		}
+		return false;
+	}
+
     @Override
     public T[] next() {
         if (!hasNext()) {
-            throw new NoSuchElementException();
+          throw new NoSuchElementException();
+        	//System.out.println("no next");
+        	
         }
-
+       
         T[] tmp = next;
         next = null;
         return tmp;
+    }
+    
+    public static void main(String [] args){
+    	
+    	//represents number of system assets that match each incident asset assuming
+    			int rows = 10;
+    			//represents number of incident assets
+    			int columns = 10;
+//    			String [] a = {"a", "b", "c"};
+//    			System.out.println(Arrays.toString(a));
+    			String [][] tst = new String[rows][columns];
+    			int cnt = 0;
+    			//generate dummy array assuming they are all unique
+    			for(int i = 0;i<rows;i++) {
+    				for(int j=0;j<columns;j++) {
+    					tst[i][j] = ""+j;//cnt;//dummy[rand.nextInt(dummy.length)];
+    					cnt++;
+    				}
+    			}
+    			
+    	CartesianIterator<String> car = new CartesianIterator<String>(tst, String[]::new);
+    	
+    	 LinkedList<LinkedList<String>> res = car.iterateElements();
+    	 
+    	 System.out.println(res.size());
     }
 }
