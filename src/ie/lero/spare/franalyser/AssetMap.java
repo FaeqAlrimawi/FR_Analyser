@@ -22,7 +22,6 @@ public class AssetMap {
 	private LinkedList<String[]> uniqueCombinations;
 	public int numberOfSets;
 	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-	private static LocalDateTime now;
 	private int numberOfSegments = 2;
 	private int sizeofSegment = 3;
 	private LinkedList<String> systemAssets;
@@ -421,8 +420,8 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		
 		//set the number of segments and the size of each depending on the number of rows
 		//dividing could depend on the number of segments or the size of a segment
-		int size = 2;
 		int number = 2;
+		int size = 2;
 		
 		//division depending on number of segments
 		if(rows % number == 0){
@@ -434,7 +433,7 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 //			m.setSizeofSegment(size);
 //			m.setNumberOfSegments(rows/size);
 //		}
-	
+	 
 		m.setSpaceAssetMatches(tst);
 		m2.setSpaceAssetMatches(tst);
 		
