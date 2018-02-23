@@ -43,10 +43,8 @@ public class IncidentPath {
 					continue;
 				}
 				distinctPaths.add(tmp.getFullPathsToNextActivities());
-				for (IncidentActivity act : tmp.getNextActivities()) {
-					activities.add(act);
-				}
-
+				activities.addAll(tmp.getNextActivities());
+				
 				visitedActivities.add(tmp);
 			}
 

@@ -143,9 +143,7 @@ public class IncidentPatternInstantiator {
 			
 			 //could be done internally in the PredicateHandler class
 			 Digraph<String> graph = predicateHandler.createActivitiesDigraph();
-			 System.out.println(graph);
-			 
-			 
+			 System.out.println(graph);			 
 			 
 			// hndlr.getActivitiesSequences();
 			 //print all possible state transitions satisfying conditions
@@ -154,9 +152,11 @@ public class IncidentPatternInstantiator {
 						 hndlr.getActivitiesNotSatisfied());
 			 }*/
 			 
+			 //how to represent all possible paths to the given sequence of assets?
+			 //incidentpath can be used to hold one path, but now it is holding everything
 			IncidentPath inc = new IncidentPath(predicateHandler);
 			inc.generateDistinctPaths();
-
+			
 			//System.out.println(predic.toString());
 		}
 
