@@ -73,7 +73,6 @@ public class CartesianIterator<T> implements Iterator<T[]> {
     public T[] next() {
         if (!hasNext()) {
           throw new NoSuchElementException();
-        	//System.out.println("no next");
         	
         }
        

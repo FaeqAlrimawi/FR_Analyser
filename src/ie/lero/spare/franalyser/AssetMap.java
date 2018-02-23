@@ -150,6 +150,40 @@ public class AssetMap {
 		return false;
 	}
 	
+	private  boolean containsDuplicateUsingThreads(String [] strs) {
+		
+		LinkedList<String> list = new LinkedList<String>();
+		LinkedList<String> strs2 = new LinkedList<String>();
+		String [] tmp;
+		
+		int cnt = 0;
+		
+		String rest = Arrays.toString(strs);
+		tmp = rest.split("\\[|\\]|,");
+			for(String a : tmp) {
+				a.trim();
+				if(!a.contains("[a-z]")) {
+					strs2.add(a);
+				}
+		}
+		
+		System.out.println(strs2.size());
+		for(String a : strs2) {
+			System.out.println(a);
+		}
+		
+		for(String key: strs2) {
+			 if (list.contains(key)) {
+	               return true;
+
+	           } 
+			 list.add(key);
+		}
+		return false;
+	}
+	
+	
+	
 private  boolean containsDuplicate(Integer [] strs) {
 		
 		LinkedList<Integer> list = new LinkedList<Integer>();
@@ -345,7 +379,7 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		try {
 			latch.await();
 			LinkedList<String> finalResult = new LinkedList<String>();
-			if(numberOfSegments == 2) {
+			if(spaceAssetMatches.length % 2 == 0) {
 			String [][] res = new String [2][];
 			res[0] = results[0].toArray(new String[0]);
 			res[1] = results[1].toArray(new String[0]);
@@ -356,7 +390,20 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 						//uniqueCombinations.add(s);	
 					}
 			}
-			} else if (numberOfSegments ==3){
+			} else {
+				String [][] res = new String [3][];
+				res[0] = results[0].toArray(new String[0]);
+				res[1] = results[1].toArray(new String[0]);
+				res[2] = spaceAssetMatches[spaceAssetMatches.length-1];
+				Iterable<String[]> it = () -> new CartesianIterator<>(res, String[]::new);
+				for (String[] s : it) {
+						if(!containsDuplicate(s)) {
+							finalResult.add( Arrays.toString(s));
+							//uniqueCombinations.add(s);	
+						}
+				}
+			}
+				/*if (numberOfSegments ==3){
 				//returns how many higher levels are there
 //				int num2 = numberOfSegments/2; 
 //				for(int i=0;i<num2;i++) {
@@ -379,8 +426,20 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 							//uniqueCombinations.add(s);	
 						}
 				}
-			}
+			} */
 			
+			/*int cnt = 0;
+			String[] tmp;
+			
+			for(String s : finalResult) {
+				tmp = s.split(",");
+				for(String a : tmp) {
+					if(!a.equals("") || !a.equals(" ") | !a.isEmpty()) {
+						cnt++;
+					}
+				}
+			}*/
+			containsDuplicateUsingThreads(finalResult.toArray(new String[0]));
 			
 			System.out.println("size: "+finalResult.size());
 		} catch (InterruptedException e) {
@@ -403,9 +462,9 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		Random rand = new Random();
 		
 		//represents number of system assets that match each incident asset assuming
-		int rows = 8;
+		int rows = 4;
 		//represents number of incident assets
-		int columns = 10;
+		int columns = 4;
 //		String [] a = {"a", "b", "c"};
 //		System.out.println(Arrays.toString(a));
 		String [][] tst = new String[rows][columns];
@@ -424,10 +483,10 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		int size = 2;
 		
 		//division depending on number of segments
-		if(rows % number == 0){
+		//if(rows % number == 0){
 			m.setNumberOfSegments(number);
 			m.setSizeofSegment(rows/number);
-		}
+	//	}
 		//division depending on size
 //		if(rows % size == 0) {
 //			m.setSizeofSegment(size);
@@ -437,18 +496,19 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		m.setSpaceAssetMatches(tst);
 		m2.setSpaceAssetMatches(tst);
 		
-/*		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
+		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
-		LinkedList<String[]> seq = m.generateUniqueCombinations2();
-		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]\n\n");*/
+		LinkedList<String[]> seq = m.generateUniqueCombinationsUsingThreads();
+		//System.out.println(seq.size());
 		
-		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
+/*		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
 		LinkedList<String[]> seq2 = m2.generateUniqueCombinations();
-
-		for(String [] s: seq2) {
+		System.out.println(seq2.size());*/
+/*		for(String [] s: seq2) {
 			System.out.println(Arrays.toString(s));
-		}
+		}*/
+
 		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]");
 		
 		//size (if all unique) = columns^rows

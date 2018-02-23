@@ -414,7 +414,7 @@ public class PredicateHandler {
 	 * System.out.println(p2.toSimpleString()); }
 	 */
 
-	public void createActivitiesDigraph() {
+	public Digraph<String> createActivitiesDigraph() {
 		activitiesGraph = new Digraph<String>();
 
 		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
@@ -441,6 +441,7 @@ public class PredicateHandler {
 			actsVisited.add(tmp);
 		}
 
+		return activitiesGraph;
 	}
 
 	private void depthFirst(String endActivity, LinkedList<String> visited) {

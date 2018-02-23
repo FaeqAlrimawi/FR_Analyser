@@ -2,6 +2,8 @@ package ie.lero.spare.franalyser;
 
 import java.util.LinkedList;
 
+import ie.lero.spare.franalyser.utility.Digraph;
+
 public class IncidentPatternInstantiator {
 
 	public void execute() {
@@ -27,19 +29,20 @@ public class IncidentPatternInstantiator {
 
 			//generate all possible unique combinations of system assets
 			//the generation might take a while! scalability issue with this!
+			//temporary storage could be used, which then can be processed
 			LinkedList<String[]> lst = am.generateUniqueCombinations();
 			
 			if(lst != null) {
 				System.out.println(lst.size());
 			} else {
-				System.out.println("no unique combinations found.... terminating execution");
+				System.out.println("no combinations found.... exisitng program");
 				return;
 			}
 			
 			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 			
 			//create threads that handle each sequence generated from asset matching
-			for(int i=0; i<incidentInstances.length;i++) {
+			for(int i=0; i<2;i++) {
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), am.getIncidentAssetNames(), i);
 				incidentInstances[i].start();
 			}
@@ -66,16 +69,26 @@ public class IncidentPatternInstantiator {
 		SystemInstanceHandler.loadStates();
 		//boolean issuccessful = SystemInstanceHandler.analyseSystem(BRSFileName, bigrapher);
 		
-		
 		// load states (includes converting them into LibBig format for
 		// matching)
 		/** some method needed here */
 	}
 	
 	public void test() {
-		initialiseSystem();
-		Mapper m = new Mapper("match_query.xq");
-		AssetMap am = m.findMatches();
+		String BRSFileName = "sav/savannah-general.big";
+		String outputFolder = "sav/output10000";
+		
+		// execute BRS using Bigrapher tool as a systemExecutor
+		// the default output folder is in the format: [fileName]_output e.g.,
+		// sb3_output
+		// output folder can be set in the executeBigraph method
+		//BigrapherHandler bigrapher = new BigrapherHandler();
+		
+		SystemInstanceHandler.setFileName(BRSFileName);
+		SystemInstanceHandler.setOutputFolder(outputFolder);
+		SystemInstanceHandler.loadStates();
+	//	Mapper m = new Mapper("match_query.xq");
+		//AssetMap am = m.findMatches();
 		
 		PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
 		incidentInstances.start();
@@ -85,6 +98,7 @@ public class IncidentPatternInstantiator {
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
 		ins.execute();
+		//ins.test();
 		//SystemInstanceHandler.loadStates();
 	}
 
@@ -116,39 +130,32 @@ public class IncidentPatternInstantiator {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
-			PredicateGenerator pred = new PredicateGenerator(systemAssetNames, incidentAssetNames);
-			PredicateHandler predic = pred.generatePredicates();
-			// String outputFolder =
-			// BRSFileName.split("\\.")[0]+"_"+threadID+"_output";
-			//predic.insertPredicatesIntoBigraphFile(BRSFileName);//not required anymore
-			predic.updateNextPreviousActivities();
-			//this object should convert predicates to the format required, then search for
-			//state matches
-			BigraphAnalyser analyser = new BigraphAnalyser(predic);
-			 PredicateHandler hndlr = analyser.analyse();
-			 hndlr.createActivitiesDigraph();
-			 hndlr.getActivitiesSequences();
+		
+			//this object allows the conversion of incident activities conditions into bigraphs
+			//which later can be matched against states of the system (also presented in Bigraph)
+			PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentAssetNames);
+			PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
+
+			//this object identifies states and state transitions that satisfy the conditions of activities
+			//state transitions are updated in the predicates, which can be accessed through predicateHandler
+			BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler);
+			analyser.analyse();
+			
+			 //could be done internally in the PredicateHandler class
+			 Digraph<String> graph = predicateHandler.createActivitiesDigraph();
+			 System.out.println(graph);
+			 
+			 
+			 
+			// hndlr.getActivitiesSequences();
 			 //print all possible state transitions satisfying conditions
-			 if(!hndlr.areAllSatisfied()){
+			/* if(!hndlr.areAllSatisfied()){
 				 System.out.println("thread ["+threadID+"] activities are not satisfied:" + 
 						 hndlr.getActivitiesNotSatisfied());
-			 }
+			 }*/
 			 
-			//TransitionSystem.setFileName(outputFolder + "/transitions");//not required
-			//analyser.setBigrapherExecutionOutputFolder(outputFolder);//not required
-
-			// in the execution of the bigrapher file there is NO need to create
-			// the states and the transtion
-			// files again..only needed is the new predicates file containing
-			// the states that satisfy a predicate
-			//
-			//analyser.analyse(); // set to true to execute the bigrapher
-										// file or use the function without
-										// parameters
-
-			/*IncidentPath inc = new IncidentPath(predic);
-			inc.generateDistinctPaths();*/
+			IncidentPath inc = new IncidentPath(predicateHandler);
+			inc.generateDistinctPaths();
 
 			//System.out.println(predic.toString());
 		}

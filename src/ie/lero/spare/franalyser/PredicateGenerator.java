@@ -56,6 +56,9 @@ public class PredicateGenerator {
 					predHandler.addIncidentActivity(activity);
 				}
 			}
+			
+			predHandler.updateNextPreviousActivities();
+			
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
