@@ -66,61 +66,6 @@ public class CartesianIterator<T> implements Iterator<T[]> {
         return true;
     }
 
-    public LinkedList<LinkedList<T>> iterateElements() {
-    	
-    	 int tmp = count;
-         boolean isDuplicate =  false;
-         LinkedList<T> value = new LinkedList<T>();
-         int num = calculateNumberOfElements();
-         LinkedList<LinkedList<T>> results = new LinkedList<LinkedList<T>>();
-         
-         for(;count<num;count++) {
-        	 isDuplicate = false;
-        	// previous = null;
-        	 tmp = count;
-        	value = new LinkedList<T>();
-        	// T[] value = arrayConstructor.apply(sets.length);
-         for (int i = 0; i < sets.length; i++) {
-             T[] set = sets[i];
-
-             int radix = set.length;
-             int index = tmp % radix;
-             
-             if(value.contains(set[index])) {
-            	 isDuplicate = true;
-      			break;
-             }
-             value.add(set[index]);
-             tmp /= radix;
-         }
-    
-         if(!isDuplicate) {
-        	results.add(value);
-         }
-         }
-
-       return results;
-    }
-    
-    private int calculateNumberOfElements() {
-    	
-    	return (int) Math.pow(sets[0].length, sets.length);
-    }
-private  boolean containsDuplicate(T [] strs) {
-		
-		LinkedList<T> list = new LinkedList<T>();
-
-		for(T key: strs) {
-			 if (key != null && list.contains(key)) {
-	               return true;
-
-	           } 
-
-			 list.add(key);
-		}
-		return false;
-	}
-
     @Override
     public T[] next() {
         if (!hasNext()) {
@@ -134,6 +79,47 @@ private  boolean containsDuplicate(T [] strs) {
         return tmp;
     }
     
+    public LinkedList<LinkedList<T>> iterateElements() {
+    	
+   	 int tmp = count;
+        boolean isDuplicate =  false;
+        LinkedList<T> value = new LinkedList<T>();
+        int num = calculateNumberOfElements();
+        LinkedList<LinkedList<T>> results = new LinkedList<LinkedList<T>>();
+        
+        for(;count<num;count++) {
+       	 isDuplicate = false;
+       	// previous = null;
+       	 tmp = count;
+       	value = new LinkedList<T>();
+       	// T[] value = arrayConstructor.apply(sets.length);
+        for (int i = 0; i < sets.length; i++) {
+            T[] set = sets[i];
+
+            int radix = set.length;
+            int index = tmp % radix;
+            
+            if(value.contains(set[index])) {
+           	 isDuplicate = true;
+     			break;
+            }
+            value.add(set[index]);
+            tmp /= radix;
+        }
+   
+        if(!isDuplicate) {
+       	results.add(value);
+        }
+        }
+
+      return results;
+   }
+   
+   private int calculateNumberOfElements() {
+   	
+   	return (int) Math.pow(sets[0].length, sets.length);
+   }
+   
     public static void main(String [] args){
     	
     	//represents number of system assets that match each incident asset assuming
