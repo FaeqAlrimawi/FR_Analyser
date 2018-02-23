@@ -462,9 +462,9 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		Random rand = new Random();
 		
 		//represents number of system assets that match each incident asset assuming
-		int rows = 4;
+		int rows = 8;
 		//represents number of incident assets
-		int columns = 4;
+		int columns = 10;
 //		String [] a = {"a", "b", "c"};
 //		System.out.println(Arrays.toString(a));
 		String [][] tst = new String[rows][columns];
@@ -496,15 +496,15 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		m.setSpaceAssetMatches(tst);
 		m2.setSpaceAssetMatches(tst);
 		
-		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
+/*		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
-		LinkedList<String[]> seq = m.generateUniqueCombinationsUsingThreads();
+		LinkedList<String[]> seq = m.generateUniqueCombinationsUsingThreads();*/
 		//System.out.println(seq.size());
 		
-/*		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
+		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
 		LinkedList<String[]> seq2 = m2.generateUniqueCombinations();
-		System.out.println(seq2.size());*/
+		System.out.println(seq2.size());
 /*		for(String [] s: seq2) {
 			System.out.println(Arrays.toString(s));
 		}*/

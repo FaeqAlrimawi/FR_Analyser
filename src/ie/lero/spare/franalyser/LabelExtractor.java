@@ -7,10 +7,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
@@ -18,26 +20,26 @@ import ie.lero.spare.franalyser.utility.TransitionSystem;
 public class LabelExtractor {
 
 	// private String[] predicatesFileLines;
-	private String outputPath = "output";
-	private String transitionFileName = "transitions";
+	private String outputPath = SystemInstanceHandler.getOutputFolder();//"output";
+//	private String transitionFileName = "transitions.txt";
 	// private String predicateFilePath = outputPath+"/pred";
 	// private ArrayList<ReactionRule> reactionRules;
 	private String rulesKeywordsFileName = "rules_keywords.txt";
 	private String [] rulesKeywords;
-	TransitionSystem transitionSystem;
+	TransitionSystem transitionSystem = SystemInstanceHandler.getTransitionSystem();
 
 	public LabelExtractor() {
 		// reactionRules = new ArrayList<ReactionRule>();
-		TransitionSystem.setFileName(outputPath + "/" + transitionFileName);
+		//TransitionSystem.setFileName(outputPath + "/" + transitionFileName);
 
-		transitionSystem = TransitionSystem.getTransitionSystemInstance();
+		//transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
 
 	public LabelExtractor(String outputFolder) {
 		// reactionRules = new ArrayList<ReactionRule>();
 		this.outputPath = outputFolder;
-		TransitionSystem.setFileName(outputPath + "/" + this.transitionFileName);
-		transitionSystem = TransitionSystem.getTransitionSystemInstance();
+	//	TransitionSystem.setFileName(outputPath + "/" + this.transitionFileName);
+	//	transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
 
 	public static void main(String[] args) {
@@ -46,16 +48,15 @@ public class LabelExtractor {
 		
 		//##### one way to identify the labels is by using the redex and reactum of
 		// rules as predicates
-		// however, this is requires more computational power and it can assign
-		// more than one label
-		// to a single transition
+		// however, this requires more computational power and it can assign
+		// more than one label to a single transition
 		/*
 		 * ex.getRulesStates(); ex.removeNoneImmediateTransitionStates();
 		 * ex.updateTransitionFile();
 		 */
 		// ex.extractLabel(1, 4);
 
-		//##### another way is to define a keyword for each such as its name as a
+		//##### another way is to define a keyword for each reaction rule such as its name as a
 		// control which is then used to identify transitions
 		// it requires adding controls that identify the action in each reaction rule
 		ex.extractLabels();
@@ -68,7 +69,7 @@ public class LabelExtractor {
 	 * is based on the assumption that all reaction rules have a unique keyword
 	 * such as its name that defines each rule. Extraction is done based on the
 	 * presence of a keyword in a source state and it being missing in the
-	 * target state The Digraph in the TransitionSystem class is updated after
+	 * target state. The Digraph in the TransitionSystem class is updated after
 	 * this with the labels name
 	 */
 	public Digraph<Integer> extractLabels() {
@@ -192,7 +193,7 @@ public class LabelExtractor {
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		float prob = 0;
 		String label;
-		String newFileName = transitionFileName + "_labelled";
+		String newFileName = SystemInstanceHandler.getOutputFolder()+"/transitions_labelled.txt";
 		res.append(nodes.size()).append(" ").append(digraph.getNumberOfEdges()).append("\r\n");
 		for (Integer state : transitionSystem.getDigraph().getNodes()) {
 			for (Integer stateDes : digraph.outboundNeighbors(state)) {
@@ -234,14 +235,6 @@ public class LabelExtractor {
 
 	public void setOutputPath(String outputPath) {
 		this.outputPath = outputPath;
-	}
-
-	public String getTransitionFileName() {
-		return transitionFileName;
-	}
-
-	public void setTransitionFileName(String transitionFileName) {
-		this.transitionFileName = transitionFileName;
 	}
 
 	public String getRulesKeywordsFileName() {

@@ -8,7 +8,6 @@ public class IncidentPatternInstantiator {
 
 	public void execute() {
 		
-		
 			//handles system representation: analysing system output (states, transitions) to generate bigraphs
 			initialiseSystem();
 			
