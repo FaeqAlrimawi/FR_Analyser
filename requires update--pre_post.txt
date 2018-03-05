@@ -1,0 +1,7 @@
+update of the pre/post conditions of the activities defined in an incident pattern is required.
+the update is to consider generating multi-predicates (i.e. multi conditions) out of the defined conditions
+for example, if control is ComputingDevices, then different variations of the smae condition can be created when 
+mapped to a certain environment i.e. to SmartLight, HVAC, etc.
+
+currently, I use direct mapping between the two i.e. i specify in the conditions the direct control that corresponds to
+the entity

@@ -25,7 +25,7 @@ public class IncidentPatternInstantiator {
 				return; // execution stops if there are incident entities with
 						// no matching
 			}
-
+ 
 			//generate all possible unique combinations of system assets
 			//the generation might take a while! scalability issue with this!
 			//temporary storage could be used, which then can be processed
@@ -158,7 +158,6 @@ public class IncidentPatternInstantiator {
 			
 			//System.out.println(predic.toString());
 		}
-
 		public void start() {
 			System.out.println("Starting " + threadID);
 			//System.out.println("system assets: " + Arrays.toString(systemAssetNames));
