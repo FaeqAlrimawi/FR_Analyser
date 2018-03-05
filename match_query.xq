@@ -195,8 +195,8 @@ return $spaceAsset
 };
 
 
-let $incidentDoc := "incident.cpi"
-let $spaceDoc := "space.xml"
+let $incidentDoc := "eavesdropping.cpi"
+let $spaceDoc := "research centre.environment"
 let $incidentAssets := doc($incidentDoc)//cyberPhysical_Incident:IncidentDiagram/(asset, actor, resource)
 let $matches := ( 
 <matches>{

@@ -9,7 +9,7 @@ public class IncidentPatternInstantiator {
 	public void execute() {
 		
 			//handles system representation: analysing system output (states, transitions) to generate bigraphs
-			initialiseSystem();
+			initialiseBigraphSystem();
 			
 			Mapper m = new Mapper("match_query.xq");
 			//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
@@ -51,7 +51,7 @@ public class IncidentPatternInstantiator {
 	// this method can be later changed to another location since pattern
 	// instantiation
 	// does not need to execute a bigrapher file
-	public void initialiseSystem() {
+	public void initialiseBigraphSystem() {
 		
 		// set the name of the output folder
 		String BRSFileName = "actors.big";
@@ -93,12 +93,30 @@ public class IncidentPatternInstantiator {
 		incidentInstances.start();
 	}
 
+	private void testNewIncident(){
+		Mapper m = new Mapper("match_query.xq");
+		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
+		AssetMap am = m.findMatches(); 
+
+		// if there are incident assets with no matches from space model then exit
+		if (am.hasAssetsWithNoMatch()) {
+			System.out.println("Some incident Assets have no matches in the space asset, these are:");
+			String[] asts = am.getIncidentAssetsWithNoMatch();
+			for (String s : asts) {
+				System.out.println(s);
+			}
+			return; // execution stops if there are incident entities with
+					// no matching
+		}
+	}
+
 	public static void main(String[] args) {
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
-		ins.execute();
+		//ins.execute();
 		//ins.test();
 		//SystemInstanceHandler.loadStates();
+		ins.testNewIncident();
 	}
 
 	class PotentialIncidentInstance implements Runnable {

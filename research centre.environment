@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<environment:EnvironmentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:environment="http://www.example.org/environment">
+  <asset xsi:type="environment:Building" name="Research_Centre" description="" control="Building" containedAssets="2nd_floor">
+    <type name="building"/>
+  </asset>
+  <asset xsi:type="environment:Floor" name="2nd_floor" description="" control="Floor" containedAssets="Control_room Hallway Server_room Toilet" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:Room" connections="ToiletRm-Hallway" name="Toilet" control="Room" containedAssets="SL1" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:Room" connections="CntrlRm-Hallway" name="Control_room" control="Room" containedAssets="SL2 Workstation1" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:Room" connections="ServerRm-Hallway" name="Server_room" control="Room" containedAssets="SL3 FireAlarm1 AirConditioning" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:SmartLight" connections="SL1-DN" name="SL1" control="SmartLight" parentAsset="Toilet"/>
+  <asset xsi:type="environment:SmartLight" connections="SL2-DN" name="SL2" control="SmartLight" parentAsset="Control_room"/>
+  <asset xsi:type="environment:SmartLight" connections="SL3-DN" name="SL3" control="SmartLight" parentAsset="Server_room"/>
+  <asset xsi:type="environment:HVAC" connections="HVAC-DN" name="AirConditioning" control="HVAC" parentAsset="Server_room"/>
+  <asset xsi:type="environment:FireAlarm" connections="FA-DN" name="FireAlarm1" control="FireAlarm" parentAsset="Server_room"/>
+  <asset xsi:type="environment:Room" connections="CntrlRm-Hallway ServerRm-Hallway ToiletRm-Hallway" name="Hallway" control="Room" containedAssets="Visitor1" parentAsset="2nd_floor"/>
+  <asset xsi:type="environment:Server" connections="Server-DN" name="Server1" control="Server" parentAsset="Server_room"/>
+  <asset xsi:type="environment:Workstation" connections="Workstation-DN" name="Workstation1" control="Workstation" parentAsset="Control_room"/>
+  <asset xsi:type="environment:DigitalAsset" connections="FA-DN HVAC-DN Server-DN SL1-DN SL2-DN SL3-DN" name="Digital_network" control="DigitalNetwork">
+    <type name="digitalnetwork"/>
+  </asset>
+  <asset xsi:type="environment:Actor" name="Visitor1" control="Visitor" containedAssets="Laptop1" parentAsset="Hallway"/>
+  <asset xsi:type="environment:Laptop" name="Laptop1" parentAsset="Visitor1"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="Digital_network" asset2="FireAlarm1" name="FA-DN"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="Digital_network" asset2="AirConditioning" name="HVAC-DN"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="Digital_network" asset2="Server1" name="Server-DN"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="Digital_network" asset2="SL1" name="SL1-DN"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="Digital_network" asset2="SL2" name="SL2-DN"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="Digital_network" asset2="SL3" name="SL3-DN"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="Digital_network" asset2="Workstation1" name="Workstation-DN"/>
+  <connection xsi:type="environment:PhysicalConnection" asset1="Control_room" asset2="Hallway" name="CntrlRm-Hallway"/>
+  <connection xsi:type="environment:PhysicalConnection" asset1="Toilet" asset2="Hallway" name="ToiletRm-Hallway"/>
+  <connection xsi:type="environment:PhysicalConnection" asset1="Server_room" asset2="Hallway" name="ServerRm-Hallway"/>
+</environment:EnvironmentDiagram>
