@@ -5,3 +5,7 @@ mapped to a certain environment i.e. to SmartLight, HVAC, etc.
 
 currently, I use direct mapping between the two i.e. i specify in the conditions the direct control that corresponds to
 the entity
+
+summary of updates required:
+-control field: can be replaced by defined classes from the system meta-model
+-out field (outer names): can be updated by the number of connections available from the system
