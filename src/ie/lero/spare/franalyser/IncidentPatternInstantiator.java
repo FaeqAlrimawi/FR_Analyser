@@ -10,7 +10,7 @@ public class IncidentPatternInstantiator {
 	public void execute() {
 		
 			//handles system representation: analysing system output (states, transitions) to generate bigraphs
-			initialiseBigraphSystem();
+			initialiseBigraphSystem("BRS-fileName","outputFolder");
 			
 			Mapper m = new Mapper("match_query.xq");
 			//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
@@ -20,9 +20,7 @@ public class IncidentPatternInstantiator {
 			if (am.hasAssetsWithNoMatch()) {
 				System.out.println("Some incident Assets have no matches in the space asset, these are:");
 				String[] asts = am.getIncidentAssetsWithNoMatch();
-				for (String s : asts) {
-					System.out.println(s);
-				}
+				System.out.println(Arrays.toString(asts));
 				return; // execution stops if there are incident entities with
 						// no matching
 			}
@@ -39,39 +37,39 @@ public class IncidentPatternInstantiator {
 				return;
 			}
 			
-			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
-			
 			//create threads that handle each sequence generated from asset matching
-			for(int i=0; i<2;i++) {
-				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), am.getIncidentAssetNames(), i);
+			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+			String [] incidentAssetNames = am.getIncidentAssetNames();
+			for(int i=0; i<incidentInstances.length;i++) {
+				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 				incidentInstances[i].start();
 			}
 			
 	}
 
-	// this method can be later changed to another location since pattern
-	// instantiation
-	// does not need to execute a bigrapher file
-	public void initialiseBigraphSystem() {
+	/**
+	 * This method intialises the BRS system by executing the BRS file, then loading states as Bigraph objects 
+	 * @param BRSFileName The BRS file describing the system components and its evolution
+	 * @param outputFolder Output folder
+	 * @return
+	 */
+	public boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
 		
-		// set the name of the output folder
-		String BRSFileName = "actors.big";
-		String outputFolder = "output";
+		//first execute the system. If the execution is not successful then return false
+		//a pre-requiste for this is to have the BRS tool installed on the system
+		if(!SystemInstanceHandler.isSystemAnalysed()) {
+			if(!SystemInstanceHandler.analyseSystem(BRSFileName)) {
+				System.out.println("something went wrong executing the BRS system");
+				return false;
+			}
+		}
 		
-		// execute BRS using Bigrapher tool as a systemExecutor
-		// the default output folder is in the format: [fileName]_output e.g.,
-		// sb3_output
-		// output folder can be set in the executeBigraph method
-		//BigrapherHandler bigrapher = new BigrapherHandler();
-		
+		//if execution is already done then one can set the file name and the output folder instead of using the analyseSystem() method above
 		SystemInstanceHandler.setFileName(BRSFileName);
 		SystemInstanceHandler.setOutputFolder(outputFolder);
-		SystemInstanceHandler.loadStates();
-		//boolean issuccessful = SystemInstanceHandler.analyseSystem(BRSFileName, bigrapher);
 		
-		// load states (includes converting them into LibBig format for
-		// matching)
-		/** some method needed here */
+		//read states from the output folder then create Bigraph signature and convert states from JSON objects to Bigraph (from LibBig library) objects
+		SystemInstanceHandler.loadStates();
 	}
 	
 	public void test() {
@@ -103,17 +101,42 @@ public class IncidentPatternInstantiator {
 		if (am.hasAssetsWithNoMatch()) {
 			System.out.println("Some incident Assets have no matches in the space asset, these are:");
 			String[] asts = am.getIncidentAssetsWithNoMatch();
-			for (String s : asts) {
-				System.out.println(s);
-			}
+				System.out.println(Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
 		
+		//print matched assets
 		for(String n : am.getIncidentAssetNames()) {
 			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
 		}
 	
+		//generate sequences
+		LinkedList<String[]> lst = am.generateUniqueCombinations();
+		
+		//checks if there are sequences generated or not. if not, then execution is terminated
+		if(lst == null) {
+			System.out.println("no combinations found.... exisitng program");
+			return;
+		}
+		
+		//initialise BRS system. This includes: 
+		//1- Executing the BRS file (currently done using Bigrapher tool), 
+		//2- Loading states i.e. reading states from output folder, create Bigraph signature, and convert states into Bigraph objects for matching
+		initialiseBigraphSystem("research_centre_system.big", "research_centre_output");
+		//print sequences 
+		System.out.println("Sequences ["+lst.size()+"]");
+		for (String[] s : lst) {
+			System.out.println(Arrays.toString(s));
+		}
+		
+		//create threads that handle each sequence generated from asset matching
+		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+		String [] incidentAssetNames = am.getIncidentAssetNames();
+		for(int i=0; i<incidentInstances.length;i++) {
+			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
+			incidentInstances[i].start();
+		}
 	}
 
 	public static void main(String[] args) {
@@ -125,6 +148,7 @@ public class IncidentPatternInstantiator {
 		ins.testNewIncident();
 	}
 
+	
 	class PotentialIncidentInstance implements Runnable {
 
 		private String[] systemAssetNames;
