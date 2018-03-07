@@ -64,6 +64,7 @@ public class IncidentPatternInstantiator {
 		}*/
 		
 		//if execution is already done then one can set the file name and the output folder instead of using the analyseSystem() method above
+		//this is a way to bypass bigraph execution
 		SystemInstanceHandler.setFileName(BRSFileName);
 		SystemInstanceHandler.setOutputFolder(outputFolder);
 		
@@ -93,6 +94,10 @@ public class IncidentPatternInstantiator {
 		incidentInstances.start();
 	}
 
+	/**
+	 * This method details the steps for mapping an incident pattern to a system representation
+	 * it requires: 1-incident pattern file (i.e. *.cpi), 2-system model (i.e. *.environment), and 3-Bigraph representation of the system (i.e. *.big)
+	 */
 	private void testNewIncident(){
 		Mapper m = new Mapper("match_query.xq");
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
@@ -130,7 +135,11 @@ public class IncidentPatternInstantiator {
 		//initialise BRS system. This includes: 
 		//1- Executing the BRS file (currently done using Bigrapher tool), 
 		//2- Loading states i.e. reading states from output folder, create Bigraph signature, and convert states into Bigraph objects for matching
-		initialiseBigraphSystem("research_centre_system.big", "research_centre_output");
+		//normally only the file name is required. however, to bypass the execution of the system I specify also the folder name
+		boolean isInitialised = initialiseBigraphSystem("research_centre_system.big", "research_centre_output"); 
+		if (!isInitialised) {
+			System.out.println("System could not be initialised....execution is terminated");
+		}
 		
 		//create threads that handle each sequence generated from asset matching
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
@@ -138,8 +147,7 @@ public class IncidentPatternInstantiator {
 		for(int i=0; i<incidentInstances.length;i++) {
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			incidentInstances[i].start();
-		}
-		
+		}	
 	}
 
 	public static void main(String[] args) {
