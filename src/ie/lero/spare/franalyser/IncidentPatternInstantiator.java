@@ -57,12 +57,11 @@ public class IncidentPatternInstantiator {
 		
 		//first execute the system. If the execution is not successful then return false
 		//a pre-requiste for this is to have the BRS tool installed on the system
-		if(!SystemInstanceHandler.isSystemAnalysed()) {
+		/*if(!SystemInstanceHandler.isSystemAnalysed()) {
 			if(!SystemInstanceHandler.analyseSystem(BRSFileName)) {
-				System.out.println("something went wrong executing the BRS system");
 				return false;
 			}
-		}
+		}*/
 		
 		//if execution is already done then one can set the file name and the output folder instead of using the analyseSystem() method above
 		SystemInstanceHandler.setFileName(BRSFileName);
@@ -70,6 +69,8 @@ public class IncidentPatternInstantiator {
 		
 		//read states from the output folder then create Bigraph signature and convert states from JSON objects to Bigraph (from LibBig library) objects
 		SystemInstanceHandler.loadStates();
+		
+		return true;
 	}
 	
 	public void test() {
@@ -120,15 +121,16 @@ public class IncidentPatternInstantiator {
 			return;
 		}
 		
+		//print sequences 
+		/*System.out.println("Sequences ["+lst.size()+"]");
+		for (String[] s : lst) {
+			System.out.println(Arrays.toString(s));
+		}*/
+		
 		//initialise BRS system. This includes: 
 		//1- Executing the BRS file (currently done using Bigrapher tool), 
 		//2- Loading states i.e. reading states from output folder, create Bigraph signature, and convert states into Bigraph objects for matching
 		initialiseBigraphSystem("research_centre_system.big", "research_centre_output");
-		//print sequences 
-		System.out.println("Sequences ["+lst.size()+"]");
-		for (String[] s : lst) {
-			System.out.println(Arrays.toString(s));
-		}
 		
 		//create threads that handle each sequence generated from asset matching
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
@@ -137,6 +139,7 @@ public class IncidentPatternInstantiator {
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			incidentInstances[i].start();
 		}
+		
 	}
 
 	public static void main(String[] args) {

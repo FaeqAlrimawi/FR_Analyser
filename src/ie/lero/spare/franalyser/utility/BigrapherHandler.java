@@ -74,7 +74,7 @@ public class BigrapherHandler implements SystemExecutor {
 		try {
 
 			proc = r.exec(bigrapherValidateCmd + bigrapherFileName);
-
+			
 			Scanner s = new Scanner(proc.getInputStream()).useDelimiter("\\A");
 			String result = s.hasNext() ? s.next() : "";
 
