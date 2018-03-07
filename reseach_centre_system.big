@@ -1,0 +1,77 @@
+# Signature
+
+ctrl Room = 1;
+atomic ctrl SmartLight = 1;
+atomic ctrl HVAC = 1;
+atomic ctrl Server = 1;
+atomic ctrl FireAlarm = 1;
+atomic ctrl Workstation = 1;
+ctrl Laptop = 1;
+ctrl Actor = 0;
+#hallway is not defined as a room since it requires more than one connection
+ctrl Hallway = 3;
+ctrl Building = 0;
+ctrl Floor = 0;
+ctrl DigitalNetwork = 6;
+
+#initial state
+big building_state =
+Building. (/sl1 /sl2 /sl3 /serv /alarm /station
+Floor.(
+Room{toiletRm}.SmartLight{sl1} |
+Room{serverRm}.(SmartLight{sl2} | Server{serv} | FireAlarm{alarm}) |
+Room{cntrlRm}.(SmartLight{sl3} | Workstation{station}) |   
+Hallway{cntrlRm,toiletRm, serverRm}.(/x Actor.Laptop{x}.1)
+) ||
+ DigitalNetwork{sl1,sl2,sl3,serv,alarm,station}.1)
+;   	 
+
+# Reaction rules
+react actor_enter_room=
+Hallway{a,b,c}.(Actor.id | id) | Room{a}.id
+->
+Hallway{a,b,c}.id | Room{a}.(Actor.id | id)
+@[1,0,2];
+
+react actor_exit_room=
+Room{a}.(Actor.(/c1 Laptop{c1}.id | id) | id) | Hallway{a,b,c}.id
+->
+Room{a}.id | Hallway{a,b,c}.(Actor.(/c1 Laptop{c1}.id | id) | id)
+@[2,0,1,3];
+
+react disconnect_smartLight =
+Room{a}.(Actor.(/net1 Laptop{net1}) | SmartLight{net1}) || DigitalNetwork{net1,net2,net3,net4,net5,net6}
+->
+Room{a}.(Actor.(/net1 Laptop{net1}) | /net1 SmartLight{net1}) || DigitalNetwork{net1,net2,net3,net4,net5,net6};
+
+react connect_smartLight =
+Room{a}.(Actor.(/sl1 Laptop{sl1}) | /sl1 SmartLight{sl1}) || DigitalNetwork{sl1,net2,net3,net4,net5,net6}
+->
+Room{a}.(Actor.(/sl1 Laptop{sl1}) | SmartLight{sl1}) || DigitalNetwork{sl1,net2,net3,net4,net5,net6};
+
+big laptop_connected = Room{a}.(Actor.(Laptop{sl1}) | /sl1 SmartLight{sl1}) || DigitalNetwork{sl1,net2,net3,net4,net5,net6};
+
+big laptop_disconnected = Room{a}.(/sl1 Actor.(Laptop{sl1}) | /sl1 SmartLight{sl1}) || DigitalNetwork{net2,sl1, net3,net4,net5,net6};
+
+react connect_externalDevice =
+laptop_disconnected
+->
+laptop_connected;
+
+react disconnect_externalDevice =
+laptop_connected
+->
+laptop_disconnected;
+
+# Reactive system
+begin brs
+  init building_state;
+  rules = [ {actor_enter_room, actor_exit_room, connect_smartLight, disconnect_smartLight, connect_externalDevice, disconnect_externalDevice} ];
+end
+
+
+
+
+
+
+

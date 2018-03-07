@@ -1,5 +1,6 @@
 package ie.lero.spare.franalyser;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 import ie.lero.spare.franalyser.utility.Digraph;
@@ -108,6 +109,11 @@ public class IncidentPatternInstantiator {
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
+		
+		for(String n : am.getIncidentAssetNames()) {
+			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
+		}
+	
 	}
 
 	public static void main(String[] args) {
