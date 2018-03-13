@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.xml.xquery.XQConnection;
@@ -21,8 +22,8 @@ public class XqueryExecuter {
 
 	public static String NS_DECELERATION = "declare namespace cyberPhysical_Incident = \"http://www.example.org/cyberPhysical_Incident\"; "
 			+ "declare namespace environment = \"http://www.example.org/environment\";";
-	public static String INCIDENT_DOC = "incident.cpi";
-	public static String SPACE_DOC = "space.xml";
+	public static String INCIDENT_DOC = "eavesdropping_incident-pattern.cpi";
+	public static String SPACE_DOC = "research_centre_model.environment";
 	public static String INCIDENT_ROOT_ELEMENT = "cyberPhysical_Incident:IncidentDiagram";
 	public static String SPACE_ROOT_ELEMENT = "";
 	
@@ -90,21 +91,21 @@ public class XqueryExecuter {
 		
 		return names;
 	}
-	
-	public static String[] getSystemAssetControls(String [] assets) throws FileNotFoundException, XQException{
+
+/*	public static String[] getSystemAssetControls(String [] assets) throws FileNotFoundException, XQException{
 		String [] names = null;
 		String res=null; 
-		String asts = "";
+		StringBuilder asts = new StringBuilder();
 		for(int i=0;i<assets.length;i++) {
 			if(i<assets.length-1) {
-				asts+="\""+assets[i]+"\",";	
+				asts.append("\""+assets[i]+"\",");	
 			} else {
-				asts+="\""+assets[i]+"\"";	
+				asts.append("\""+assets[i]+"\"");	
 			}
 			
 		}
-	
-		String query = NS_DECELERATION+"doc(\""+SPACE_DOC+"\")//asset[@name=("+asts+")]/concat(data(@control), \"%%\")";
+		System.out.println("Xq:" + asts.toString());
+		String query = NS_DECELERATION+"doc(\""+SPACE_DOC+"\")//asset[@name=("+asts.toString()+")]/concat(data(@control), \"%%\")";
 		
 		res = executeQuery(query);
 		
@@ -112,6 +113,17 @@ public class XqueryExecuter {
 			names = res.split("%%");
 		}
 		
+		return names;
+	}
+	*/
+	
+	public static String[] getSystemAssetControls(String [] assets) throws FileNotFoundException, XQException{
+		String[] names = new String[assets.length];
+		
+		for(int i=0;i<assets.length;i++) {
+			names[i] = executeQuery(NS_DECELERATION+"doc(\""+SPACE_DOC+"\")//asset[@name=\""+assets[i]+"\"]/data(@control)");
+		}
+
 		return names;
 	}
 	

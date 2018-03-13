@@ -49,16 +49,20 @@
             </child>
             <outername name="walkway1"/>
             <outername name="walkway2"/>
-			
-			<outername name="walkway4"/>
-			<outername name="walkway3"/>
-           
+            <outername name="walkway3"/>
+            <outername name="walkway4"/>
             <site/>
           </child>
-		  <child name="room1" control="Room">
-		  <outername name="walkway1"/>
-		  <site/>
-		  </child>
+          <child name="location_SD1" control="Room">
+            <child name="computingDevice1" control="SmartLight">
+              <outername name="cyber1"/>
+            </child>
+            <outername name="walkway1"/>
+            <site/>
+          </child>
+        </entity>
+        <entity name="digitalNetwork" control="InstallationBus">
+          <outername name="cyber1"/>
         </entity>
       </expression>
     </condition>
@@ -73,6 +77,19 @@
             <outername name="walkway4"/>
             <site/>
           </child>
+          <child name="location_SD1" control="Room">
+            <child name="computingDevice1" control="SmartLight">
+              <outername name="cyber1"/>
+            </child>
+            <child name="offender1" control="Actor">
+              <site/>
+            </child>
+            <outername name="walkway1"/>
+            <site/>
+          </child>
+        </entity>
+        <entity name="digitalNetwork">
+          <outername name="cyber1"/>
         </entity>
       </expression>
     </condition>

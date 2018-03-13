@@ -471,6 +471,7 @@ public class SystemInstanceHandler {
 
 		BigraphBuilder biBuilder = new BigraphBuilder(globalBigraphSignature);
 
+	
 		// create roots for the bigraph
 		for (int i = 0; i < numOfRoots; i++) {
 			libBigRoots.add(biBuilder.addRoot(i));
@@ -508,6 +509,7 @@ public class SystemInstanceHandler {
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 
 		LinkedList<Handle> names = new LinkedList<Handle>();
+		
 		for (String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
 		}
@@ -521,6 +523,7 @@ public class SystemInstanceHandler {
 
 		// if the parent is already created as a node in the bigraph
 		if (nodes.containsKey(node.getParent().getId())) {
+			
 			Node n = biBuilder.addNode(node.getControl(), nodes.get(node.getParent().getId()), names);
 			nodes.put(node.getId(), n);
 			return n;

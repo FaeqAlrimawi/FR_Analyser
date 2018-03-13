@@ -144,7 +144,8 @@ public class IncidentPatternInstantiator {
 		//create threads that handle each sequence generated from asset matching
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		String [] incidentAssetNames = am.getIncidentAssetNames();
-		for(int i=0; i<incidentInstances.length;i++) {
+		
+		for(int i=0; i<1;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			incidentInstances[i].start();
 		}	
@@ -199,16 +200,17 @@ public class IncidentPatternInstantiator {
 			BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler);
 			analyser.analyse();
 			
-			 //could be done internally in the PredicateHandler class
-			 Digraph<String> graph = predicateHandler.createActivitiesDigraph();
-			 System.out.println(graph);			 
+			 //creating activities diagraph could be done internally in the PredicateHandler class
+			/* Digraph<String> graph = predicateHandler.createActivitiesDigraph();
+			 System.out.println("activities graph: "+graph);*/			 
 			 
-			// hndlr.getActivitiesSequences();
+			 //dpredicateHandler.getActivitiesSequences();
+			 
 			 //print all possible state transitions satisfying conditions
-			/* if(!hndlr.areAllSatisfied()){
+			 if(!predicateHandler.areAllSatisfied()){
 				 System.out.println("thread ["+threadID+"] activities are not satisfied:" + 
-						 hndlr.getActivitiesNotSatisfied());
-			 }*/
+						 predicateHandler.getActivitiesNotSatisfied());
+			 }
 			 
 			 //how to represent all possible paths to the given sequence of assets?
 			 //incidentpath can be used to hold one path, but now it is holding everything

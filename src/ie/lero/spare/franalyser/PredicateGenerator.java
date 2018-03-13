@@ -127,6 +127,8 @@ public class PredicateGenerator {
 						p.setName(activity+"_pre");
 						condition = convertToMatchedAssets(condition);
 						p.setBigraphPredicate(Predicate.convertJSONtoBigraph(condition));
+						if(p.getBigraphPredicate() != null)
+						System.out.println("PredicateGenerator: "+p.getBigraphPredicate().toString());
 						predHandler.addActivityPredicate(activity, p);
 					}
 				}

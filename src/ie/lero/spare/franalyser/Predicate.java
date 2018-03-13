@@ -509,7 +509,9 @@ public class Predicate {
 				nodes.put(nodeTmp.getId(), nodeTmp);
 				
 				//get outer names	
+				//check if there are any outernames
 				if(!tmpObj2.isNull("outername")) {
+				//check if there are more than one outername	
 				if (JSONArray.class.isAssignableFrom(tmpObj2.get("outername").getClass())){
 					JSONArray tmpAry2 = tmpObj2.getJSONArray("outername");
 					for(int k = 0;k<tmpAry2.length();k++) {
