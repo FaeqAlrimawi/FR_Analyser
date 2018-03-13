@@ -57,6 +57,11 @@
           </child>
 		  <child name="room1" control="Room">
 		  <outername name="walkway1"/>
+            <outername name="walkway2"/>
+			<outername name="walkway3"/>
+			<outername name="walkway4"/>
+			<outername name="walkway5"/>
+			
 		  <site/>
 		  </child>
         </entity>
@@ -77,54 +82,5 @@
       </expression>
     </condition>
   </activity>
-  <activity name="activity2" nextActivities="activity3" previousActivities="activity1" initiator="offender1" targetedAssets="smartDevice1" resources="laptopX" type="UNKNOWN" behaviourType="SUSPICIOUS" description="Connect to network through smart device">
-    <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre2">
-      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>offender1.laptopX</exp>
-        <entity name="digitalNetwork">
-          <outername name="cyber1"/>
-        </entity>
-        <entity name="location_SD1" control="Room">
-          <child name="computingDevice1" control="SmartLight">
-            <outername name="cyber1"/>
-          </child>
-          <child name="offender1" control="Actor">
-            <child name="laptopX" control="Laptop"/>
-            <site/>
-          </child>
-          <site/>
-        </entity>
-      </expression>
-    </condition>
-    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post2">
-      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>offender1.laptopX{wired, cyber2} | smartDevice1{wired, cyber2} || digitalNetwork{cyber2}</exp>
-        <entity name="digitalNetwork">
-          <outername name="cyber1"/>
-        </entity>
-        <entity name="location_SD1" control="Room">
-          <child name="computingDevice1" control="SmartLight"/>
-          <child name="offender1" control="Actor">
-            <child name="laptopX" control="Laptop">
-              <outername name="cyber1"/>
-            </child>
-            <site/>
-          </child>
-          <site/>
-        </entity>
-      </expression>
-    </condition>
-  </activity>
-  <activity name="activity3" previousActivities="activity2" initiator="offender1" resources="laptopX" type="CYBER" behaviourType="MALICIOUS" description="Identify access control in trade secret's location">
-    <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre4">
-      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>laptopX{cyber2} || digitalNetwork{cyber2}.deviceInfo</exp>
-      </expression>
-    </condition>
-    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post4">
-      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>laptopX{cyber2}.deviceInfo || digitalNetwork{cyber2}</exp>
-      </expression>
-    </condition>
-  </activity>
+ 
 </cyberPhysical_Incident:IncidentDiagram>

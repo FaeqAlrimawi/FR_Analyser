@@ -2,6 +2,7 @@ package ie.lero.spare.franalyser;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -453,7 +454,7 @@ public class Predicate {
 		
 		for(BigraphNode n : nodes.values()) {
 			
-			//create bigraph outer names
+			//create bigraph outernames
 			for(String out : n.getOuterNames()) {
 				if(!outerNames.contains(out)) {
 					libBigOuterNames.put(out, biBuilder.addOuterName(out));
@@ -514,6 +515,7 @@ public class Predicate {
 				//check if there are more than one outername	
 				if (JSONArray.class.isAssignableFrom(tmpObj2.get("outername").getClass())){
 					JSONArray tmpAry2 = tmpObj2.getJSONArray("outername");
+
 					for(int k = 0;k<tmpAry2.length();k++) {
 						nodeTmp.addOuterName(((JSONObject)tmpAry2.get(k)).get("name").toString());
 					}
@@ -594,13 +596,20 @@ public class Predicate {
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
+		System.out.println("Predicate-createNode: outername-"+ node.getControl()+" "+node.getOuterNames().toString());
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
 		}
 		
+		//LinkedList<Handle> names = new LinkedList<Handle>();
+	
+	//	names.add(outerNames.get("walkway1"));names.add(outerNames.get("walkway2"));names.add(outerNames.get("walkway3"));names.add(outerNames.get("walkway4"));
+		
+		
 		//if the parent is a root
 		if(node.isParentRoot()) { //if the parent is a root	
 			Node  n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
+			
 			nodes.put(node.getId(), n);
 			return n;
 		}
@@ -613,6 +622,8 @@ public class Predicate {
 		}
 		
 		Node n = biBuilder.addNode(node.getControl(), createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
+		System.out.println(names.toString());
+		System.out.println(n.getPorts().toString());
 		nodes.put(node.getId(), n);
 		return n;
 			
