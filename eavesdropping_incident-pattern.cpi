@@ -43,19 +43,7 @@
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>floorX.(entrance.offender1 | mainLocation)</exp>
         <entity name="floorX" control="floor">
-          <child name="hallway" control="Hallway">
-            <child name="offender1" control="Actor">
-              <site/>
-            </child>
-            <outername name="walkway1"/>
-            <site/>
-          </child>
-          <child name="location_SD1" control="Room">
-            <child name="computingDevice1" control="SmartLight">
-              <outername name="cyber1"/>
-            </child>
-			<outername name="walkway1"/>
-          </child>
+          <site/>
         </entity>
       </expression>
     </condition>

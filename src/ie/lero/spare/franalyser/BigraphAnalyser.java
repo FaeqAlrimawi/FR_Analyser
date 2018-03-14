@@ -6,13 +6,15 @@ import java.util.LinkedList;
 
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
+import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Matcher;
+import it.uniud.mads.jlibbig.core.std.Node;
 
 public class BigraphAnalyser {
 
 	private PredicateHandler predicateHandler;
 	private LinkedList<GraphPath> paths;
-	private boolean isDebugging = false;
+	private boolean isDebugging = true;
 
 	public BigraphAnalyser() {
 		predicateHandler = null;
@@ -85,6 +87,8 @@ public class BigraphAnalyser {
 		Matcher matcher = new Matcher();
 		Bigraph redex = Predicate.convertJSONtoBigraph(o);
 		*/
+		
+		
 		if(pred == null) {
 			return false;
 		}
@@ -95,9 +99,24 @@ public class BigraphAnalyser {
 			return false;
 		}
 		
+		//testing code
+		BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
+		Node bld = bi.addNode("Building", bi.addRoot());
+		Node flr = bi.addNode("Floor", bld);
+		bi.addSite(flr);
+		bi.addSite(bld);
+		redex = bi.makeBigraph();
+		bi.ground();
+		Bigraph redex2 = bi.makeBigraph();
+		
 		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
 		Matcher matcher = new Matcher();
-		System.out.println("\nBigraphAnalyser: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
+		print("\nBigraphAnalyser: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
+		
+		if(matcher.match(redex2, redex).iterator().hasNext()){
+			print("BigraphAnalyser: matchhhhed");
+		}
+
 		for(int i =0; i<states.size();i++) {	
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
