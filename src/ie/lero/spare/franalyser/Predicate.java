@@ -491,8 +491,6 @@ public class Predicate {
 			}
 		}
 		
-		System.out.println("bigraph: "+biBuilder.makeBigraph().toString());
-		
 		return biBuilder.makeBigraph();
 	}
 	
@@ -624,6 +622,7 @@ public class Predicate {
 		
 		//a node will take as outernames only the number specified in the bigraph signature
 		//for example, if a node has arity 2, then it will take only two outernames (the first two) and ignore any other that might exist in the names variable
+		//if the number of outernames defined are less than in the signature, then the rest of outernames will be defined as links (i.e. XX:e)
 		Node n = biBuilder.addNode(node.getControl(), createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
 		nodes.put(node.getId(), n);
 		return n;

@@ -47,32 +47,17 @@
             <child name="offender1" control="Actor">
               <site/>
             </child>
-			<outername name="walkway1"/>
-            <outername name="walkway2"/>
-			<outername name="walkway3"/>
+            <outername name="walkway1"/>
             <site/>
           </child>
-		  <child name="room1" control="Room">
-            <outername name="walkway1"/>
-		  <site/>
-		  </child>
-        </entity>
-      </expression>
-    </condition>
-    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post1">
-      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>offender.laptop</exp>
-        <entity name="floorX" control="floor">
-          <child name="hallway" control="Room">
-            <outername name="walkway1"/>
-            <outername name="walkway2"/>
-            <outername name="walkway3"/>
-            <outername name="walkway4"/>
-            <site/>
+          <child name="location_SD1" control="Room">
+            <child name="computingDevice1" control="SmartLight">
+              <outername name="cyber1"/>
+            </child>
+			<outername name="walkway1"/>
           </child>
         </entity>
       </expression>
     </condition>
   </activity>
- 
 </cyberPhysical_Incident:IncidentDiagram>

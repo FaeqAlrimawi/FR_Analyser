@@ -97,7 +97,7 @@ public class BigraphAnalyser {
 		
 		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
 		Matcher matcher = new Matcher();
-		System.out.println("BigraphAnalyser: "+redex.toString()+"\nstate: "+states.get(0));
+		System.out.println("\nBigraphAnalyser: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
 		for(int i =0; i<states.size();i++) {	
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
