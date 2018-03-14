@@ -523,7 +523,6 @@ public class SystemInstanceHandler {
 
 		// if the parent is already created as a node in the bigraph
 		if (nodes.containsKey(node.getParent().getId())) {
-			
 			Node n = biBuilder.addNode(node.getControl(), nodes.get(node.getParent().getId()), names);
 			nodes.put(node.getId(), n);
 			return n;

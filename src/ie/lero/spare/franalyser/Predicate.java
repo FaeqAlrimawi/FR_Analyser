@@ -481,7 +481,6 @@ public class Predicate {
 			if(libBigNodes.containsKey(nd.getId())) {
 				continue;
 			}
-			
 			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);	
 		}
 		
@@ -491,6 +490,8 @@ public class Predicate {
 				biBuilder.addSite(libBigNodes.get(n.getId()));
 			}
 		}
+		
+		System.out.println("bigraph: "+biBuilder.makeBigraph().toString());
 		
 		return biBuilder.makeBigraph();
 	}
@@ -596,19 +597,20 @@ public class Predicate {
 		}
 	}
 	
+	
+
 	private static Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
-		System.out.println("Predicate-createNode: outername-"+ node.getControl()+" "+node.getOuterNames().toString());
+		
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
-		}	
+		}
 		
 		//if the parent is a root
 		if(node.isParentRoot()) { //if the parent is a root	
 			Node  n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
-			
 			nodes.put(node.getId(), n);
 			return n;
 		}
@@ -620,9 +622,9 @@ public class Predicate {
 			return n;
 		}
 		
+		//a node will take as outernames only the number specified in the bigraph signature
+		//for example, if a node has arity 2, then it will take only two outernames (the first two) and ignore any other that might exist in the names variable
 		Node n = biBuilder.addNode(node.getControl(), createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
-		System.out.println("Predicate-createNode: outername-[names]"+ names.toString());
-		System.out.println(n.getPorts().toString());
 		nodes.put(node.getId(), n);
 		return n;
 			
