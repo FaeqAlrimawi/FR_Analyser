@@ -442,22 +442,22 @@ public class SystemInstanceHandler {
 			outerNames.clear();
 			innerNames.clear();
 
-			// get inner names
-			innerAry = (JSONArray) (tmpObj.get("inner"));
-			itInner = innerAry.iterator();
-			while (itInner.hasNext()) {
-				innerNames.add(itInner.next().get("name").toString());
-				innerNamesFull.addAll(innerNames);
-			}
-
 			// get outer names
 			outerAry = (JSONArray) (tmpObj.get("outer"));
 			itOuter = outerAry.iterator();
 			while (itOuter.hasNext()) {
 				outerNames.add(itOuter.next().get("name").toString());
-				outerNamesFull.addAll(outerNames);
 			}
-
+			outerNamesFull.addAll(outerNames);
+						
+			// get inner names
+			innerAry = (JSONArray) (tmpObj.get("inner"));
+			itInner = innerAry.iterator();
+			while (itInner.hasNext()) {
+				innerNames.add(itInner.next().get("name").toString());
+			}
+			innerNamesFull.addAll(innerNames);
+			
 			// get nodes connected to outer names. Inner names should be
 			// considered
 			portAry = (JSONArray) (tmpObj.get("ports"));

@@ -47,16 +47,14 @@
             <child name="offender1" control="Actor">
               <site/>
             </child>
-            <outername name="walkway1"/>
             <outername name="walkway2"/>
-			
-			<outername name="walkway4"/>
 			<outername name="walkway3"/>
+			<outername name="walkway4"/>
+			
            
             <site/>
           </child>
 		  <child name="room1" control="Room">
-		  <outername name="walkway1"/>
             <outername name="walkway2"/>
 			<outername name="walkway3"/>
 			<outername name="walkway4"/>

@@ -108,6 +108,10 @@ public class Predicate {
 	public void setBigraphPredicate(Bigraph bigraphPredicate) {
 		this.bigraphPredicate = bigraphPredicate;
 	}
+	
+	public void setBigraphPredicate(JSONObject JSONPredicate) {
+		this.bigraphPredicate = Predicate.convertJSONtoBigraph(JSONPredicate);
+	}
 
 	public void setStatesIntraSatisfied(ArrayList<Integer> statesIntraSatisfied) {
 		this.statesIntraSatisfied = statesIntraSatisfied;
@@ -599,12 +603,7 @@ public class Predicate {
 		System.out.println("Predicate-createNode: outername-"+ node.getControl()+" "+node.getOuterNames().toString());
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
-		}
-		
-		//LinkedList<Handle> names = new LinkedList<Handle>();
-	
-	//	names.add(outerNames.get("walkway1"));names.add(outerNames.get("walkway2"));names.add(outerNames.get("walkway3"));names.add(outerNames.get("walkway4"));
-		
+		}	
 		
 		//if the parent is a root
 		if(node.isParentRoot()) { //if the parent is a root	
@@ -622,7 +621,7 @@ public class Predicate {
 		}
 		
 		Node n = biBuilder.addNode(node.getControl(), createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
-		System.out.println(names.toString());
+		System.out.println("Predicate-createNode: outername-[names]"+ names.toString());
 		System.out.println(n.getPorts().toString());
 		nodes.put(node.getId(), n);
 		return n;
