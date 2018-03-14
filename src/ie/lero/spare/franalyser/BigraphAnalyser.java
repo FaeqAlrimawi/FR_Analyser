@@ -7,8 +7,10 @@ import java.util.LinkedList;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
+import it.uniud.mads.jlibbig.core.std.Handle;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
+import it.uniud.mads.jlibbig.core.std.OuterName;
 
 public class BigraphAnalyser {
 
@@ -99,23 +101,42 @@ public class BigraphAnalyser {
 			return false;
 		}
 		
-		//testing code
+		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
+		Matcher matcher = new Matcher();
+		
+		////test code
 		BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		Node bld = bi.addNode("Building", bi.addRoot());
 		Node flr = bi.addNode("Floor", bld);
-		bi.addSite(flr);
+		
+		OuterName o1 = bi.addOuterName("wk1");
+		OuterName o2 = bi.addOuterName("wk2");
+		OuterName o3 = bi.addOuterName("wk3");
+//		bi.closeOuterName(o1);
+//		bi.closeOuterName(o2);
+//		bi.closeOuterName(o3);
+		
+		LinkedList<Handle> hnd = new LinkedList<Handle>();
+		hnd.add(o1);
+		hnd.add(o2);
+		hnd.add(o3);
+		
+		Node hal = bi.addNode("Hallway", flr, hnd);
+		Node rm = bi.addNode("Room", flr, o1);
+	//	Node rm2 = bi.addNode("Room", flr, o2);
+	//	Node rm3 = bi.addNode("Room", flr, o3);
+		Node visitor = bi.addNode("Visitor", hal);
+		
+		bi.addSite(visitor);
 		bi.addSite(bld);
-		redex = bi.makeBigraph();
-		bi.ground();
-		Bigraph redex2 = bi.makeBigraph();
+		bi.addSite(flr);
+//		bi.addSite(rm3);
+//		bi.addSite(rm2);
+		bi.addSite(rm);
+		redex =  bi.makeBigraph();
+		////
 		
-		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
-		Matcher matcher = new Matcher();
 		print("\nBigraphAnalyser: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
-		
-		if(matcher.match(redex2, redex).iterator().hasNext()){
-			print("BigraphAnalyser: matchhhhed");
-		}
 
 		for(int i =0; i<states.size();i++) {	
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){
