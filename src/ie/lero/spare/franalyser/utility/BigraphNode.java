@@ -17,7 +17,7 @@ public class BigraphNode {
 		
 		outerNames = new LinkedList<OuterName>();
 		innerNames = new LinkedList<InnerName>();
-		site = new Site();
+		site = null;
 		childNodes = new LinkedList<BigraphNode>();
 		parentRoot = -1;
 		parent = null;
