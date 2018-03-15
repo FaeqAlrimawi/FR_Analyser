@@ -395,10 +395,20 @@ public class Predicate {
 				if (JSONArray.class.isAssignableFrom(tmpObj.get("innername").getClass())){
 					JSONArray tmpAry = tmpObj.getJSONArray("innername");
 					for(int j = 0;j<tmpAry.length();j++) {
-						node.addInnerName(((JSONObject)tmpAry.get(j)).get("name").toString());
+						String name = ((JSONObject)tmpAry.get(j)).get("name").toString();
+						boolean isClosed = false;
+						if(!((JSONObject)tmpAry.get(j)).isNull("isClosed")) {
+							isClosed = ((JSONObject)tmpAry.get(j)).get("isClosed").toString().equals("true");
+						}
+						node.addInnerName(name, isClosed);
 					}
 				} else {
-					node.addInnerName(((JSONObject)tmpObj.get("innername")).get("name").toString());
+					String name = ((JSONObject)tmpObj.get("innername")).get("name").toString();
+					boolean isClosed = false;
+					if(!((JSONObject)tmpObj.get("innername")).isNull("isClosed")) {
+						isClosed = ((JSONObject)tmpObj.get("innername")).get("isClosed").toString().equals("true");
+					}
+					node.addInnerName(name, isClosed);
 				}
 			}
 			
@@ -428,10 +438,20 @@ public class Predicate {
 			if (JSONArray.class.isAssignableFrom(tmpObj.get("outername").getClass())){
 				JSONArray tmpAry = tmpObj.getJSONArray("outername");
 				for(int j = 0;j<tmpAry.length();j++) {
-					node.addOuterName(((JSONObject)tmpAry.get(j)).get("name").toString());
+					String name = ((JSONObject)tmpAry.get(j)).get("name").toString();
+					boolean isClosed = false;
+					if(!((JSONObject)tmpAry.get(j)).isNull("isClosed")) {
+						isClosed = ((JSONObject)tmpAry.get(j)).get("isClosed").toString().equals("true");
+					}
+					node.addOuterName(name, isClosed);
 				}
 			} else {
-				node.addOuterName(((JSONObject)tmpObj.get("outername")).get("name").toString());
+				String name = ((JSONObject)tmpObj.get("outername")).get("name").toString();
+				boolean isClosed = false;
+				if(!((JSONObject)tmpObj.get("outername")).isNull("isClosed")) {
+					isClosed = ((JSONObject)tmpObj.get("outername")).get("isClosed").toString().equals("true");
+				}
+				node.addOuterName(name, isClosed);
 			}
 			}
 			
@@ -440,10 +460,20 @@ public class Predicate {
 				if (JSONArray.class.isAssignableFrom(tmpObj.get("innername").getClass())){
 					JSONArray tmpAry = tmpObj.getJSONArray("innername");
 					for(int j = 0;j<tmpAry.length();j++) {
-						node.addInnerName(((JSONObject)tmpAry.get(j)).get("name").toString());
+						String name = ((JSONObject)tmpAry.get(j)).get("name").toString();
+						boolean isClosed = false;
+						if(!((JSONObject)tmpAry.get(j)).isNull("isClosed")) {
+							isClosed = ((JSONObject)tmpAry.get(j)).get("isClosed").toString().equals("true");
+						}
+						node.addInnerName(name, isClosed);
 					}
 				} else {
-					node.addInnerName(((JSONObject)tmpObj.get("innername")).get("name").toString());
+					String name = ((JSONObject)tmpObj.get("innername")).get("name").toString();
+					boolean isClosed = false;
+					if(!((JSONObject)tmpObj.get("innername")).isNull("isClosed")) {
+						isClosed = ((JSONObject)tmpObj.get("innername")).get("isClosed").toString().equals("true");
+					}
+					node.addInnerName(name, isClosed);
 				}
 			}
 			
@@ -565,10 +595,20 @@ public class Predicate {
 					if (JSONArray.class.isAssignableFrom(tmpObj2.get("innername").getClass())){
 						JSONArray tmpAry2 = tmpObj2.getJSONArray("innername");
 						for(int k = 0;k<tmpAry2.length();k++) {
-							nodeTmp.addInnerName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+							String name = ((JSONObject)tmpAry.get(k)).get("name").toString();
+							boolean isClosed = false;
+							if(!((JSONObject)tmpAry.get(k)).isNull("isClosed")) {
+								isClosed = ((JSONObject)tmpAry.get(k)).get("isClosed").toString().equals("true");
+							}
+							nodeTmp.addInnerName(name, isClosed);
 						}
 					} else {
-						nodeTmp.addInnerName(((JSONObject)tmpObj2.get("innername")).get("name").toString());
+						String name = ((JSONObject)tmpObj2.get("innername")).get("name").toString();
+						boolean isClosed = false;
+						if(!((JSONObject)tmpObj2.get("innername")).isNull("isClosed")) {
+							isClosed = ((JSONObject)tmpObj2.get("innername")).get("isClosed").toString().equals("true");
+						}
+						nodeTmp.addInnerName(name, isClosed);
 					}
 				}
 				
@@ -618,10 +658,20 @@ public class Predicate {
 				if (JSONArray.class.isAssignableFrom(tmpObj2.get("innername").getClass())){
 					JSONArray tmpAry2 = tmpObj2.getJSONArray("innername");
 					for(int k = 0;k<tmpAry2.length();k++) {
-						nodeTmp.addInnerName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+						String name = ((JSONObject)tmpAry2.get(k)).get("name").toString();
+						boolean isClosed = false;
+						if(!((JSONObject)tmpAry2.get(k)).isNull("isClosed")) {
+							isClosed = ((JSONObject)tmpAry2.get(k)).get("isClosed").toString().equals("true");
+						}
+						nodeTmp.addInnerName(name, isClosed);
 					}
 				} else {
-					nodeTmp.addInnerName(((JSONObject)tmpObj2.get("innername")).get("name").toString());
+					String name = ((JSONObject)tmpObj2.get("innername")).get("name").toString();
+					boolean isClosed = false;
+					if(!((JSONObject)tmpObj2.get("innername")).isNull("isClosed")) {
+						isClosed = ((JSONObject)tmpObj2.get("innername")).get("isClosed").toString().equals("true");
+					}
+					nodeTmp.addInnerName(name, isClosed);
 				}
 			}
 			
@@ -634,7 +684,6 @@ public class Predicate {
 			if (!tmpObj2.isNull("entity")){
 				getChildren(tmpObj2, nodes);
 			}
-
 		}
 	}
 	
@@ -645,6 +694,7 @@ public class Predicate {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
 		
+		//get outernames
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
 		}

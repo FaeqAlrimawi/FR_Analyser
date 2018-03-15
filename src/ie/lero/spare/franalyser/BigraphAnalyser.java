@@ -8,6 +8,7 @@ import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
+import it.uniud.mads.jlibbig.core.std.InnerName;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
@@ -134,7 +135,10 @@ public class BigraphAnalyser {
 //		bi.addSite(rm3);
 //		bi.addSite(rm2);
 		bi.addSite(rm);
-//		redex =  bi.makeBigraph();
+		InnerName n1 = bi.addInnerName("n1", o1);
+		InnerName n2 = bi.addInnerName("n2", o1);
+		
+		redex =  bi.makeBigraph();
 		////
 		
 		print("\nidentifyRelevantStates: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");

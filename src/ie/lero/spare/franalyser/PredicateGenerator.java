@@ -158,8 +158,9 @@ public class PredicateGenerator {
 
 			for(int i=0;i<ary.length();i++) {
 				tmpObj = ary.getJSONObject(i); //gets hold of node info
+				String name = tmpObj.get("name").toString();
 				for(int j=0;j<incidentAssetNames.length;j++) {
-					if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+					if(incidentAssetNames[j].equals(name)) {
 						tmpObj.put("name", spaceAssetSet[j]);
 						tmpObj.put("control", systemAssetControls[j]);
 						break;
@@ -167,22 +168,23 @@ public class PredicateGenerator {
 				}
 				
 				//get childern
-				if(!tmpObj.isNull("child")) {
+				if(!tmpObj.isNull("entity")) {
 					getChildren(tmpObj);
 				}
 				
 			}
 			} else { //if there is only one entity
 				tmpObj = (JSONObject)obj.get("entity");; //gets hold of node info
+				String name = tmpObj.get("name").toString();
 				for(int j=0;j<incidentAssetNames.length;j++) {
-					if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+					if(incidentAssetNames[j].equals(name)) {
 						tmpObj.put("name", spaceAssetSet[j]);
 						tmpObj.put("control", systemAssetControls[j]);
 						break;
 					}
 				}
 				//get childern
-				if(!tmpObj.isNull("child")) {
+				if(!tmpObj.isNull("entity")) {
 					getChildren(tmpObj);
 				}	
 			
@@ -198,12 +200,13 @@ public class PredicateGenerator {
 	
 private  void getChildren(JSONObject obj) {
 		
-		if (JSONArray.class.isAssignableFrom(obj.get("child").getClass())){
-			JSONArray tmpAry = (JSONArray)obj.get("child");
+		if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())){
+			JSONArray tmpAry = (JSONArray)obj.get("entity");
 			for(int i=0;i<tmpAry.length();i++) {
 				JSONObject tmpObj = tmpAry.getJSONObject(i); //gets hold of node info
+				String name = tmpObj.get("name").toString();
 				for(int j=0;j<incidentAssetNames.length;j++) {
-					if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+					if(incidentAssetNames[j].equals(name)) {
 						tmpObj.put("name", spaceAssetSet[j]);
 						tmpObj.put("control", systemAssetControls[j]);
 						break;
@@ -211,15 +214,16 @@ private  void getChildren(JSONObject obj) {
 					}
 				
 				//iterate over other children
-				if (!tmpObj.isNull("child")){
+				if (!tmpObj.isNull("entity")){
 					getChildren( tmpObj);
 				}
 
 			}
 		} else {
-			JSONObject tmpObj = (JSONObject)obj.get("child");
+			JSONObject tmpObj = (JSONObject)obj.get("entity");
+			String name = tmpObj.get("name").toString();
 			for(int j=0;j<incidentAssetNames.length;j++) {
-				if(incidentAssetNames[j].equals(tmpObj.get("name").toString())) {
+				if(incidentAssetNames[j].equals(name)) {
 					tmpObj.put("name", spaceAssetSet[j]);
 					tmpObj.put("control", systemAssetControls[j]);
 					break;
@@ -227,7 +231,7 @@ private  void getChildren(JSONObject obj) {
 				}
 			
 			//iterate over other children
-			if (!tmpObj.isNull("child")){
+			if (!tmpObj.isNull("entity")){
 				getChildren( tmpObj);
 			}
 		}
