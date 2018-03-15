@@ -361,7 +361,7 @@ public class BigraphNode {
 	
 	}
 	
-	class OuterName extends BRSName {
+	public class OuterName extends BRSName {
 		
 		public OuterName() {
 			super();
@@ -377,7 +377,7 @@ public class BigraphNode {
 		
 	}
 	
-	class InnerName extends BRSName {
+	public class InnerName extends BRSName {
 		
 		public InnerName() {
 			super();
@@ -392,7 +392,7 @@ public class BigraphNode {
 		}
 	}
 	
-	class Site extends BRSName {
+	public class Site extends BRSName {
 		
 		public Site() {
 			super();

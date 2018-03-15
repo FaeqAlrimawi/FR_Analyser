@@ -332,8 +332,8 @@ public class Predicate {
 		HashMap<String,BigraphNode> nodes = new HashMap<String, BigraphNode>();
 		BigraphNode node;
 		JSONArray ary;
-		LinkedList<String> outerNames = new LinkedList<String>();
-		LinkedList<String> innerNames = new LinkedList<String>();
+		LinkedList<BigraphNode.OuterName> outerNames = new LinkedList<BigraphNode.OuterName>();
+		LinkedList<BigraphNode.InnerName> innerNames = new LinkedList<BigraphNode.InnerName>();
 		
 		HashMap<String, OuterName> libBigOuterNames = new HashMap<String, OuterName>();
 		HashMap<String, InnerName> libBigInnerNames = new HashMap<String, InnerName>();
@@ -381,7 +381,12 @@ public class Predicate {
 					node.addOuterName(name, isClosed);
 				}
 			} else {
-				node.addOuterName(((JSONObject)tmpObj.get("outername")).get("name").toString());
+				String name = ((JSONObject)tmpObj.get("outername")).get("name").toString();
+				boolean isClosed = false;
+				if(!((JSONObject)tmpObj.get("outername")).isNull("isClosed")) {
+					isClosed = ((JSONObject)tmpObj.get("outername")).get("isClosed").toString().equals("true");
+				}
+				node.addOuterName(name, isClosed);
 			}
 			}
 			
@@ -464,23 +469,21 @@ public class Predicate {
 		for(BigraphNode n : nodes.values()) {
 			
 			//create bigraph outernames
-			for(String out : n.getOuterNames()) {
+			for(BigraphNode.OuterName out : n.getOuterNamesObjects()) {
 				if(!outerNames.contains(out)) {
-					libBigOuterNames.put(out, biBuilder.addOuterName(out));
+					libBigOuterNames.put(out.getName(), biBuilder.addOuterName(out.getName()));
 					outerNames.add(out);
 				}	
 			}
 			
 			//create bigraph inner names
-			for(String in : n.getInnerNames()) {
+			for(BigraphNode.InnerName in : n.getInnerNamesObjects()) {
 				if(!innerNames.contains(in)) {
-					libBigInnerNames.put(in, biBuilder.addInnerName(in));
+					libBigInnerNames.put(in.getName(), biBuilder.addInnerName(in.getName()));
 					innerNames.add(in);
 				}	
 			}
-			
 		}
-	
 	
 		//initial creation of bigraph nodes
 		for(BigraphNode nd : nodes.values()) {
@@ -489,6 +492,20 @@ public class Predicate {
 			}
 			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);	
 		}
+		
+		//close outernames after creating nodes of the Bigraph
+		for(BigraphNode.OuterName out : outerNames) {
+			if(out.isClosed()) {
+				biBuilder.closeOuterName(out.getName());
+			}
+		}
+		
+		//close innernames after creating nodes of the Bigraph
+		for(BigraphNode.InnerName in : innerNames) {
+			if(in.isClosed()) {
+				biBuilder.closeInnerName(in.getName());
+			}
+		}		
 		
 		//add sites to bigraph
 		for(BigraphNode n : nodes.values()) {
@@ -526,10 +543,20 @@ public class Predicate {
 					JSONArray tmpAry2 = tmpObj2.getJSONArray("outername");
 
 					for(int k = 0;k<tmpAry2.length();k++) {
-						nodeTmp.addOuterName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+						String name = ((JSONObject)tmpAry2.get(k)).get("name").toString();
+						boolean isClosed = false;
+						if(!((JSONObject)tmpAry2.get(k)).isNull("isClosed")) {
+							isClosed = ((JSONObject)tmpAry2.get(k)).get("isClosed").toString().equals("true");
+						}
+						nodeTmp.addOuterName(name, isClosed);
 					}
 				} else {
-					nodeTmp.addOuterName(((JSONObject)tmpObj2.get("outername")).get("name").toString());
+					String name = ((JSONObject)tmpObj2.get("outername")).get("name").toString();
+					boolean isClosed = false;
+					if(!((JSONObject)tmpObj2.get("outername")).isNull("isClosed")) {
+						isClosed = ((JSONObject)tmpObj2.get("outername")).get("isClosed").toString().equals("true");
+					}
+					nodeTmp.addOuterName(name, isClosed);
 				}
 				}
 				
@@ -551,7 +578,7 @@ public class Predicate {
 				}
 				
 				//iterate over other children
-				if (!tmpObj2.isNull("child")){
+				if (!tmpObj2.isNull("entity")){
 					getChildren( tmpObj2, nodes);
 				}
 
@@ -569,10 +596,20 @@ public class Predicate {
 			if (JSONArray.class.isAssignableFrom(tmpObj2.get("outername").getClass())){
 				JSONArray tmpAry2 = tmpObj2.getJSONArray("outername");
 				for(int k = 0;k<tmpAry2.length();k++) {
-					nodeTmp.addOuterName(((JSONObject)tmpAry2.get(k)).get("name").toString());
+					String name = ((JSONObject)tmpAry2.get(k)).get("name").toString();
+					boolean isClosed = false;
+					if(!((JSONObject)tmpAry2.get(k)).isNull("isClosed")) {
+						isClosed = ((JSONObject)tmpAry2.get(k)).get("isClosed").toString().equals("true");
+					}
+					nodeTmp.addOuterName(name, isClosed);
 				}
 			} else {
-				nodeTmp.addOuterName(((JSONObject)tmpObj2.get("outername")).get("name").toString());
+				String name = ((JSONObject)tmpObj2.get("outername")).get("name").toString();
+				boolean isClosed = false;
+				if(!((JSONObject)tmpObj2.get("outername")).isNull("isClosed")) {
+					isClosed = ((JSONObject)tmpObj2.get("outername")).get("isClosed").toString().equals("true");
+				}
+				nodeTmp.addOuterName(name, isClosed);
 			}
 			}
 			
