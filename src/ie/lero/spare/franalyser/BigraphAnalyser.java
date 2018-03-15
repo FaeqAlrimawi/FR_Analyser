@@ -140,9 +140,14 @@ public class BigraphAnalyser {
 		
 	//	redex =  bi.makeBigraph();
 		////
-		
+		print("Hallway arity: "+SystemInstanceHandler.getGlobalBigraphSignature().getByName("Hallway").getArity());
 		print("\nidentifyRelevantStates: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
-
+		
+		//check outernames defined each node whether they are less or more than that of in a control in the signature
+		//assuming knowledge is partial, if the number of outernames in a redex node is less than that in the signature (and knolwdege is partial for that node),
+		//then add outernames to equal the number of outernames in the signature for that node.
+		//if knowledge is complete, then any 
+		
 		for(int i =0; i<states.size();i++) {	
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
