@@ -41,21 +41,27 @@
   <activity name="activity1" nextActivities="activity2" goals="goal2" initiator="offender1" type="UNKNOWN" behaviourType="UNKNOWN" description="enter location containing a vulnerable smart device that is connected to the digital network">
     <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre1">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>floorX.(entrance.offender1 | mainLocation)</exp>
-        <entity name="floorX" control="floor">
-          <child name="hallway" control="Hallway">
-            <child name="offender1" control="Actor">
+<entity name="floorX" control="floor">
+          <entity name="hallway" control="Hallway">
+            <entity name="offender1" control="Actor">
               <site/>
-            </child>
-            <outername name="walkway1"/>
-			<outername name="walkway2"/>
-			<outername name="walkway3"/>
+            </entity>
+            <outername name="walkway1" isClosed="true"/>
+            <outername name="walkway2"/>
+            <outername name="walkway3"/>
+            <outername name="walkway4"/>
             <site/>
-          </child>
-          <child name="location_SD1" control="Room">
+          </entity>
+          <entity name="location_SD1" control="Room">
+            <entity name="computingDevice1" control="SmartLight">
+              <outername name="cyber1"/>
+            </entity>
             <outername name="walkway1"/>
             <site/>
-          </child>
+          </entity>
+        </entity>
+        <entity name="digitalNetwork" control="InstallationBus">
+          <outername name="cyber1"/>
         </entity>
       </expression>
     </condition>

@@ -113,7 +113,7 @@ public class BigraphAnalyser {
 		OuterName o2 = bi.addOuterName("wk2");
 		OuterName o3 = bi.addOuterName("wk3");
 //		bi.closeOuterName(o1);
-//		bi.closeOuterName(o2);
+		bi.closeOuterName(o2);
 //		bi.closeOuterName(o3);
 		
 		LinkedList<Handle> hnd = new LinkedList<Handle>();
@@ -123,6 +123,7 @@ public class BigraphAnalyser {
 		
 		Node hal = bi.addNode("Hallway", flr, hnd);
 		Node rm = bi.addNode("Room", flr, o1);
+	
 	//	Node rm2 = bi.addNode("Room", flr, o2);
 	//	Node rm3 = bi.addNode("Room", flr, o3);
 		Node visitor = bi.addNode("Visitor", hal);
@@ -133,10 +134,10 @@ public class BigraphAnalyser {
 //		bi.addSite(rm3);
 //		bi.addSite(rm2);
 		bi.addSite(rm);
-		redex =  bi.makeBigraph();
+//		redex =  bi.makeBigraph();
 		////
 		
-		print("\nBigraphAnalyser: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
+		print("\nidentifyRelevantStates: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
 
 		for(int i =0; i<states.size();i++) {	
 			if(matcher.match(states.get(i), redex).iterator().hasNext()){

@@ -373,7 +373,12 @@ public class Predicate {
 			if (JSONArray.class.isAssignableFrom(tmpObj.get("outername").getClass())){
 				JSONArray tmpAry = tmpObj.getJSONArray("outername");
 				for(int j = 0;j<tmpAry.length();j++) {
-					node.addOuterName(((JSONObject)tmpAry.get(j)).get("name").toString());
+					String name = ((JSONObject)tmpAry.get(j)).get("name").toString();
+					boolean isClosed = false;
+					if(!((JSONObject)tmpAry.get(j)).isNull("isClosed")) {
+						isClosed = ((JSONObject)tmpAry.get(j)).get("isClosed").toString().equals("true");
+					}
+					node.addOuterName(name, isClosed);
 				}
 			} else {
 				node.addOuterName(((JSONObject)tmpObj.get("outername")).get("name").toString());
@@ -398,7 +403,7 @@ public class Predicate {
 			}
 			
 			//get childern
-			if(!tmpObj.isNull("child")) {
+			if(!tmpObj.isNull("entity")) {
 				getChildren(tmpObj, nodes);
 			}
 			
@@ -443,7 +448,7 @@ public class Predicate {
 			}
 			
 			//get childern
-			if(!tmpObj.isNull("child")) {
+			if(!tmpObj.isNull("entity")) {
 				getChildren(tmpObj, nodes);
 			}
 			
@@ -502,8 +507,8 @@ public class Predicate {
 	 */
 	private static void getChildren(JSONObject obj, HashMap<String,BigraphNode> nodes) {
 		
-		if (JSONArray.class.isAssignableFrom(obj.get("child").getClass())){
-			JSONArray tmpAry = (JSONArray)obj.get("child");
+		if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())){
+			JSONArray tmpAry = (JSONArray)obj.get("entity");
 			for(int j=0;j<tmpAry.length();j++) {
 				BigraphNode nodeTmp = new BigraphNode();
 				JSONObject tmpObj2 = (JSONObject)tmpAry.getJSONObject(j);
@@ -553,7 +558,7 @@ public class Predicate {
 			}
 		} else {
 			BigraphNode nodeTmp = new BigraphNode();
-			JSONObject tmpObj2 = (JSONObject)obj.get("child");
+			JSONObject tmpObj2 = (JSONObject)obj.get("entity");
 			nodeTmp.setControl(tmpObj2.get("control").toString());
 			nodeTmp.setId(tmpObj2.get("name").toString());
 			nodeTmp.setParent(nodes.get(obj.get("name")));
@@ -589,7 +594,7 @@ public class Predicate {
 			}
 			
 			//iterate over other children
-			if (!tmpObj2.isNull("child")){
+			if (!tmpObj2.isNull("entity")){
 				getChildren(tmpObj2, nodes);
 			}
 
