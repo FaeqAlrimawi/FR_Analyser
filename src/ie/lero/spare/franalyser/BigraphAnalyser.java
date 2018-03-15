@@ -138,7 +138,7 @@ public class BigraphAnalyser {
 		InnerName n1 = bi.addInnerName("n1", o1);
 		InnerName n2 = bi.addInnerName("n2", o1);
 		
-		redex =  bi.makeBigraph();
+	//	redex =  bi.makeBigraph();
 		////
 		
 		print("\nidentifyRelevantStates: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
