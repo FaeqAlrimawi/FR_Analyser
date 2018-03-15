@@ -476,6 +476,7 @@ public class Predicate {
 			
 		}
 	
+	
 		//initial creation of bigraph nodes
 		for(BigraphNode nd : nodes.values()) {
 			if(libBigNodes.containsKey(nd.getId())) {

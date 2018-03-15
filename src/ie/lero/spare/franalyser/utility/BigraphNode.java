@@ -5,52 +5,102 @@ import java.util.LinkedList;
 public class BigraphNode {
 	
 	private String id;
-	private LinkedList<String> outerNames;
-	private LinkedList<String> innerNames;
-	private boolean site;
+	private LinkedList<OuterName> outerNames;
+	private LinkedList<InnerName> innerNames;
+	private Site site;
 	private LinkedList<BigraphNode> childNodes;
 	private String control;
 	private BigraphNode parent;
 	private int parentRoot;
 	
 	public BigraphNode() {
-		outerNames = new LinkedList<String>();
-		innerNames = new LinkedList<String>();
-		site = false;
+		
+		outerNames = new LinkedList<OuterName>();
+		innerNames = new LinkedList<InnerName>();
+		site = new Site();
 		childNodes = new LinkedList<BigraphNode>();
 		parentRoot = -1;
 		parent = null;
 	}
 
-	public void addOuterName(String name) {
-		if(!outerNames.contains(name)) {
-			outerNames.add(name);
+	public boolean addOuterName(String name, boolean isClosed) {
+		
+		OuterName tmp = new OuterName(name, isClosed);
+		
+		if(!outerNames.contains(tmp)) {
+			outerNames.add(tmp);
+			return true;
 		}
+		
+		return false;
 		
 	}
 	
-	public void addOuterNames(LinkedList<String> names) {
+	public boolean addOuterName(String name) {
+		return addOuterName(name, false);
+	}
+	
+	public boolean addOuterNames(LinkedList<String> names) {
+		
 		if(names != null && !names.isEmpty()){
 			for(String n : names) {
-				addOuterName(n);
+				addOuterName(n, false);
 			}
+			return true;
 		}
 		
+		return false;
 	}
 	
-	public void addInnerName(String name) {
-		if(!innerNames.contains(name)) {
-			innerNames.add(name);
+	public boolean addOuterNames(OuterName name) {
+		
+		if(name == null) {
+			return false;
 		}
+		
+		outerNames.add(name);
+		
+		return true;
 	}
 	
-	public void addInnerNames(LinkedList<String> names) {
+	public boolean addInnerName(String name, boolean isClosed) {
+		
+		InnerName tmp = new InnerName(name, isClosed);
+		
+		if(!innerNames.contains(tmp)) {
+			innerNames.add(tmp);
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean addInnerName(String name) {
+		
+		return addInnerName(name, false);
+	}
+	
+	public boolean addInnerNames(LinkedList<String> names) {
+		
 		if(names != null && !names.isEmpty()){
 			for(String n : names) {
-				addInnerName(n);
+				addInnerName(n, false);
 			}
+			return true;
 		}
 		
+		return false;
+	}
+	
+	public boolean addInnerNames(InnerName name) {
+		
+		if(name == null) {
+			return false;
+		}
+		
+		innerNames.add(name);
+		
+		return true;
 	}
 	
 	public void addChildNode(BigraphNode node) {
@@ -86,29 +136,77 @@ public class BigraphNode {
 	}
 
 	public LinkedList<String> getOuterNames() {
+		LinkedList<String> names = new LinkedList<String>();
+		
+		if(outerNames != null) {
+			for(OuterName n : outerNames) {
+				names.add(n.getName());
+			}
+		}
+		
+		return names;
+	}
+	
+	public LinkedList<OuterName> getOuterNamesObjects() {
 		return outerNames;
 	}
 
 	public void setOuterNames(LinkedList<String> outerNames) {
-		this.outerNames = outerNames;
+		this.outerNames.clear();
+		addOuterNames(outerNames);
 	}
 
 	public LinkedList<String> getInnerNames() {
+		LinkedList<String> names = new LinkedList<String>();
+		
+		if(innerNames != null) {
+			for(InnerName n : innerNames) {
+				names.add(n.getName());
+			}
+		}
+		
+		return names;
+	}
+	
+	public LinkedList<InnerName> getInnerNamesObjects() {
 		return innerNames;
 	}
 
 	public void setInnerNames(LinkedList<String> innerNames) {
-		this.innerNames = innerNames;
+		innerNames.clear();
+		addInnerNames(innerNames);
 	}
 
 	public boolean hasSite() {
-		return site;
+		if(site != null) {
+			return true;
+		}
+		
+		return false;
 	}
 
-	public void setSite(boolean site) {
-		this.site = site;
+	public void setSite(boolean setSite) {
+		
+		if(setSite) {
+			if(site == null) {
+				site = new Site();
+			}
+		} else {
+			site = null;
+		}
+		
 	}
 
+	public void setSite(String name, boolean isClosed) {
+		
+		if(site == null) {
+			site = new Site(name, isClosed);	
+		}
+		
+		site.setName(name);
+		site.setClosed(isClosed);
+	}
+	
 	public LinkedList<BigraphNode> getChildNodes() {
 		return childNodes;
 	}
@@ -209,5 +307,104 @@ public class BigraphNode {
 		return res.toString();
 	}
 	
+	class BRSName {
+		
+		protected String name;
+		protected boolean isClosed;
+		
+		public BRSName(){
+			name ="";
+			isClosed = false;
+		}
+		
+		public BRSName(String name){
+			this.name = name;
+			isClosed = false;
+		}
+		
+		public BRSName(String name, boolean isClosed){
+			this.name = name;
+			this.isClosed = isClosed;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public boolean isClosed() {
+			return isClosed;
+		}
+
+		public void setClosed(boolean isClosed) {
+			this.isClosed = isClosed;
+		}
+		
+		@Override
+		public boolean equals(Object other){
+		    boolean result;
+		    
+		    if((other == null) || (!BRSName.class.isAssignableFrom(other.getClass()))){
+		        return false;
+		    } 
+
+		     BRSName otherName = (BRSName)other;
+		     
+		     //equality based on name matching
+		     result = name.equals(otherName.name);
+
+		    return result;
+		} // end equals
+	
+	}
+	
+	class OuterName extends BRSName {
+		
+		public OuterName() {
+			super();
+		}
+		
+		public OuterName(String name){
+			super(name);
+		}
+		
+		public OuterName(String name, boolean isClosed) {
+			super(name, isClosed);
+		}
+		
+	}
+	
+	class InnerName extends BRSName {
+		
+		public InnerName() {
+			super();
+		}
+		
+		public InnerName(String name){
+			super(name);
+		}
+		
+		public InnerName(String name, boolean isClosed) {
+			super(name, isClosed);
+		}
+	}
+	
+	class Site extends BRSName {
+		
+		public Site() {
+			super();
+		}
+		
+		public Site(String name){
+			super(name);
+		}
+		
+		public Site(String name, boolean isClosed) {
+			super(name, isClosed);
+		}
+	}
 
 }
