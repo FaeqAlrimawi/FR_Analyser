@@ -113,25 +113,31 @@ public class PredicateGenerator {
 	*/
 	public PredicateHandler generatePredicates() {
 
-		PredicateType [] types = {PredicateType.Precondition, PredicateType.Postcondition};
-		
-		try {		
-				HashMap<String, IncidentActivity> activities = createIncidentActivities();
-				
-				for (String activity : activities.keySet()) {
-					for(PredicateType type : types) {
-						JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
-						Predicate p = new Predicate();
-						p.setIncidentActivity(activities.get(activity));
-						p.setPredicateType(type);
-						p.setName(activity+"_pre");
-						condition = convertToMatchedAssets(condition);
-						p.setBigraphPredicate(condition);
-						if(p.getBigraphPredicate() != null)
+		PredicateType[] types = { PredicateType.Precondition, PredicateType.Postcondition };
+
+		try {
+			
+			// create activties of the incident
+			HashMap<String, IncidentActivity> activities = createIncidentActivities();
+
+			//get controls for the asset set from the system file
+			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
+
+			//create the Bigraph representation (from LibBig library) for the pre/postconditions of the activities
+			for (String activity : activities.keySet()) {
+				for (PredicateType type : types) {
+					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
+					Predicate p = new Predicate();
+					p.setIncidentActivity(activities.get(activity));
+					p.setPredicateType(type);
+					p.setName(activity + "_pre");
+					convertToMatchedAssets(condition);
+					p.setBigraphPredicate(condition);
+					if (p.getBigraphPredicate() != null)
 						predHandler.addActivityPredicate(activity, p);
-					}
 				}
-					
+			}
+
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -139,10 +145,7 @@ public class PredicateGenerator {
 		return predHandler;
 	}
 
-	private JSONObject convertToMatchedAssets(JSONObject obj) {
-		
-		JSONArray ary;
-		JSONObject tmpObj;
+	/*private JSONObject convertToMatchedAssets2(JSONObject obj) {
 		
 		try {
 			
@@ -152,44 +155,8 @@ public class PredicateGenerator {
 			
 			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
 			
-			//get all entities (they are divided by || as Bigraph)
-			if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())){	
-			ary = (JSONArray) obj.get("entity");
-
-			for(int i=0;i<ary.length();i++) {
-				tmpObj = ary.getJSONObject(i); //gets hold of node info
-				String name = tmpObj.get("name").toString();
-				for(int j=0;j<incidentAssetNames.length;j++) {
-					if(incidentAssetNames[j].equals(name)) {
-						tmpObj.put("name", spaceAssetSet[j]);
-						tmpObj.put("control", systemAssetControls[j]);
-						break;
-					}
-				}
-				
-				//get childern
-				if(!tmpObj.isNull("entity")) {
-					getChildren(tmpObj);
-				}
-				
-			}
-			} else { //if there is only one entity
-				tmpObj = (JSONObject)obj.get("entity");; //gets hold of node info
-				String name = tmpObj.get("name").toString();
-				for(int j=0;j<incidentAssetNames.length;j++) {
-					if(incidentAssetNames[j].equals(name)) {
-						tmpObj.put("name", spaceAssetSet[j]);
-						tmpObj.put("control", systemAssetControls[j]);
-						break;
-					}
-				}
-				//get childern
-				if(!tmpObj.isNull("entity")) {
-					getChildren(tmpObj);
-				}	
+			getChildren(obj);
 			
-			}
-
 			} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -197,43 +164,38 @@ public class PredicateGenerator {
 		
 		return obj;
 	}
-	
-private  void getChildren(JSONObject obj) {
-		
-		if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())){
-			JSONArray tmpAry = (JSONArray)obj.get("entity");
-			for(int i=0;i<tmpAry.length();i++) {
-				JSONObject tmpObj = tmpAry.getJSONObject(i); //gets hold of node info
-				String name = tmpObj.get("name").toString();
-				for(int j=0;j<incidentAssetNames.length;j++) {
-					if(incidentAssetNames[j].equals(name)) {
-						tmpObj.put("name", spaceAssetSet[j]);
-						tmpObj.put("control", systemAssetControls[j]);
-						break;
-						}
-					}
-				
-				//iterate over other children
-				if (!tmpObj.isNull("entity")){
-					getChildren( tmpObj);
-				}
+	*/
+	private void convertToMatchedAssets(JSONObject obj) {
 
-			}
+		JSONArray tmpAry;
+
+		if (obj.isNull("entity")) {
+			return;
+		}
+
+		if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())) {
+			tmpAry = (JSONArray) obj.get("entity");
 		} else {
-			JSONObject tmpObj = (JSONObject)obj.get("entity");
+			tmpAry = new JSONArray();
+			tmpAry.put((JSONObject) obj.get("entity"));
+		}
+		for (int i = 0; i < tmpAry.length(); i++) {
+			JSONObject tmpObj = tmpAry.getJSONObject(i); // gets hold of node
+															// info
 			String name = tmpObj.get("name").toString();
-			for(int j=0;j<incidentAssetNames.length;j++) {
-				if(incidentAssetNames[j].equals(name)) {
+			for (int j = 0; j < incidentAssetNames.length; j++) {
+				if (incidentAssetNames[j].equals(name)) {
 					tmpObj.put("name", spaceAssetSet[j]);
 					tmpObj.put("control", systemAssetControls[j]);
 					break;
-					}
 				}
-			
-			//iterate over other children
-			if (!tmpObj.isNull("entity")){
-				getChildren( tmpObj);
 			}
+
+			// iterate over other children
+			if (!tmpObj.isNull("entity")) {
+				convertToMatchedAssets(tmpObj);
+			}
+
 		}
 	}
 

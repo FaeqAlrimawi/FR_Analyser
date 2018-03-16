@@ -11,7 +11,7 @@
   <asset connections="location_SD1-Hallway" parentEntity="floorX" containedEntities="smartDevice1" name="location_SD1">
     <type name="Room"/>
   </asset>
-  <asset connections="cyber1" parentEntity="location_SD1" name="smartDevice1" status="">
+  <asset connections="cyber1" parentEntity="location_SD1" name="smartDevice1" status="" knowledge="EXACT">
     <type name="SmartLight"/>
   </asset>
   <asset connections="cyber1" name="digitalNetwork" status="">

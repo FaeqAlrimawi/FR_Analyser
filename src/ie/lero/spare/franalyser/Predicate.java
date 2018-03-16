@@ -25,7 +25,7 @@ import it.uniud.mads.jlibbig.core.std.Site;
 
 public class Predicate {
 	
-	private String predicate; //Bigrapher format
+	private String predicate; //Bigrapher format (to be deleted)
 	private Bigraph bigraphPredicate;
 	private PredicateType predicateType; //precondition, postcondition
 	private String name;
@@ -381,6 +381,7 @@ public class Predicate {
 		}
 		
 		//close outernames after creating nodes of the Bigraph
+		//this turns them into edges (or links) in the Bigraph object
 		for(BigraphNode.OuterName out : outerNames) {
 			if(out.isClosed()) {
 				biBuilder.closeOuterName(out.getName());
@@ -499,7 +500,16 @@ public class Predicate {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
 		
-		//get outernames
+		////get outernames
+		//if knowledge is partial for the node, then if number of outernames less than that in the signature, then the rest are either:
+		
+		//1-created, added for that node.
+		
+		//2-create, added, then closed for that node.
+		//3-created, closed, then add for that node
+		//if it is more than that in the signature, then nothing will be done.
+		//if knowledge is exact and number of outernames are different, then nothing will be done
+		
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
 		}

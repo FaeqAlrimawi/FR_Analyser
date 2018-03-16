@@ -12,7 +12,7 @@ public class BigraphNode {
 	private String control;
 	private BigraphNode parent;
 	private int parentRoot;
-	
+	private boolean isKnowledgePartial;
 	public BigraphNode() {
 		
 		outerNames = new LinkedList<OuterName>();
@@ -21,6 +21,7 @@ public class BigraphNode {
 		childNodes = new LinkedList<BigraphNode>();
 		parentRoot = -1;
 		parent = null;
+		isKnowledgePartial = false;
 	}
 
 	public boolean addOuterName(String name, boolean isClosed) {
@@ -36,6 +37,16 @@ public class BigraphNode {
 		
 	}
 	
+	
+	
+	public boolean isKnowledgePartial() {
+		return isKnowledgePartial;
+	}
+
+	public void setKnowledgePartial(boolean isKnowledgePartial) {
+		this.isKnowledgePartial = isKnowledgePartial;
+	}
+
 	public boolean addOuterName(String name) {
 		return addOuterName(name, false);
 	}

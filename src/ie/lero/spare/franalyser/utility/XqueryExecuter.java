@@ -208,12 +208,28 @@ public class XqueryExecuter {
 		try {
 			String [] ast = {"toilet", "light1"};
 			
-		System.out.println(Arrays.toString(getSystemAssetControls("a")));
+		//System.out.println(Arrays.toString(getSystemAssetControls("a")));
+		isKnowledgePartial("smartDevice1");
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+	}
+	
+	public static boolean isKnowledgePartial(String entityName) throws FileNotFoundException, XQException {
+		
+		String query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//asset[@name=\""+entityName+"\"]/data(@knowledge)";
+		
+		String res = executeQuery(query);
+		
+		//if knowldege is EXACT then it returns false
+		//default is to be partial (if it does not exist as an attribute in the pattern xml)
+		if(res != null && !res.isEmpty() && res.equals("EXACT")) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 		 
