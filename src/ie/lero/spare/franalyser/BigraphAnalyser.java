@@ -140,7 +140,7 @@ public class BigraphAnalyser {
 		
 	//	redex =  bi.makeBigraph();
 		////
-		print("Hallway arity: "+SystemInstanceHandler.getGlobalBigraphSignature().getByName("Hallway").getArity());
+	
 		print("\nidentifyRelevantStates: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature

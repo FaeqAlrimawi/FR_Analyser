@@ -515,9 +515,9 @@ public class Predicate {
 				while (difference < 0) {
 					//then the rest are either:
 					//1-created, added for that node.
-					OuterName tmp = biBuilder.addOuterName();
+					/*OuterName tmp = biBuilder.addOuterName();
 					outerNames.put(tmp.getName(), tmp);
-					node.addOuterName(tmp.getName());
+					node.addOuterName(tmp.getName());*/
 					difference++;
 					//2-create, added, then closed for that node.
 					//3-created, closed, then add for that node

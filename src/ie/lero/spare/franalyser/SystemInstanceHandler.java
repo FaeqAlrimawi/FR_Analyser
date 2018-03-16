@@ -494,6 +494,11 @@ public class SystemInstanceHandler {
 			}
 			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);
 		}
+		
+		// create outer names
+		for (OuterName n : libBigOuterNames.values()) {
+			biBuilder.closeOuterName(n);
+		}
 
 		// add sites to bigraph
 		for (BigraphNode n : nodes.values()) {
@@ -502,6 +507,7 @@ public class SystemInstanceHandler {
 			}
 		}
 
+		
 		return biBuilder.makeBigraph();
 	}
 
