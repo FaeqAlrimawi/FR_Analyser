@@ -4,7 +4,8 @@ import java.util.LinkedList;
 
 public class BigraphNode {
 	
-	private String id;
+	private String id; //the name of the asset in the system model
+	private String incidentAssetName; //the name of the asset in the incident model
 	private LinkedList<OuterName> outerNames;
 	private LinkedList<InnerName> innerNames;
 	private Site site;
@@ -39,6 +40,14 @@ public class BigraphNode {
 	
 	
 	
+	public String getIncidentAssetName() {
+		return incidentAssetName;
+	}
+
+	public void setIncidentAssetName(String incidentAssetName) {
+		this.incidentAssetName = incidentAssetName;
+	}
+
 	public boolean isKnowledgePartial() {
 		return isKnowledgePartial;
 	}

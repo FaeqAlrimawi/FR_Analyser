@@ -47,12 +47,13 @@
               <site/>
             </entity>
             <site/>
-          <outername name="wkl1"/>
-		  <outername name="wkl2"/>
-		  <outername name="wkl3"/>
+		            <outername name="wkl2"/>
+		      <outername name="wkl3"/>
+      <outername name="wkl14"/>	
+		  
 		  </entity>
           <entity name="location_SD1" control="Room">
-		  <outername name="wkl1"/>
+		          <outername name="wkl77"/>
             <site/>
           </entity>
 		  <site/>

@@ -164,7 +164,6 @@ public class XqueryExecuter {
 		res = executeQuery(query);
 		
 		JSONObject conditions = XML.toJSONObject(res);
-		//System.out.println(conditions.toString(4));
 		
 		return conditions;
 	}
@@ -209,7 +208,9 @@ public class XqueryExecuter {
 			String [] ast = {"toilet", "light1"};
 			
 		//System.out.println(Arrays.toString(getSystemAssetControls("a")));
-		isKnowledgePartial("smartDevice1");
+		//isKnowledgePartial("smartDevice1");
+		getBigraphConditions("activity1", PredicateType.Precondition);
+		
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -124,13 +124,21 @@ public class PredicateGenerator {
 			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
 
 			//create the Bigraph representation (from LibBig library) for the pre/postconditions of the activities
+			//assumption: esach activity has ONE precondition and ONE postcondition
 			for (String activity : activities.keySet()) {
 				for (PredicateType type : types) {
 					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
+					
+					//if there is no condition returend then skip creating a predicate for it
+					if(condition == null || condition.isNull("entity")) {
+						continue;
+					}
+					
 					Predicate p = new Predicate();
 					p.setIncidentActivity(activities.get(activity));
 					p.setPredicateType(type);
-					p.setName(activity + "_pre");
+					p.setName(activity + "_" + type.toString()); //e.g., name = activity1_pre1
+					//updates entity names and controls from incident pattern to that from the system model
 					convertToMatchedAssets(condition);
 					p.setBigraphPredicate(condition);
 					if (p.getBigraphPredicate() != null)
@@ -145,26 +153,6 @@ public class PredicateGenerator {
 		return predHandler;
 	}
 
-	/*private JSONObject convertToMatchedAssets2(JSONObject obj) {
-		
-		try {
-			
-			if(obj.isNull("entity")) {
-				return obj;
-			}
-			
-			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
-			
-			getChildren(obj);
-			
-			} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return obj;
-	}
-	*/
 	private void convertToMatchedAssets(JSONObject obj) {
 
 		JSONArray tmpAry;
@@ -187,6 +175,7 @@ public class PredicateGenerator {
 				if (incidentAssetNames[j].equals(name)) {
 					tmpObj.put("name", spaceAssetSet[j]);
 					tmpObj.put("control", systemAssetControls[j]);
+					tmpObj.put("incidentAssetName", incidentAssetNames[j]);
 					break;
 				}
 			}

@@ -429,9 +429,10 @@ public class Predicate {
 		*/
 		for(int i=0;i<ary.length();i++) {
 			node = new BigraphNode();
-			tmpObj = ary.getJSONObject(i); //gets hold of node info
+			tmpObj = ary.getJSONObject(i);
 			node.setControl(tmpObj.get("control").toString());
 			node.setId(tmpObj.get("name").toString());
+			node.setIncidentAssetName(tmpObj.get("incidentAssetName").toString());
 			//if the current entity has no entity parent i.e. has a root as a parent
 			if(obj.isNull("name")) {
 				node.setParentRoot(numOfRoots);
@@ -440,6 +441,7 @@ public class Predicate {
 				node.setParent(nodes.get(obj.get("name")));
 			}		
 			nodes.put(node.getId(), node);
+			
 			//get outer names
 			JSONArray tmpAry;
 
@@ -501,14 +503,34 @@ public class Predicate {
 		LinkedList<Handle> names = new LinkedList<Handle>();
 		
 		////get outernames
-		//if knowledge is partial for the node, then if number of outernames less than that in the signature, then the rest are either:
 		
-		//1-created, added for that node.
-		
-		//2-create, added, then closed for that node.
-		//3-created, closed, then add for that node
-		//if it is more than that in the signature, then nothing will be done.
-		//if knowledge is exact and number of outernames are different, then nothing will be done
+		try {
+			node.setKnowledgePartial(XqueryExecuter.isKnowledgePartial(node.getIncidentAssetName()));
+			
+			//if knowledge is partial for the node, 
+			if(node.isKnowledgePartial()) {
+				//then if number of outernames less than that in the signature,
+				int difference = node.getOuterNames().size() - SystemInstanceHandler.getGlobalBigraphSignature().getByName(node.getControl()).getArity();
+				
+				while (difference < 0) {
+					//then the rest are either:
+					//1-created, added for that node.
+					OuterName tmp = biBuilder.addOuterName();
+					outerNames.put(tmp.getName(), tmp);
+					node.addOuterName(tmp.getName());
+					difference++;
+					//2-create, added, then closed for that node.
+					//3-created, closed, then add for that node
+				}
+				//if it is equal or more than that in the signature, then nothing will be done. more outernames in the node will be ignored in the bigraph
+			} else {
+				//if knowledge is exact and number of outernames are different, then nothing will be done
+			}	
+			
+		} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
