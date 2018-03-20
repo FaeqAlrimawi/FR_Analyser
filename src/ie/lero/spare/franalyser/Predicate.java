@@ -455,6 +455,7 @@ public class Predicate {
 			for(int i=0;i<ary.length();i++) {
 				node = new BigraphNode();
 				tmpObj = ary.getJSONObject(i);
+				System.out.println(i+" "+tmpObj.toString());
 				node.setControl(tmpObj.get(JSONTerms.CONTROL).toString());
 				node.setId(tmpObj.get(JSONTerms.NAME).toString());
 				node.setIncidentAssetName(tmpObj.get(JSONTerms.INCIDENT_ASSET_NAME).toString());

@@ -41,18 +41,50 @@
   <activity name="activity1" nextActivities="activity2" goals="goal2" initiator="offender1" type="UNKNOWN" behaviourType="UNKNOWN" description="enter location containing a vulnerable smart device that is connected to the digital network">
     <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre1">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-	  
-          <entity name="location_SD1" >
-            <entity name="smartDevice1" >
+        <exp>floorX.(entrance.offender1 | mainLocation)</exp>
+        <entity name="floorX">
+          <entity name="hallway">
+            <entity name="offender1">
+              <site/>
+            </entity>
+            <connectivity name="walkway1"/>
+            <site/>
+          </entity>
+          <entity name="location_SD1">
+            <entity name="smartDevice1">
               <connectivity name="cyber1"/>
             </entity>
             <connectivity name="walkway1"/>
             <site/>
           </entity>
-        <entity name="digitalNetwork" >
-          <connectivity name="cyber2"/>
         </entity>
-        
+        <entity name="digitalNetwork">
+          <connectivity name="cyber1"/>
+        </entity>
+      </expression>
+    </condition>
+    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post1">
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <exp>offender.laptop</exp>
+        <entity name="floorX">
+          <entity name="hallway">
+            <connectivity name="walkway1"/>
+            <site/>
+          </entity>
+          <entity name="location_SD1">
+            <entity name="smartDevice1">
+              <connectivity name="cyber1"/>
+            </entity>
+            <entity name="offender1">
+              <site/>
+            </entity>
+            <connectivity name="walkway1"/>
+            <site/>
+          </entity>
+        </entity>
+        <entity name="digitalNetwork">
+          <connectivity name="cyber1"/>
+        </entity>
       </expression>
     </condition>
   </activity>
