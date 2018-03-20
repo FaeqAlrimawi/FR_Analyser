@@ -119,20 +119,20 @@ public class BigraphAnalyser {
 		OuterName n6 = bi.addOuterName("n6");
 		
 		Node flr = bi.addNode("Floor", bld);
-		Node neti = bi.addNode("InstallationBus", bld, n1, n2,n3,n4,n5,n6);
+		Node neti = bi.addNode("InstallationBus", flr, n1, n2,n3,n4,n5,n6);
 		OuterName o1 = bi.addOuterName("wk1");
 		OuterName o2 = bi.addOuterName("wk2");
 		OuterName o3 = bi.addOuterName("wk3");
 //		bi.closeOuterName(o1);
-		bi.closeOuterName(o2);
+//		bi.closeOuterName(o2);
 //		bi.closeOuterName(o3);
 		
-		LinkedList<Handle> hnd = new LinkedList<Handle>();
+/*		LinkedList<Handle> hnd = new LinkedList<Handle>();
 		hnd.add(o1);
 		hnd.add(o2);
-		hnd.add(o3);
+		hnd.add(o3);*/
 		
-		Node hal = bi.addNode("Hallway", flr, hnd);
+		Node hal = bi.addNode("Hallway", flr, o1,o2,o3);
 		Node rm1 = bi.addNode("Room", flr, o1);
 		Node rm2 = bi.addNode("Room", flr, o2);
 		Node rm3 = bi.addNode("Room", flr, o3);
@@ -195,14 +195,14 @@ public class BigraphAnalyser {
 		}*/
 		
 		
-		print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
+	//	print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
 		//assuming knowledge is partial, if the number of outernames in a redex node is less than that in the signature (and knolwdege is partial for that node),
 		//then add outernames to equal the number of outernames in the signature for that node.
 		//if knowledge is complete, then any 
 		
-		if(matcher.match(states.get(0), red).iterator().hasNext()){
+		if(matcher.match(st, red).iterator().hasNext()){
 			areStatesIdentified = true;
 			print("created matched");		
 		}
