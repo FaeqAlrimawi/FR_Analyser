@@ -43,23 +43,23 @@
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>floorX.(entrance.offender1 | mainLocation)</exp>
         <entity name="floorX" control="floor">
-          <child name="hallway" control="Hallway">
-            <child name="offender1" control="Actor">
+          <entity name="hallway" control="Hallway">
+            <entity name="offender1" control="Actor">
               <site/>
-            </child>
-            <outername name="walkway1"/>
+            </entity>
+            <outername name="walkway1" isClosed="true"/>
             <outername name="walkway2"/>
             <outername name="walkway3"/>
             <outername name="walkway4"/>
             <site/>
-          </child>
-          <child name="location_SD1" control="Room">
-            <child name="computingDevice1" control="SmartLight">
+          </entity>
+          <entity name="location_SD1" control="Room">
+            <entity name="computingDevice1" control="SmartLight">
               <outername name="cyber1"/>
-            </child>
+            </entity>
             <outername name="walkway1"/>
             <site/>
-          </child>
+          </entity>
         </entity>
         <entity name="digitalNetwork" control="InstallationBus">
           <outername name="cyber1"/>
@@ -70,23 +70,23 @@
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <exp>offender.laptop</exp>
         <entity name="floorX" control="floor">
-          <child name="hallway" control="Room">
+          <entity name="hallway" control="Room">
             <outername name="walkway1"/>
             <outername name="walkway2"/>
             <outername name="walkway3"/>
             <outername name="walkway4"/>
             <site/>
-          </child>
-          <child name="location_SD1" control="Room">
-            <child name="computingDevice1" control="SmartLight">
+          </entity>
+          <entity name="location_SD1" control="Room">
+            <entity name="computingDevice1" control="SmartLight">
               <outername name="cyber1"/>
-            </child>
-            <child name="offender1" control="Actor">
+            </entity>
+            <entity name="offender1" control="Actor">
               <site/>
-            </child>
+            </entity>
             <outername name="walkway1"/>
             <site/>
-          </child>
+          </entity>
         </entity>
         <entity name="digitalNetwork">
           <outername name="cyber1"/>
@@ -102,13 +102,13 @@
           <outername name="cyber1"/>
         </entity>
         <entity name="location_SD1" control="Room">
-          <child name="computingDevice1" control="SmartLight">
+          <entity name="computingDevice1" control="SmartLight">
             <outername name="cyber1"/>
-          </child>
-          <child name="offender1" control="Actor">
-            <child name="laptopX" control="Laptop"/>
+          </entity>
+          <entity name="offender1" control="Actor">
+            <entity name="laptopX" control="Laptop"/>
             <site/>
-          </child>
+          </entity>
           <site/>
         </entity>
       </expression>
@@ -120,13 +120,13 @@
           <outername name="cyber1"/>
         </entity>
         <entity name="location_SD1" control="Room">
-          <child name="computingDevice1" control="SmartLight"/>
-          <child name="offender1" control="Actor">
-            <child name="laptopX" control="Laptop">
+          <entity name="computingDevice1" control="SmartLight"/>
+          <entity name="offender1" control="Actor">
+            <entity name="laptopX" control="Laptop">
               <outername name="cyber1"/>
-            </child>
+            </entity>
             <site/>
-          </child>
+          </entity>
           <site/>
         </entity>
       </expression>

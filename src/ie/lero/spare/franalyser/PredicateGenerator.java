@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.xml.xquery.XQException;
@@ -130,7 +131,7 @@ public class PredicateGenerator {
 					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
 					
 					//if there is no condition returend then skip creating a predicate for it
-					if(condition == null || condition.isNull("entity")) {
+					if(condition == null || condition.isNull(JSONTerms.ENTITY)) {
 						continue;
 					}
 					
@@ -156,8 +157,47 @@ public class PredicateGenerator {
 	private void convertToMatchedAssets(JSONObject obj) {
 
 		JSONArray tmpAry;
+		JSONObject tmpObject;
+		
+		LinkedList<JSONObject> objs = new LinkedList<JSONObject>();
+		
+		objs.add(obj);
+		
+		while (!objs.isEmpty()){
+		tmpObject = objs.pop();
+		
+		if (tmpObject.isNull(JSONTerms.ENTITY)) {
+		return;
+	}
 
-		if (obj.isNull("entity")) {
+	if (JSONArray.class.isAssignableFrom(tmpObject.get(JSONTerms.ENTITY).getClass())) {
+		tmpAry = (JSONArray) tmpObject.get(JSONTerms.ENTITY);
+	} else {
+		tmpAry = new JSONArray();
+		tmpAry.put((JSONObject) tmpObject.get(JSONTerms.ENTITY));
+	}
+	for (int i = 0; i < tmpAry.length(); i++) {
+		JSONObject tmpObj = tmpAry.getJSONObject(i);
+		objs.add(tmpObj);
+		String name = tmpObj.get(JSONTerms.NAME).toString();
+		for (int j = 0; j < incidentAssetNames.length; j++) {
+			if (incidentAssetNames[j].equals(name)) {
+				tmpObj.put(JSONTerms.NAME, spaceAssetSet[j]);
+				tmpObj.put(JSONTerms.CONTROL, systemAssetControls[j]);
+				tmpObj.put(JSONTerms.INCIDENT_ASSET_NAME, incidentAssetNames[j]);
+				break;
+			}
+		}
+
+		/*// iterate over other children
+		if (!tmpObj.isNull("entity")) {
+			convertToMatchedAssets(tmpObj);
+		}*/
+
+	}
+			
+		}
+		/*if (obj.isNull("entity")) {
 			return;
 		}
 
@@ -185,7 +225,7 @@ public class PredicateGenerator {
 				convertToMatchedAssets(tmpObj);
 			}
 
-		}
+		}*/
 	}
 
 /*	public String matchConditionAssetsToSpaceAssets(String condition) {

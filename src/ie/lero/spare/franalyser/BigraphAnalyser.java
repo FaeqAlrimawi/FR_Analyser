@@ -2,13 +2,14 @@ package ie.lero.spare.franalyser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
-import it.uniud.mads.jlibbig.core.std.InnerName;
+import it.uniud.mads.jlibbig.core.std.Match;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
@@ -106,10 +107,19 @@ public class BigraphAnalyser {
 		Matcher matcher = new Matcher();
 		
 		////test code
-		BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
-		Node bld = bi.addNode("Building", bi.addRoot());
-		Node flr = bi.addNode("Floor", bld);
+	/*	BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
+		BigraphBuilder bi2 = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		
+		Node bld = bi.addNode("Building", bi.addRoot());
+		OuterName n1 = bi.addOuterName("n1");
+		OuterName n2 = bi.addOuterName("n2");
+		OuterName n3 = bi.addOuterName("n3");
+		OuterName n4 = bi.addOuterName("n4");
+		OuterName n5 = bi.addOuterName("n5");
+		OuterName n6 = bi.addOuterName("n6");
+		
+		Node flr = bi.addNode("Floor", bld);
+		Node neti = bi.addNode("InstallationBus", bld, n1, n2,n3,n4,n5,n6);
 		OuterName o1 = bi.addOuterName("wk1");
 		OuterName o2 = bi.addOuterName("wk2");
 		OuterName o3 = bi.addOuterName("wk3");
@@ -123,24 +133,55 @@ public class BigraphAnalyser {
 		hnd.add(o3);
 		
 		Node hal = bi.addNode("Hallway", flr, hnd);
-		Node rm = bi.addNode("Room", flr, o1);
-	
-	//	Node rm2 = bi.addNode("Room", flr, o2);
+		Node rm1 = bi.addNode("Room", flr, o1);
+		Node rm2 = bi.addNode("Room", flr, o2);
+		Node rm3 = bi.addNode("Room", flr, o3);
+		
+		Node s1 = bi.addNode("SmartLight", rm1, n1);
+		Node s2 = bi.addNode("SmartLight", rm2, n2);
+		Node s3 = bi.addNode("SmartLight", rm3, n3);
+		
+		Node f = bi.addNode("FireAlarm", rm2, n4);
+		Node h = bi.addNode("HVAC", rm2, n5);
+		Node ser = bi.addNode("Workstation", rm3, n6);
+		//	Node rm2 = bi.addNode("Room", flr, o2);
 	//	Node rm3 = bi.addNode("Room", flr, o3);
 		Node visitor = bi.addNode("Visitor", hal);
 		
-		bi.addSite(visitor);
-		bi.addSite(bld);
-		bi.addSite(flr);
+		bi.ground();
+		Bigraph st = bi.makeBigraph();
+		//bi.addSite(visitor);
+	//	bi.addSite(bld);
+		//bi.addSite(flr);
 //		bi.addSite(rm3);
 //		bi.addSite(rm2);
-		bi.addSite(rm);
-		InnerName n1 = bi.addInnerName("n1", o1);
-		InnerName n2 = bi.addInnerName("n2", o1);
+		//bi.addSite(rm);
+		//InnerName n1 = bi.addInnerName("n1", o1);
+		//InnerName n2 = bi.addInnerName("n2", o1);
 		
+		OuterName u1 = bi2.addOuterName("u1");
+		OuterName u2 = bi2.addOuterName("u2");
+		OuterName u3 = bi2.addOuterName("u3");
+		OuterName u4 = bi2.addOuterName("u4");
+		OuterName u5 = bi2.addOuterName("u5");
+		OuterName u6 = bi2.addOuterName("u6");
+		OuterName r1 = bi2.addOuterName("r1");
+		
+		Node room1 = bi2.addNode("Room", bi2.addRoot(), r1);
+		bi2.addSite(room1);
+		Node net = bi2.addNode("InstallationBus", bi2.addRoot(), u1, u2,u3,u4,u5, u6);
+		Node device = bi2.addNode("SmartLight", room1, u1);
+		Bigraph red = bi2.makeBigraph();
 	//	redex =  bi.makeBigraph();
 		////
 	
+		print("\nidentifyRelevantStates: "+red.toString()+"\n\nstate: "+st+"\n");
+		
+		if(matcher.match(st, red).iterator().hasNext()){
+			print("state matched");		
+		}*/
+		
+		
 		print("\nidentifyRelevantStates: "+redex.toString()+"\n\nstate: "+states.get(0)+"\n");
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
@@ -154,6 +195,19 @@ public class BigraphAnalyser {
 				areStatesIdentified = true;
 				print("state " + i + " matched");		
 			}
+			
+			/*Iterator<? extends Match> t = matcher.match(states.get(i), redex).iterator();
+			int cnt = 0;
+			while(t.hasNext()){
+				Match m = t.next();
+				//pred.addBigraphState(i);
+				//areStatesIdentified = true;
+				print("state " + i + " matched...match:");//+m.toString());		
+			cnt++;
+			}
+			
+			print("number of time matched for state " + i + " is:"+cnt);*/
+			
 		}
 		return areStatesIdentified;
 	}

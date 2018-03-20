@@ -1,5 +1,6 @@
 package ie.lero.spare.franalyser;
 
+import java.awt.print.Printable;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -338,7 +339,7 @@ public class Predicate {
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 		
 		//if the json object is null, then nothing will be done and null will be returned
-		if(redex.isNull("entity")) {
+		if(redex.isNull(JSONTerms.ENTITY)) {
 			return null;
 		}
 		
@@ -353,13 +354,27 @@ public class Predicate {
 			libBigRoots.add(biBuilder.addRoot(i));
 		}
 		
+		
+		int difference;
+		int arity;
+		int newSize = 0;
+		LinkedList<BigraphNode.OuterName> names;
+		//create bigraph outernames
 		for(BigraphNode n : nodes.values()) {
-			
-			//create bigraph outernames
-			for(BigraphNode.OuterName out : n.getOuterNamesObjects()) {
-				if(!outerNames.contains(out)) {
-					libBigOuterNames.put(out.getName(), biBuilder.addOuterName(out.getName()));
-					outerNames.add(out);
+			arity = SystemInstanceHandler.getGlobalBigraphSignature().getByName(n.getControl()).getArity();
+			names = n.getOuterNamesObjects();
+			difference = names.size() - arity;
+			//if the node has more outernames than that in the signature and knowledge is partial, then only add outernames equal to the arity
+			//other option is to leave it, then the other extra outernames will be defined as empty i.e. XX:o<-{}
+			if (difference > 0 && n.isKnowledgePartial()) {
+				newSize = arity;
+			} else {
+				newSize = names.size();
+			}
+			for(int i = 0;i<newSize;i++) {
+				if(!outerNames.contains(names.get(i))) {
+					libBigOuterNames.put(names.get(i).getName(), biBuilder.addOuterName(names.get(i).getName()));
+					outerNames.add(names.get(i));
 				}	
 			}
 			
@@ -416,11 +431,11 @@ public class Predicate {
 		BigraphNode node;
 		JSONObject tmpObj;
 		
-		if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())){	
-			ary = (JSONArray) obj.get("entity");
+		if (JSONArray.class.isAssignableFrom(obj.get(JSONTerms.ENTITY).getClass())){	
+			ary = (JSONArray) obj.get(JSONTerms.ENTITY);
 		} else {
 			ary = new JSONArray();
-			ary.put((JSONObject)obj.get("entity"));
+			ary.put((JSONObject)obj.get(JSONTerms.ENTITY));
 		}
 		//get all entities (they are divided by || as Bigraph)
 		/*if (JSONArray.class.isAssignableFrom(redex.get("entity").getClass())){	
@@ -430,68 +445,76 @@ public class Predicate {
 		for(int i=0;i<ary.length();i++) {
 			node = new BigraphNode();
 			tmpObj = ary.getJSONObject(i);
-			node.setControl(tmpObj.get("control").toString());
-			node.setId(tmpObj.get("name").toString());
-			node.setIncidentAssetName(tmpObj.get("incidentAssetName").toString());
+			node.setControl(tmpObj.get(JSONTerms.CONTROL).toString());
+			node.setId(tmpObj.get(JSONTerms.NAME).toString());
+			node.setIncidentAssetName(tmpObj.get(JSONTerms.INCIDENT_ASSET_NAME).toString());
 			//if the current entity has no entity parent i.e. has a root as a parent
-			if(obj.isNull("name")) {
+			if(obj.isNull(JSONTerms.NAME)) {
 				node.setParentRoot(numOfRoots);
 				numOfRoots++;
 			} else {
-				node.setParent(nodes.get(obj.get("name")));
+				node.setParent(nodes.get(obj.get(JSONTerms.NAME)));
 			}		
+			//update knowledge about the connections for that node
+			try {
+				node.setKnowledgePartial(XqueryExecuter.isKnowledgePartial(node.getIncidentAssetName()));
+			} catch (FileNotFoundException | XQException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
 			nodes.put(node.getId(), node);
 			
 			//get outer names
 			JSONArray tmpAry;
 
-			if (!tmpObj.isNull("outername")) {
+			if (!tmpObj.isNull(JSONTerms.OUTERNAME)) {
 				// if there are more than one outername
-				if (JSONArray.class.isAssignableFrom(tmpObj.get("outername").getClass())) {
-					tmpAry = tmpObj.getJSONArray("outername");
+				if (JSONArray.class.isAssignableFrom(tmpObj.get(JSONTerms.OUTERNAME).getClass())) {
+					tmpAry = tmpObj.getJSONArray(JSONTerms.OUTERNAME);
 				} else { // if there is only one outername
 					tmpAry = new JSONArray();
-					tmpAry.put((JSONObject) tmpObj.get("outername"));
+					tmpAry.put((JSONObject) tmpObj.get(JSONTerms.OUTERNAME));
 				}
 
 				for (int j = 0; j < tmpAry.length(); j++) {
-					String name = ((JSONObject) tmpAry.get(j)).get("name").toString();
-					boolean isClosed = false;
-					if (!((JSONObject) tmpAry.get(j)).isNull("isClosed")) {
-						isClosed = ((JSONObject) tmpAry.get(j)).get("isClosed").toString().equals("true");
+					String name = ((JSONObject) tmpAry.get(j)).get(JSONTerms.NAME).toString();
+					boolean isLink = false;
+					if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISLINK)) {
+						isLink = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISLINK).toString().equals("true");
 					}
-					node.addOuterName(name, isClosed);
+					node.addOuterName(name, isLink);
 				}
 			}
 			
 			// get inner names
-			if (!tmpObj.isNull("innername")) {
+			if (!tmpObj.isNull(JSONTerms.INNERNAME)) {
 				
 				//if there are more than one innername
-				if (JSONArray.class.isAssignableFrom(tmpObj.get("innername").getClass())) {
-					tmpAry = tmpObj.getJSONArray("innername");
+				if (JSONArray.class.isAssignableFrom(tmpObj.get(JSONTerms.INNERNAME).getClass())) {
+					tmpAry = tmpObj.getJSONArray(JSONTerms.INNERNAME);
 				} else { //if there is only one innername
 					tmpAry = new JSONArray();
-					tmpAry.put((JSONObject) tmpObj.get("innername"));
+					tmpAry.put((JSONObject) tmpObj.get(JSONTerms.INNERNAME));
 				}
 				
 				for (int j = 0; j < tmpAry.length(); j++) {
-					String name = ((JSONObject) tmpAry.get(j)).get("name").toString();
+					String name = ((JSONObject) tmpAry.get(j)).get(JSONTerms.NAME).toString();
 					boolean isClosed = false;
-					if (!((JSONObject) tmpAry.get(j)).isNull("isClosed")) {
-						isClosed = ((JSONObject) tmpAry.get(j)).get("isClosed").toString().equals("true");
+					if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISCLOSED)) {
+						isClosed = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISCLOSED).toString().equals("true");
 					}
 					node.addInnerName(name, isClosed);
 				}
 			}
 			
 			//get sites
-			if(!tmpObj.isNull("site")) {	
+			if(!tmpObj.isNull(JSONTerms.SITE)) {	
 					node.setSite(true);
 			}
 			
 			//get childern
-			if(!tmpObj.isNull("entity")) {
+			if(!tmpObj.isNull(JSONTerms.ENTITY)) {
 				unpackPredicateJSON(tmpObj, nodes);
 			}	
 		}
@@ -501,37 +524,41 @@ public class Predicate {
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
-		
-		////get outernames
-		
-		try {
-			node.setKnowledgePartial(XqueryExecuter.isKnowledgePartial(node.getIncidentAssetName()));
-			
-			//if knowledge is partial for the node, 
-			if(node.isKnowledgePartial()) {
-				//then if number of outernames less than that in the signature,
-				int difference = node.getOuterNames().size() - SystemInstanceHandler.getGlobalBigraphSignature().getByName(node.getControl()).getArity();
-				
-				while (difference < 0) {
-					//then the rest are either:
-					//1-created, added for that node.
-					/*OuterName tmp = biBuilder.addOuterName();
-					outerNames.put(tmp.getName(), tmp);
-					node.addOuterName(tmp.getName());*/
-					difference++;
-					//2-create, added, then closed for that node.
-					//3-created, closed, then add for that node
-				}
-				//if it is equal or more than that in the signature, then nothing will be done. more outernames in the node will be ignored in the bigraph
-			} else {
-				//if knowledge is exact and number of outernames are different, then nothing will be done
-			}	
-			
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+		// find the difference between the outernames (i.e. connections) of the
+		// node and the outernames defined for that node in the signature
+		int difference = node.getOuterNames().size()
+				- SystemInstanceHandler.getGlobalBigraphSignature().getByName(node.getControl()).getArity();
+
+		// if knowledge is partial for the node,
+		if (node.isKnowledgePartial()) {
+			// then if number of outernames less than that in the signature,
+			while (difference < 0) {
+				// then the rest are either:
+				// 1-created, added for that node.
+				OuterName tmp = biBuilder.addOuterName();
+				outerNames.put(tmp.getName(), tmp);
+				node.addOuterName(tmp.getName());
+				difference++;
+				// 2-create, added, then closed for that node (they become links
+				// or edges i.e. XX:e).
+			}
+			// if it is more than that in the signature, then
+
+		} else {
+			// if knowledge is exact and number of outernames are different,
+			// then nothing will be done
+			while (difference < 0) {
+				// then create and close for that node.
+				OuterName tmp = biBuilder.addOuterName();
+				// close outernames
+				biBuilder.closeOuterName(tmp);
+				outerNames.put(tmp.getName(), tmp);
+				node.addOuterName(tmp.getName());
+				difference++;
+			}
 		}
-		
+
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
 		}

@@ -4,6 +4,8 @@
     <type name="building"/>
   </asset>
   <asset xsi:type="environment:Floor" name="second_floor" description="" control="Floor" containedAssets="Control_room hallway Server_room Toilet" parentAsset="second_floor"/>
+  <asset xsi:type="environment:Room" connections="ToiletRm-Hallway" name="Toilet" control="Room" containedAssets="SL1" parentAsset="second_floor"/>
+  <asset xsi:type="environment:Room" connections="CntrlRm-Hallway" name="Control_room" control="Room" containedAssets="SL2 Workstation1" parentAsset="second_floor"/>
   <asset xsi:type="environment:Room" connections="ServerRm-Hallway" name="Server_room" control="Room" containedAssets="SL3 FireAlarm1 AirConditioning" parentAsset="second_floor"/>
   <asset xsi:type="environment:SmartLight" connections="SL1-DN" name="SL1" control="SmartLight" parentAsset="Toilet"/>
   <asset xsi:type="environment:SmartLight" connections="SL2-DN" name="SL2" control="SmartLight" parentAsset="Control_room"/>
