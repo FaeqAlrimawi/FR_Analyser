@@ -386,24 +386,24 @@ public class SystemInstanceHandler {
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 
 		// number of roots, sites, and nodes respectively
-		int numOfRoots = Integer.parseInt(((JSONObject) state.get("place_graph")).get("regions").toString());
-		int numOfSites = Integer.parseInt(((JSONObject) state.get("place_graph")).get("sites").toString());
-		int numOfNodes = Integer.parseInt(((JSONObject) state.get("place_graph")).get("nodes").toString());
+		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_REGIONS).toString());
+		int numOfSites = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_SITES).toString());
+		int numOfNodes = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NODES).toString());
 
 		// get controls & their arity [defines signature]. Controls are assumed
 		// to be active (i.e. true)
-		ary = (JSONArray) state.get("nodes");
+		ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
 		it = ary.iterator();
 		while (it.hasNext()) {
 			node = new BigraphNode();
 			tmpObj = (JSONObject) it.next(); // gets hold of node info
 
-			tmpCtrl = (JSONObject) tmpObj.get("control");
-			tmp = tmpCtrl.get("control_id").toString();
-			tmpArity = tmpCtrl.get("control_arity").toString();
+			tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
+			tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ID).toString();
+			tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ARITY).toString();
 
 			// set node id
-			node.setId(tmpObj.get("node_id").toString());
+			node.setId(tmpObj.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
 			// set node control
 			node.setControl(tmp);
 			nodes.put(node.getId(), node);
@@ -411,12 +411,12 @@ public class SystemInstanceHandler {
 
 		// get parents for nodes from the place_graph=> dag. Caution using the
 		// roots and sites numbers
-		ary = (JSONArray) ((JSONObject) state.get("place_graph")).get("dag");
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_DAG);
 		it = ary.iterator();
 		while (it.hasNext()) {
 			tmpObj = (JSONObject) it.next(); // gets hold of node info
-			src = Integer.parseInt(tmpObj.get("source").toString());
-			target = Integer.parseInt(tmpObj.get("target").toString());
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
 
 			if (src >= numOfRoots) {
 				// set parent node in the target node
@@ -435,7 +435,7 @@ public class SystemInstanceHandler {
 		// get outer names and inner names for the nodes. Currently, focus on
 		// outer names
 		// while inner names are extracted they are not updated in the nodes
-		ary = (JSONArray) (state.get("link_graph"));
+		ary = (JSONArray) (state.get(JSONTerms.BIGRAPHER_LINK_GRAPH));
 		it = ary.iterator();
 		while (it.hasNext()) {
 			tmpObj = (JSONObject) it.next(); // gets hold of node info
@@ -443,27 +443,27 @@ public class SystemInstanceHandler {
 			innerNames.clear();
 
 			// get outer names
-			outerAry = (JSONArray) (tmpObj.get("outer"));
+			outerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_OUTER));
 			itOuter = outerAry.iterator();
 			while (itOuter.hasNext()) {
-				outerNames.add(itOuter.next().get("name").toString());
+				outerNames.add(itOuter.next().get(JSONTerms.BIGRAPHER_NAME).toString());
 			}
 			outerNamesFull.addAll(outerNames);
 						
 			// get inner names
-			innerAry = (JSONArray) (tmpObj.get("inner"));
+			innerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_INNER));
 			itInner = innerAry.iterator();
 			while (itInner.hasNext()) {
-				innerNames.add(itInner.next().get("name").toString());
+				innerNames.add(itInner.next().get(JSONTerms.BIGRAPHER_NAME).toString());
 			}
 			innerNamesFull.addAll(innerNames);
 			
 			// get nodes connected to outer names. Inner names should be
 			// considered
-			portAry = (JSONArray) (tmpObj.get("ports"));
+			portAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_PORTS));
 			itPort = portAry.iterator();
 			while (itPort.hasNext()) {
-				node = nodes.get(itPort.next().get("node_id").toString());
+				node = nodes.get(itPort.next().get(JSONTerms.BIGRAPHER_NODE_ID).toString());
 				node.addOuterNames(outerNames);
 				node.addInnerNames(innerNames);
 			}

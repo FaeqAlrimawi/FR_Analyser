@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <environment:EnvironmentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:environment="http://www.example.org/environment">
-  <asset xsi:type="environment:Building" name="Research_Centre" description="" control="Building" containedAssets="second_floor">
+  <asset xsi:type="environment:Building" name="Research_Centre" description="" control="Building" containedAssets="second_floor busNetwork">
     <type name="building"/>
   </asset>
   <asset xsi:type="environment:Floor" name="second_floor" description="" control="Floor" containedAssets="Control_room hallway Server_room Toilet" parentAsset="second_floor"/>
