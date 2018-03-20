@@ -12,5 +12,6 @@ public class JSONTerms {
 	public static final String ISCLOSED = "isClosed";
 	public static final String SITE = "site";
 	public static final String INCIDENT_ASSET_NAME = "incidentAssetName";
+	public static final String TRUE_VALUE = "true";
 
 }

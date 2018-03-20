@@ -338,13 +338,12 @@ public class Predicate {
 		LinkedList<Root> libBigRoots = new LinkedList<Root>();
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 		
-		//if the json object is null, then nothing will be done and null will be returned
-		if(redex.isNull(JSONTerms.ENTITY)) {
-			return null;
-		}
 		
 		//get entities (or nodes) information from the json object of the condition
-		unpackPredicateJSON(redex, nodes);
+		//if the json object is null, then nothing will be done and null will be returned
+		if(!unpackPredicateJSON(redex, nodes)) {
+			return null;
+		}
 
 		/////build Bigraph object
 		BigraphBuilder biBuilder = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
@@ -425,99 +424,112 @@ public class Predicate {
 	 * @param obj JSONObject
 	 * @param nodes BigraphNode objects holding the inner tags info
 	 */
-	private static void unpackPredicateJSON(JSONObject obj, HashMap<String,BigraphNode> nodes) {
+	private static boolean unpackPredicateJSON(JSONObject obj, HashMap<String,BigraphNode> nodes) {
 		
 		JSONArray ary;
 		BigraphNode node;
 		JSONObject tmpObj;
+		JSONObject tmpObject;
+		LinkedList<JSONObject> objs = new LinkedList<JSONObject>();
 		
-		if (JSONArray.class.isAssignableFrom(obj.get(JSONTerms.ENTITY).getClass())){	
-			ary = (JSONArray) obj.get(JSONTerms.ENTITY);
-		} else {
-			ary = new JSONArray();
-			ary.put((JSONObject)obj.get(JSONTerms.ENTITY));
+		if(obj.isNull(JSONTerms.ENTITY)) {
+			return false;
 		}
-		//get all entities (they are divided by || as Bigraph)
-		/*if (JSONArray.class.isAssignableFrom(redex.get("entity").getClass())){	
-		ary = (JSONArray) redex.get("entity");
 		
-		*/
-		for(int i=0;i<ary.length();i++) {
-			node = new BigraphNode();
-			tmpObj = ary.getJSONObject(i);
-			node.setControl(tmpObj.get(JSONTerms.CONTROL).toString());
-			node.setId(tmpObj.get(JSONTerms.NAME).toString());
-			node.setIncidentAssetName(tmpObj.get(JSONTerms.INCIDENT_ASSET_NAME).toString());
-			//if the current entity has no entity parent i.e. has a root as a parent
-			if(obj.isNull(JSONTerms.NAME)) {
-				node.setParentRoot(numOfRoots);
-				numOfRoots++;
+		objs.add(obj);
+		
+		while(!objs.isEmpty()) {
+			tmpObject = objs.pop();
+			
+			if (JSONArray.class.isAssignableFrom(tmpObject.get(JSONTerms.ENTITY).getClass())){	
+				ary = (JSONArray) tmpObject.get(JSONTerms.ENTITY);
 			} else {
-				node.setParent(nodes.get(obj.get(JSONTerms.NAME)));
-			}		
-			//update knowledge about the connections for that node
-			try {
-				node.setKnowledgePartial(XqueryExecuter.isKnowledgePartial(node.getIncidentAssetName()));
-			} catch (FileNotFoundException | XQException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				ary = new JSONArray();
+				ary.put((JSONObject)tmpObject.get(JSONTerms.ENTITY));
 			}
+			//get all entities (they are divided by || as Bigraph)
+			/*if (JSONArray.class.isAssignableFrom(redex.get("entity").getClass())){	
+			ary = (JSONArray) redex.get("entity");
 			
-			nodes.put(node.getId(), node);
-			
-			//get outer names
-			JSONArray tmpAry;
-
-			if (!tmpObj.isNull(JSONTerms.OUTERNAME)) {
-				// if there are more than one outername
-				if (JSONArray.class.isAssignableFrom(tmpObj.get(JSONTerms.OUTERNAME).getClass())) {
-					tmpAry = tmpObj.getJSONArray(JSONTerms.OUTERNAME);
-				} else { // if there is only one outername
-					tmpAry = new JSONArray();
-					tmpAry.put((JSONObject) tmpObj.get(JSONTerms.OUTERNAME));
-				}
-
-				for (int j = 0; j < tmpAry.length(); j++) {
-					String name = ((JSONObject) tmpAry.get(j)).get(JSONTerms.NAME).toString();
-					boolean isLink = false;
-					if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISLINK)) {
-						isLink = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISLINK).toString().equals("true");
-					}
-					node.addOuterName(name, isLink);
-				}
-			}
-			
-			// get inner names
-			if (!tmpObj.isNull(JSONTerms.INNERNAME)) {
-				
-				//if there are more than one innername
-				if (JSONArray.class.isAssignableFrom(tmpObj.get(JSONTerms.INNERNAME).getClass())) {
-					tmpAry = tmpObj.getJSONArray(JSONTerms.INNERNAME);
-				} else { //if there is only one innername
-					tmpAry = new JSONArray();
-					tmpAry.put((JSONObject) tmpObj.get(JSONTerms.INNERNAME));
+			*/
+			for(int i=0;i<ary.length();i++) {
+				node = new BigraphNode();
+				tmpObj = ary.getJSONObject(i);
+				node.setControl(tmpObj.get(JSONTerms.CONTROL).toString());
+				node.setId(tmpObj.get(JSONTerms.NAME).toString());
+				node.setIncidentAssetName(tmpObj.get(JSONTerms.INCIDENT_ASSET_NAME).toString());
+				//if the current entity has no entity parent i.e. has a root as a parent
+				if(tmpObject.isNull(JSONTerms.NAME)) {
+					node.setParentRoot(numOfRoots);
+					numOfRoots++;
+				} else {
+					node.setParent(nodes.get(tmpObject.get(JSONTerms.NAME)));
+				}		
+				//update knowledge about the connections for that node
+				try {
+					node.setKnowledgePartial(XqueryExecuter.isKnowledgePartial(node.getIncidentAssetName()));
+				} catch (FileNotFoundException | XQException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
-				for (int j = 0; j < tmpAry.length(); j++) {
-					String name = ((JSONObject) tmpAry.get(j)).get(JSONTerms.NAME).toString();
-					boolean isClosed = false;
-					if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISCLOSED)) {
-						isClosed = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISCLOSED).toString().equals("true");
+				nodes.put(node.getId(), node);
+				
+				//get outer names
+				JSONArray tmpAry;
+
+				if (!tmpObj.isNull(JSONTerms.OUTERNAME)) {
+					// if there are more than one outername
+					if (JSONArray.class.isAssignableFrom(tmpObj.get(JSONTerms.OUTERNAME).getClass())) {
+						tmpAry = tmpObj.getJSONArray(JSONTerms.OUTERNAME);
+					} else { // if there is only one outername
+						tmpAry = new JSONArray();
+						tmpAry.put((JSONObject) tmpObj.get(JSONTerms.OUTERNAME));
 					}
-					node.addInnerName(name, isClosed);
+
+					for (int j = 0; j < tmpAry.length(); j++) {
+						String name = ((JSONObject) tmpAry.get(j)).get(JSONTerms.NAME).toString();
+						boolean isLink = false;
+						if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISLINK)) {
+							isLink = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISLINK).toString().equals(JSONTerms.TRUE_VALUE);
+						}
+						node.addOuterName(name, isLink);
+					}
 				}
+				
+				// get inner names
+				if (!tmpObj.isNull(JSONTerms.INNERNAME)) {
+					
+					//if there are more than one innername
+					if (JSONArray.class.isAssignableFrom(tmpObj.get(JSONTerms.INNERNAME).getClass())) {
+						tmpAry = tmpObj.getJSONArray(JSONTerms.INNERNAME);
+					} else { //if there is only one innername
+						tmpAry = new JSONArray();
+						tmpAry.put((JSONObject) tmpObj.get(JSONTerms.INNERNAME));
+					}
+					
+					for (int j = 0; j < tmpAry.length(); j++) {
+						String name = ((JSONObject) tmpAry.get(j)).get(JSONTerms.NAME).toString();
+						boolean isClosed = false;
+						if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISCLOSED)) {
+							isClosed = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISCLOSED).toString().equals(JSONTerms.TRUE_VALUE);
+						}
+						node.addInnerName(name, isClosed);
+					}
+				}
+				
+				//get sites
+				if(!tmpObj.isNull(JSONTerms.SITE)) {	
+						node.setSite(true);
+				}
+				
+				//get childern
+				if(!tmpObj.isNull(JSONTerms.ENTITY)) {
+					objs.add(tmpObj);
+				}	
 			}
-			
-			//get sites
-			if(!tmpObj.isNull(JSONTerms.SITE)) {	
-					node.setSite(true);
-			}
-			
-			//get childern
-			if(!tmpObj.isNull(JSONTerms.ENTITY)) {
-				unpackPredicateJSON(tmpObj, nodes);
-			}	
 		}
+		return true;
 	}
 
 	private static Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 

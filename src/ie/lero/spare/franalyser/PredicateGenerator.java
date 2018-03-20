@@ -68,83 +68,47 @@ public class PredicateGenerator {
 		return predHandler.getIncidentActivities();
 	}
 	
-	//might go absolute because of the new one
-/*	public PredicateHandler generatePredicates2() {
-		
-		String[] preconditions = null;
-		String[] postconditions = null;
-		
-		try {
-				HashMap<String, IncidentActivity> activities = createIncidentActivities();
-				
-				for (String activity : activities.keySet()) {
-					preconditions = XqueryExecuter.returnConditions(activity, PredicateType.Precondition);
-					for (String prec : preconditions) {
-						if(prec.isEmpty()) continue; //if it has no preconditions
-						Predicate p = new Predicate();
-						//p.setActivityName(activity);//to be deleted
-						p.setIncidentActivity(activities.get(activity));
-						p.setPredicateType(PredicateType.Precondition);
-						p.setName(prec.split("##")[0]);
-						p.setPredicate(matchConditionAssetsToSpaceAssets(prec.split("##")[1]));
-						//predHandler.addPredicate(p);
-						predHandler.addActivityPredicate(activity, p);
-					}
-					postconditions = XqueryExecuter.returnConditions(activity, PredicateType.Postcondition);
-					for (String prec : postconditions) {
-						if(prec.isEmpty()) continue; //if it has no preconditions
-						Predicate p = new Predicate();
-					//	p.setActivityName(activity);//to be deleted
-						p.setIncidentActivity(activities.get(activity));
-						p.setPredicateType(PredicateType.Postcondition);
-						p.setName(prec.split("##")[0]);
-						p.setPredicate(matchConditionAssetsToSpaceAssets(prec.split("##")[1]));
-						//predHandler.addPredicate(p);
-						predHandler.addActivityPredicate(activity, p);
-					}
-				}
-				
 
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return predHandler;
-	}
-	*/
 	public PredicateHandler generatePredicates() {
 
 		PredicateType[] types = { PredicateType.Precondition, PredicateType.Postcondition };
 
 		try {
-			
+
 			// create activties of the incident
 			HashMap<String, IncidentActivity> activities = createIncidentActivities();
 
-			//get controls for the asset set from the system file
+			// get controls for the asset set from the system file
 			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
 
-			//create the Bigraph representation (from LibBig library) for the pre/postconditions of the activities
-			//assumption: esach activity has ONE precondition and ONE postcondition
+			// create the Bigraph representation (from LibBig library) for the
+			// pre/postconditions of the activities
+			// assumption: esach activity has ONE precondition and ONE
+			// postcondition
 			for (String activity : activities.keySet()) {
 				for (PredicateType type : types) {
 					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
-					
-					//if there is no condition returend then skip creating a predicate for it
-					if(condition == null || condition.isNull(JSONTerms.ENTITY)) {
+
+					// if there is no condition returend then skip creating a
+					// predicate for it
+					if (condition == null || condition.isNull(JSONTerms.ENTITY)) {
 						continue;
 					}
-					
+
 					Predicate p = new Predicate();
 					p.setIncidentActivity(activities.get(activity));
 					p.setPredicateType(type);
-					p.setName(activity + "_" + type.toString()); //e.g., name = activity1_pre1
-					//updates entity names and controls from incident pattern to that from the system model
-					convertToMatchedAssets(condition);
-					p.setBigraphPredicate(condition);
-					if (p.getBigraphPredicate() != null)
-						predHandler.addActivityPredicate(activity, p);
+					p.setName(activity + "_" + type.toString()); // e.g., name =
+																	// activity1_pre1
+					// updates entity names and controls from incident pattern
+					// to that from the system model
+					if (convertToMatchedAssets(condition)) {
+						p.setBigraphPredicate(condition);
+						if (p.getBigraphPredicate() != null)
+							predHandler.addActivityPredicate(activity, p);
+					}
 				}
+
 			}
 
 		} catch (FileNotFoundException | XQException e) {
@@ -154,78 +118,50 @@ public class PredicateGenerator {
 		return predHandler;
 	}
 
-	private void convertToMatchedAssets(JSONObject obj) {
+	private boolean convertToMatchedAssets(JSONObject obj) {
 
 		JSONArray tmpAry;
 		JSONObject tmpObject;
-		
 		LinkedList<JSONObject> objs = new LinkedList<JSONObject>();
+
+		if (obj.isNull(JSONTerms.ENTITY)) {
+			return false;
+		}
 		
 		objs.add(obj);
-		
-		while (!objs.isEmpty()){
-		tmpObject = objs.pop();
-		
-		if (tmpObject.isNull(JSONTerms.ENTITY)) {
-		return;
-	}
 
-	if (JSONArray.class.isAssignableFrom(tmpObject.get(JSONTerms.ENTITY).getClass())) {
-		tmpAry = (JSONArray) tmpObject.get(JSONTerms.ENTITY);
-	} else {
-		tmpAry = new JSONArray();
-		tmpAry.put((JSONObject) tmpObject.get(JSONTerms.ENTITY));
-	}
-	for (int i = 0; i < tmpAry.length(); i++) {
-		JSONObject tmpObj = tmpAry.getJSONObject(i);
-		objs.add(tmpObj);
-		String name = tmpObj.get(JSONTerms.NAME).toString();
-		for (int j = 0; j < incidentAssetNames.length; j++) {
-			if (incidentAssetNames[j].equals(name)) {
-				tmpObj.put(JSONTerms.NAME, spaceAssetSet[j]);
-				tmpObj.put(JSONTerms.CONTROL, systemAssetControls[j]);
-				tmpObj.put(JSONTerms.INCIDENT_ASSET_NAME, incidentAssetNames[j]);
-				break;
+		while (!objs.isEmpty()) {
+			tmpObject = objs.pop();
+
+			if (JSONArray.class.isAssignableFrom(tmpObject.get(JSONTerms.ENTITY).getClass())) {
+				tmpAry = (JSONArray) tmpObject.get(JSONTerms.ENTITY);
+			} else {
+				tmpAry = new JSONArray();
+				tmpAry.put((JSONObject) tmpObject.get(JSONTerms.ENTITY));
 			}
-		}
-
-		/*// iterate over other children
-		if (!tmpObj.isNull("entity")) {
-			convertToMatchedAssets(tmpObj);
-		}*/
-
-	}
-			
-		}
-		/*if (obj.isNull("entity")) {
-			return;
-		}
-
-		if (JSONArray.class.isAssignableFrom(obj.get("entity").getClass())) {
-			tmpAry = (JSONArray) obj.get("entity");
-		} else {
-			tmpAry = new JSONArray();
-			tmpAry.put((JSONObject) obj.get("entity"));
-		}
-		for (int i = 0; i < tmpAry.length(); i++) {
-			JSONObject tmpObj = tmpAry.getJSONObject(i); // gets hold of node
-															// info
-			String name = tmpObj.get("name").toString();
-			for (int j = 0; j < incidentAssetNames.length; j++) {
-				if (incidentAssetNames[j].equals(name)) {
-					tmpObj.put("name", spaceAssetSet[j]);
-					tmpObj.put("control", systemAssetControls[j]);
-					tmpObj.put("incidentAssetName", incidentAssetNames[j]);
-					break;
+			for (int i = 0; i < tmpAry.length(); i++) {
+				JSONObject tmpObj = tmpAry.getJSONObject(i);
+				
+				String name = tmpObj.get(JSONTerms.NAME).toString();
+				for (int j = 0; j < incidentAssetNames.length; j++) {
+					if (incidentAssetNames[j].equals(name)) {
+						tmpObj.put(JSONTerms.NAME, spaceAssetSet[j]);
+						tmpObj.put(JSONTerms.CONTROL, systemAssetControls[j]);
+						tmpObj.put(JSONTerms.INCIDENT_ASSET_NAME, incidentAssetNames[j]);
+						break;
+					}
 				}
+
+				//add contained entities
+				if (!tmpObj.isNull(JSONTerms.ENTITY)) {
+					objs.add(tmpObj);
+				}
+				
 			}
 
-			// iterate over other children
-			if (!tmpObj.isNull("entity")) {
-				convertToMatchedAssets(tmpObj);
-			}
+		}
 
-		}*/
+		return true;
 	}
 
 /*	public String matchConditionAssetsToSpaceAssets(String condition) {
