@@ -358,6 +358,7 @@ public class Predicate {
 		int arity;
 		int newSize = 0;
 		LinkedList<BigraphNode.OuterName> names;
+		
 		//create bigraph outernames
 		for(BigraphNode n : nodes.values()) {
 			arity = SystemInstanceHandler.getGlobalBigraphSignature().getByName(n.getControl()).getArity();
@@ -373,8 +374,10 @@ public class Predicate {
 			for(int i = 0;i<newSize;i++) {
 				if(!outerNames.contains(names.get(i))) {
 					libBigOuterNames.put(names.get(i).getName(), biBuilder.addOuterName(names.get(i).getName()));
+					//biBuilder.closeOuterName(names.get(i).getName());
 					outerNames.add(names.get(i));
 				}	
+				
 			}
 			
 			//create bigraph inner names
@@ -396,10 +399,25 @@ public class Predicate {
 		
 		//close outernames after creating nodes of the Bigraph
 		//this turns them into edges (or links) in the Bigraph object
-		for(BigraphNode.OuterName out : outerNames) {
+	/*	for(BigraphNode.OuterName out : outerNames) {
 			if(out.isClosed()) {
 				biBuilder.closeOuterName(out.getName());
 			}
+		}*/
+		
+/*		LinkedList<String> visited = new LinkedList<String>();
+		for(BigraphNode nd : nodes.values()) {
+			for(BigraphNode.OuterName ot : nd.getOuterNamesObjects()) {
+				if(ot.isClosed() && libBigOuterNames.containsKey(ot.getName()) && !visited.contains(ot.getName())) {
+					biBuilder.closeOuterName(ot.getName());
+					visited.add(ot.getName());
+				}
+			}
+		}*/
+	
+		//close every outername....should be removed...it is just for testing
+		for(OuterName ot : libBigOuterNames.values()) {
+			biBuilder.closeOuterName(ot);
 		}
 		
 		//close innernames after creating nodes of the Bigraph
@@ -536,10 +554,10 @@ public class Predicate {
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
-
+		OuterName tmp; 
 		// find the difference between the outernames (i.e. connections) of the
 		// node and the outernames defined for that node in the signature
-		int difference = node.getOuterNames().size()
+		/*int difference = node.getOuterNames().size()
 				- SystemInstanceHandler.getGlobalBigraphSignature().getByName(node.getControl()).getArity();
 
 		// if knowledge is partial for the node,
@@ -547,22 +565,21 @@ public class Predicate {
 			// then if number of outernames less than that in the signature,
 			while (difference < 0) {
 				// then the rest are either:
-				// 1-created, added for that node.
-				OuterName tmp = biBuilder.addOuterName();
+				// 1-create, added, then closed for that node (they become links
+				// or edges i.e. XX:e)
+				tmp = biBuilder.addOuterName();
 				outerNames.put(tmp.getName(), tmp);
-				node.addOuterName(tmp.getName());
+				node.addOuterName(tmp.getName(), true);
 				difference++;
-				// 2-create, added, then closed for that node (they become links
-				// or edges i.e. XX:e).
+				// 2-created, added for that node.
 			}
 			// if it is more than that in the signature, then
 
 		} else {
 			// if knowledge is exact and number of outernames are different,
-			// then nothing will be done
 			while (difference < 0) {
 				// then create and close for that node.
-				OuterName tmp = biBuilder.addOuterName();
+				tmp = biBuilder.addOuterName();
 				// close outernames
 				biBuilder.closeOuterName(tmp);
 				outerNames.put(tmp.getName(), tmp);
@@ -570,7 +587,7 @@ public class Predicate {
 				difference++;
 			}
 		}
-
+*/
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
 		}

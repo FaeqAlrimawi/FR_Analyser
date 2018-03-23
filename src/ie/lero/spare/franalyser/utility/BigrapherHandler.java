@@ -578,14 +578,16 @@ public class BigrapherHandler implements SystemExecutor {
 		outerNamesFull.addAll(outerNames);
 		innerNamesFull.addAll(innerNames);
 		
+		//// Create Bigraph Object \\\\\
+		
 		Signature tmpSig = getBigraphSignature();
 		
 		if(tmpSig == null) {
 			return null;
 		}
 		
+		
 		BigraphBuilder biBuilder = new BigraphBuilder(tmpSig);
-
 	
 		// create roots for the bigraph
 		for (int i = 0; i < numOfRoots; i++) {

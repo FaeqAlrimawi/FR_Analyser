@@ -52,50 +52,24 @@
             <entity name="offender1">
               <site/>
             </entity>
-            <connectivity name="walkway1"/>
-            <site/>
+            <connectivity name="walkway1" isLink="true"/>
+           
           </entity>
           <entity name="location_SD1">
             <entity name="smartDevice1">
-             <connectivity name="cyber1"/>
-			  <site/>
+             <connectivity name="cyber1" isLink="true"/>
             </entity>
-            <connectivity name="walkway1"/>
+            <connectivity name="walkway1" isLink="true"/>
             <site/>
           </entity>
 		  <site/>
         </entity>
         <entity name="digitalNetwork">
-          <connectivity name="cyber1"/>
+          <connectivity name="cyber1" isLink="true"/>
         </entity>
 		</entity>
       </expression>
     </condition>
-    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post1">
-      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <exp>offender.laptop</exp>
-        <entity name="floorX">
-          <entity name="hallway">
-            <connectivity name="walkway1"/>
-            <site/>
-          </entity>
-          <entity name="location_SD1">
-            <entity name="smartDevice1">
-              <connectivity name="cyber1"/>
-            </entity>
-            <entity name="offender1">
-              <site/>
-            </entity>
-            <connectivity name="walkway1"/>
-            <site/>
-          </entity>
-		  <site/>
-        </entity>
-        <entity name="digitalNetwork">
-          <connectivity name="cyber1"/>
-        </entity>
-		
-      </expression>
-    </condition>
+   
   </activity>
 </cyberPhysical_Incident:IncidentDiagram>

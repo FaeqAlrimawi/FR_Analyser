@@ -195,30 +195,31 @@ public class BigraphAnalyser {
 		}*/
 		
 		
-		print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
+	//	print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
+		print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\n\nOriginal state: "+states.get(0)+"\n\n");
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
 		//assuming knowledge is partial, if the number of outernames in a redex node is less than that in the signature (and knolwdege is partial for that node),
 		//then add outernames to equal the number of outernames in the signature for that node.
 		//if knowledge is complete, then any 
 		
-		if(matcher.match(st, red).iterator().hasNext()){
+/*		if(matcher.match(st, red).iterator().hasNext()){
 			areStatesIdentified = true;
 			print("created matched");		
-		}
+		}*/
 
-		if(matcher.match(states.get(0), redex).iterator().hasNext()){
+	/*	if(matcher.match(states.get(0), redex).iterator().hasNext()){
 			areStatesIdentified = true;
 			print("original matched");		
-		}
+		}*/
 
-	/*	for(int i =0; i<states.size();i++) {	
-			if(matcher.match(st, redex).iterator().hasNext()){
+		for(int i =0; i<states.size();i++) {	
+			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;
 				print("state " + i + " matched");		
 			}
-			*/
+		}
 			/*Iterator<? extends Match> t = matcher.match(states.get(i), redex).iterator();
 			int cnt = 0;
 			while(t.hasNext()){
