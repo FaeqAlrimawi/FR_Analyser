@@ -374,7 +374,7 @@ public class Predicate {
 			for(int i = 0;i<newSize;i++) {
 				if(!outerNames.contains(names.get(i))) {
 					libBigOuterNames.put(names.get(i).getName(), biBuilder.addOuterName(names.get(i).getName()));
-					biBuilder.closeOuterName(names.get(i).getName());
+					//biBuilder.closeOuterName(names.get(i).getName());
 					outerNames.add(names.get(i));
 				}	
 				
