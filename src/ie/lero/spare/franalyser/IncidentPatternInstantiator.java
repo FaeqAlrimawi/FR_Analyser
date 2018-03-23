@@ -115,9 +115,9 @@ public class IncidentPatternInstantiator {
 		}
 		
 		//print matched assets
-		for(String n : am.getIncidentAssetNames()) {
+		/*for(String n : am.getIncidentAssetNames()) {
 			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
-		}
+		}*/
 	
 		//generate sequences
 		LinkedList<String[]> lst = am.generateUniqueCombinations();

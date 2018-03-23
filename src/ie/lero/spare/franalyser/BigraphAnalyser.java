@@ -169,21 +169,32 @@ public class BigraphAnalyser {
 		OuterName r2 = bi2.addOuterName("r2");
 		OuterName r3 = bi2.addOuterName("r3");
 		OuterName tst = bi2.addOuterName("tst");*/
+		OuterName u1 = bi2.addOuterName("u1");
+		OuterName u2 = bi2.addOuterName("u2");
+		OuterName u3 = bi2.addOuterName("u3");
+		OuterName u4 = bi2.addOuterName("u4");
 		
-		Node flor = bi2.addNode("Floor", bi2.addRoot());
+		Node bld2 = bi2.addNode("Building", bi2.addRoot());
+		Node flor = bi2.addNode("Floor", bld2);
 		//Node room1 = bi2.addNode("Room", flor, r1);
 		//Node room2 = bi2.addNode("Room", flor, r2);
 		//Node device = bi2.addNode("SmartLight", room1, u1);
 		//Node device2 = bi2.addNode("SmartLight", room2, tst);
-		Node hlway = bi2.addNode("Hallway", flor);
+		Node hlway = bi2.addNode("Hallway", flor,u1,u2,u3);
+		Node rm11 = bi2.addNode("Room", flor,u4);
+		//Node rm12 = bi2.addNode("Room", flor,u2);
+		//Node rm13 = bi2.addNode("Room", flor,u3);
 		//Node net = bi2.addNode("InstallationBus", bi2.addRoot(), u1, u2,u3,u4,u5, u6);
-		
+		//bi2.closeOuterName(u3);
+		//bi2.closeOuterName(u2);
+		bi2.closeOuterName(u1);
 		bi2.addSite(hlway);
 		//bi2.addSite(room1);
 		bi2.addSite(flor);
-		
-		
-		
+		bi2.addSite(bld2);
+		bi2.addSite(rm11);
+		//bi2.addSite(rm12);
+		//bi2.addSite(rm13);
 		Bigraph red = bi2.makeBigraph();
 	//	redex =  bi.makeBigraph();
 		////
@@ -213,9 +224,10 @@ public class BigraphAnalyser {
 			print("original matched");		
 		}*/
 
+		
 		for(int i =0; i<states.size();i++) {	
-			if(matcher.match(states.get(i), red).iterator().hasNext()){
-				pred.addBigraphState(i);
+			if(matcher.match(states.get(i), redex).iterator().hasNext()){
+			//	pred.addBigraphState(i);
 				areStatesIdentified = true;
 				print("state " + i + " matched");		
 			}
@@ -270,10 +282,10 @@ public class BigraphAnalyser {
 			System.out.println("BigraphAnalyser: "+msg);
 		}
 	}
-	public static void main(String[] args){
+	/*public static void main(String[] args){
 		BigraphAnalyser a = new BigraphAnalyser();
 		Predicate p = null;
 		a.identifyRelevantStates(p);
-	}
+	}*/
 
 }

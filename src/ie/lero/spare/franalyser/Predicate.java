@@ -374,7 +374,7 @@ public class Predicate {
 			for(int i = 0;i<newSize;i++) {
 				if(!outerNames.contains(names.get(i))) {
 					libBigOuterNames.put(names.get(i).getName(), biBuilder.addOuterName(names.get(i).getName()));
-					//biBuilder.closeOuterName(names.get(i).getName());
+					biBuilder.closeOuterName(names.get(i).getName());
 					outerNames.add(names.get(i));
 				}	
 				
@@ -557,7 +557,7 @@ public class Predicate {
 		OuterName tmp; 
 		// find the difference between the outernames (i.e. connections) of the
 		// node and the outernames defined for that node in the signature
-		/*int difference = node.getOuterNames().size()
+		int difference = node.getOuterNames().size()
 				- SystemInstanceHandler.getGlobalBigraphSignature().getByName(node.getControl()).getArity();
 
 		// if knowledge is partial for the node,
@@ -565,13 +565,13 @@ public class Predicate {
 			// then if number of outernames less than that in the signature,
 			while (difference < 0) {
 				// then the rest are either:
-				// 1-create, added, then closed for that node (they become links
-				// or edges i.e. XX:e)
+				// 1-created, added for that node.
 				tmp = biBuilder.addOuterName();
 				outerNames.put(tmp.getName(), tmp);
-				node.addOuterName(tmp.getName(), true);
+				node.addOuterName(tmp.getName());
 				difference++;
-				// 2-created, added for that node.
+				// 2-create, added, then closed for that node (they become links
+				// or edges i.e. XX:e)
 			}
 			// if it is more than that in the signature, then
 
@@ -587,7 +587,7 @@ public class Predicate {
 				difference++;
 			}
 		}
-*/
+
 		for(String n : node.getOuterNames()) {
 			names.add(outerNames.get(n));
 		}
@@ -615,7 +615,7 @@ public class Predicate {
 			
 	}
 	
-	public static void main(String[] args){
+	/*public static void main(String[] args){
 		Predicate p = new Predicate();
 		Matcher matcher = new Matcher();
 		
@@ -642,6 +642,6 @@ public class Predicate {
 		if(isDebugging) {
 			System.out.println("Predicate: "+msg);
 		}
-	}
+	}*/
 }
 
