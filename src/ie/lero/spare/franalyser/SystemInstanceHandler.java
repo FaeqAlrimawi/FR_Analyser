@@ -1,33 +1,12 @@
 package ie.lero.spare.franalyser;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import ie.lero.spare.franalyser.utility.BigraphNode;
-import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
-import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
-import it.uniud.mads.jlibbig.core.std.Handle;
-import it.uniud.mads.jlibbig.core.std.InnerName;
 import it.uniud.mads.jlibbig.core.std.Matcher;
-import it.uniud.mads.jlibbig.core.std.Node;
-import it.uniud.mads.jlibbig.core.std.OuterName;
-import it.uniud.mads.jlibbig.core.std.Root;
 import it.uniud.mads.jlibbig.core.std.Signature;
-import it.uniud.mads.jlibbig.core.std.SignatureBuilder;
-import it.uniud.mads.jlibbig.core.std.Site;
 
 public class SystemInstanceHandler {
 
@@ -36,9 +15,8 @@ public class SystemInstanceHandler {
 	private static TransitionSystem transitionSystem;
 	private static HashMap<Integer, Bigraph> states;
 	private static Signature globalBigraphSignature;
-	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 	private static boolean isDebugging = true;
-
+	private static String errorSign = "## ";
 	public static boolean analyseSystem() {
 
 		if (executor == null) {
@@ -59,7 +37,7 @@ public class SystemInstanceHandler {
 			if(globalBigraphSignature != null) {
 				print("Bigraph signature is created successfully");
 			} else {
-				print("Something went wrong creating the Bigraph signature");
+				print(errorSign+"Something went wrong creating the Bigraph signature");
 				return false;
 			}
 			
@@ -67,9 +45,9 @@ public class SystemInstanceHandler {
 			transitionSystem = executor.getTransitionSystem();
 			
 			if(transitionSystem != null) {
-				print("Bigraph transition systen is created successfully");
+				print("Bigraph transition system is created successfully");
 			} else {
-				print("something went wrong while creating the Bigraph transition system");
+				print(errorSign+"something went wrong while creating the Bigraph transition system");
 				return false;
 			}
 			
@@ -79,13 +57,13 @@ public class SystemInstanceHandler {
 			if (states != null) {
 				print("States are created successfully");
 			} else {
-				print("something went wrong while creating the Bigraph system states");
+				print(errorSign+"something went wrong while creating the Bigraph system states");
 				return false;
 			}
 			
 			return true;			
 		} else {
-			print("something went wrong while executing the BRS");
+			print(errorSign+"something went wrong while executing the BRS");
 			return false;
 		}
 	}
@@ -115,23 +93,6 @@ public class SystemInstanceHandler {
 		return transitionSystem;
 	}
 
-/*	public static void setTransitionSystem(TransitionSystem transitionsystem) {
-		SystemInstanceHandler.transitionSystem = transitionsystem;
-	}*/
-
-/*	public static String getFileName() {
-		return fileName;
-	}
-*/
-/*	public static void setFileName(String fileName) {
-		SystemInstanceHandler.fileName = fileName;
-		clearSystem();
-	}*/
-
-/*	public static boolean isSystemAnalysed() {
-		return isSystemAnalysed;
-	}
-*/
 	public static HashMap<Integer, Bigraph> getStates() {
 		return states;
 	}
@@ -150,251 +111,6 @@ public class SystemInstanceHandler {
 			System.out.println(msg);
 		}
 	}
-
-	/**
-	 * converts the states of a bigraph execution to bigraph objects then adds
-	 * them to a hashmap
-	 * 
-	 * @return HashMap containing the Bigraphs keyed using their state number
-	 *         (e.g., key 0, value Bigraph0)
-	 *//*
-	public static HashMap<Integer, Bigraph> loadStates() {
-
-		// for testing
-		// outputFolder = "sb3_output";
-
-		states = new HashMap<Integer, Bigraph>();
-		// should rethink how to know how many states are there/ Currently
-		// depends on the transition file
-
-		int numOfStates = transitionSystem.getNumberOfStates();
-	
-		JSONObject state;
-		JSONParser parser = new JSONParser();
-		boolean isSignatureCreated = false;
-
-		print("[" + dtf.format(LocalDateTime.now()) + "] loading states...");
-
-		if (globalBigraphSignature != null) {
-			for (int i = 0; i < numOfStates; i++) {
-				try {
-					// read state from file
-					state = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + i + ".json"));
-					Bigraph bigraph = convertJSONtoBigraph(state);
-					states.put(i, bigraph);
-
-				} catch (IOException | ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			print("[" + dtf.format(LocalDateTime.now()) + "] " + states.size() + " states loaded.");
-		} else {
-			print("Could not create signature...exiting the program.");
-			return null;
-		}
-		
-		return states;
-	}
-
-	*//**
-	 * converts a given bigraph in JSON format to a Bigraph object from the
-	 * LibBig library. A signature should be created first using the
-	 * buildSignature method.
-	 * 
-	 * @param state
-	 *            the JSON object containing the bigtaph
-	 * @return Bigraph object
-	 *//*
-	public static Bigraph convertJSONtoBigraph(JSONObject state) {
-
-		String tmp;
-		String tmpArity;
-		JSONObject tmpObj;
-		JSONObject tmpCtrl;
-		HashMap<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();
-		BigraphNode node;
-		JSONArray ary;
-		JSONArray innerAry;
-		JSONArray outerAry;
-		JSONArray portAry;
-		Iterator<JSONObject> it;
-		Iterator<JSONObject> itInner;
-		Iterator<JSONObject> itOuter;
-		Iterator<JSONObject> itPort;
-		int src, target;
-		LinkedList<String> outerNames = new LinkedList<String>();
-		LinkedList<String> innerNames = new LinkedList<String>();
-		LinkedList<String> outerNamesFull = new LinkedList<String>();
-		LinkedList<String> innerNamesFull = new LinkedList<String>();
-
-		HashMap<String, OuterName> libBigOuterNames = new HashMap<String, OuterName>();
-		HashMap<String, InnerName> libBigInnerNames = new HashMap<String, InnerName>();
-		HashMap<String, Node> libBigNodes = new HashMap<String, Node>();
-		LinkedList<Root> libBigRoots = new LinkedList<Root>();
-		LinkedList<Site> libBigSites = new LinkedList<Site>();
-
-		// number of roots, sites, and nodes respectively
-		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_REGIONS).toString());
-		int numOfSites = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_SITES).toString());
-		int numOfNodes = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NODES).toString());
-
-		// get controls & their arity [defines signature]. Controls are assumed
-		// to be active (i.e. true)
-		ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
-		it = ary.iterator();
-		while (it.hasNext()) {
-			node = new BigraphNode();
-			tmpObj = (JSONObject) it.next(); // gets hold of node info
-
-			tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
-			tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ID).toString();
-			tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ARITY).toString();
-
-			// set node id
-			node.setId(tmpObj.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
-			// set node control
-			node.setControl(tmp);
-			nodes.put(node.getId(), node);
-		}
-
-		// get parents for nodes from the place_graph=> dag. Caution using the
-		// roots and sites numbers
-		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_DAG);
-		it = ary.iterator();
-		while (it.hasNext()) {
-			tmpObj = (JSONObject) it.next(); // gets hold of node info
-			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
-			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
-
-			if (src >= numOfRoots) {
-				// set parent node in the target node
-				nodes.get(Integer.toString(target)).setParent(nodes.get(Integer.toString(src - numOfRoots)));
-				// add child node to source node
-				nodes.get(Integer.toString(src - numOfRoots)).addChildNode(nodes.get(Integer.toString(target)));
-			} else { // source is a root
-				nodes.get(Integer.toString(target)).setParentRoot(src);
-
-			}
-
-			// should pay attention to sites
-
-		}
-
-		// get outer names and inner names for the nodes. Currently, focus on
-		// outer names
-		// while inner names are extracted they are not updated in the nodes
-		ary = (JSONArray) (state.get(JSONTerms.BIGRAPHER_LINK_GRAPH));
-		it = ary.iterator();
-		while (it.hasNext()) {
-			tmpObj = (JSONObject) it.next(); // gets hold of node info
-			outerNames.clear();
-			innerNames.clear();
-
-			// get outer names
-			outerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_OUTER));
-			itOuter = outerAry.iterator();
-			while (itOuter.hasNext()) {
-				outerNames.add(itOuter.next().get(JSONTerms.BIGRAPHER_NAME).toString());
-			}
-			outerNamesFull.addAll(outerNames);
-						
-			// get inner names
-			innerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_INNER));
-			itInner = innerAry.iterator();
-			while (itInner.hasNext()) {
-				innerNames.add(itInner.next().get(JSONTerms.BIGRAPHER_NAME).toString());
-			}
-			innerNamesFull.addAll(innerNames);
-			
-			// get nodes connected to outer names. Inner names should be
-			// considered
-			portAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_PORTS));
-			itPort = portAry.iterator();
-			while (itPort.hasNext()) {
-				node = nodes.get(itPort.next().get(JSONTerms.BIGRAPHER_NODE_ID).toString());
-				node.addOuterNames(outerNames);
-				node.addInnerNames(innerNames);
-			}
-		}
-
-		BigraphBuilder biBuilder = new BigraphBuilder(globalBigraphSignature);
-
-	
-		// create roots for the bigraph
-		for (int i = 0; i < numOfRoots; i++) {
-			libBigRoots.add(biBuilder.addRoot(i));
-		}
-
-		// create outer names
-		for (String outer : outerNamesFull) {
-			libBigOuterNames.put(outer, biBuilder.addOuterName(outer));
-		}
-
-		// create inner names
-		for (String inner : innerNamesFull) {
-			libBigInnerNames.put(inner, biBuilder.addInnerName(inner));
-		}
-
-		// initial creation of nodes
-		for (BigraphNode nd : nodes.values()) {
-			if (libBigNodes.containsKey(nd.getId())) {
-				continue;
-			}
-			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);
-		}
-		
-
-
-		// add sites to bigraph
-		for (BigraphNode n : nodes.values()) {
-			if (n.hasSite()) {
-				biBuilder.addSite(libBigNodes.get(n.getId()));
-			}
-		}
-
-		
-		return biBuilder.makeBigraph();
-	}
-
-	private static Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots,
-			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
-
-		LinkedList<Handle> names = new LinkedList<Handle>();
-		
-		for (String n : node.getOuterNames()) {
-			names.add(outerNames.get(n));
-		}
-
-		// if the parent is a root
-		if (node.isParentRoot()) { // if the parent is a root
-			Node n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
-			nodes.put(node.getId(), n);
-			return n;
-		}
-
-		// if the parent is already created as a node in the bigraph
-		if (nodes.containsKey(node.getParent().getId())) {
-			Node n = biBuilder.addNode(node.getControl(), nodes.get(node.getParent().getId()), names);
-			nodes.put(node.getId(), n);
-			return n;
-		}
-
-		Node n = biBuilder.addNode(node.getControl(),
-				createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
-		nodes.put(node.getId(), n);
-		return n;
-
-	}
-*/
-/*	public static void clearSystem() {
-		isSystemAnalysed = false;
-		outputFolder = null;
-		states = null;
-		System.gc();
-
-	}*/
-
 	
 	public static void main(String[] args) {
 

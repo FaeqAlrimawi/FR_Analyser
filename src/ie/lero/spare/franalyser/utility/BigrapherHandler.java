@@ -380,19 +380,17 @@ public class BigrapherHandler implements SystemExecutor {
 	@Override
 	public Signature getBigraphSignature() {
 		
-		Signature tmp;
+		if(bigraphSignature != null) {
+			return bigraphSignature;
+		}
+		
+		bigraphSignature = createSignatureFromBRS();
 		
 		if(bigraphSignature != null) {
 			return bigraphSignature;
 		}
 		
-		tmp = createSignatureFromBRS();
-		
-		if(tmp != null) {
-			return tmp;
-		}
-		
-		return createSignatureFromStates();
+		return bigraphSignature  = createSignatureFromStates();
 		
 	}
 	
@@ -476,7 +474,8 @@ public class BigrapherHandler implements SystemExecutor {
 		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_REGIONS).toString());
 		int numOfSites = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_SITES).toString());
 		int numOfNodes = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NODES).toString());
-
+		int edgeNumber = 0;
+		
 		// get controls & their arity [defines signature]. Controls are assumed
 		// to be active (i.e. true)
 		ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
@@ -515,8 +514,6 @@ public class BigrapherHandler implements SystemExecutor {
 
 			}
 
-			// should pay attention to sites
-
 		}
 
 		// get outer names and inner names for the nodes. Currently, focus on
@@ -531,31 +528,56 @@ public class BigrapherHandler implements SystemExecutor {
 
 			// get outer names
 			outerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_OUTER));
-			itOuter = outerAry.iterator();
-			while (itOuter.hasNext()) {
-				outerNames.add(itOuter.next().get(JSONTerms.BIGRAPHER_NAME).toString());
-			}
-			outerNamesFull.addAll(outerNames);
-						
-			// get inner names
 			innerAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_INNER));
-			itInner = innerAry.iterator();
-			while (itInner.hasNext()) {
-				innerNames.add(itInner.next().get(JSONTerms.BIGRAPHER_NAME).toString());
-			}
-			innerNamesFull.addAll(innerNames);
-			
-			// get nodes connected to outer names. Inner names should be
-			// considered
 			portAry = (JSONArray) (tmpObj.get(JSONTerms.BIGRAPHER_PORTS));
-			itPort = portAry.iterator();
-			while (itPort.hasNext()) {
-				node = nodes.get(itPort.next().get(JSONTerms.BIGRAPHER_NODE_ID).toString());
-				node.addOuterNames(outerNames);
+			
+			//get outernames
+			for (int i=0; i<outerAry.size();i++) {
+				JSONObject tmpOuter = (JSONObject)outerAry.get(i);
+				
+				outerNames.add(tmpOuter.get(JSONTerms.BIGRAPHER_NAME).toString());
+			}
+			
+			// get inner names
+			for (int i=0; i<innerAry.size();i++) {
+				JSONObject tmpInner = (JSONObject)innerAry.get(i);
+	
+				innerNames.add(tmpInner.get(JSONTerms.BIGRAPHER_NAME).toString());
+			}
+						
+			// get nodes connected to outer names. Inner names should be considered
+			if (outerNames.size() > 0) {
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+
+					node.addOuterNames(outerNames);
+					node.addInnerNames(innerNames);
+				}
+			} else { //if there are no outer names, then create edges by creating outernames, adding them to the nodes, then closing the outername
+
+				for (int i = 0; i < portAry.size(); i++) {
+					JSONObject tmpPort = (JSONObject) portAry.get(i);
+					node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
+
+					node.addOuterName("edge"+edgeNumber, true);
+				}
+				edgeNumber++;
+			}
+			
+			//add inner names to nodes
+			if(innerNames.size()>0) {
+			for (int i = 0; i < portAry.size(); i++) {
+				JSONObject tmpPort = (JSONObject) portAry.get(i);
+				node = nodes.get(tmpPort.get(JSONTerms.BIGRAPHER_NODE_ID).toString());;
 				node.addInnerNames(innerNames);
 			}
+			}
 		}
-
+		
+		outerNamesFull.addAll(outerNames);
+		innerNamesFull.addAll(innerNames);
+		
 		Signature tmpSig = getBigraphSignature();
 		
 		if(tmpSig == null) {
@@ -570,12 +592,22 @@ public class BigrapherHandler implements SystemExecutor {
 			libBigRoots.add(biBuilder.addRoot(i));
 		}
 
-		// create outer names
-		for (String outer : outerNamesFull) {
-			libBigOuterNames.put(outer, biBuilder.addOuterName(outer));
+		// create outer names		
+		OuterName tmpNm;
+		HashMap<String, Boolean> isClosedMap = new HashMap<String, Boolean>();
+		
+		for(BigraphNode nd : nodes.values()) {
+			for(BigraphNode.OuterName nm : nd.getOuterNamesObjects()) {
+				if(libBigOuterNames.get(nm.getName()) == null) {
+					tmpNm = biBuilder.addOuterName(nm.getName());
+					libBigOuterNames.put(nm.getName(), tmpNm);
+					isClosedMap.put(nm.getName(), nm.isClosed());
+				}
+			}
 		}
-
+		
 		// create inner names
+		//consider closing iner names also (future work)
 		for (String inner : innerNamesFull) {
 			libBigInnerNames.put(inner, biBuilder.addInnerName(inner));
 		}
@@ -589,8 +621,15 @@ public class BigrapherHandler implements SystemExecutor {
 		}
 		
 
-
-		// add sites to bigraph
+		//close outernames
+		for(OuterName nm : libBigOuterNames.values()) {
+			if(isClosedMap.get(nm.getName())) {
+				biBuilder.closeOuterName(nm);
+			}
+		}
+		
+		
+		// add sites to bigraph (probably for states they don't have sites)
 		for (BigraphNode n : nodes.values()) {
 			if (n.hasSite()) {
 				biBuilder.addSite(libBigNodes.get(n.getId()));
