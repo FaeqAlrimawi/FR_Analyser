@@ -34,39 +34,66 @@ public class SystemInstanceHandler {
 	private static String outputFolder;
 	private static SystemExecutor executor;
 	private static TransitionSystem transitionSystem;
-	private static String fileName;
-	private static boolean isSystemAnalysed = false;
 	private static HashMap<Integer, Bigraph> states;
 	private static Signature globalBigraphSignature;
 	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-	private static LocalDateTime now;
 	private static boolean isDebugging = true;
 
-	public static boolean analyseSystem(String fileName) {
+	public static boolean analyseSystem() {
 
-		if (executor == null || fileName == null) {
-			return isSystemAnalysed = false;
+		if (executor == null) {
+			print("System Executor is not set.");
+			return false;
 		}
 
-		if (isSystemAnalysed && fileName.equals(SystemInstanceHandler.fileName)) {
-			return true;
-		}
-
-		SystemInstanceHandler.fileName = fileName;
-
-		outputFolder = executor.execute(fileName);
-
+		print("Executing the Bigraphical Reactive System (BRS)");
+		outputFolder = executor.execute();
+		
 		if (outputFolder != null) {
-			return isSystemAnalysed = true;
+			print("Execution is done successfully");
+			print("Loading Bigraph Signature");
+			
+			//get the signature
+			globalBigraphSignature = executor.getBigraphSignature();
+			
+			if(globalBigraphSignature != null) {
+				print("Bigraph signature is created successfully");
+			} else {
+				print("Something went wrong creating the Bigraph signature");
+				return false;
+			}
+			
+			//get the transition system
+			transitionSystem = executor.getTransitionSystem();
+			
+			if(transitionSystem != null) {
+				print("Bigraph transition systen is created successfully");
+			} else {
+				print("something went wrong while creating the Bigraph transition system");
+				return false;
+			}
+			
+			//gete states as Bigraph objects
+			states = executor.getStates();
+			
+			if (states != null) {
+				print("States are created successfully");
+			} else {
+				print("something went wrong while creating the Bigraph system states");
+				return false;
+			}
+			
+			return true;			
+		} else {
+			print("something went wrong while executing the BRS");
+			return false;
 		}
-
-		return isSystemAnalysed = false;
 	}
 
-	public static boolean analyseSystem(String fileName, SystemExecutor exec) {
+/*	public static boolean analyseSystem(String fileName, SystemExecutor exec) {
 		executor = exec;
 		return analyseSystem(fileName);
-	}
+	}*/
 
 	public static String getOutputFolder() {
 		return outputFolder;
@@ -85,37 +112,26 @@ public class SystemInstanceHandler {
 	}
 
 	public static TransitionSystem getTransitionSystem() {
-		if (transitionSystem == null) {
-			if (outputFolder != null) {
-				TransitionSystem.setFileName(outputFolder + "/transitions.txt");
-				transitionSystem = TransitionSystem.getTransitionSystemInstance();
-			}
-		}
-
 		return transitionSystem;
 	}
 
-	public static void setTransitionSystem(TransitionSystem transitionsystem) {
+/*	public static void setTransitionSystem(TransitionSystem transitionsystem) {
 		SystemInstanceHandler.transitionSystem = transitionsystem;
-	}
+	}*/
 
-	public static String getFileName() {
+/*	public static String getFileName() {
 		return fileName;
 	}
-
-	public static void setFileName(String fileName) {
+*/
+/*	public static void setFileName(String fileName) {
 		SystemInstanceHandler.fileName = fileName;
 		clearSystem();
-	}
+	}*/
 
-	public static boolean isSystemAnalysed() {
+/*	public static boolean isSystemAnalysed() {
 		return isSystemAnalysed;
 	}
-
-	public static void setSystemAnalysed(boolean isSystemAnalysed) {
-		SystemInstanceHandler.isSystemAnalysed = isSystemAnalysed;
-	}
-
+*/
 	public static HashMap<Integer, Bigraph> getStates() {
 		return states;
 	}
@@ -141,7 +157,7 @@ public class SystemInstanceHandler {
 	 * 
 	 * @return HashMap containing the Bigraphs keyed using their state number
 	 *         (e.g., key 0, value Bigraph0)
-	 */
+	 *//*
 	public static HashMap<Integer, Bigraph> loadStates() {
 
 		// for testing
@@ -151,7 +167,7 @@ public class SystemInstanceHandler {
 		// should rethink how to know how many states are there/ Currently
 		// depends on the transition file
 
-		int numOfStates = getTransitionSystem().getNumberOfStates();
+		int numOfStates = transitionSystem.getNumberOfStates();
 	
 		JSONObject state;
 		JSONParser parser = new JSONParser();
@@ -159,21 +175,7 @@ public class SystemInstanceHandler {
 
 		print("[" + dtf.format(LocalDateTime.now()) + "] loading states...");
 
-		// create signature
-		if (createSignatureFromBRS() != null) {
-			print("[" + dtf.format(LocalDateTime.now()) + "] bigraph Signature is created.");
-			isSignatureCreated = true;
-		} else {
-			print("Creating Bigraph signature by visiting all states");
-			if (createSignatureFromStates() != null) {
-				print("[" + dtf.format(LocalDateTime.now()) + "] bigraph Signature is created.");
-				isSignatureCreated = true;
-			} else {
-				print("Could not create signature...exiting the program.");
-			}
-		}
-
-		if (isSignatureCreated) {
+		if (globalBigraphSignature != null) {
 			for (int i = 0; i < numOfStates; i++) {
 				try {
 					// read state from file
@@ -195,154 +197,7 @@ public class SystemInstanceHandler {
 		return states;
 	}
 
-
-/*	public static Signature createStateSignature(JSONObject state) {
-
-		SignatureBuilder sigBuilder = new SignatureBuilder();
-		JSONArray ary;
-		Iterator<?> it;
-		JSONObject tmpObj, tmpCtrl;
-		String tmp, tmpArity;
-		LinkedList<String> controls = new LinkedList<String>();
-
-		ary = (JSONArray) state.get("nodes");
-		it = ary.iterator();
-		while (it.hasNext()) {
-			tmpObj = (JSONObject) it.next(); // gets hold of node info
-
-			tmpCtrl = (JSONObject) tmpObj.get("control");
-			tmp = tmpCtrl.get("control_id").toString();
-			tmpArity = tmpCtrl.get("control_arity").toString();
-
-			if (!controls.contains(tmp)) {
-				// to avoid duplicates
-				controls.add(tmp);
-				sigBuilder.add(tmp, true, Integer.parseInt(tmpArity));
-			}
-		}
-
-		return sigBuilder.makeSignature();
-	}
-*/
-	/**
-	 * creates a signature from the Bigrapher file provided (i.e. fileName set
-	 * by method setFileName)
-	 * 
-	 * @return The signature of the Bigrapher as a Signature object from the
-	 *         LibBig library
-	 */
-	public static Signature createSignatureFromBRS() {
-		SignatureBuilder sigBuilder = new SignatureBuilder();
-
-		String[] lines = FileManipulator.readFileNewLine(fileName);
-		String tmp;
-
-		for (int i = 0; i < lines.length; i++) {
-			// if there are functions in the control then creating the signature
-			// should be done in alternative
-			// way i.e. by looking into all states and extracting the controls
-			if ((lines[i].startsWith("fun") && lines[i].contains(" ctrl "))
-					|| (lines[i].startsWith("atomic") && lines[i].contains(" fun "))) {
-				return null;
-			}
-		}
-		// determine the last time the keyword ctrl is used as predicates
-		for (int i = 0; i < lines.length; i++) {
-			tmp = lines[i];
-			if (tmp.startsWith("ctrl") || (tmp.startsWith("atomic") || tmp.contains(" ctrl "))) {
-				if (!tmp.contains(";")) {
-					for (int j = i + 1; j < lines.length; j++) {
-						tmp += lines[j];
-						if (lines[j].contains(";")) {
-							i = j;
-							break;
-						}
-					}
-				}
-				// remove comments
-				if (tmp.contains("#")) {
-					tmp = tmp.split("#")[0];
-
-				}
-				// remove semicolon
-				tmp = tmp.replace(";", "");
-				tmp = tmp.trim();
-				String[] tmp2 = tmp.split("=");
-
-				// get control arity
-				String controlArity = tmp2[1].trim();
-
-				// get control name
-				String[] tmp3 = tmp2[0].split(" ");
-				String controlName = tmp3[tmp3.length - 1];
-
-				// if control holds brackets i.e. () then create a global
-				// signature from all other states
-				if (controlName.contains("(")) {
-					controlName = controlName.substring(0, controlName.indexOf("("));
-				}
-				controlName.trim();
-
-				// create signature
-				sigBuilder.add(controlName, true, Integer.parseInt(controlArity));
-
-			}
-		}
-
-		globalBigraphSignature = sigBuilder.makeSignature();
-
-		return globalBigraphSignature;
-	}
-
-	/**
-	 * creates a global signature by traversing through all states and
-	 * extracting controls from the nodes
-	 * 
-	 * @return Signature object
-	 */
-	public static Signature createSignatureFromStates() {
-		SignatureBuilder sigBuilder = new SignatureBuilder();
-		JSONArray ary;
-		Iterator<?> it;
-		JSONObject tmpObj, tmpCtrl;
-		String tmp, tmpArity;
-		LinkedList<String> controls = new LinkedList<String>();
-		int numOfStates = getTransitionSystem().getNumberOfStates();
-		JSONParser parser = new JSONParser();
-		JSONObject state;
-
-		for (int i = 0; i < numOfStates; i++) {
-			try {
-				// read state from file
-				state = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + i + ".json"));
-				ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
-				it = ary.iterator();
-				while (it.hasNext()) {
-					tmpObj = (JSONObject) it.next(); // gets hold of node info
-
-					tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
-					tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ID).toString();
-					tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ARITY).toString();
-
-					if (!controls.contains(tmp)) {
-						// to avoid duplicates
-						controls.add(tmp);
-						sigBuilder.add(tmp, true, Integer.parseInt(tmpArity));
-					}
-
-				}
-			} catch (IOException | ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		globalBigraphSignature = sigBuilder.makeSignature();
-
-		return globalBigraphSignature;
-	}
-
-	/**
+	*//**
 	 * converts a given bigraph in JSON format to a Bigraph object from the
 	 * LibBig library. A signature should be created first using the
 	 * buildSignature method.
@@ -350,7 +205,7 @@ public class SystemInstanceHandler {
 	 * @param state
 	 *            the JSON object containing the bigtaph
 	 * @return Bigraph object
-	 */
+	 *//*
 	public static Bigraph convertJSONtoBigraph(JSONObject state) {
 
 		String tmp;
@@ -531,19 +386,19 @@ public class SystemInstanceHandler {
 		return n;
 
 	}
-
-	public static void clearSystem() {
+*/
+/*	public static void clearSystem() {
 		isSystemAnalysed = false;
 		outputFolder = null;
 		states = null;
 		System.gc();
 
-	}
+	}*/
 
 	
 	public static void main(String[] args) {
 
-		fileName = "sav/savannah-general.big";
+	/*	String fileName = "sav/savannah-general.big";
 		outputFolder = "sav/output10000";
 		//fileName = "sb3.big";
 		//outputFolder = "sb3_output";
@@ -560,11 +415,11 @@ public class SystemInstanceHandler {
 				return;
 			}
 			redex = convertJSONtoBigraph((JSONObject) parser.parse(new FileReader(outputFolder + "/99.json")));
-			/*for (int i = 0; i < states.size(); i++) {
+			for (int i = 0; i < states.size(); i++) {
 				if (matcher.match(states.get(i), redex).iterator().hasNext()) {
 					print("state " + i + " matched");
 				}
-			}*/
+			}
 			int numberOFThreads = 10;
 			int size = 10000/numberOFThreads;
 			BigraphMatcherThread [] threads = new BigraphMatcherThread[numberOFThreads];
@@ -576,7 +431,7 @@ public class SystemInstanceHandler {
 			}
 		} catch (IOException | ParseException e) {
 			e.printStackTrace();
-		}
+		}*/
 
 	}
 

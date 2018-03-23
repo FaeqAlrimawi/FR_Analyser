@@ -604,10 +604,10 @@ public class Predicate {
 		
 		try {
 			JSONObject o = XqueryExecuter.getBigraphConditions("activity2", PredicateType.Precondition);
-			SystemInstanceHandler.setFileName("actors.big");
+			//SystemInstanceHandler.setFileName("actors.big");
 			SystemInstanceHandler.setOutputFolder("output");
 			//SystemInstanceHandler.createSignatureFromBRS();
-			SystemInstanceHandler.loadStates();
+		//	SystemInstanceHandler.loadStates();
 			Bigraph redex = p.convertJSONtoBigraph(o);
 			p.print(redex.toString());
 			for (int i = 0; i < SystemInstanceHandler.getStates().size(); i++) {

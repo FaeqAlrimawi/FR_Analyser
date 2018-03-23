@@ -3,6 +3,7 @@ package ie.lero.spare.franalyser;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
 
 public class IncidentPatternInstantiator {
@@ -63,15 +64,15 @@ public class IncidentPatternInstantiator {
 			}
 		}*/
 		
-		//if execution is already done then one can set the file name and the output folder instead of using the analyseSystem() method above
-		//this is a way to bypass bigraph execution
-		SystemInstanceHandler.setFileName(BRSFileName);
-		SystemInstanceHandler.setOutputFolder(outputFolder);
+		//create a handler for bigrapher tool
+		BigrapherHandler bigrapherHandler = new BigrapherHandler(BRSFileName, outputFolder);
 		
 		//read states from the output folder then create Bigraph signature and convert states from JSON objects to Bigraph (from LibBig library) objects
-		SystemInstanceHandler.loadStates();
 		
-		return true;
+		SystemInstanceHandler.setExecutor(bigrapherHandler);
+		
+		return SystemInstanceHandler.analyseSystem();
+
 	}
 	
 	public void test() {
@@ -83,10 +84,11 @@ public class IncidentPatternInstantiator {
 		// sb3_output
 		// output folder can be set in the executeBigraph method
 		//BigrapherHandler bigrapher = new BigrapherHandler();
+		BigrapherHandler bigrapherHandler = new BigrapherHandler(BRSFileName, outputFolder);
 		
-		SystemInstanceHandler.setFileName(BRSFileName);
-		SystemInstanceHandler.setOutputFolder(outputFolder);
-		SystemInstanceHandler.loadStates();
+		SystemInstanceHandler.setExecutor(bigrapherHandler);
+		
+		SystemInstanceHandler.analyseSystem();
 	//	Mapper m = new Mapper("match_query.xq");
 		//AssetMap am = m.findMatches();
 		
@@ -133,9 +135,6 @@ public class IncidentPatternInstantiator {
 		}*/
 		
 		//initialise BRS system. This includes: 
-		//1- Executing the BRS file (currently done using Bigrapher tool), 
-		//2- Loading states i.e. reading states from output folder, create Bigraph signature, and convert states into Bigraph objects for matching
-		//normally only the file name is required. however, to bypass the execution of the system I specify also the folder name
 		boolean isInitialised = initialiseBigraphSystem("research_centre_system.big", "research_centre_output"); 
 		if (!isInitialised) {
 			System.out.println("System could not be initialised....execution is terminated");
