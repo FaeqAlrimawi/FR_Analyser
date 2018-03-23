@@ -25,7 +25,7 @@ public class IncidentPatternInstantiator {
 						// no matching
 			}
  
-			//generate all possible unique combinations of system assets
+			//generate all possible unique combinations of system assets 
 			//the generation might take a while! scalability issue with this!
 			//temporary storage could be used, which then can be processed
 			LinkedList<String[]> lst = am.generateUniqueCombinations();

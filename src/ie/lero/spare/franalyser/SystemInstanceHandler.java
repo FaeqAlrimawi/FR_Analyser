@@ -195,14 +195,8 @@ public class SystemInstanceHandler {
 		return states;
 	}
 
-	/**
-	 * creates a state signature based on the provied JSONObject
-	 * 
-	 * @param state
-	 *            the JSONObject holding the state information
-	 * @return Signature object
-	 */
-	public static Signature createStateSignature(JSONObject state) {
+
+/*	public static Signature createStateSignature(JSONObject state) {
 
 		SignatureBuilder sigBuilder = new SignatureBuilder();
 		JSONArray ary;
@@ -229,7 +223,7 @@ public class SystemInstanceHandler {
 
 		return sigBuilder.makeSignature();
 	}
-
+*/
 	/**
 	 * creates a signature from the Bigrapher file provided (i.e. fileName set
 	 * by method setFileName)
@@ -321,14 +315,14 @@ public class SystemInstanceHandler {
 			try {
 				// read state from file
 				state = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + i + ".json"));
-				ary = (JSONArray) state.get("nodes");
+				ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
 				it = ary.iterator();
 				while (it.hasNext()) {
 					tmpObj = (JSONObject) it.next(); // gets hold of node info
 
-					tmpCtrl = (JSONObject) tmpObj.get("control");
-					tmp = tmpCtrl.get("control_id").toString();
-					tmpArity = tmpCtrl.get("control_arity").toString();
+					tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
+					tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ID).toString();
+					tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ARITY).toString();
 
 					if (!controls.contains(tmp)) {
 						// to avoid duplicates
