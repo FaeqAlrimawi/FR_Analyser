@@ -159,7 +159,7 @@ public class BigraphAnalyser {
 		//InnerName n1 = bi.addInnerName("n1", o1);
 		//InnerName n2 = bi.addInnerName("n2", o1);
 		
-		OuterName u1 = bi2.addOuterName("u1");
+/*		OuterName u1 = bi2.addOuterName("u1");
 		OuterName u2 = bi2.addOuterName("u2");
 		OuterName u3 = bi2.addOuterName("u3");
 		OuterName u4 = bi2.addOuterName("u4");
@@ -168,18 +168,18 @@ public class BigraphAnalyser {
 		OuterName r1 = bi2.addOuterName("r1");
 		OuterName r2 = bi2.addOuterName("r2");
 		OuterName r3 = bi2.addOuterName("r3");
-		OuterName tst = bi2.addOuterName("tst");
+		OuterName tst = bi2.addOuterName("tst");*/
 		
 		Node flor = bi2.addNode("Floor", bi2.addRoot());
-		Node room1 = bi2.addNode("Room", flor, r1);
+		//Node room1 = bi2.addNode("Room", flor, r1);
 		//Node room2 = bi2.addNode("Room", flor, r2);
-		Node device = bi2.addNode("SmartLight", room1, u1);
+		//Node device = bi2.addNode("SmartLight", room1, u1);
 		//Node device2 = bi2.addNode("SmartLight", room2, tst);
-		Node hlway = bi2.addNode("Hallway", flor, r1, r2,r3);
-		Node net = bi2.addNode("InstallationBus", bi2.addRoot(), u1, u2,u3,u4,u5, u6);
+		Node hlway = bi2.addNode("Hallway", flor);
+		//Node net = bi2.addNode("InstallationBus", bi2.addRoot(), u1, u2,u3,u4,u5, u6);
 		
 		bi2.addSite(hlway);
-		bi2.addSite(room1);
+		//bi2.addSite(room1);
 		bi2.addSite(flor);
 		
 		
@@ -195,8 +195,8 @@ public class BigraphAnalyser {
 		}*/
 		
 		
-	//	print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
-		print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\n\nOriginal state: "+states.get(0)+"\n\n");
+		print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
+		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\n\nOriginal state: "+states.get(0)+"\n\n");
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
 		//assuming knowledge is partial, if the number of outernames in a redex node is less than that in the signature (and knolwdege is partial for that node),
@@ -214,7 +214,7 @@ public class BigraphAnalyser {
 		}*/
 
 		for(int i =0; i<states.size();i++) {	
-			if(matcher.match(states.get(i), redex).iterator().hasNext()){
+			if(matcher.match(states.get(i), red).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;
 				print("state " + i + " matched");		

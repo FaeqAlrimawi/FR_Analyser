@@ -399,11 +399,11 @@ public class Predicate {
 		
 		//close outernames after creating nodes of the Bigraph
 		//this turns them into edges (or links) in the Bigraph object
-	/*	for(BigraphNode.OuterName out : outerNames) {
+		for(BigraphNode.OuterName out : outerNames) {
 			if(out.isClosed()) {
 				biBuilder.closeOuterName(out.getName());
 			}
-		}*/
+		}
 		
 /*		LinkedList<String> visited = new LinkedList<String>();
 		for(BigraphNode nd : nodes.values()) {
@@ -416,9 +416,9 @@ public class Predicate {
 		}*/
 	
 		//close every outername....should be removed...it is just for testing
-		for(OuterName ot : libBigOuterNames.values()) {
+	/*	for(OuterName ot : libBigOuterNames.values()) {
 			biBuilder.closeOuterName(ot);
-		}
+		}*/
 		
 		//close innernames after creating nodes of the Bigraph
 		for(BigraphNode.InnerName in : innerNames) {
