@@ -507,11 +507,11 @@ public class Predicate {
 
 					for (int j = 0; j < tmpAry.length(); j++) {
 						String name = ((JSONObject) tmpAry.get(j)).get(JSONTerms.NAME).toString();
-						boolean isLink = false;
-						if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISLINK)) {
-							isLink = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISLINK).toString().equals(JSONTerms.TRUE_VALUE);
+						boolean isClosed = false;
+						if (!((JSONObject) tmpAry.get(j)).isNull(JSONTerms.ISCLOSED)) {
+							isClosed = ((JSONObject) tmpAry.get(j)).get(JSONTerms.ISCLOSED).toString().equals(JSONTerms.TRUE_VALUE);
 						}
-						node.addOuterName(name, isLink);
+						node.addOuterName(name, isClosed);
 					}
 				}
 				

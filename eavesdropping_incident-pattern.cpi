@@ -57,7 +57,7 @@
           </entity>
           <entity name="location_SD1">
             <entity name="smartDevice1">
-              <connectivity name="cyber1" />
+              <connectivity name="cyber12" isLink="true"/>
             </entity>
             <connectivity name="walkway1" />
             <site/>
