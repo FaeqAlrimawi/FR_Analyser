@@ -25,7 +25,6 @@ public class BigraphAnalyser {
 
 	}
 
-
 	public BigraphAnalyser(PredicateHandler predHandler) {
 		this();
 		predicateHandler = predHandler;
