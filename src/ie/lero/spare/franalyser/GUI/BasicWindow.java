@@ -9,11 +9,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.awt.event.ActionEvent;
 import org.eclipse.wb.swing.FocusTraversalOnArray;
-import ie.lero.spare.franalyser.AssetMap;
-import ie.lero.spare.franalyser.BigraphAnalyser;
-import ie.lero.spare.franalyser.Mapper;
-import ie.lero.spare.franalyser.PredicateGenerator;
-import ie.lero.spare.franalyser.PredicateHandler;
+
+import i.e.lero.spare.pattern_instantiation.AssetMap;
+import i.e.lero.spare.pattern_instantiation.BigraphAnalyser;
+import i.e.lero.spare.pattern_instantiation.Mapper;
+import i.e.lero.spare.pattern_instantiation.PredicateGenerator;
+import i.e.lero.spare.pattern_instantiation.PredicateHandler;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import java.awt.Component;
 import java.awt.Desktop;

@@ -4,7 +4,7 @@ import java.io.FileNotFoundException;
 
 import javax.xml.xquery.XQException;
 
-import ie.lero.spare.franalyser.Predicate;
+import i.e.lero.spare.pattern_instantiation.Predicate;
 
 public class SVGFileHandler {
 	

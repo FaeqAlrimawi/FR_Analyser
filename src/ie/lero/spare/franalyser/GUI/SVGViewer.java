@@ -33,13 +33,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.svg.SVGDocument;
 
-import ie.lero.spare.franalyser.AssetMap;
-import ie.lero.spare.franalyser.BigraphAnalyser;
-import ie.lero.spare.franalyser.GraphPath;
-import ie.lero.spare.franalyser.Mapper;
-import ie.lero.spare.franalyser.Predicate;
-import ie.lero.spare.franalyser.PredicateGenerator;
-import ie.lero.spare.franalyser.PredicateHandler;
+import i.e.lero.spare.pattern_instantiation.AssetMap;
+import i.e.lero.spare.pattern_instantiation.BigraphAnalyser;
+import i.e.lero.spare.pattern_instantiation.GraphPath;
+import i.e.lero.spare.pattern_instantiation.Mapper;
+import i.e.lero.spare.pattern_instantiation.Predicate;
+import i.e.lero.spare.pattern_instantiation.PredicateGenerator;
+import i.e.lero.spare.pattern_instantiation.PredicateHandler;
 import ie.lero.spare.franalyser.utility.PredicateType;
 
 import org.apache.batik.swing.svg.GVTTreeBuilderAdapter;

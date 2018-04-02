@@ -1,8 +1,9 @@
-package ie.lero.spare.franalyser;
+package i.e.lero.spare.pattern_instantiation;
 
 
 import java.io.FileNotFoundException;
 import javax.xml.xquery.XQException;
+
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class Mapper {

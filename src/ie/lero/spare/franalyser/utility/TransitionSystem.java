@@ -8,8 +8,8 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import ie.lero.spare.franalyser.GraphPath;
-import ie.lero.spare.franalyser.Predicate;
+import i.e.lero.spare.pattern_instantiation.GraphPath;
+import i.e.lero.spare.pattern_instantiation.Predicate;
 
 public class TransitionSystem {
 	

@@ -1,4 +1,4 @@
-package ie.lero.spare.franalyser;
+package i.e.lero.spare.pattern_instantiation;
 
 import java.io.FileNotFoundException;
 import java.time.LocalDateTime;

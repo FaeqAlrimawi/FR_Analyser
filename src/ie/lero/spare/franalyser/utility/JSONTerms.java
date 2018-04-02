@@ -1,4 +1,4 @@
-package ie.lero.spare.franalyser;
+package ie.lero.spare.franalyser.utility;
 
 public class JSONTerms {
 	

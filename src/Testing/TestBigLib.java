@@ -1,4 +1,4 @@
-package ie.lero.spare.franalyser;
+package Testing;
 
 import java.util.LinkedList;
 

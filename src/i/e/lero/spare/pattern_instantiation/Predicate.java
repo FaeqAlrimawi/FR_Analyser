@@ -1,4 +1,4 @@
-package ie.lero.spare.franalyser;
+package i.e.lero.spare.pattern_instantiation;
 
 import java.awt.print.Printable;
 import java.io.FileNotFoundException;
@@ -12,6 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ie.lero.spare.franalyser.utility.BigraphNode;
+import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.std.Bigraph;

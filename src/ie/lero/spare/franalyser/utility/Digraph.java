@@ -2,8 +2,8 @@ package ie.lero.spare.franalyser.utility;
 
 import java.util.*;
 
-import ie.lero.spare.franalyser.GraphPath;
-import ie.lero.spare.franalyser.Predicate;
+import i.e.lero.spare.pattern_instantiation.GraphPath;
+import i.e.lero.spare.pattern_instantiation.Predicate;
 
 public class Digraph<V> {
 
