@@ -53,6 +53,7 @@
               <site/>
             </entity>
             <connectivity name="walkway1" />
+			<connectivity name="walkway2" />
             <site/>
           </entity>
           <entity name="location_SD1">
@@ -62,11 +63,12 @@
             <connectivity name="walkway1" />
             <site/>
           </entity>
+		 
           <site/>
 		  
         </entity>
         <entity name="digitalNetwork">
-          <connectivity name="cyber1s" />
+          <connectivity name="cyber1" />
 		  <site/>
         </entity>
 		</entity>

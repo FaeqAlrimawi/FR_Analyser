@@ -15,5 +15,6 @@
 	<classpathentry kind="lib" path="lib/jlibbig/jlibbig.core-0.1.jar"/>
 	<classpathentry kind="lib" path="lib/choco-2.1.5/choco-solver-2.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/bigraphspace.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

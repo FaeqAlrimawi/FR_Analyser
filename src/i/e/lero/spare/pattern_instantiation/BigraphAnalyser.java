@@ -13,6 +13,7 @@ import it.uniud.mads.jlibbig.core.std.Match;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
+import it.uniud.mads.jlibbig.core.std.WeightedMatcher;
 
 public class BigraphAnalyser {
 
@@ -104,7 +105,9 @@ public class BigraphAnalyser {
 		
 		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
 		Matcher matcher = new Matcher();
-	
+		Matcher matcher2 = new WeightedMatcher();
+		
+		
 		////test code
 		BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		BigraphBuilder bi2 = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
@@ -225,7 +228,7 @@ public class BigraphAnalyser {
 
 		
 		for(int i =0; i<states.size();i++) {	
-			if(matcher.match(states.get(i), redex).iterator().hasNext()){
+			if(matcher2.match(states.get(i), redex).iterator().hasNext()){
 			//	pred.addBigraphState(i);
 				areStatesIdentified = true;
 				print("state " + i + " matched");		
