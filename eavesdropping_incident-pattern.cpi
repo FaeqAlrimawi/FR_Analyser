@@ -63,9 +63,10 @@
             <site/>
           </entity>
           <site/>
+		  
         </entity>
         <entity name="digitalNetwork">
-          <connectivity name="cyber1" />
+          <connectivity name="cyber1s" />
 		  <site/>
         </entity>
 		</entity>

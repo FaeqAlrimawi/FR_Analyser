@@ -360,8 +360,15 @@ public class Predicate {
 		int newSize = 0;
 		LinkedList<BigraphNode.OuterName> names;
 		
-		//create bigraph outernames
+		/////To avoid the issue of matching using outernames, I don't create outernames
+		////but if there are outernames for a node then I add a special node called "connected" which donates that this node is connected to the installation bus
+		/////this solution should be temporary and we should find a way to use the outernames (links) to match connectivity based on it
+		
+		
 		for(BigraphNode n : nodes.values()) {
+			
+			
+			//create bigraph outernames
 			arity = SystemInstanceHandler.getGlobalBigraphSignature().getByName(n.getControl()).getArity();
 			names = n.getOuterNamesObjects();
 			difference = names.size() - arity;
@@ -397,6 +404,14 @@ public class Predicate {
 			}
 			createNode(nd, biBuilder, libBigRoots, libBigOuterNames, libBigNodes);	
 		}
+		
+		/*//if there are outernames
+		for(BigraphNode n : nodes.values()) {
+		if(n.getOuterNamesObjects() != null && n.getOuterNamesObjects().size() >0) {
+			//add a "connected" node to the bigraph with the father being this node
+			biBuilder.addNode("Connected", libBigNodes.get(n.getId()));
+		}
+		}*/
 		
 		//close outernames after creating nodes of the Bigraph
 		//this turns them into edges (or links) in the Bigraph object
