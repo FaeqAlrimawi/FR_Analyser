@@ -14,7 +14,7 @@
   <asset connections="cyber1" parentEntity="location_SD1" name="smartDevice1" status="">
     <type name="SmartLight"/>
   </asset>
-  <asset connections="cyber1 HVAC-IB" parentEntity="HVAC" name="busNetwork" status="">
+  <asset connections="cyber1 HVAC-IB" name="busNetwork" status="">
     <type name="DigitalAsset"/>
   </asset>
   <asset containedEntities="hallway location_SD1 location2" name="floorX">
@@ -30,7 +30,7 @@
     <type name="Laptop"/>
   </resource>
   <resource parentEntity="laptopX" name="HVACmalware">
-    <type name="DigitalAsset"/>
+    <type name="Application"/>
   </resource>
   <actor parentEntity="hallway" name="offender1" role="offender">
     <type name="Actor"/>

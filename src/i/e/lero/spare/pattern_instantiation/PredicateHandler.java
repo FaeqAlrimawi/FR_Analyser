@@ -363,18 +363,21 @@ public class PredicateHandler {
 				post.addPaths(paths);
 			}
 		}
+		LinkedList<IncidentActivity> middleActivities = getMiddleActivities(sourceActivity, destinationActivity);
 		
 		LinkedList<Integer> indices = new LinkedList<Integer>();
 		GraphPath tmp;
 		
 		//check if each path contains at least one of the satisfied states for each activity
 		for(int i=0;i<paths.size();i++) {
-			for(IncidentActivity activity: incidentActivities.values()) {
+			if(middleActivities != null) {
+			for(IncidentActivity activity: middleActivities) {
 				tmp = paths.get(i);
 				if (!tmp.satisfiesActivity(activity)) {
 					//System.out.println("remove path " + tmp.toSimpleString());
 					indices.add(i);
 				}
+			}
 			}
 		}
 
@@ -388,7 +391,6 @@ public class PredicateHandler {
 			}
 		}
 		
-		getMiddleActivities(sourceActivity, destinationActivity);
 		return paths;
 	}
 
@@ -396,7 +398,7 @@ public class PredicateHandler {
 	public LinkedList<IncidentActivity> getMiddleActivities(IncidentActivity sourceActivity, IncidentActivity destinationActivity) {
 		LinkedList<IncidentActivity> result = new LinkedList<IncidentActivity>();
 		
-		if(sourceActivity.getNextActivities().contains(destinationActivity)) {
+		if(sourceActivity.equals(destinationActivity) || sourceActivity.getNextActivities().contains(destinationActivity) ) {
 			return null;
 		}
 		

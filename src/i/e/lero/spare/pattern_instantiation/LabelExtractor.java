@@ -80,8 +80,8 @@ public class LabelExtractor {
 		}
 		
 		for (Integer stateSrc : digraph.getNodes()) {
-			System.out.println(stateSrc);
-			System.out.println(digraph.outboundNeighbors(stateSrc));
+//			System.out.println(stateSrc);
+//			System.out.println(digraph.outboundNeighbors(stateSrc));
 			for (Integer stateDes : digraph.outboundNeighbors(stateSrc)) {
 				label = updateTransitionLabel(stateSrc, stateDes);
 				labels.add(label);
@@ -89,7 +89,7 @@ public class LabelExtractor {
 			}
 		}
 		
-		System.out.println(digraph);
+//		System.out.println(digraph);
 		return digraph;
 
 	}
