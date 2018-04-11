@@ -2,7 +2,7 @@
 
 ctrl Room = 1;
 atomic ctrl SmartLight = 1;
-atomic ctrl HVAC = 1;
+ctrl HVAC = 1;
 atomic ctrl Server = 1;
 atomic ctrl FireAlarm = 1;
 atomic ctrl Workstation = 1;
@@ -15,28 +15,32 @@ ctrl Floor = 0;
 #ctrl DigitalNetwork = 1;
 ctrl InstallationBus = 6;
 atomic ctrl Data = 0;
+atomic ctrl Software = 0;
+
+#defines keywords for the reaction rules
 atomic ctrl EnterRoom = 0;
 atomic ctrl ExitRoom = 0;
 atomic ctrl ConnectDevice = 0;
 atomic ctrl DisconnectDevice = 0;
 atomic ctrl GenerateData = 0;
 atomic ctrl CollectData = 0;
+atomic ctrl SendSoftware = 0;
 ctrl RulesKeywords = 0;
 
 #initial state
 big building_state =
-/toiletRm /serverRm /cntrlRm /sl1 /sl2 /sl3 /serv /station /alarm
+/toiletRm /serverRm /cntrlRm /sl1 /sl2 /sl3 /hc /station /alarm
 Building.(
 Floor.( 
 Room{toiletRm}.SmartLight{sl1}|
-Room{serverRm}.(SmartLight{sl2} | Server{serv} | FireAlarm{alarm}) |
+Room{serverRm}.(SmartLight{sl2} | HVAC{hc}.1 | FireAlarm{alarm}) |
 Room{cntrlRm}.(SmartLight{sl3} | Workstation{station}) |   
-Hallway{cntrlRm,toiletRm, serverRm}.(/a Visitor.Laptop{a}.1)
+Hallway{cntrlRm,toiletRm, serverRm}.(/a Visitor.Laptop{a}.Software)
 ) |
- InstallationBus{sl1,sl2,sl3,serv,station,alarm}.1
+ InstallationBus{sl1,sl2,sl3,hc,station,alarm}.1
 )
 
-|| RulesKeywords.(EnterRoom | ExitRoom)
+|| RulesKeywords.(EnterRoom | ConnectDevice | GenerateData | CollectData| SendSoftware)
 ;        
 
 big pred =  Building.(Floor.(Hallway{a,b,c}.(Visitor.id | id) | Room{a}.(SmartLight{b1} | id) | id) | id);
@@ -57,59 +61,57 @@ react visitor_exit_room=
 /a (Room{a}.id | Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id)) || RulesKeywords.(EnterRoom | id)
 @[2,0,1,3,4];
 
-#big smartLight_connected = /sl1 (Room{a}.(Visitor.id | SmartLight{sl1}) || InstallationBus{sl1,net2,net3,net4,net5,net6});
-
-#big smartLight_disconnected = /sl1 (Room{a}.(Visitor.id | /cx SmartLight{cx}) || InstallationBus{sl1,net2,net3,net4,net5,net6});
-
-#react disconnect_smartLight = 
-#smartLight_connected
-#->
-#smartLight_disconnected;
-
-#react connect_smartLight =
-#smartLight_disconnected
-#->
-#smartLight_connected;
-
 big busNetwork = InstallationBus{sl1, net2,net3,net4,net5,net6}.1;
 
 big busNetwork_has_data = InstallationBus{sl1, net2,net3,net4,net5,net6}.Data;
 
 react generate_data = 
-busNetwork
+busNetwork || RulesKeywords.(GenerateData | id)
 ->
-busNetwork_has_data;
+busNetwork_has_data || RulesKeywords.(id)
+;
 
 big laptop_connected =  (Room{a}.(Visitor.(Laptop{sl1}.id | id) | /cx SmartLight{cx} | id));
 
 big laptop_disconnected =  (Room{a}.(Visitor.(/cx Laptop{cx}.id | id) | SmartLight{sl1} | id));
 
 react connect_externalDevice =
-/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(ConnectDevice | id)
 ->
-/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(DisconnectDevice | id)
 ;
 
 react disconnect_externalDevice =
-/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(DisconnectDevice | id)
 ->
-/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(ConnectDevice | id)
 ;
 
-big laptop_has_data = (Room{a}.(Visitor.(Laptop{sl1}.Data | id) | /cx SmartLight{cx} | id));
+big laptop_has_data = (Room{a}.(Visitor.(Laptop{sl1}.(Data | id)  | id) | /cx SmartLight{cx} | id));
 
 react collect_data = 
-/sl1 (busNetwork_has_data  || laptop_connected)
+/sl1 (busNetwork_has_data  || laptop_connected) || RulesKeywords.(CollectData | id)
 ->
-/sl1 (busNetwork_has_data  || laptop_has_data)
-@[1,2]
+/sl1 (busNetwork_has_data  || laptop_has_data) || RulesKeywords.id
+;
+
+react send_software = 
+/sl1 /net2 (Room{a}.(Visitor.(Laptop{sl1}.Software | id) | /cx SmartLight{cx} | id) 
+|| HVAC{net2}.1
+|| InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+|| RulesKeywords.(SendSoftware | id)
+->
+/sl1 /net2 (Room{a}.(Visitor.(Laptop{sl1}.Software | id) | /cx SmartLight{cx} | id) 
+|| HVAC{net2}.Software
+|| InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+|| RulesKeywords.(id)
 ;
 
 # Reactive system
 begin brs
   init building_state;
   rules = [ {visitor_enter_room, visitor_exit_room,connect_externalDevice, disconnect_externalDevice
-, generate_data, collect_data} ];
+, generate_data, collect_data, send_software} ];
 
 preds = {pred, pred2};
 

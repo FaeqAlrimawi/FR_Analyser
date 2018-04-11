@@ -107,7 +107,7 @@ public class IncidentPatternInstantiator {
 
 		// if there are incident assets with no matches from space model then exit
 		if (am.hasAssetsWithNoMatch()) {
-			System.out.println("Some incident Assets have no matches in the space asset, these are:");
+			System.out.println("Some incident entities have no matches in the system assets. These are:");
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				System.out.println(Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
@@ -195,7 +195,7 @@ public class IncidentPatternInstantiator {
 			PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
 
 			//this object identifies states and state transitions that satisfy the conditions of activities
-			//state transitions are updated in the predicates, which can be accessed through predicateHandler
+		 	//state transitions are updated in the predicates, which can be accessed through predicateHandler
 			BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler);
 			analyser.analyse();
 			

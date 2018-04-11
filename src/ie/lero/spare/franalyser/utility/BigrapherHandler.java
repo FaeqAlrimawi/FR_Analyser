@@ -378,7 +378,7 @@ public class BigrapherHandler implements SystemExecutor {
 		createTransitionSystem();
 		
 		//keywords used to identify actions performed in BRS
-		String [] rulesKeywords = {"EnterRoom", "ExitRoom","ConnectDevice"};
+		String [] rulesKeywords = {"EnterRoom", "ExitRoom","ConnectDevice", "Disconnectdevice", "GenerateData", "CollectData", "SendSoftware"};
 		
 		//update digraph with action labels
 		LabelExtractor lbl = new LabelExtractor(rulesKeywords);
