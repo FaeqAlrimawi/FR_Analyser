@@ -31,12 +31,12 @@ public class Predicate {
 	private Bigraph bigraphPredicate;
 	private PredicateType predicateType; //precondition, postcondition
 	private String name;
-	private ArrayList<Integer> bigraphStates; //what states from the execution of a bigrapher the pred satisfies
+	private LinkedList<Integer> bigraphStates; //what states from the execution of a bigrapher the pred satisfies
 	private Predicate[] associatedPredicates; //to be implemented, those are linked predicates
 	private LinkedList<GraphPath> paths;
 	private IncidentActivity incidentActivity;
-	private ArrayList<Integer> statesIntraSatisfied;
-	private ArrayList<Integer> statesInterSatisfied;
+	private LinkedList<Integer> statesIntraSatisfied;
+	private LinkedList<Integer> statesInterSatisfied;
 	private boolean isDebugging = true;
 	private static int numOfRoots;
 	
@@ -44,9 +44,9 @@ public class Predicate {
 		predicate="";
 		predicateType = PredicateType.Precondition;
 		name="";
-		bigraphStates = new ArrayList<Integer>();
-		statesIntraSatisfied = new ArrayList<Integer>();
-		statesInterSatisfied = new ArrayList<Integer>();
+		bigraphStates = new LinkedList<Integer>();
+		statesIntraSatisfied = new LinkedList<Integer>();
+		statesInterSatisfied = new LinkedList<Integer>();
 		paths = new LinkedList<GraphPath>();
 		}
 
@@ -82,11 +82,11 @@ public class Predicate {
 		this.incidentActivity = incidentActivity;
 	}
 
-	public ArrayList<Integer> getBigraphStates() {
+	public LinkedList<Integer> getBigraphStates() {
 		return bigraphStates;
 	}
 
-	public void setBigraphStates(ArrayList<Integer> bigraphStates) {
+	public void setBigraphStates(LinkedList<Integer> bigraphStates) {
 		this.bigraphStates = bigraphStates;
 	}
 
@@ -99,7 +99,7 @@ public class Predicate {
 		return isAdded;
 	}
 
-	public ArrayList<Integer> getStatesIntraSatisfied() {
+	public LinkedList<Integer> getStatesIntraSatisfied() {
 		return statesIntraSatisfied;
 	}
 
@@ -115,7 +115,7 @@ public class Predicate {
 		this.bigraphPredicate = Predicate.convertJSONtoBigraph(JSONPredicate);
 	}
 
-	public void setStatesIntraSatisfied(ArrayList<Integer> statesIntraSatisfied) {
+	public void setStatesIntraSatisfied(LinkedList<Integer> statesIntraSatisfied) {
 		this.statesIntraSatisfied = statesIntraSatisfied;
 	}
 	
@@ -126,11 +126,11 @@ public class Predicate {
 	}
 
 	
-	public ArrayList<Integer> getStatesInterSatisfied() {
+	public LinkedList<Integer> getStatesInterSatisfied() {
 		return statesInterSatisfied;
 	}
 
-	public void setStatesInterSatisfied(ArrayList<Integer> statesInterSatisfied) {
+	public void setStatesInterSatisfied(LinkedList<Integer> statesInterSatisfied) {
 		this.statesInterSatisfied = statesInterSatisfied;
 	}
 

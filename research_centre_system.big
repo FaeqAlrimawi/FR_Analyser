@@ -12,42 +12,56 @@ ctrl Visitor = 0;
 ctrl Hallway = 3;
 ctrl Building = 0;
 ctrl Floor = 0;
-#ctrl DigitalNetwork = 6;
+#ctrl DigitalNetwork = 1;
 ctrl InstallationBus = 6;
 atomic ctrl Data = 0;
+atomic ctrl EnterRoom = 0;
+atomic ctrl ExitRoom = 0;
+atomic ctrl ConnectDevice = 0;
+atomic ctrl DisconnectDevice = 0;
+atomic ctrl GenerateData = 0;
+atomic ctrl CollectData = 0;
+ctrl RulesKeywords = 0;
 
 #initial state
 big building_state =
-
+/toiletRm /serverRm /cntrlRm /sl1 /sl2 /sl3 /serv /station /alarm
 Building.(
-/toiletRm /serverRm /cntrlRm Floor.(
+Floor.( 
 Room{toiletRm}.SmartLight{sl1}|
 Room{serverRm}.(SmartLight{sl2} | Server{serv} | FireAlarm{alarm}) |
 Room{cntrlRm}.(SmartLight{sl3} | Workstation{station}) |   
-Hallway{cntrlRm,toiletRm, serverRm}.(/sl1 Visitor.Laptop{sl1}.1)
+Hallway{cntrlRm,toiletRm, serverRm}.(/a Visitor.Laptop{a}.1)
 ) |
  InstallationBus{sl1,sl2,sl3,serv,station,alarm}.1
 )
-;   	 
+
+|| RulesKeywords.(EnterRoom | ExitRoom)
+;        
+
+big pred =  Building.(Floor.(Hallway{a,b,c}.(Visitor.id | id) | Room{a}.(SmartLight{b1} | id) | id) | id);
+
+big pred2 =  Building.(Floor.(Hallway{a,b,c}.(id) | Room{a}.(Visitor.id | SmartLight{b1} | id) | id) | id);
+
 
 # Reaction rules
-react Visitor_enter_room=
-Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id) | Room{a}.id
+react visitor_enter_room=
+ /a (Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id) | Room{a}.id) || RulesKeywords.(EnterRoom | id)
 ->
-Hallway{a,b,c}.id | Room{a}.(Visitor.(/con Laptop{con} | id) | id)
-@[2,0,1,3];
+/a (Hallway{a,b,c}.id | Room{a}.(Visitor.(/con Laptop{con} | id) | id)) || RulesKeywords.(ExitRoom | id)
+@[2,0,1,3,4];
 
-react Visitor_exit_room=
-Room{a}.(Visitor.(/con Laptop{con} | id) | id) | Hallway{a,b,c}.id
+react visitor_exit_room=
+/a (Room{a}.(Visitor.(/con Laptop{con} | id) | id) | Hallway{a,b,c}.id) || RulesKeywords.(ExitRoom | id)
 ->
-Room{a}.id | Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id)
-@[2,0,1,3];
+/a (Room{a}.id | Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id)) || RulesKeywords.(EnterRoom | id)
+@[2,0,1,3,4];
 
-#big smartLight_connected = Room{a}.(Visitor.id | SmartLight{sl1}) || InstallationBus{sl1,net2,net3,net4,net5,net6};
+#big smartLight_connected = /sl1 (Room{a}.(Visitor.id | SmartLight{sl1}) || InstallationBus{sl1,net2,net3,net4,net5,net6});
 
-#big smartLight_disconnected = Room{a}.(Visitor.id | /sl1 SmartLight{sl1}) || InstallationBus{sl1,net2,net3,net4,net5,net6};
+#big smartLight_disconnected = /sl1 (Room{a}.(Visitor.id | /cx SmartLight{cx}) || InstallationBus{sl1,net2,net3,net4,net5,net6});
 
-#react disconnect_smartLight =
+#react disconnect_smartLight = 
 #smartLight_connected
 #->
 #smartLight_disconnected;
@@ -61,36 +75,47 @@ big busNetwork = InstallationBus{sl1, net2,net3,net4,net5,net6}.1;
 
 big busNetwork_has_data = InstallationBus{sl1, net2,net3,net4,net5,net6}.Data;
 
-react generate_data =
+react generate_data = 
 busNetwork
 ->
 busNetwork_has_data;
 
-big laptop_connected = Room{a}.(Visitor.(Laptop{sl1}.1 | id) | /sl1 SmartLight{sl1});
+big laptop_connected =  (Room{a}.(Visitor.(Laptop{sl1}.id | id) | /cx SmartLight{cx} | id));
 
-big laptop_disconnected = Room{a}.(Visitor.(/sl1 Laptop{sl1}.1 | id) | SmartLight{sl1});
+big laptop_disconnected =  (Room{a}.(Visitor.(/cx Laptop{cx}.id | id) | SmartLight{sl1} | id));
 
 react connect_externalDevice =
-laptop_disconnected || busNetwork
+/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
 ->
-laptop_connected || busNetwork;
+/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+;
 
 react disconnect_externalDevice =
-laptop_connected || busNetwork
+/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
 ->
-laptop_disconnected || busNetwork;
+/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
+;
 
-big laptop_has_data = Room{a}.(Visitor.(Laptop{sl1}.Data | id) | /sl1 SmartLight{sl1});
+big laptop_has_data = (Room{a}.(Visitor.(Laptop{sl1}.Data | id) | /cx SmartLight{cx} | id));
 
-react collect_data =
-busNetwork_has_data  || laptop_connected
+react collect_data = 
+/sl1 (busNetwork_has_data  || laptop_connected)
 ->
-busNetwork_has_data  || laptop_has_data
+/sl1 (busNetwork_has_data  || laptop_has_data)
+@[1,2]
 ;
 
 # Reactive system
 begin brs
   init building_state;
-  rules = [ {Visitor_enter_room, Visitor_exit_room,connect_externalDevice, disconnect_externalDevice
+  rules = [ {visitor_enter_room, visitor_exit_room,connect_externalDevice, disconnect_externalDevice
 , generate_data, collect_data} ];
+
+preds = {pred, pred2};
+
 end
+
+
+
+
+

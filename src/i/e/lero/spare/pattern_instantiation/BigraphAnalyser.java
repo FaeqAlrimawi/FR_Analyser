@@ -105,11 +105,10 @@ public class BigraphAnalyser {
 		
 		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
 		Matcher matcher = new Matcher();
-		Matcher matcher2 = new WeightedMatcher();
 		
 		
 		////test code
-		BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
+/*		BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		BigraphBuilder bi2 = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		
 		Node bld = bi.addNode("Building", bi.addRoot());
@@ -129,10 +128,10 @@ public class BigraphAnalyser {
 //		bi.closeOuterName(o2);
 //		bi.closeOuterName(o3);
 		
-/*		LinkedList<Handle> hnd = new LinkedList<Handle>();
+		LinkedList<Handle> hnd = new LinkedList<Handle>();
 		hnd.add(o1);
 		hnd.add(o2);
-		hnd.add(o3);*/
+		hnd.add(o3);
 		
 		Node hal = bi.addNode("Hallway", flr, o1,o2,o3);
 		Node rm1 = bi.addNode("Room", flr, o1);
@@ -161,7 +160,7 @@ public class BigraphAnalyser {
 		//InnerName n1 = bi.addInnerName("n1", o1);
 		//InnerName n2 = bi.addInnerName("n2", o1);
 		
-/*		OuterName u1 = bi2.addOuterName("u1");
+		OuterName u1 = bi2.addOuterName("u1");
 		OuterName u2 = bi2.addOuterName("u2");
 		OuterName u3 = bi2.addOuterName("u3");
 		OuterName u4 = bi2.addOuterName("u4");
@@ -170,7 +169,7 @@ public class BigraphAnalyser {
 		OuterName r1 = bi2.addOuterName("r1");
 		OuterName r2 = bi2.addOuterName("r2");
 		OuterName r3 = bi2.addOuterName("r3");
-		OuterName tst = bi2.addOuterName("tst");*/
+		OuterName tst = bi2.addOuterName("tst");
 		OuterName u1 = bi2.addOuterName("u1");
 		OuterName u2 = bi2.addOuterName("u2");
 		OuterName u3 = bi2.addOuterName("u3");
@@ -199,7 +198,7 @@ public class BigraphAnalyser {
 		//bi2.addSite(rm13);
 		Bigraph red = bi2.makeBigraph();
 	//	redex =  bi.makeBigraph();
-		////
+*/		////
 	/*
 		print("\nidentifyRelevantStates: "+red.toString()+"\n\nstate: "+st+"\n");
 		
@@ -208,7 +207,7 @@ public class BigraphAnalyser {
 		}*/
 		
 		
-		print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
+		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
 		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\n\nOriginal state: "+states.get(0)+"\n\n");
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
@@ -226,14 +225,25 @@ public class BigraphAnalyser {
 			print("original matched");		
 		}*/
 
+		////to test for more than the know states number
+		int iterations = 1;
+		int length = states.size();
 		
-		for(int i =0; i<states.size();i++) {	
-			if(matcher2.match(states.get(i), redex).iterator().hasNext()){
-			//	pred.addBigraphState(i);
+		print("number of states matched to: " + length*iterations);
+		//print starting time of matching
+		//print("["+ +"] start the matching process...");
+		////
+		
+		for(int i =0; i<length*iterations;i++) {	
+			if(matcher.match(states.get(i%length), redex).iterator().hasNext()){
+				pred.addBigraphState(i);
 				areStatesIdentified = true;
-				print("state " + i + " matched");		
+				print("state " + i%length + " matched");		
 			}
 		}
+		
+		//print("["+ +"] matching ended...");
+		
 			/*Iterator<? extends Match> t = matcher.match(states.get(i), redex).iterator();
 			int cnt = 0;
 			while(t.hasNext()){

@@ -1,0 +1,96 @@
+# Signature
+
+ctrl Room = 1;
+atomic ctrl SmartLight = 1;
+atomic ctrl HVAC = 1;
+atomic ctrl Server = 1;
+atomic ctrl FireAlarm = 1;
+atomic ctrl Workstation = 1;
+ctrl Laptop = 1;
+ctrl Visitor = 0;
+#hallway is not defined as a room since it requires more than one connection
+ctrl Hallway = 3;
+ctrl Building = 0;
+ctrl Floor = 0;
+#ctrl DigitalNetwork = 6;
+ctrl InstallationBus = 6;
+atomic ctrl Data = 0;
+
+#initial state
+big building_state =
+
+Building.(
+/toiletRm /serverRm /cntrlRm Floor.(
+Room{toiletRm}.SmartLight{sl1}|
+Room{serverRm}.(SmartLight{sl2} | Server{serv} | FireAlarm{alarm}) |
+Room{cntrlRm}.(SmartLight{sl3} | Workstation{station}) |   
+Hallway{cntrlRm,toiletRm, serverRm}.(/sl1 Visitor.Laptop{sl1}.1)
+) |
+ InstallationBus{sl1,sl2,sl3,serv,station,alarm}.1
+)
+;   	 
+
+# Reaction rules
+react Visitor_enter_room=
+Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id) | Room{a}.id
+->
+Hallway{a,b,c}.id | Room{a}.(Visitor.(/con Laptop{con} | id) | id)
+@[2,0,1,3];
+
+react Visitor_exit_room=
+Room{a}.(Visitor.(/con Laptop{con} | id) | id) | Hallway{a,b,c}.id
+->
+Room{a}.id | Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id)
+@[2,0,1,3];
+
+#big smartLight_connected = Room{a}.(Visitor.id | SmartLight{sl1}) || InstallationBus{sl1,net2,net3,net4,net5,net6};
+
+#big smartLight_disconnected = Room{a}.(Visitor.id | /sl1 SmartLight{sl1}) || InstallationBus{sl1,net2,net3,net4,net5,net6};
+
+#react disconnect_smartLight =
+#smartLight_connected
+#->
+#smartLight_disconnected;
+
+#react connect_smartLight =
+#smartLight_disconnected
+#->
+#smartLight_connected;
+
+big busNetwork = InstallationBus{sl1, net2,net3,net4,net5,net6}.1;
+
+big busNetwork_has_data = InstallationBus{sl1, net2,net3,net4,net5,net6}.Data;
+
+react generate_data =
+busNetwork
+->
+busNetwork_has_data;
+
+big laptop_connected = Room{a}.(Visitor.(Laptop{sl1}.1 | id) | /sl1 SmartLight{sl1});
+
+big laptop_disconnected = Room{a}.(Visitor.(/sl1 Laptop{sl1}.1 | id) | SmartLight{sl1});
+
+react connect_externalDevice =
+laptop_disconnected || busNetwork
+->
+laptop_connected || busNetwork;
+
+react disconnect_externalDevice =
+laptop_connected || busNetwork
+->
+laptop_disconnected || busNetwork;
+
+big laptop_has_data = Room{a}.(Visitor.(Laptop{sl1}.Data | id) | /sl1 SmartLight{sl1});
+
+react collect_data =
+busNetwork_has_data  || laptop_connected
+->
+busNetwork_has_data  || laptop_has_data
+;
+
+# Reactive system
+begin brs
+  init building_state;
+  rules = [ {Visitor_enter_room, Visitor_exit_room,connect_externalDevice, disconnect_externalDevice
+, generate_data, collect_data} ];
+end

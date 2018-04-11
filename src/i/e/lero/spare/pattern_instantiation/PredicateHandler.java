@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -340,15 +341,75 @@ public class PredicateHandler {
 	}
 
 	public LinkedList<GraphPath> getPathsBetweenActivities(IncidentActivity sourceActivity,
-		
-			//not done
-			//
 			IncidentActivity destinationActivity) {
+		
+		//not done
+		//
+		
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 
+		ArrayList<Predicate> preconditions = getPredicates(sourceActivity.getName(), PredicateType.Precondition);
+		ArrayList<Predicate> postconditions = getPredicates(destinationActivity.getName(), PredicateType.Postcondition);
+
+		for (Predicate pre : preconditions) {
+			pre.removeAllPaths();
+			for (Predicate post : postconditions) { // this can be limited to
+													// conditions that are
+													// associated with each
+													// other
+				post.removeAllPaths();
+				paths = SystemInstanceHandler.getTransitionSystem().getPaths(pre, post);
+				pre.addPaths(paths);
+				post.addPaths(paths);
+			}
+		}
+		
+		LinkedList<Integer> indices = new LinkedList<Integer>();
+		GraphPath tmp;
+		
+		//check if each path contains at least one of the satisfied states for each activity
+		for(int i=0;i<paths.size();i++) {
+			for(IncidentActivity activity: incidentActivities.values()) {
+				tmp = paths.get(i);
+				if (!tmp.satisfiesActivity(activity)) {
+					//System.out.println("remove path " + tmp.toSimpleString());
+					indices.add(i);
+				}
+			}
+		}
+
+		//if there are paths that do not go through all activities then remove them
+		for(int i=0;i<indices.size();i++) {
+			paths.remove((int)(indices.get(i)));
+			//this is needed since removing an element from the list will shift the indices
+			for(int j=i+1;j<indices.size();j++) {
+				int v = indices.get(j)-1;
+				indices.set(j, v);
+			}
+		}
+		
+		getMiddleActivities(sourceActivity, destinationActivity);
 		return paths;
 	}
 
+	
+	public LinkedList<IncidentActivity> getMiddleActivities(IncidentActivity sourceActivity, IncidentActivity destinationActivity) {
+		LinkedList<IncidentActivity> result = new LinkedList<IncidentActivity>();
+		
+		if(sourceActivity.getNextActivities().contains(destinationActivity)) {
+			return null;
+		}
+		
+		activitySequences.clear();
+		LinkedList<String> visited = new LinkedList<String>();
+		visited.add(sourceActivity.getNextActivities().get(0).getName());
+		
+		depthFirst(destinationActivity.getName(), visited);
+		
+		System.out.println(visited);
+		
+		return null;
+	}
 	/*public LinkedList<HashMap<String, LinkedList<GraphPath>>> getPathsForIncident() {
 
 		LinkedList<IncidentActivity> activities = new LinkedList<IncidentActivity>();

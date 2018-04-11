@@ -1,10 +1,13 @@
 package i.e.lero.spare.pattern_instantiation;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.fop.util.AbstractPaintingState.StateStack;
 import org.apache.xmlgraphics.xmp.merge.ArrayAddPropertyMerger;
 
+import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
 public class GraphPath {
@@ -257,6 +260,49 @@ public class GraphPath {
 		return result;
 	}
 	
+	public boolean contains(Integer state) {
+		
+		return stateTransitions.contains(state);
+	}
+	
+	public boolean containsAtLeastOne(LinkedList<Integer> states) {
+		
+		for( Integer st : states) {
+			if (stateTransitions.contains(st)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean satisfiesActivity(IncidentActivity activity) {
+		ArrayList<Predicate> predsPre = activity.getPredicates(PredicateType.Precondition);
+		ArrayList<Predicate> predsPost = activity.getPredicates(PredicateType.Postcondition);
+		
+	/*	//checks whether the both precondition and postcondition have at least one state in each that is in the graph transition
+		if (!containsAtLeastOne(predsPre.get(0).getBigraphStates()) ||  
+				!containsAtLeastOne(predsPost.get(0).getBigraphStates())) {
+			return false;
+			
+		}*/
+		
+		LinkedList<Integer> preStates = predsPre.get(0).getBigraphStates();
+		LinkedList<Integer> postStates = predsPost.get(0).getBigraphStates();
+		
+		for(int i=0;i<stateTransitions.size();i++) {
+			if(preStates.contains(stateTransitions.get(i))) {
+				for(int j = i; j<stateTransitions.size();j++) {
+					if(postStates.contains(stateTransitions.get(j))) {
+						return true;
+					}
+				}
+			}
+		}
+		
+		return false;
+	}
+	
 	public LinkedList<String> getPathActions(){
 		
 		LinkedList<String> actions = new LinkedList<String>();
@@ -283,4 +329,33 @@ public class GraphPath {
 		
 		return prob;
 	}
+	
+	/*public static void main(String[] args) {
+		
+		GraphPath p = new GraphPath();
+		LinkedList<Integer> t = new LinkedList<Integer>();
+		LinkedList<Integer> t1 = new LinkedList<Integer>();
+		LinkedList<Integer> t2 = new LinkedList<Integer>();
+		Predicate pre = new Predicate();
+		Predicate post = new Predicate();
+		IncidentActivity a = new IncidentActivity();
+		
+		t1.add(5);
+		t2.add(9);
+		pre.setPredicateType(PredicateType.Precondition);
+		pre.setBigraphStates(t1);
+		
+		post.setPredicateType(PredicateType.Postcondition);;
+		post.setBigraphStates(t2);
+		
+		a.addPredicate(pre);
+		a.addPredicate(post);
+		
+		for(int i=0;i<10;i++) {
+			t.add(i);
+		}
+		p.setStateTransitions(t);
+		
+		System.out.println(p.satisfiesActivity(a));
+	}*/
 }

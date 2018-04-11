@@ -6,8 +6,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
+import org.apache.xpath.compiler.Keywords;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -15,18 +17,20 @@ import org.json.simple.parser.ParseException;
 
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
+import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
 public class LabelExtractor {
 
 	// private String[] predicatesFileLines;
-	private String outputPath = SystemInstanceHandler.getOutputFolder();//"output";
+	private String outputFolder = SystemInstanceHandler.getOutputFolder();
 //	private String transitionFileName = "transitions.txt";
 	// private String predicateFilePath = outputPath+"/pred";
 	// private ArrayList<ReactionRule> reactionRules;
-	private String rulesKeywordsFileName = "rules_keywords.txt";
+	private String rulesKeywordsFileName = "rules_keywords.txt"; //defualt file name for the keywords
+	private String outputFileName = "transitions_labelled.txt";
 	private String [] rulesKeywords;
-	TransitionSystem transitionSystem = SystemInstanceHandler.getTransitionSystem();
+	TransitionSystem transitionSystem = TransitionSystem.getTransitionSystemInstance();
 
 	public LabelExtractor() {
 		// reactionRules = new ArrayList<ReactionRule>();
@@ -35,33 +39,21 @@ public class LabelExtractor {
 		//transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
 
-	public LabelExtractor(String outputFolder) {
+	public LabelExtractor(String keywordsFileName) {
 		// reactionRules = new ArrayList<ReactionRule>();
-		this.outputPath = outputFolder;
+		this.rulesKeywordsFileName = keywordsFileName;
 	//	TransitionSystem.setFileName(outputPath + "/" + this.transitionFileName);
 	//	transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
-
-	public static void main(String[] args) {
-
-		LabelExtractor ex = new LabelExtractor("output");
+	
+	public LabelExtractor(String [] keywords) {
+		// reactionRules = new ArrayList<ReactionRule>();
 		
-		//##### one way to identify the labels is by using the redex and reactum of
-		// rules as predicates
-		// however, this requires more computational power and it can assign
-		// more than one label to a single transition
-		/*
-		 * ex.getRulesStates(); ex.removeNoneImmediateTransitionStates();
-		 * ex.updateTransitionFile();
-		 */
-		// ex.extractLabel(1, 4);
-
-		//##### another way is to define a keyword for each reaction rule such as its name as a
-		// control which is then used to identify transitions
-		// it requires adding controls that identify the action in each reaction rule
-		ex.extractLabels();
-		ex.createNewLabelledTransitionFile();
-
+		if(keywords != null && keywords.length>0) {
+		this.rulesKeywords = Arrays.copyOf(keywords, keywords.length);
+		}
+	//	TransitionSystem.setFileName(outputPath + "/" + this.transitionFileName);
+	//	transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
 
 	/**
@@ -72,25 +64,26 @@ public class LabelExtractor {
 	 * target state. The Digraph in the TransitionSystem class is updated after
 	 * this with the labels name
 	 */
-	public Digraph<Integer> extractLabels() {
+	public Digraph<Integer> updateDigraphLabels() {
 
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		ArrayList<String> labels = new ArrayList<String>();
 		String label = "";
 
-		rulesKeywords = FileManipulator.readFile(outputPath + "/" + rulesKeywordsFileName);
+		if(rulesKeywords == null || rulesKeywords.length == 0) {
+		rulesKeywords = FileManipulator.readFile(outputFolder + "/" + rulesKeywordsFileName);
 		
 		//remove any unnecessary white spaces
 		for(int i=0;i<rulesKeywords.length; i++) {
 			rulesKeywords[i]=rulesKeywords[i].trim();
 		}
-		
+		}
 		
 		for (Integer stateSrc : digraph.getNodes()) {
 			System.out.println(stateSrc);
 			System.out.println(digraph.outboundNeighbors(stateSrc));
 			for (Integer stateDes : digraph.outboundNeighbors(stateSrc)) {
-				label = extractLabel(stateSrc, stateDes);
+				label = updateTransitionLabel(stateSrc, stateDes);
 				labels.add(label);
 				digraph.setLabel(stateSrc, stateDes, label);
 			}
@@ -111,7 +104,7 @@ public class LabelExtractor {
 	 * states are in json format
 	 * 
 	 */
-	public String extractLabel(Integer stateSrc, Integer stateDes) {
+	public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
 
 		JSONParser parser = new JSONParser();
 		String tmp;
@@ -124,24 +117,24 @@ public class LabelExtractor {
 		boolean isLabelFound = false;
 
 		try {
-			JSONObject src = (JSONObject) parser.parse(new FileReader(outputPath + "/" + stateSrc + ".json"));
-			JSONObject des = (JSONObject) parser.parse(new FileReader(outputPath + "/" + stateDes + ".json"));
+			JSONObject src = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateSrc + ".json"));
+			JSONObject des = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateDes + ".json"));
 
-			JSONArray arSrc = (JSONArray) src.get("nodes");
+			JSONArray arSrc = (JSONArray) src.get(JSONTerms.BIGRAPHER_NODES);
 			Iterator<JSONObject> itSrc = arSrc.iterator();
 
-			JSONArray arDes = (JSONArray) des.get("nodes");
+			JSONArray arDes = (JSONArray) des.get(JSONTerms.BIGRAPHER_NODES);
 			Iterator<JSONObject> itDes = arDes.iterator();
 
 			// get controls in the source state file
 			while (itSrc.hasNext()) {
-				tmp = (String) ((JSONObject) itSrc.next().get("control")).get("control_id");
+				tmp = (String) ((JSONObject) itSrc.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CONTROL_ID);
 				srcControlNames.add(tmp);
 			}
 
 			// get controls in the destination state file
 			while (itDes.hasNext()) {
-				tmp = (String) ((JSONObject) itDes.next().get("control")).get("control_id");
+				tmp = (String) ((JSONObject) itDes.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CONTROL_ID);
 				desControlNames.add(tmp);
 
 			}
@@ -193,7 +186,7 @@ public class LabelExtractor {
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		float prob = 0;
 		String label;
-		String newFileName = SystemInstanceHandler.getOutputFolder()+"/transitions_labelled.txt";
+		String newFileName = SystemInstanceHandler.getOutputFolder()+"/"+outputFileName;
 		res.append(nodes.size()).append(" ").append(digraph.getNumberOfEdges()).append("\r\n");
 		for (Integer state : transitionSystem.getDigraph().getNodes()) {
 			for (Integer stateDes : digraph.outboundNeighbors(state)) {
@@ -219,7 +212,7 @@ public class LabelExtractor {
 		// write the new file
 		BufferedWriter writer;
 		try {
-			writer = new BufferedWriter(new FileWriter(outputPath + "/" + newFileName));
+			writer = new BufferedWriter(new FileWriter(outputFolder + "/" + newFileName));
 
 			writer.write(res.toString());
 
@@ -230,11 +223,11 @@ public class LabelExtractor {
 	}
 
 	public String getOutputPath() {
-		return outputPath;
+		return outputFolder;
 	}
 
 	public void setOutputPath(String outputPath) {
-		this.outputPath = outputPath;
+		this.outputFolder = outputPath;
 	}
 
 	public String getRulesKeywordsFileName() {
@@ -245,7 +238,14 @@ public class LabelExtractor {
 		this.rulesKeywordsFileName = rulesKeywordsFileName;
 	}
 	
-	
+	public String[] getRulesKeywords() {
+		return rulesKeywords;
+	}
+
+	public void setRulesKeywords(String[] rulesKeywords) {
+		this.rulesKeywords = rulesKeywords;
+	}
+
 	/*
 	 * public void getRulesStates() {
 	 * 
@@ -382,5 +382,30 @@ public class LabelExtractor {
 	 * 
 	 * }
 	 */
+	
+	public static void main(String[] args) {
+
+		LabelExtractor ex = new LabelExtractor("output");
+		
+		//##### one way to identify the labels is by using the redex and reactum of
+		// rules as predicates
+		// however, this requires more computational power and it can assign
+		// more than one label to a single transition
+		/*
+		 * ex.getRulesStates(); ex.removeNoneImmediateTransitionStates();
+		 * ex.updateTransitionFile();
+		 */
+		// ex.extractLabel(1, 4);
+
+		//##### another way is to define a keyword for each reaction rule such as its name as a
+		// control which is then used to identify transitions
+		// it requires adding controls that identify the action in each reaction rule
+		//it also requires the Digraph of the transition system created
+		ex.updateDigraphLabels();
+		
+		//this creates a new transitions file with the labels
+		ex.createNewLabelledTransitionFile();
+
+	}
 
 }

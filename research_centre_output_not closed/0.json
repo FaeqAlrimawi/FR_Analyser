@@ -130,4 +130,7 @@
 "port_arity": 1},
 {"node_id": 7,
 "port_arity": 1}]},
-]}
+{"inner": [],
+"outer": [],
+"ports": [{"node_id": 13,
+"port_arity": 1}]}]}

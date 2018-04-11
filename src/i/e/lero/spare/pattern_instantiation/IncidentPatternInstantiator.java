@@ -214,8 +214,31 @@ public class IncidentPatternInstantiator {
 			 //how to represent all possible paths to the given sequence of assets?
 			 //incidentpath can be used to hold one path, but now it is holding everything
 			IncidentPath inc = new IncidentPath(predicateHandler);
-			inc.generateDistinctPaths();
+			//inc.generateDistinctPaths();
 			
+			//this gives details about the states and their transitions that satisfy the conditions of each activity
+			//it prints transitions between pre and post within one activity, post of current to pre of next activity, pre of current to pre of next 
+			//predicateHandler.printAll();
+			
+			
+			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
+			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
+			
+			System.out.println("\n\n**Transitions that satisfy the incident:");
+			for(int i=0; i<paths.size();i++) {
+				System.out.println(i+": "+paths.get(i).toSimpleString());
+			}
+			
+			//another way is to combine the transitions found for each activity from the initial one to the final one
+			
+			
+			/*inc.generateDistinctPaths();
+			
+			LinkedList<GraphPath> paths = inc.getAllPaths();
+			
+			for(GraphPath p : paths) {
+				System.out.println(p.toSimpleString());
+			}*/
 			//System.out.println(predic.toString());
 		}
 		public void start() {

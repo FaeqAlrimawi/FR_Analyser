@@ -12,6 +12,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import i.e.lero.spare.pattern_instantiation.LabelExtractor;
 import i.e.lero.spare.pattern_instantiation.SystemExecutor;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
@@ -373,7 +374,22 @@ public class BigrapherHandler implements SystemExecutor {
 	@Override
 	public TransitionSystem getTransitionSystem() {
 
-		return createTransitionSystem();
+		//creates the diagraph from the transitions file
+		createTransitionSystem();
+		
+		//keywords used to identify actions performed in BRS
+		String [] rulesKeywords = {"EnterRoom", "ExitRoom","ConnectDevice"};
+		
+		//update digraph with action labels
+		LabelExtractor lbl = new LabelExtractor(rulesKeywords);
+		
+		lbl.updateDigraphLabels();
+		
+		return transitionSystem;
+		//add action labels to transitions, if there are keywords provided
+		//for testing, keywords are provided as string array. They can be provided via a file.
+		
+		
 	}
 
 	@Override
@@ -652,6 +668,7 @@ public class BigrapherHandler implements SystemExecutor {
 
 		// if the parent is a root
 		if (node.isParentRoot()) { // if the parent is a root
+			
 			Node n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
 			nodes.put(node.getId(), n);
 			return n;

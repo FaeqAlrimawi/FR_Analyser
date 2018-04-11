@@ -18,9 +18,8 @@ public class TestBigraphSpace {
 		
 		BasicSignature sig;
 		
-		try {
 			
-			Definitions defs = new Definitions();
+			/*Definitions defs = new Definitions();
 			//Controls cl = new Controls();
 			Control c1 = new Control("Name", "description", null, Status.active, 0, null);
 			
@@ -29,12 +28,8 @@ public class TestBigraphSpace {
 			sig = SignatureFactory.createSignature(null);
 			DomBigraph t = new DomBigraph(sig);
 			
-			DomMatcher mt = new DomMatcher();
-		} catch (DefinitionException | ParserConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+			DomMatcher mt = new DomMatcher();*/
+	
 		
 		
 	}

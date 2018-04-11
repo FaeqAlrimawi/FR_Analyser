@@ -60,6 +60,7 @@ public class PredicateGenerator {
 			}
 			
 			predHandler.updateNextPreviousActivities();
+			predHandler.createActivitiesDigraph();
 			
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
