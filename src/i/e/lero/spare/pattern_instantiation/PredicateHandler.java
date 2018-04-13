@@ -408,8 +408,6 @@ public class PredicateHandler {
 		
 		depthFirst(destinationActivity.getName(), visited);
 		
-		System.out.println(visited);
-		
 		return null;
 	}
 	/*public LinkedList<HashMap<String, LinkedList<GraphPath>>> getPathsForIncident() {

@@ -27,7 +27,6 @@ import it.uniud.mads.jlibbig.core.std.Site;
 
 public class Predicate {
 	
-	private String predicate; //Bigrapher format (to be deleted)
 	private Bigraph bigraphPredicate;
 	private PredicateType predicateType; //precondition, postcondition
 	private String name;
@@ -38,10 +37,9 @@ public class Predicate {
 	private LinkedList<Integer> statesIntraSatisfied;
 	private LinkedList<Integer> statesInterSatisfied;
 	private boolean isDebugging = true;
-	private static int numOfRoots;
+	private int numOfRoots;
 	
 	public Predicate(){
-		predicate="";
 		predicateType = PredicateType.Precondition;
 		name="";
 		bigraphStates = new LinkedList<Integer>();
@@ -49,14 +47,6 @@ public class Predicate {
 		statesInterSatisfied = new LinkedList<Integer>();
 		paths = new LinkedList<GraphPath>();
 		}
-
-	public String getPredicate() {
-		return predicate;
-	}
-
-	public void setPredicate(String predicate) {
-		this.predicate = predicate;
-	}
 
 	public PredicateType getPredicateType() {
 		return predicateType;
@@ -112,7 +102,7 @@ public class Predicate {
 	}
 	
 	public void setBigraphPredicate(JSONObject JSONPredicate) {
-		this.bigraphPredicate = Predicate.convertJSONtoBigraph(JSONPredicate);
+		this.bigraphPredicate = convertJSONtoBigraph(JSONPredicate);
 	}
 
 	public void setStatesIntraSatisfied(LinkedList<Integer> statesIntraSatisfied) {
@@ -197,8 +187,7 @@ public class Predicate {
 		StringBuilder res = new StringBuilder();
 		
 		res.append("{Name:").append(getName()).append(", Type:").append(getPredicateType().toString()).
-		append(", ActivityName:").append(incidentActivity.getName()).append(", Predicate:").
-		append(getPredicate()).append("}\n");
+		append(", ActivityName:").append(incidentActivity.getName()).append(", Predicate:");
 		
 	return res.toString();
 	}
@@ -209,8 +198,6 @@ public class Predicate {
 		res.append("\nName: ").append(getName()).
 		append("\nType: ").append(getPredicateType().toString()).
 		append("\nActivityName: ").append(incidentActivity.getName()).
-		append("\nPredicate value: ").append(getPredicate()).
-		
 		append("\nStates Satisfying: ");
 		for(Integer state : bigraphStates) {
 			res.append(state).append(",");
@@ -234,7 +221,7 @@ public class Predicate {
 		StringBuilder res= new StringBuilder();
 		
 		res.append("big ").append(getName()).append("_").append(getPredicateType()).append("_")
-		.append(incidentActivity.getName()).append(" = ").append(getPredicate()).append(";\r\n");
+		.append(incidentActivity.getName()).append(" = ").append(";\r\n");
 		
 		return res.toString();
 		
@@ -318,7 +305,7 @@ public class Predicate {
 		return ps;
 	}
 	
-	public Bigraph convertPredicateToBigraph() {
+	private Bigraph convertPredicateToBigraph() {
 		
 		
 		//convert predicate to bigraph
@@ -328,7 +315,7 @@ public class Predicate {
 		return bigraphBuilder.makeBigraph();
 	}
 	
-	public static 	Bigraph convertJSONtoBigraph(JSONObject redex){
+	public 	Bigraph convertJSONtoBigraph(JSONObject redex){
 
 		HashMap<String,BigraphNode> nodes = new HashMap<String, BigraphNode>();
 		LinkedList<BigraphNode.OuterName> outerNames = new LinkedList<BigraphNode.OuterName>();
@@ -339,7 +326,7 @@ public class Predicate {
 		LinkedList<Root> libBigRoots = new LinkedList<Root>();
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 		
-		
+		numOfRoots = 0;
 		//get entities (or nodes) information from the json object of the condition
 		//if the json object is null, then nothing will be done and null will be returned
 		if(!unpackPredicateJSON(redex, nodes)) {
@@ -366,7 +353,6 @@ public class Predicate {
 		
 		
 		for(BigraphNode n : nodes.values()) {
-			
 			
 			//create bigraph outernames
 			arity = SystemInstanceHandler.getGlobalBigraphSignature().getByName(n.getControl()).getArity();
@@ -458,7 +444,7 @@ public class Predicate {
 	 * @param obj JSONObject
 	 * @param nodes BigraphNode objects holding the inner tags info
 	 */
-	private static boolean unpackPredicateJSON(JSONObject obj, HashMap<String,BigraphNode> nodes) {
+	private boolean unpackPredicateJSON(JSONObject obj, HashMap<String,BigraphNode> nodes) {
 		
 		JSONArray ary;
 		BigraphNode node;
@@ -507,8 +493,14 @@ public class Predicate {
 					e.printStackTrace();
 				}
 				
-				nodes.put(node.getId(), node);
+				//if the node already exists in the predicate, then it is assumed it is being copied
+				//so a new node with the same properties are created with different IDs
+				if(nodes.containsKey(node.getId())) {
+					node.setId(node.getId()+"_copy");
+				} 
 				
+				nodes.put(node.getId(), node);
+		
 				//get outer names
 				JSONArray tmpAry;
 
@@ -611,6 +603,7 @@ public class Predicate {
 		//if the parent is a root
 		if(node.isParentRoot()) { //if the parent is a root	
 			Node  n = biBuilder.addNode(node.getControl(), libBigRoots.get(node.getParentRoot()), names);
+			
 			nodes.put(node.getId(), n);
 			return n;
 		}
@@ -618,6 +611,7 @@ public class Predicate {
 		//if the parent is already created as a node in the bigraph
 		if(nodes.containsKey(node.getParent().getId())) {
 			Node  n = biBuilder.addNode(node.getControl(), nodes.get(node.getParent().getId()), names);
+			
 			nodes.put(node.getId(), n);
 			return n;
 		}
@@ -626,6 +620,7 @@ public class Predicate {
 		//for example, if a node has arity 2, then it will take only two outernames (the first two) and ignore any other that might exist in the names variable
 		//if the number of outernames defined are less than in the signature, then the rest of outernames will be defined as links (i.e. XX:e)
 		Node n = biBuilder.addNode(node.getControl(), createNode(node.getParent(), biBuilder, libBigRoots, outerNames, nodes), names);
+
 		nodes.put(node.getId(), n);
 		return n;
 			

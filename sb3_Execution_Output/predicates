@@ -1,8 +1,0 @@
-label "pre1_Precondition_activity1" = x = 4 | x = 6;
-label "post1_Postcondition_activity1" = x = 8 | x = 9;
-label "pre3_Precondition_activity2" = x = 10 | x = 12;
-label "post3_Postcondition_activity2" = x = 10 | x = 13;
-label "pre4_Precondition_activity3" = x = 10;
-label "post4_Postcondition_activity3" = x = 10;
-label "pre5_Precondition_activity4" = x = 10 | x = 13;
-label "post5_Postcondition_activity4" = x = 10

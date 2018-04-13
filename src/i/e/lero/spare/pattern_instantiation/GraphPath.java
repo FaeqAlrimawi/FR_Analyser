@@ -103,14 +103,23 @@ public class GraphPath {
 	}
 	
 	public String toPrettyString() {
+		
 		StringBuilder res = new StringBuilder();
+		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+		String label;
 		
-		for(Integer state: stateTransitions) {
-			res.append(state).append(" => ");
+		for(int i=0;i<stateTransitions.size();i++) {
+			if(i<stateTransitions.size()-1) {
+				if((label = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1))) != null) {
+					res.append(stateTransitions.get(i)).append("=["+label+"]=>");
+				} else {
+					res.append(stateTransitions.get(i)).append("==>");
+				}
+			} else {
+				res.append(stateTransitions.get(i));
+			}
 		}
-		if(res.length() > 4)
-		res.delete(res.length()-4, res.length()); //remove " => "
-		
+	
 		return res.toString();
 	}
 	

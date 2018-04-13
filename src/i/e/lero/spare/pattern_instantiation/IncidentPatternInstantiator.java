@@ -76,8 +76,8 @@ public class IncidentPatternInstantiator {
 	}
 	
 	public void test() {
-		String BRSFileName = "sav/savannah-general.big";
-		String outputFolder = "sav/output10000";
+		String BRSFileName = "savannah_Bigrapherexample/savannah-general.big";
+		String outputFolder = "savannah_Bigrapherexample/output10000";
 		
 		// execute BRS using Bigrapher tool as a systemExecutor
 		// the default output folder is in the format: [fileName]_output e.g.,
@@ -101,41 +101,52 @@ public class IncidentPatternInstantiator {
 	 * it requires: 1-incident pattern file (i.e. *.cpi), 2-system model (i.e. *.environment), and 3-Bigraph representation of the system (i.e. *.big)
 	 */
 	private void testNewIncident(){
-		Mapper m = new Mapper("match_query.xq");
+		
+		String xQueryMatcherFile = "match_query.xq";//in the xquery file the incident and system model paths should be adjusted if changed from current location
+		String BRS_file = "etc/research_centre_system.big";
+		String BRS_outputFolder = "etc/research_centre_output";
+		
+		Mapper m = new Mapper(xQueryMatcherFile);
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		AssetMap am = m.findMatches(); 
 
 		// if there are incident assets with no matches from space model then exit
-		if (am.hasAssetsWithNoMatch()) {
+/*		if (am.hasAssetsWithNoMatch()) {
 			System.out.println("Some incident entities have no matches in the system assets. These are:");
+			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				System.out.println(Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
 					// no matching
-		}
+		}*/
 		
 		//print matched assets
 		/*for(String n : am.getIncidentAssetNames()) {
+			//getIncidetnAssetWithNoMatch method has some issues
 			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
 		}*/
-	
+		
+		//print matched assets
+		System.out.println(am.toString());
+		
 		//generate sequences
 		LinkedList<String[]> lst = am.generateUniqueCombinations();
 		
 		//checks if there are sequences generated or not. if not, then execution is terminated
-		if(lst == null) {
+		//this can be loosened to allow same asset to be mapped to two entities
+		if(lst == null || lst.isEmpty()) {
 			System.out.println("no combinations found.... exisitng program");
 			return;
 		}
 		
 		//print sequences 
-		/*System.out.println("Sequences ["+lst.size()+"]");
+	/*	System.out.println("Sequences ["+lst.size()+"]");
 		for (String[] s : lst) {
 			System.out.println(Arrays.toString(s));
 		}*/
 		
 		//initialise BRS system. This includes: 
-		boolean isInitialised = initialiseBigraphSystem("research_centre_system.big", "research_centre_output"); 
+		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
 		if (!isInitialised) {
 			System.out.println("System could not be initialised....execution is terminated");
 		}
@@ -144,6 +155,7 @@ public class IncidentPatternInstantiator {
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
+		System.out.println("System assets matched:"+ Arrays.toString(lst.get(0)));
 		for(int i=0; i<1;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			incidentInstances[i].start();
@@ -224,13 +236,16 @@ public class IncidentPatternInstantiator {
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 			
+			//write instantiation output to a text file
+			
+			
 			System.out.println("\n\n**Transitions that satisfy the incident:");
 			for(int i=0; i<paths.size();i++) {
-				System.out.println(i+": "+paths.get(i).toSimpleString());
+				System.out.println(i+": "+paths.get(i).toPrettyString());
 			}
 			
 			//another way is to combine the transitions found for each activity from the initial one to the final one
-			
+			predicateHandler.printAll();
 			
 			/*inc.generateDistinctPaths();
 			

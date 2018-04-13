@@ -19,17 +19,20 @@ public class SystemInstanceHandler {
 	private static String errorSign = "## ";
 	public static boolean analyseSystem() {
 
+		boolean isDone = false;
+		
+		print("\n******Initialising the System******");
 		if (executor == null) {
 			print("System Executor is not set.");
-			return false;
+			isDone = false;
 		}
 
-		print("Executing the Bigraphical Reactive System (BRS)");
+		print(">>Executing the Bigraphical Reactive System (BRS)...");
 		outputFolder = executor.execute();
 		
 		if (outputFolder != null) {
 			print("Execution is done successfully");
-			print("Loading Bigraph Signature");
+			print(">>Creating Bigraph Signature...");
 			
 			//get the signature
 			globalBigraphSignature = executor.getBigraphSignature();
@@ -38,9 +41,10 @@ public class SystemInstanceHandler {
 				print("Bigraph signature is created successfully");
 			} else {
 				print(errorSign+"Something went wrong creating the Bigraph signature");
-				return false;
+				isDone = false;
 			}
 			
+			print(">>Creating Bigraph transition system...");
 			//get the transition system
 			transitionSystem = executor.getTransitionSystem();
 			
@@ -48,24 +52,29 @@ public class SystemInstanceHandler {
 				print("Bigraph transition system is created successfully");
 			} else {
 				print(errorSign+"something went wrong while creating the Bigraph transition system");
-				return false;
+				isDone = false;
 			}
 			
+			print(">>Loading states...");
 			//gete states as Bigraph objects
 			states = executor.getStates();
 			
 			if (states != null) {
-				print("States are created successfully");
+				print("States are loaded successfully");
 			} else {
-				print(errorSign+"something went wrong while creating the Bigraph system states");
-				return false;
+				print(errorSign+"something went wrong while loading the Bigraph system states");
+				isDone = false;
 			}
 			
-			return true;			
+			isDone = true;			
 		} else {
 			print(errorSign+"something went wrong while executing the BRS");
-			return false;
+			isDone = false;
 		}
+		
+		print("***********************************\n\n");
+		
+		return isDone;
 	}
 
 /*	public static boolean analyseSystem(String fileName, SystemExecutor exec) {

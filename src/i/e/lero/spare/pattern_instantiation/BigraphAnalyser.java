@@ -20,9 +20,13 @@ public class BigraphAnalyser {
 	private PredicateHandler predicateHandler;
 	private LinkedList<GraphPath> paths;
 	private boolean isDebugging = true;
-
+	private HashMap<Integer, Bigraph> states;
+	Matcher matcher;
+	
 	public BigraphAnalyser() {
 		predicateHandler = null;
+		states = SystemInstanceHandler.getStates();
+		matcher = new Matcher();
 
 	}
 
@@ -101,11 +105,7 @@ public class BigraphAnalyser {
 		
 		if(redex == null) {
 			return false;
-		}
-		
-		HashMap<Integer, Bigraph> states = SystemInstanceHandler.getStates();
-		Matcher matcher = new Matcher();
-		
+		}		
 		
 		////test code
 /*		BigraphBuilder bi = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
@@ -208,7 +208,7 @@ public class BigraphAnalyser {
 		
 		
 		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
-		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\n\nOriginal state: "+states.get(0)+"\n\n");
+		print("\nidentifyRelevantStates: " + pred.getName()+" \nOriginal redex:"+redex.toString());
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
 		//assuming knowledge is partial, if the number of outernames in a redex node is less than that in the signature (and knolwdege is partial for that node),
@@ -229,7 +229,7 @@ public class BigraphAnalyser {
 		int iterations = 1;
 		int length = states.size();
 		
-		print("number of states matched to: " + length*iterations);
+		//print("number of states matched to: " + length*iterations);
 		//print starting time of matching
 		//print("["+ +"] start the matching process...");
 		////
@@ -238,7 +238,7 @@ public class BigraphAnalyser {
 			if(matcher.match(states.get(i%length), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;
-				print("state " + i%length + " matched");		
+				//print("state " + i%length + " matched");		
 			}
 		}
 		

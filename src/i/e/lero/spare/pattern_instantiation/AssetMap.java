@@ -223,7 +223,7 @@ private  boolean containsDuplicate(Integer [] strs) {
 		}
 		
 		for(int i=0;i<spaceAssetMatches.length;i++) {
-			if(spaceAssetMatches[i][0] == null || spaceAssetMatches[i][0] == "" ) {
+			if(spaceAssetMatches[i][0] == null || spaceAssetMatches[i][0].equals("") ) {
 				names.append(incidentAssetNames[i]).append(",");
 			}
 		}
@@ -331,9 +331,9 @@ public LinkedList<String[]> generateUniqueCombinations() {
 		uniqueCombinations = new LinkedList<String[]>();
 		
 		for (String[] s : it) {
-				//if(!containsDuplicate(s)) {
+				if(!containsDuplicate(s)) {
 					uniqueCombinations.add(s);	
-			//	}
+				}
 		}
 		
 		return uniqueCombinations;

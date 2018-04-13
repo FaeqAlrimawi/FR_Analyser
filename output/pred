@@ -1,8 +1,0 @@
-label "lambda_reactum" = x = 9 | x = 8 | x = 7 | x = 5 | x = 6 | x = 4 | x = 3 | x = 1 | x = 2 | x = 0;
-label "lambda_redex" = x = 5 | x = 6 | x = 4;
-label "new_reactum" = x = 9 | x = 8 | x = 7 | x = 5 | x = 6 | x = 4 | x = 3 | x = 1 | x = 2 | x = 0;
-label "new_redex" = false;
-label "ready_reactum" = x = 9 | x = 8 | x = 7 | x = 5 | x = 6 | x = 4 | x = 3 | x = 1 | x = 2 | x = 0;
-label "ready_redex" = x = 3 | x = 1;
-label "snd_reactum" = x = 9 | x = 8 | x = 5 | x = 6 | x = 3 | x = 1 | x = 2;
-label "snd_redex" = x = 7 | x = 4 | x = 1 | x = 2 | x = 0
