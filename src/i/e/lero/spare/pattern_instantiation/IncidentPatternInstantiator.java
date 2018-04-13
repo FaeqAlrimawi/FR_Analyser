@@ -161,7 +161,7 @@ public class IncidentPatternInstantiator {
 		
 		for(int i=0; i<lst.size();i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-			System.out.println(">>Asset set[:"+i+"]: "+ Arrays.toString(lst.get(i)));
+			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			incidentInstances[i].start();
 		}	
 	}

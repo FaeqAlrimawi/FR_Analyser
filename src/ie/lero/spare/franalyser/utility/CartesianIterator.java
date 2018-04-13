@@ -88,7 +88,7 @@ public class CartesianIterator<T> implements Iterator<T[]> {
         LinkedList<T> value;
         int num = calculateNumberOfElements();
         LinkedList<LinkedList<T>> results = new LinkedList<LinkedList<T>>();
-        
+ 
         for(;count<num;count++) {
        	 isDuplicate = false;
        	 tmp = count;
@@ -118,15 +118,22 @@ public class CartesianIterator<T> implements Iterator<T[]> {
    
    private int calculateNumberOfElements() {
    	
-   	return (int) Math.pow(sets[0].length, sets.length);
+	   int num = 1;
+	   
+	   for(int i=0;i<sets.length;i++) {
+		   num *= sets[i].length;
+	   }
+   	
+	   return num;
+	   //return (int) Math.pow(sets[0].length, sets.length);
    }
    
     public static void main(String [] args){
     	
     	//represents number of system assets that match each incident asset assuming
-    			int rows = 8;
+    			int rows = 4;
     			//represents number of incident assets
-    			int columns = 10;
+    			int columns = 3;
 //    			String [] a = {"a", "b", "c"};
 //    			System.out.println(Arrays.toString(a));
     			String [][] tst = new String[rows][columns];
@@ -134,11 +141,14 @@ public class CartesianIterator<T> implements Iterator<T[]> {
     			//generate dummy array assuming they are all unique
     			for(int i = 0;i<rows;i++) {
     				for(int j=0;j<columns;j++) {
-    					tst[i][j] = i+""+j;//cnt;//dummy[rand.nextInt(dummy.length)];
+    					tst[i][j] = ""+j;//+""+j;//cnt;//dummy[rand.nextInt(dummy.length)];
     					cnt++;
     				}
     			}
     			
+    			for(String [] a : tst) {
+    				System.out.println(Arrays.toString(a));
+    			}
     	CartesianIterator<String> car = new CartesianIterator<String>(tst, String[]::new);
     	
     	System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
@@ -146,6 +156,9 @@ public class CartesianIterator<T> implements Iterator<T[]> {
     	
     	 LinkedList<LinkedList<String>> res = car.iterateElements();
     	 
+    	 for(LinkedList<String> lst : res) {
+    		 System.out.println(lst);
+    	 }
      	System.out.println("End time [" + dtf.format(LocalDateTime.now())+"]");
     	 System.out.println(res.size());
     }

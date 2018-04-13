@@ -327,13 +327,15 @@ private  boolean containsDuplicate(Integer [] strs) {
 	
 public LinkedList<String[]> generateUniqueCombinations() {
 
-		Iterable<String[]> it = () -> new CartesianIterator<>(spaceAssetMatches, String[]::new);
+	CartesianIterator<String> it =  new CartesianIterator<String>(spaceAssetMatches, String[]::new);
 		uniqueCombinations = new LinkedList<String[]>();
 		
-		for (String[] s : it) {
-				if(!containsDuplicate(s)) {
-					uniqueCombinations.add(s);	
-				}
+		LinkedList<LinkedList<String>> res = it.iterateElements();
+		
+		for (LinkedList<String> lst : res) {
+				//if(!containsDuplicate(s)) {
+					uniqueCombinations.add(lst.toArray(new String[0]));	
+				//}
 		}
 		
 		return uniqueCombinations;
