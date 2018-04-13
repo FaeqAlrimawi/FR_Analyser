@@ -205,7 +205,7 @@ public class IncidentActivity {
 	 * of next activities. Currently, it finds whatever it can i.e. no restrictions
 	 * @return LinkedList of GraphPath objects that contain possible paths. Empty List if there are none
 	 */
-	private LinkedList<GraphPath> findPathsToNextActivities() {
+	public LinkedList<GraphPath> findPathsToNextActivities() {
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 		LinkedList<GraphPath> tmp;
 		

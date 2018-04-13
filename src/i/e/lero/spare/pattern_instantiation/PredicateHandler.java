@@ -630,4 +630,93 @@ public class PredicateHandler {
 			actsVisited.add(tmp);
 		}
 	}
+	
+	public String getSummary() {
+		
+		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
+		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
+		IncidentActivity tmp;
+		StringBuilder res = new StringBuilder();
+		String newLine = "\n";
+		String separator = "###########################";
+		
+		updateInterStatesSatisfied();
+		
+		acts.add(getInitialActivity());
+
+		while (!acts.isEmpty()) {
+			tmp = acts.pop();
+			
+			if (tmp == null || actsVisited.contains(tmp)) {
+				continue;
+			}
+			
+			//get activity name
+			res.append(newLine).append(separator).append(newLine).append(">>>Activity name: " + tmp.getName());
+			
+			ArrayList<Predicate> pre = tmp.getPredicates(PredicateType.Precondition);
+			ArrayList<Predicate> post = tmp.getPredicates(PredicateType.Postcondition);
+			
+			//get preconditions
+			if(pre != null && !pre.isEmpty()) {
+				res.append(newLine).append(">>>Precondition: ").append(pre.get(0).getName()) //assumption made is that there is only one precondition
+				.append(newLine).append("States matched: ").append(pre.get(0).getBigraphStates())
+				//get states satisfying preconditions to postconditions within the activity, and states that satisfy condiitions between
+				//the post of current activity and the precondition of the next activity
+				.append(newLine).append("States satisfying intra-conditions (i.e. pre-post): ").append(pre.get(0).getStatesIntraSatisfied());
+			}
+			
+			//get postcondition
+			if(post != null && !post.isEmpty()) {
+				res.append(newLine).append(">>>Postcondition: ").append(post.get(0).getName()) //assumption made is that there is only one precondition
+				.append(newLine).append("States matched: ").append(post.get(0).getBigraphStates())
+				//get states satisfying preconditions to postconditions within the activity, and states that satisfy condiitions between
+				//the post of current activity and the precondition of the next activity
+				.append(newLine).append("States satisfying intra-conditions (i.e. pre-post): ").append(post.get(0).getStatesIntraSatisfied())
+				.append(newLine).append("States satisfying inter-conditions (i.e. post-pre,next): ").append(post.get(0).getStatesInterSatisfied());
+				}
+			
+	
+			
+			res.append(newLine).append(separator).append(newLine);
+			ArrayList<IncidentActivity> next = tmp.getNextActivities();
+			if (next != null && next.size() > 0) {
+				for(IncidentActivity activity: next) {
+					if(!acts.contains(activity)) {
+						acts.add(activity);
+					}
+				}
+			}
+			actsVisited.add(tmp);
+		}
+		
+		return res.toString();
+	}
+	
+	public void updateInterStatesSatisfied() {
+		
+		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
+		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
+		IncidentActivity tmp;
+		
+		acts.add(getInitialActivity());
+
+		while (!acts.isEmpty()) {
+			tmp = acts.pop();
+			
+			if (tmp == null || actsVisited.contains(tmp)) {
+				continue;
+			}
+			
+			tmp.findPathsToNextActivities();
+			
+			for (IncidentActivity act : tmp.getNextActivities()) {
+				if(!acts.contains(act)) {
+					acts.add(act);
+				}
+			}
+			
+			actsVisited.add(tmp);
+		}
+	}
 }

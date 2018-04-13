@@ -208,7 +208,7 @@ public class BigraphAnalyser {
 		
 		
 		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
-		print("\nidentifyRelevantStates: " + pred.getName()+" \nOriginal redex:"+redex.toString());
+		//print("\nidentifyRelevantStates: " + pred.getName()+" \nOriginal redex:"+redex.toString());
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
 		//assuming knowledge is partial, if the number of outernames in a redex node is less than that in the signature (and knolwdege is partial for that node),

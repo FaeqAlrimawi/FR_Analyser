@@ -76,8 +76,8 @@ public class IncidentPatternInstantiator {
 	}
 	
 	public void test() {
-		String BRSFileName = "savannah_Bigrapherexample/savannah-general.big";
-		String outputFolder = "savannah_Bigrapherexample/output10000";
+		String BRSFileName = "savannah_BigrapherExample/savannah-general.big";
+		String outputFolder = "savannah_BigrapherExample/output10000";
 		
 		// execute BRS using Bigrapher tool as a systemExecutor
 		// the default output folder is in the format: [fileName]_output e.g.,
@@ -245,8 +245,9 @@ public class IncidentPatternInstantiator {
 			}
 			
 			//another way is to combine the transitions found for each activity from the initial one to the final one
-			predicateHandler.printAll();
+			//predicateHandler.printAll();
 			
+			System.out.println(predicateHandler.getSummary());
 			/*inc.generateDistinctPaths();
 			
 			LinkedList<GraphPath> paths = inc.getAllPaths();
