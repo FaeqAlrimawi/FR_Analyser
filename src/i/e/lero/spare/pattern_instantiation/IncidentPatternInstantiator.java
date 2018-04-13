@@ -108,17 +108,18 @@ public class IncidentPatternInstantiator {
 		
 		Mapper m = new Mapper(xQueryMatcherFile);
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
+		System.out.println(">>Matching incident pattern entities to system assets");
 		AssetMap am = m.findMatches(); 
-
+		
 		// if there are incident assets with no matches from space model then exit
-/*		if (am.hasAssetsWithNoMatch()) {
-			System.out.println("Some incident entities have no matches in the system assets. These are:");
+		if (am.hasAssetsWithNoMatch()) {
+			System.out.println(">>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				System.out.println(Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
 					// no matching
-		}*/
+		}
 		
 		//print matched assets
 		/*for(String n : am.getIncidentAssetNames()) {
@@ -127,6 +128,7 @@ public class IncidentPatternInstantiator {
 		}*/
 		
 		//print matched assets
+		System.out.println(">>Entity-Asset map:");
 		System.out.println(am.toString());
 		
 		//generate sequences
@@ -135,7 +137,7 @@ public class IncidentPatternInstantiator {
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
 		if(lst == null || lst.isEmpty()) {
-			System.out.println("no combinations found.... exisitng program");
+			System.out.println(">>No combinations found.... exisitng program");
 			return;
 		}
 		
@@ -145,19 +147,21 @@ public class IncidentPatternInstantiator {
 			System.out.println(Arrays.toString(s));
 		}*/
 		
-		//initialise BRS system. This includes: 
+		System.out.println(">>Initialise the System");
+		//initialise BRS system 
 		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
 		if (!isInitialised) {
-			System.out.println("System could not be initialised....execution is terminated");
+			System.out.println(">>System could not be initialised....execution is terminated");
 		}
 		
 		//create threads that handle each sequence generated from asset matching
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
-		System.out.println("System assets matched:"+ Arrays.toString(lst.get(0)));
-		for(int i=0; i<1;i++) {//adjust the length
+		
+		for(int i=0; i<lst.size();i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
+			System.out.println(">>Asset set[:"+i+"]: "+ Arrays.toString(lst.get(i)));
 			incidentInstances[i].start();
 		}	
 	}
@@ -209,7 +213,12 @@ public class IncidentPatternInstantiator {
 			//this object identifies states and state transitions that satisfy the conditions of activities
 		 	//state transitions are updated in the predicates, which can be accessed through predicateHandler
 			BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler);
+			
+			System.out.println("\nThread["+threadID+"]>>Identifying states and their transitions that satisfy the pattern activities...");
+
+			//identify states and transitions that satisfy the pre-/post-conditions of each activity
 			analyser.analyse();
+			System.out.println("\nThread["+threadID+"]>>Identification is completed");
 			
 			 //creating activities diagraph could be done internally in the PredicateHandler class
 			/* Digraph<String> graph = predicateHandler.createActivitiesDigraph();
@@ -218,14 +227,17 @@ public class IncidentPatternInstantiator {
 			 //dpredicateHandler.getActivitiesSequences();
 			 
 			 //print all possible state transitions satisfying conditions
+				
 			 if(!predicateHandler.areAllSatisfied()){
-				 System.out.println("thread ["+threadID+"] activities are not satisfied:" + 
+				 System.out.println("\nThread["+threadID+"]>>Activities are not satisfied:" + 
 						 predicateHandler.getActivitiesNotSatisfied());
+				 System.out.println("\nThread["+threadID+"]>>Terminating thread");
+				 return;
 			 }
 			 
 			 //how to represent all possible paths to the given sequence of assets?
 			 //incidentpath can be used to hold one path, but now it is holding everything
-			IncidentPath inc = new IncidentPath(predicateHandler);
+			//IncidentPath inc = new IncidentPath(predicateHandler);
 			//inc.generateDistinctPaths();
 			
 			//this gives details about the states and their transitions that satisfy the conditions of each activity
@@ -239,7 +251,7 @@ public class IncidentPatternInstantiator {
 			//write instantiation output to a text file
 			
 			
-			System.out.println("\n\n**Transitions that satisfy the incident:");
+			System.out.println("\nThread["+threadID+"]>>State transitions that satisfy the incident:");
 			for(int i=0; i<paths.size();i++) {
 				System.out.println(i+": "+paths.get(i).toPrettyString());
 			}
@@ -247,9 +259,13 @@ public class IncidentPatternInstantiator {
 			//another way is to combine the transitions found for each activity from the initial one to the final one
 			//predicateHandler.printAll();
 			
-			System.out.println(predicateHandler.getSummary());
-			/*inc.generateDistinctPaths();
+//			System.out.println("\nThread["+threadID+"]>>Summary of the incident pattern activities");
+//			System.out.println(predicateHandler.getSummary());
 			
+			System.out.println("Thread ["+threadID+"]>>Terminated");
+			System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			
+			/*inc.generateDistinctPaths();
 			LinkedList<GraphPath> paths = inc.getAllPaths();
 			
 			for(GraphPath p : paths) {
@@ -258,7 +274,7 @@ public class IncidentPatternInstantiator {
 			//System.out.println(predic.toString());
 		}
 		public void start() {
-			System.out.println("Starting " + threadID);
+			System.out.println(">>Thread [" + threadID +"] is starting...\n");
 			//System.out.println("system assets: " + Arrays.toString(systemAssetNames));
 			if (t == null) {
 				t = new Thread(this, "" + threadID);

@@ -21,59 +21,60 @@ public class SystemInstanceHandler {
 
 		boolean isDone = false;
 		
-		print("\n******Initialising the System******");
 		if (executor == null) {
-			print("System Executor is not set.");
+			print("SystemHandler>> Bigraph System Executor is not set");
 			isDone = false;
+		} else {
+			print("SystemHandler>> Executing the Bigraphical Reactive System (BRS)...");
+			outputFolder = executor.execute();
+
+			if (outputFolder != null) {
+				print("SystemHandler>> Creating Bigraph Signature...");
+
+				// get the signature
+				globalBigraphSignature = executor.getBigraphSignature();
+
+				if (globalBigraphSignature != null) {
+				} else {
+					print("SystemHandler>> " + errorSign + "Something went wrong creating the Bigraph signature");
+					isDone = false;
+				}
+
+				print("SystemHandler>> Creating Bigraph transition system...");
+				// get the transition system
+				transitionSystem = executor.getTransitionSystem();
+
+				if (transitionSystem != null) {
+				} else {
+					print("SystemHandler>> " + errorSign
+							+ "something went wrong while creating the Bigraph transition system");
+					isDone = false;
+				}
+
+				print("ystemHandler>> Loading states...");
+				// gete states as Bigraph objects
+				states = executor.getStates();
+
+				if (states != null) {
+				} else {
+					print("SystemHandler>> " + errorSign
+							+ "something went wrong while loading the Bigraph system states");
+					isDone = false;
+				}
+
+				isDone = true;
+			} else {
+				print("SystemHandler>> " + errorSign + "something went wrong while executing the BRS");
+				isDone = false;
+			}
+
+			if (isDone) {
+				print("SystemHandler>> Initialisation completed successfully");
+			} else {
+				print("SystemHandler>> Initialisation was NOT completed successfully...");
+			}
 		}
 
-		print(">>Executing the Bigraphical Reactive System (BRS)...");
-		outputFolder = executor.execute();
-		
-		if (outputFolder != null) {
-			print("Execution is done successfully");
-			print(">>Creating Bigraph Signature...");
-			
-			//get the signature
-			globalBigraphSignature = executor.getBigraphSignature();
-			
-			if(globalBigraphSignature != null) {
-				print("Bigraph signature is created successfully");
-			} else {
-				print(errorSign+"Something went wrong creating the Bigraph signature");
-				isDone = false;
-			}
-			
-			print(">>Creating Bigraph transition system...");
-			//get the transition system
-			transitionSystem = executor.getTransitionSystem();
-			
-			if(transitionSystem != null) {
-				print("Bigraph transition system is created successfully");
-			} else {
-				print(errorSign+"something went wrong while creating the Bigraph transition system");
-				isDone = false;
-			}
-			
-			print(">>Loading states...");
-			//gete states as Bigraph objects
-			states = executor.getStates();
-			
-			if (states != null) {
-				print("States are loaded successfully");
-			} else {
-				print(errorSign+"something went wrong while loading the Bigraph system states");
-				isDone = false;
-			}
-			
-			isDone = true;			
-		} else {
-			print(errorSign+"something went wrong while executing the BRS");
-			isDone = false;
-		}
-		
-		print("***********************************\n\n");
-		
 		return isDone;
 	}
 
