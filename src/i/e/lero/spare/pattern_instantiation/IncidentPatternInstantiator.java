@@ -218,7 +218,7 @@ public class IncidentPatternInstantiator {
 
 			//identify states and transitions that satisfy the pre-/post-conditions of each activity
 			analyser.analyse();
-			System.out.println("\nThread["+threadID+"]>>Identification is completed");
+			//System.out.println("\nThread["+threadID+"]>>Identification is completed");
 			
 			 //creating activities diagraph could be done internally in the PredicateHandler class
 			/* Digraph<String> graph = predicateHandler.createActivitiesDigraph();
