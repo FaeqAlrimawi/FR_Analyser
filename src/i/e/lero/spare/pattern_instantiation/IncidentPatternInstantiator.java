@@ -3,10 +3,15 @@ package i.e.lero.spare.pattern_instantiation;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import org.apache.batik.parser.PathArrayProducer;
+
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
+import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class IncidentPatternInstantiator {
+	
+	private String xqueryFile = "match_query.xq";
 
 	public void execute() {
 		
@@ -100,12 +105,89 @@ public class IncidentPatternInstantiator {
 	 * This method details the steps for mapping an incident pattern to a system representation
 	 * it requires: 1-incident pattern file (i.e. *.cpi), 2-system model (i.e. *.environment), and 3-Bigraph representation of the system (i.e. *.big)
 	 */
-	private void testNewIncident(){
+	private void executeExample(){
 		
-		String xQueryMatcherFile = "match_query.xq";//in the xquery file the incident and system model paths should be adjusted if changed from current location
-		String BRS_file = "etc/research_centre_system.big";
-		String BRS_outputFolder = "etc/research_centre_output";
+		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
+		String BRS_file = "etc/example/research_centre_system.big";
+		String BRS_outputFolder = "etc/example/research_centre_output";
+		String systemModelFile = "etc/example/research_centre_model.environment";
+		String incidentPatternFile = "etc/example/interruption_incident-pattern.cpi";
 		
+		XqueryExecuter.SPACE_DOC = systemModelFile;
+		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
+		
+		Mapper m = new Mapper(xQueryMatcherFile);
+		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
+		System.out.println(">>Matching incident pattern entities to system assets");
+		AssetMap am = m.findMatches(); 
+		
+		// if there are incident assets with no matches from space model then exit
+		if (am.hasAssetsWithNoMatch()) {
+			System.out.println(">>Some incident entities have no matches in the system assets. These are:");
+			//getIncidetnAssetWithNoMatch method has some issues
+			String[] asts = am.getIncidentAssetsWithNoMatch();
+				System.out.println(Arrays.toString(asts));
+			return; // execution stops if there are incident entities with
+					// no matching
+		}
+		
+		//print matched assets
+		/*for(String n : am.getIncidentAssetNames()) {
+			//getIncidetnAssetWithNoMatch method has some issues
+			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
+		}*/
+		
+		//print matched assets
+		System.out.println(">>Entity-Asset map:");
+		System.out.println(am.toString());
+		
+		//generate sequences
+		LinkedList<String[]> lst = am.generateUniqueCombinations();
+		
+		//checks if there are sequences generated or not. if not, then execution is terminated
+		//this can be loosened to allow same asset to be mapped to two entities
+		if(lst == null || lst.isEmpty()) {
+			System.out.println(">>No combinations found.... exisitng program");
+			return;
+		}
+		
+		//print sequences 
+	/*	System.out.println("Sequences ["+lst.size()+"]");
+		for (String[] s : lst) {
+			System.out.println(Arrays.toString(s));
+		}*/
+		
+		System.out.println(">>Initialise the System");
+		//initialise BRS system 
+		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
+		if (!isInitialised) {
+			System.out.println(">>System could not be initialised....execution is terminated");
+		}
+		
+		//create threads that handle each sequence generated from asset matching
+		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+		String [] incidentAssetNames = am.getIncidentAssetNames();
+		
+		
+		for(int i=0; i<lst.size();i++) {//adjust the length
+			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
+			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			incidentInstances[i].start();
+		}	
+	}
+	
+private void executeScenario1(){
+		
+		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
+		String BRS_file = "etc/scenario1/research_centre_system.big";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output";
+		String systemModelFile = "etc/scenario1/research_centre_model.environment";
+		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
+		
+		XqueryExecuter.SPACE_DOC = systemModelFile;
+		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
+		
+		////start executing the scenario \\\\
 		Mapper m = new Mapper(xQueryMatcherFile);
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		System.out.println(">>Matching incident pattern entities to system assets");
@@ -172,7 +254,8 @@ public class IncidentPatternInstantiator {
 		//ins.execute();
 		//ins.test();
 		//SystemInstanceHandler.loadStates();
-		ins.testNewIncident();
+		ins.executeExample();
+		//ins.executeScenario1();
 	}
 
 	
@@ -256,6 +339,10 @@ public class IncidentPatternInstantiator {
 				System.out.println(i+": "+paths.get(i).toPrettyString());
 			}
 			
+			//create an analysis object for the identified paths
+			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
+			pathsAnalyser.analyse();
+			System.out.println(pathsAnalyser.print());
 			//another way is to combine the transitions found for each activity from the initial one to the final one
 			//predicateHandler.printAll();
 			
@@ -273,6 +360,21 @@ public class IncidentPatternInstantiator {
 			}*/
 			//System.out.println(predic.toString());
 		}
+		
+		/**
+		 * Returns information about the paths that satisfy an incident pattern. Information include:
+		 * 	-Most common actions
+		 *  -shortest 10% of the paths
+		 *  -others??
+		 * @param paths the list of paths
+		 */
+		private String analysePaths(LinkedList<GraphPath> paths) {
+			StringBuilder str = new StringBuilder();
+			
+			
+			return str.toString();
+		}
+		
 		public void start() {
 			System.out.println(">>Thread [" + threadID +"] is starting...\n");
 			//System.out.println("system assets: " + Arrays.toString(systemAssetNames));

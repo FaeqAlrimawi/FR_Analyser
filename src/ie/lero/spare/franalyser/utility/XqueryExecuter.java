@@ -6,9 +6,11 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import javax.xml.namespace.QName;
 import javax.xml.xquery.XQConnection;
 import javax.xml.xquery.XQDataSource;
 import javax.xml.xquery.XQException;
+import javax.xml.xquery.XQItemType;
 import javax.xml.xquery.XQPreparedExpression;
 import javax.xml.xquery.XQResultSequence;
 
@@ -17,12 +19,13 @@ import org.json.XML;
 
 import com.saxonica.xqj.SaxonXQDataSource;
 
+
 public class XqueryExecuter {
 
 	public static final String NS_DECELERATION = "declare namespace cyberPhysical_Incident = \"http://www.example.org/cyberPhysical_Incident\"; "
 			+ "declare namespace environment = \"http://www.example.org/environment\";";
-	public static String INCIDENT_DOC = "etc/eavesdropping_incident-pattern.cpi";
-	public static String SPACE_DOC = "etc/research_centre_model.environment";
+	public static String INCIDENT_DOC = "etc/example/eavesdropping_incident-pattern.cpi";
+	public static String SPACE_DOC = "etc/example/research_centre_model.environment";
 	public static final String INCIDENT_ROOT_ELEMENT = "cyberPhysical_Incident:IncidentDiagram";
 	public static final String SPACE_ROOT_ELEMENT = "";
 	
@@ -31,13 +34,24 @@ public class XqueryExecuter {
 	}
 	
 	public static String executeQueryFromFile(String xqueryFilePath) throws FileNotFoundException, XQException{
+		
 		StringBuilder res=new StringBuilder();
+		XQResultSequence result;
+		
 		InputStream inputStream = new FileInputStream(new File(xqueryFilePath));
 		 XQDataSource ds = new SaxonXQDataSource();
 		 
 		 XQConnection conn = ds.getConnection();
 		 XQPreparedExpression exp = conn.prepareExpression(inputStream);
-		 XQResultSequence result = exp.executeQuery();
+		 XQItemType xsUntyped = conn.createAtomicType(XQItemType.XQBASETYPE_STRING);
+		 
+		 //bind extranl variables to ones in the xquery file
+		 final QName incidentDoc = new QName("incidentDoc");
+		 final QName spaceDoc = new QName("spaceDoc");
+		 exp.bindString(incidentDoc, INCIDENT_DOC, xsUntyped);
+		 exp.bindString(spaceDoc, SPACE_DOC, xsUntyped);
+		 
+		 result = exp.executeQuery();
 		 
 		 while (result.next()) {
 		        res.append(result.getItemAsString(null));

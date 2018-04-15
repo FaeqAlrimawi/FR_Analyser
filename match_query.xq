@@ -1,6 +1,7 @@
 declare namespace cyberPhysical_Incident = "http://www.example.org/cyberPhysical_Incident";
 declare namespace environment = "http://www.example.org/environment";
-
+declare variable $incidentDoc as xs:string external;
+declare variable $spaceDoc as xs:string external;
  
 (:
 :: This function compares the number and types of connections found in an incident asset to that of a space asset
@@ -195,8 +196,8 @@ return $spaceAsset
 };
 
 
-let $incidentDoc := "etc/eavesdropping_incident-pattern.cpi"
-let $spaceDoc := "etc/research_centre_model.environment"
+(: let $incidentDoc := "etc/scenario1/interruption_incident-pattern.cpi" :)
+(: let $spaceDoc := "etc/scenario1/research_centre_model.environment" :)
 let $incidentAssets := doc($incidentDoc)//cyberPhysical_Incident:IncidentDiagram/(asset, actor, resource)
 let $matches := ( 
 <matches>{
