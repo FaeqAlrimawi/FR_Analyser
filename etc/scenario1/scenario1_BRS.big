@@ -27,6 +27,8 @@ ctrl ElevatorsArea = 1; # 1 area
 ##computingDevices
 ctrl Elevator = 1; #(7 in total: 6 elevators in elevator area and 1 emerbency elevator)
 ctrl Desktop = 1; # (15 desktops)
+ctrl Server = 1; # (2 servers, 1 in informatics lab the other in the empirical lab)
+
 
 #Digital structure
 ctrl IPNetwork = 10; #defines 10 connections to desktops
