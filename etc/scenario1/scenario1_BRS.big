@@ -1,18 +1,10 @@
 # Signature
 
-ctrl Room = 1;
-atomic ctrl SmartLight = 1;
-ctrl HVAC = 1;
-atomic ctrl Server = 1;
-atomic ctrl FireAlarm = 1;
-atomic ctrl Workstation = 1;
-ctrl Laptop = 1;
-ctrl Visitor = 0;
-
 #physical structure
 ctrl Building = 0; #currently no connections to outside world
 ctrl Floor = 2; #connections can define upper and lower floors 
 ##Rooms
+ctrl Room = 1;
 ctrl Hallway = 30; #number of connections to the rooms in the floor
 ctrl Lab = 1; #control refers to labs that has one connection to hallway (12 labs)
 ctrl Lab_2 = 2; #control refers to labs that has two connection to hallway (1 lab)
@@ -28,22 +20,30 @@ ctrl ElevatorsArea = 1; # 1 area
 ctrl Elevator = 1; #(7 in total: 6 elevators in elevator area and 1 emerbency elevator)
 ctrl Desktop = 1; # (15 desktops)
 ctrl Server = 1; # (2 servers, 1 in informatics lab the other in the empirical lab)
-
+atomic ctrl SmartLight = 1;
+ctrl HVAC = 1;
+atomic ctrl Server = 1;
+atomic ctrl FireAlarm = 1;
+atomic ctrl Workstation = 1;
+ctrl Laptop = 1;
+ctrl CardReader = 0;
 
 #Digital structure
 ctrl IPNetwork = 10; #defines 10 connections to desktops
+ctrl BusNetwork = 5; # 5 should be changed to the right number
+atomic ctrl Data = 0; # could be packets
+atomic ctrl Software = 0; #could be programs/processes, something that executes
+
+#Actors
+ctrl Visitor = 0;
 
 #context (defines some constrains over rules)
 ctrl Context = 1; #context contains one of the below states of working (workinghours, cardehours, and closedhours)
 atomic ctrl WorkingHours = 0; # defines the period between 8:30-19:00 as working hours
-atomic CardRequiredHours = 0; #defines the period between 19:00=22:00 as card required to access rooms
-atomic ClosedHours = 0; #defines the period between 22:00-8:30 as Closed hours
-atomic ClosedHours_2 = 0; #defines the period between 19:00-8:30 as Closed hours
+atomic ctrl CardRequiredHours = 0; #defines the period between 19:00=22:00 as card required to access rooms
+atomic ctrl ClosedHours = 0; #defines the period between 22:00-8:30 as Closed hours
+atomic ctrl ClosedHours_2 = 0; #defines the period between 19:00-8:30 as Closed hours
 
-#ctrl DigitalNetwork = 1;
-ctrl InstallationBus = 6;
-atomic ctrl Data = 0;
-atomic ctrl Software = 0;
 
 #defines keywords for the reaction rules
 atomic ctrl EnterRoom = 0;
@@ -56,92 +56,44 @@ atomic ctrl SendSoftware = 0; #7 number of actions
 ctrl RulesKeywords = 0;
 
 #initial state
-big building_state =
-/toiletRm /serverRm /cntrlRm /sl1 /sl2 /sl3 /hc /station /alarm
-Building.(
-Floor.( 
-Room{toiletRm}.SmartLight{sl1}|
-Room{serverRm}.(SmartLight{sl2} | HVAC{hc}.1 | FireAlarm{alarm}) |
-Room{cntrlRm}.(SmartLight{sl3} | Workstation{station}) |   
-Hallway{cntrlRm,toiletRm, serverRm}.(/a Visitor.Laptop{a}.Software)
-) |
- InstallationBus{sl1,sl2,sl3,hc,station,alarm}.1
-)
+big instructorsLab = Lab{inst1}.(SmartLight{sm1} | HVAC{hvac1}.1 | CardReader.1 |
+ Desktop{desk1_1}.1 | Desktop{desk1_2}.1 | Desktop{desk1_3}.1);
+ 
+#big hallway =;
 
+#big informaticsLab = ;
+
+#big empiricalLab = ;
+
+#big elevatorsArea = ;
+
+#big researchLab = ;
+
+#big meetingRoom = ;
+
+#big stairs = ;
+
+big research_centre = 
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab 
 || RulesKeywords.(EnterRoom | ExitRoom | ConnectDevice | DisconnectDevice | GenerateData | CollectData| SendSoftware)
 ;        
 
-big pred =  Building.(Floor.(Hallway{a,b,c}.(Visitor.id | id) | Room{a}.(SmartLight{b1} | id) | id) | id);
+react dummy = 
 
-big pred2 =  Building.(Floor.(Hallway{a,b,c}.(id) | Room{a}.(Visitor.id | SmartLight{b1} | id) | id) | id);
-
-
-# Reaction rules
-react visitor_enter_room=
- /a (Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id) | Room{a}.id) || RulesKeywords.(EnterRoom | id)
-->
-/a (Hallway{a,b,c}.id | Room{a}.(Visitor.(/con Laptop{con} | id) | id)) || RulesKeywords.(id)
-@[2,0,1,3,4];
-
-react visitor_exit_room=
-/a (Room{a}.(Visitor.(/con Laptop{con} | id) | id) | Hallway{a,b,c}.id) || RulesKeywords.(ExitRoom | id)
-->
-/a (Room{a}.id | Hallway{a,b,c}.(Visitor.(/con Laptop{con} | id) | id)) || RulesKeywords.( id)
-@[2,0,1,3,4];
-
-big busNetwork = InstallationBus{sl1, net2,net3,net4,net5,net6}.1;
-
-big busNetwork_has_data = InstallationBus{sl1, net2,net3,net4,net5,net6}.Data;
-
-react generate_data = 
-busNetwork || RulesKeywords.(GenerateData | id)
-->
-busNetwork_has_data || RulesKeywords.(id)
-;
-
-big laptop_connected =  (Room{a}.(Visitor.(Laptop{sl1}.id | id) | /cx SmartLight{cx} | id));
-
-big laptop_disconnected =  (Room{a}.(Visitor.(/cx Laptop{cx}.id | id) | SmartLight{sl1} | id));
-
-react connect_externalDevice =
-/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(ConnectDevice | id)
-->
-/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(id)
-;
-
-react disconnect_externalDevice =
-/sl1 (laptop_connected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(DisconnectDevice | id)
-->
-/sl1 (laptop_disconnected || InstallationBus{sl1, net2,net3,net4,net5,net6}.id) || RulesKeywords.(ConnectDevice | id)
-;
-
-big laptop_has_data = (Room{a}.(Visitor.(Laptop{sl1}.(Data | id)  | id) | /cx SmartLight{cx} | id));
-
-react collect_data = 
-/sl1 (busNetwork_has_data  || laptop_connected) || RulesKeywords.(CollectData | id)
-->
-/sl1 (busNetwork_has_data  || laptop_has_data) || RulesKeywords.id
-;
-
-react send_software = 
-/sl1 /net2 (Room{a}.(Visitor.(Laptop{sl1}.(Software | id) | id) | /cx SmartLight{cx} | id) 
-|| HVAC{net2}.1
-|| InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
-|| RulesKeywords.(SendSoftware | id)
-->
-/sl1 /net2 (Room{a}.(Visitor.(Laptop{sl1}.(Software | id) | id) | /cx SmartLight{cx} | id) 
-|| HVAC{net2}.Software
-|| InstallationBus{sl1, net2,net3,net4,net5,net6}.id)
-|| RulesKeywords.(id)
-;
+Room {a} | Room {a} |Room {a} -> Room {a} | Room {a} |Room {a} |Room {a};
+@[0,1,2,2]
 
 # Reactive system
 begin brs
-  init building_state;
-  rules = [ {visitor_enter_room, visitor_exit_room,connect_externalDevice, disconnect_externalDevice
-, generate_data, collect_data, send_software} ];
-
-preds = {pred, pred2};
+  init research_centre;
+  rules = [ {dummy} ];
 
 end
 
