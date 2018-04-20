@@ -16,5 +16,6 @@
 	<classpathentry kind="lib" path="lib/choco-2.1.5/choco-solver-2.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/bigraphspace.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
