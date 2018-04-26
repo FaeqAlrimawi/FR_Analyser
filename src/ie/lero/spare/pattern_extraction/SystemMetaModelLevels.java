@@ -1,5 +1,7 @@
 package ie.lero.spare.pattern_extraction;
 
+import org.eclipse.emf.common.util.EList;
+
 import environment.Asset;
 import environment.Building;
 import environment.ComputingDevice;
@@ -30,8 +32,14 @@ public class SystemMetaModelLevels {
 		Room r1 = instance.createRoom();
 		Kitchen kit = instance.createKitchen();
 		Lab lb = instance.createLab();
+		Lab lb2 = instance.createLab();
 		SmartLight sl = instance.createSmartLight();
 		SmartLight sl2 = instance.createSmartLight();
+		SmartLight sl3 = instance.createSmartLight();
+		SmartLight sl4 = instance.createSmartLight();
+		SmartLight sl5 = instance.createSmartLight();
+		SmartLight sl6 = instance.createSmartLight();
+		SmartLight sl7 = instance.createSmartLight();
 		Asset abstractedAsset;
 		ComputingDevice dev = instance.createComputingDevice();
 		DigitalAsset dig = instance.createDigitalAsset();
@@ -42,7 +50,20 @@ public class SystemMetaModelLevels {
 		//Asset slAbstracted = sl.abstractAsset();
 		//abstractedAsset = sl.abstractAsset();
 		
-		lb.isSimilarTo(dev);
+		System.out.println("Max. similarity value: " + Asset.SIMILARITY_MAXIMUM_VALUE);
+		System.out.println("Threshold similarity value: " + Asset.SIMILARITY_THRESHOLD);
+		kit.setParentAsset(f);
+		lb.setParentAsset(f);
+		lb2.setParentAsset(f);
+		kit.getContainedAssets().add(sl);
+		//kit.getContainedAssets().add(sl6);
+		kit.getContainedAssets().add(sl7);
+		kit.getContainedAssets().add(sl2);
+		kit.getContainedAssets().add(sl3);
+		lb.getContainedAssets().add(sl4);
+		lb2.getContainedAssets().add(sl6);
+		//lb.getContainedAssets().add(sl5);
+		System.out.println(lb.isSimilarTo(lb2));
 		//Room res =f.abstract_();//r1.abstract_();//f.abstract_();
 		
 		/*if(res != null) {
