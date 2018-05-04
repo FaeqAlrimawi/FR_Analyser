@@ -419,7 +419,7 @@ private void executeScenario1(){
 			
 			System.out.println("\nThread["+threadID+"]>>State transitions that satisfy the incident:");
 			for(int i=0; i<paths.size();i++) {
-				System.out.println(i+": "+paths.get(i).toPrettyString());
+				System.out.println("P["+i+"]: "+paths.get(i).toPrettyString());
 			}
 			
 			//create an analysis object for the identified paths
