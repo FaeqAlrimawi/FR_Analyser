@@ -28,5 +28,6 @@
 			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/CyberPhysical_Incident.v1"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

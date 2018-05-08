@@ -83,7 +83,7 @@ public class SystemMetaModelLevels {
 		c3.setType(CredentialType.PINCODE);
 		
 		p1.setName("p1");
-		p1.setAsset(sl);
+		p1.setAsset(dig2);
 		p1.getCredential().add(c3);
 		
 		p2.setName("p1");
@@ -182,7 +182,7 @@ public class SystemMetaModelLevels {
 		}
 		
 		Connection con = busCon.abstractConnection();
-		System.out.println(busCon.getName()+" "+con.getName()+" "+con.getClass());
+		System.out.println(con.getName()+" "+con.getAsset1() +" "+con.getAsset2());
 		
 		/*int length = 10;
 		Asset [] asts = new Asset[length];

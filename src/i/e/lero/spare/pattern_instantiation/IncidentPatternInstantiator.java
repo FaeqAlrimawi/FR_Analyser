@@ -110,7 +110,7 @@ public class IncidentPatternInstantiator {
 		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = "etc/example/research_centre_system.big";
 		String BRS_outputFolder = "etc/example/research_centre_output";
-		String systemModelFile = "etc/example/research_centre_model.smartbuilding";
+		String systemModelFile = "etc/example/research_centre_model.cps";
 		String incidentPatternFile = "etc/example/interruption_incident-pattern.cpi";
 		
 		XqueryExecuter.SPACE_DOC = systemModelFile;
@@ -181,7 +181,7 @@ private void executeScenario1(){
 		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output";
-		String systemModelFile = "etc/scenario1/research_centre_model.smartbuilding";
+		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		
 		XqueryExecuter.SPACE_DOC = systemModelFile;
@@ -335,7 +335,7 @@ private void executeScenario1(){
 		//ins.executeScenario1();
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output"; //could be derived i.e. the name of the BRS_output
-		String systemModelFile = "etc/scenario1/research_centre_model.smartbuilding";
+		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		
 		//ins.generateSequences(incidentPatternFile, systemModelFile, BRS_file);
