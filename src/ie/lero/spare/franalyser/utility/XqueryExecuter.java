@@ -157,8 +157,15 @@ public class XqueryExecuter {
 	public static String[] returnConditions(String activityName, PredicateType type) throws FileNotFoundException, XQException{
 		String [] conditions = null;
 		String res=null; 
-		String query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
-				+ "condition[@xsi:type=\"cyberPhysical_Incident:"+type.toString()+"\"]/expression/exp/concat(../../@name,\"##\", ./text(), \"%%\")";
+		String query = null;
+		
+		if(type == PredicateType.Precondition) {
+			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
+					+ "precondition/expression/exp/concat(../../@name,\"##\", ./text(), \"%%\")";	
+		} else if (type == PredicateType.Postcondition) {
+			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
+					+ "postcondition/expression/exp/concat(../../@name,\"##\", ./text(), \"%%\")";	
+		}
 		
 		res = executeQuery(query);
 		
@@ -172,8 +179,17 @@ public class XqueryExecuter {
 	public static JSONObject getBigraphConditions(String activityName, PredicateType type) throws FileNotFoundException, XQException{
 
 		String res=null; 
-		String query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
-				+ "condition[@xsi:type=\"cyberPhysical_Incident:"+type.toString()+"\"]/expression/entity";
+		String query = null;
+		
+		if(type == PredicateType.Precondition) {
+			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
+					+ "precondition/expression/entity";
+				
+		} else if (type == PredicateType.Postcondition) {
+			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
+					+ "postcondition/expression/entity";
+			
+		}
 		
 		res = executeQuery(query);
 		

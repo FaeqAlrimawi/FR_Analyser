@@ -72,52 +72,82 @@ public class IncidentModelBuilder {
 	public static void main(String[]args) {
 	CPIFactory instance = CPIFactory.eINSTANCE;
 	
-	Activity a1 = instance.createActivity();
-	Activity a2 = instance.createActivity();
-	Activity a3 = instance.createActivity();
-	Actor actor1 = instance.createActor();
-	Actor actor2 = instance.createActor();
-	Asset asset1 = instance.createAsset();
-	Asset asset2 = instance.createAsset();
-	Asset asset3 = instance.createAsset();
+	int numOfActivities = 5;
+	int numOfActors = 2;
+	int numOfAssets = 2;
 	
-	//names
-	actor1.setName("act1");
-	actor2.setName("act2");
+	Activity [] activities = new Activity[numOfActivities];
+	Actor [] actors = new Actor[numOfActors];
+	Asset [] assets = new Asset[numOfAssets];
+	IncidentDiagram inc = instance.createIncidentDiagram();
+	
+	//create actors
+	for(int i=0;i<numOfActors;i++) {
+		actors[i] = instance.createActor();
+		actors[i].setName("actor"+i);
+	}
 
-	asset1.setName("ast1");
-	asset2.setName("ast2");
-	asset3.setName("ast3");
-	
-	a1.setName("activity1");
-	a2.setName("activity2");
-	a3.setName("activity3");
-	
-	//set activities sequence
-	a2.getNextActivities().add(a3);
-	a2.getPreviousActivities().add(a1);
-	
-	//set action
-	a1.setSystemAction("enter");
-	a2.setSystemAction("enter");
-	a3.setSystemAction("enter");
-	
-	//set type
-	a1.setType(ActivityType.PHYSICAL);
-	a2.setType(ActivityType.PHYSICAL);
-	a3.setType(ActivityType.PHYSICAL);
-	
-	a1.setInitiator((ActivityInitiator)actor1);
-	a2.setInitiator(actor2);
-	a3.setInitiator(actor1);
-	
-	//a2.mergeActivities();
-	
-
-	System.out.println(asset1.equals(asset2));
-	
+	//create assets
+	for(int i=0;i<numOfAssets;i++) {
+		assets[i] = instance.createAsset();
+		assets[i].setName("asset"+i);
 	}
 	
+	//create activities
+	for(int i=0;i<numOfActivities;i++) {
+		activities[i] = instance.createActivity();
+		activities[i].setName("activity"+i);
+		activities[i].setSystemAction("enter");
+		activities[i].setType(ActivityType.PHYSICAL);
+		activities[i].setInitiator(actors[0]);
+		inc.getActivity().add(activities[i]);
+	}
+	
+	//set next sequence
+	for(int i=0;i<numOfActivities-1;i++) {
+		activities[i].getNextActivities().add(activities[i+1]);
+	}
+	
+	//set previous sequence
+	for (int i = 1; i < numOfActivities; i++) {
+		activities[i].getPreviousActivities().add(activities[i - 1]);
+	}
+	
+	System.out.println("Incident activity sequence:");
+	for(Activity ac: inc.getActivity()) {
+		System.out.print(ac.getName()+"->");
+	}
+	
+	Activity act = inc.mergeActivities(inc.getActivity().get(2), inc.getActivity().get(3));
+	//Activity act2 = inc.mergeActivities(inc.getActivity().get(0), inc.getActivity().get(1));
+	
+	printActivityInfo(act);
+	//printActivityInfo(act2);
+	
+	System.out.println("Incident activity sequence:");
+	for(Activity ac: inc.getActivity()) {
+		System.out.print(ac.getName()+"->");
+	}
+	
+}
+	
+	static void printActivityInfo(Activity act) {
+		if(act != null) {
+			System.out.println("\n\nmerged activity name: "+act.getName());
+			
+			for(Activity ac : act.getPreviousActivities()) {
+				System.out.println("previous activity name: "+ac.getName());
+			}
+			
+			for(Activity ac : act.getNextActivities()) {
+				System.out.println("next activity name: "+ac.getName());
+			}
+		} else {
+			System.out.println("no merge");
+		}
+		//a2.mergeActivities();
+	
+		}
 	
 
 }

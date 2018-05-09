@@ -48,7 +48,7 @@
     <type name="DigitalConnection"/>
   </connection>
   <activity name="activity1" nextActivities="activity2" goals="goal2" initiator="offender1" type="UNKNOWN" behaviourType="UNKNOWN" description="enter location containing a vulnerable smart device that is connected to the digital network">
-    <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre1" description="offender in hallway">
+    <precondition name="pre1" description="offender in hallway">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="floorX">
           <entity name="hallway">
@@ -76,8 +76,8 @@
           <site/>
         </entity>
       </expression>
-    </condition>
-    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post1" description="offender in room contianing a smart device connected to the bus network">
+    </precondition>
+    <postcondition name="post1" description="offender in room contianing a smart device connected to the bus network">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="floorX">
           <entity name="location_SD1">
@@ -100,10 +100,10 @@
           <site/>
         </entity>
       </expression>
-    </condition>
+    </postcondition>
   </activity>
   <activity name="activity2" nextActivities="activity3" previousActivities="activity1" initiator="offender1" targetedAssets="smartDevice1" resources="laptopX" type="UNKNOWN" behaviourType="SUSPICIOUS" description="Connect to network through smart device">
-    <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre2" description="offender has a laptop not connected to the installation bus">
+    <precondition name="pre2" description="offender has a laptop not connected to the installation bus">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="location_SD1">
           <entity name="smartDevice1">
@@ -126,8 +126,8 @@
           <site/>
         </entity>
       </expression>
-    </condition>
-    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post2" description="offender's laptop is connected to the installation bus">
+    </precondition>
+    <postcondition name="post2" description="offender's laptop is connected to the installation bus">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="location_SD1">
           <entity name="smartDevice1">
@@ -150,10 +150,10 @@
           <site/>
         </entity>
       </expression>
-    </condition>
+    </postcondition>
   </activity>
   <activity name="activity3" previousActivities="activity2" initiator="offender1" resources="laptopX" type="CYBER" behaviourType="MALICIOUS" description="Identify access control in trade secret's location">
-    <condition xsi:type="cyberPhysical_Incident:Precondition" name="pre4" description="offender's laptop has malware to target hvac and there is an HVAC connect to bus network">
+    <precondition name="pre4" description="offender's laptop has malware to target hvac and there is an HVAC connect to bus network">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="location_SD1">
           <entity name="smartDevice1">
@@ -176,8 +176,8 @@
           <site/>
         </entity>
       </expression>
-    </condition>
-    <condition xsi:type="cyberPhysical_Incident:Postcondition" name="post4" description="malware is copied to the hvac target smart device (i.e. HVAC)">
+    </precondition>
+    <postcondition name="post4" description="malware is copied to the hvac target smart device (i.e. HVAC)">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="location2">
           <entity name="HVAC">
@@ -201,6 +201,6 @@
           <site/>
         </entity>
       </expression>
-    </condition>
+    </postcondition>
   </activity>
 </cyberPhysical_Incident:IncidentDiagram>
