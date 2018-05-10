@@ -1,5 +1,7 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.util.LinkedList;
+
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
@@ -175,7 +177,7 @@ public class IncidentModelBuilder {
 	ent7.setName(actors[0].getName());
 
 	ent1.getEntity().add(ent3); //ent1 contains ent3 & ent2 contains ent4 (which has the same name as ent3). This expresses entity movement
-	//ent5.getEntity().add(ent3); 
+	//ent3.getEntity().add(ent5); 
 	ent2.getEntity().add(ent4);
 	
 	preExp1.getEntity().add(ent1);
@@ -196,13 +198,21 @@ public class IncidentModelBuilder {
 	activities[0].setPostcondition(post);
 	activities[0].getTargetedAssets().add(assets[1]);
 	
+	
 	activities[1].setPrecondition(pre2);
 	activities[1].setPostcondition(post2);
 	activities[1].getTargetedAssets().add(assets[3]);
+
+	//System.out.println("contianed assets: "+activities[0].getInitiatorContainedEntities(BigraphExpression.PRECONDITION_EXPRESSION));
 	
 	//takes only the first two activities and checks if they can be merged
-	Activity act = inc.mergeActivities(inc.getActivity().get(0), inc.getActivity().get(1)); 
-	
+	LinkedList<Activity> acts = new LinkedList<Activity>();
+	acts.add(activities[0]);
+	acts.add(activities[1]);
+	acts.add(activities[2]);
+
+	Activity act = inc.mergeActivities(acts); 
+
 	printActivityInfo(act);
 	
 	System.out.println("Incident activity sequence:");
@@ -216,7 +226,7 @@ public class IncidentModelBuilder {
 	
 	static void printActivityInfo(Activity act) {
 		if(act != null) {
-			System.out.println("\n\nmerged activity name: "+act.getName());
+			System.out.println("merged activity name: "+act.getName());
 			
 			for(Activity ac : act.getPreviousActivities()) {
 				System.out.println("previous activity name: "+ac.getName());
