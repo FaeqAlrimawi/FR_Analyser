@@ -12,6 +12,7 @@ import cyberPhysical_Incident.Asset;
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.CPIFactory;
 import cyberPhysical_Incident.Connection;
+import cyberPhysical_Incident.Connectivity;
 import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.Postcondition;
@@ -166,6 +167,16 @@ public class IncidentModelBuilder {
 	Entity ent6 = instance.createEntity();
 	Entity ent7 = instance.createEntity();
 	
+	Connectivity conn1 = instance.createConnectivity();
+	Connectivity conn2 = instance.createConnectivity();
+	Connectivity conn3 = instance.createConnectivity();
+	Connectivity conn4 = instance.createConnectivity();
+	
+	conn1.setName("conn1");
+	conn2.setName("conn1");
+	conn3.setName("conn2");
+	conn4.setName("conn2");
+	
 	ent1.setName(assets[0].getName());
 	ent2.setName(assets[1].getName());
 	ent5.setName(assets[2].getName());
@@ -176,12 +187,20 @@ public class IncidentModelBuilder {
 	ent4.setName(actors[0].getName());
 	ent7.setName(actors[0].getName());
 
+	//set connectivity of entities
+	ent1.getConnectivity().add(conn1);
+	ent1.getConnectivity().add(conn4);
+	ent3.getConnectivity().add(conn2);
+	ent3.getConnectivity().add(conn3);
+	
 	ent1.getEntity().add(ent3); //ent1 contains ent3 & ent2 contains ent4 (which has the same name as ent3). This expresses entity movement
 	//ent3.getEntity().add(ent5); 
 	ent2.getEntity().add(ent4);
 	
 	preExp1.getEntity().add(ent1);
 	postExp1.getEntity().add(ent2);
+	
+	//System.out.println("conn: "+preExp1.getConnections("asset0", "actor0"));
 	
 	ent6.getEntity().add(ent7); //ent6 contains ent7 (which is the same as ent3 and ent4)
 	
@@ -204,6 +223,7 @@ public class IncidentModelBuilder {
 	activities[1].getTargetedAssets().add(assets[3]);
 
 	//System.out.println("contianed assets: "+activities[0].getInitiatorContainedEntities(BigraphExpression.PRECONDITION_EXPRESSION));
+	System.out.println("conns changed: "+activities[0].connectionsChanged("asset0"));
 	
 	//takes only the first two activities and checks if they can be merged
 	LinkedList<Activity> acts = new LinkedList<Activity>();
@@ -211,6 +231,8 @@ public class IncidentModelBuilder {
 	acts.add(activities[1]);
 	acts.add(activities[2]);
 
+	
+	//merging activities
 	Activity act = inc.mergeActivities(acts); 
 
 	printActivityInfo(act);
