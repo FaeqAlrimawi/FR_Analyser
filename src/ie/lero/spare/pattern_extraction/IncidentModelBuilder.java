@@ -48,12 +48,10 @@ public class IncidentModelBuilder {
 
 	public static IncidentDiagram buildIncidentFromFile() {
 		
-		
 	// generate EPackages from schemas	
 	XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
 		Collection<EObject> generatedPackages = xsdEcoreBuilder.generate(URI.createFileURI("D:/workspace-neon/CyberPhysical_Incident.v1/model/cyberPhysical_Incident.xsd"));
-
-		//System.out.println(generatedPackages.toString());
+		
 		// register the packages loaded from XSD
 		for (EObject generatedEObject : generatedPackages) {
 		    if (generatedEObject instanceof EPackage) {
@@ -75,6 +73,7 @@ public class IncidentModelBuilder {
 		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(UMLResource.FILE_EXTENSION, UMLResource.Factory.INSTANCE);
 		resourceSet.getPackageRegistry().put("http://www.eclipse.org/uml2/2.0.0/UML", UMLPackage.eINSTANCE);
 		Resource r = resourceSet.getResource(URI.createFileURI("etc/example/interruption_incident-pattern.cpi"),true);
+		System.out.println(r);
 		IncidentDiagram diagram = (IncidentDiagram) r.getContents().get(0);
 		
 		System.out.println(diagram);
