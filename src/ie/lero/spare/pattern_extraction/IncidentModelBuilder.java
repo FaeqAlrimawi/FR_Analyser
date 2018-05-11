@@ -160,9 +160,15 @@ public class IncidentModelBuilder {
 	BigraphExpression postExp2 = instance.createBigraphExpression();
 
 	Entity ent1 = instance.createEntity();
+	Entity ent11 = instance.createEntity();
+	Entity ent12 = instance.createEntity();
 	Entity ent2 = instance.createEntity();
 	Entity ent3 = instance.createEntity();
 	Entity ent4 = instance.createEntity();
+	Entity ent41 = instance.createEntity();
+	Entity ent42 = instance.createEntity();
+	Entity ent43 = instance.createEntity();
+	Entity ent44 = instance.createEntity();
 	Entity ent5 = instance.createEntity();
 	Entity ent6 = instance.createEntity();
 	Entity ent7 = instance.createEntity();
@@ -171,13 +177,24 @@ public class IncidentModelBuilder {
 	Connectivity conn2 = instance.createConnectivity();
 	Connectivity conn3 = instance.createConnectivity();
 	Connectivity conn4 = instance.createConnectivity();
-	
+	Connectivity conn41 = instance.createConnectivity();
+	Connectivity conn42 = instance.createConnectivity();
+	Connectivity conn43 = instance.createConnectivity();
+	Connectivity conn44 = instance.createConnectivity();
+
+
 	conn1.setName("conn1");
 	conn2.setName("conn1");
 	conn3.setName("conn2");
 	conn4.setName("conn2");
+	conn41.setName("conn2");
+	conn42.setName("conn3");
+	conn43.setName("conn2");
+	conn44.setName("conn3");
 	
 	ent1.setName(assets[0].getName());
+	ent11.setName(assets[0].getName());
+	ent12.setName(assets[0].getName());
 	ent2.setName(assets[1].getName());
 	ent5.setName(assets[2].getName());
 	ent6.setName(assets[3].getName());
@@ -188,10 +205,12 @@ public class IncidentModelBuilder {
 	ent7.setName(actors[0].getName());
 
 	//set connectivity of entities
-	ent1.getConnectivity().add(conn1);
-	ent1.getConnectivity().add(conn4);
-	ent3.getConnectivity().add(conn2);
-	ent3.getConnectivity().add(conn3);
+	//ent1.getConnectivity().add(conn2);
+	ent11.getConnectivity().add(conn3);
+	//ent1.getConnectivity().add(conn4);
+	//ent3.getConnectivity().add(conn2);
+//	ent3.getConnectivity().add(conn3);
+	ent4.getConnectivity().add(conn4);
 	
 	ent1.getEntity().add(ent3); //ent1 contains ent3 & ent2 contains ent4 (which has the same name as ent3). This expresses entity movement
 	//ent3.getEntity().add(ent5); 
@@ -199,13 +218,19 @@ public class IncidentModelBuilder {
 	
 	preExp1.getEntity().add(ent1);
 	postExp1.getEntity().add(ent2);
+	postExp1.getEntity().add(ent11);
 	
 	//System.out.println("conn: "+preExp1.getConnections("asset0", "actor0"));
 	
 	ent6.getEntity().add(ent7); //ent6 contains ent7 (which is the same as ent3 and ent4)
+	ent7.getConnectivity().add(conn41);
+	ent7.getConnectivity().add(conn42);
+	ent12.getConnectivity().add(conn43);
+	ent12.getConnectivity().add(conn44);
 	
 	preExp2.getEntity().add(ent5);
 	postExp2.getEntity().add(ent6);
+	postExp2.getEntity().add(ent12);
 	
 	pre.setExpression(preExp1);
 	post.setExpression(postExp1);
@@ -215,15 +240,15 @@ public class IncidentModelBuilder {
 	
 	activities[0].setPrecondition(pre);
 	activities[0].setPostcondition(post);
-	activities[0].getTargetedAssets().add(assets[1]);
+	activities[0].getTargetedAssets().add(assets[0]);
 	
 	
 	activities[1].setPrecondition(pre2);
 	activities[1].setPostcondition(post2);
-	activities[1].getTargetedAssets().add(assets[3]);
+	activities[1].getTargetedAssets().add(assets[0]);
 
 	//System.out.println("contianed assets: "+activities[0].getInitiatorContainedEntities(BigraphExpression.PRECONDITION_EXPRESSION));
-	System.out.println("conns changed: "+activities[0].connectionsChanged("asset0"));
+	//System.out.println("conns changed: "+activities[0].connectionsChanged("actor1"));
 	
 	//takes only the first two activities and checks if they can be merged
 	LinkedList<Activity> acts = new LinkedList<Activity>();
