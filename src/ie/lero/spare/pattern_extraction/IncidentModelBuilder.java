@@ -2,6 +2,8 @@ package ie.lero.spare.pattern_extraction;
 
 import java.util.LinkedList;
 
+import javax.annotation.Resource;
+
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
@@ -17,6 +19,8 @@ import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
+import cyberPhysical_Incident.impl.CPIPackageImpl;
+
 
 public class IncidentModelBuilder {
 	
@@ -37,7 +41,7 @@ public class IncidentModelBuilder {
 
 	public IncidentDiagram buildIncidentFromFile() {
 		// generate EPackages from schemas
-	/*	XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
+		/*XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
 		Collection generatedPackages = xsdEcoreBuilder.generate(schemaURI);
 
 		// register the packages loaded from XSD
@@ -53,6 +57,18 @@ public class IncidentModelBuilder {
 		ResourceFactoryRegistryImpl.INSTANCE.getExtensionToFactoryMap()
 		    .put(MY_FILE_EXTENSION, new GenericXMLResourceFactoryImpl());*/
 		
+		ResourceSet rs = new ResourceSetImpl();
+		Resource r = rs.getResource(uri, true);
+
+		Extension extension = (Extension) r.getContents().get(0);
+		OcciRegistry.getInstance().registerExtension(extension.getScheme(),
+				uri.toString());
+		closeOtherSessions(selectedFile.getProject());
+		MessageDialog.openInformation(shell,
+				Messages.RegisterExtensionAction_ExtRegistration,
+				Messages.RegisterExtensionAction_RegisteredExtension
+						+ extension.getScheme());
+		  
 		return incidentInstance;
 	}
 	
