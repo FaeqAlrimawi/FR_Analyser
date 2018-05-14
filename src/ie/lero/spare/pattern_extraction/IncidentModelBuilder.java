@@ -1,8 +1,11 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -11,7 +14,11 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryRegistryImpl;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.impl.GenericXMLResourceFactoryImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
+import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
 import org.eclipse.uml2.uml.UMLPackage;
 import org.eclipse.uml2.uml.resource.UMLResource;
 import org.eclipse.xsd.ecore.XSDEcoreBuilder;
@@ -28,13 +35,15 @@ import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
+import cyberPhysical_Incident.impl.IncidentDiagramImpl;
 
 public class IncidentModelBuilder {
 	
 	//private CPIFactory instance;
-	private String fileName;
+	private static String fileName;
 	private IncidentDiagram incidentInstance;
 	private static CPIFactory instance = CPIFactory.eINSTANCE;
+	private static final String metaModelSchemaFile = "D:/workspace-neon/CyberPhysical_Incident.v1/model/cyberPhysical_Incident.xsd";
 	
 	public IncidentModelBuilder() {
 		instance = CPIFactory.eINSTANCE;
@@ -46,53 +55,108 @@ public class IncidentModelBuilder {
 		setFileName(fileName);
 	}
 
-	public static IncidentDiagram buildIncidentFromFile() {
-		
-	// generate EPackages from schemas	
-	XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
-		Collection<EObject> generatedPackages = xsdEcoreBuilder.generate(URI.createFileURI("D:/workspace-neon/CyberPhysical_Incident.v1/model/cyberPhysical_Incident.xsd"));
-		
-		// register the packages loaded from XSD
-		for (EObject generatedEObject : generatedPackages) {
-		    if (generatedEObject instanceof EPackage) {
-		        EPackage generatedPackage = (EPackage) generatedEObject;
-		        EPackage.Registry.INSTANCE.put(generatedPackage.getNsURI(),
-		            generatedPackage);
-		    }
+	public static IncidentDiagram loadIncidentFromFile() {
+	
+	fileName = "etc/example/interruption_incident-pattern.cpi";
+	IncidentDiagram incidentDiagram = null;
+	
+	//register packages and file extension (i.e. "cpi")
+	registerPackagesAndExtension();
+	
+		try {
+			Resource.Factory.Registry reg = Resource.Factory.Registry.INSTANCE;
+	        Map<String, Object> m = reg.getExtensionToFactoryMap();
+	        m.put("cpi", new XMIResourceFactoryImpl());
+	        
+			XMIResource resource = new XMIResourceImpl(URI.createFileURI(fileName));
+			resource.load(Collections.EMPTY_MAP);
+	        // Obtain a new resource set
+	       /* ResourceSet resSet = new ResourceSetImpl();
+
+	        // Get the resource
+	        Resource resource = resSet.getResource(URI.createFileURI(fileName), true);
+			*/
+			EObject eObj = resource.getContents().get(0);
+			
+			for(EObject e : eObj.eContents()) {
+				System.out.println(e);
+			}
+			
+			//this still creates a problem (cannot cast to incidnet diagram class)
+			incidentDiagram = (IncidentDiagramImpl) resource.getContents().get(0);
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		// add file extension to registry
-		ResourceFactoryRegistryImpl.INSTANCE.getExtensionToFactoryMap()
-		    .put("cpi", new GenericXMLResourceFactoryImpl());
 	
-	
-		ResourceSet resourceSet = new ResourceSetImpl();
-		/*Resource resource = resourceSet.getResource(URI.createFileURI(""), true);
-		resource.load(Collections.EMPTY_MAP);
-		EObject root = resource.getContents().get(0);*/
-		resourceSet.getResourceFactoryRegistry().getExtensionToFactoryMap().put(UMLResource.FILE_EXTENSION, UMLResource.Factory.INSTANCE);
-		resourceSet.getPackageRegistry().put("http://www.eclipse.org/uml2/2.0.0/UML", UMLPackage.eINSTANCE);
-		Resource r = resourceSet.getResource(URI.createFileURI("etc/example/interruption_incident-pattern.cpi"),true);
-		System.out.println(r);
-		IncidentDiagram diagram = (IncidentDiagram) r.getContents().get(0);
-		
-		System.out.println(diagram);
-		
-		return null;
+		return incidentDiagram;
 	}
 	
-	public IncidentDiagram buildIncidentFromFile(String fileName) {
+	public static boolean SaveIncidentToFile(IncidentDiagram incidentDiagram, String fileName) {
+		
 		setFileName(fileName);
-		return buildIncidentFromFile();
+		return SaveIncidentToFile(incidentDiagram);
 	}
 	
+	public static boolean SaveIncidentToFile(IncidentDiagram incidentDiagram) {
+		
+		boolean isSaved = false;
+		
+		//register packages and file extension (i.e. "cpi")
+		registerPackagesAndExtension();
+		
+			try {
 
+				XMIResource resource = new XMIResourceImpl(URI.createFileURI(fileName));
+				
+				resource.getContents().add(incidentDiagram);
+				
+				resource.save(Collections.EMPTY_MAP);
+				
+				isSaved = true;
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+			return isSaved;
+		}
+	
+	public IncidentDiagram loadIncidentFromFile(String fileName) {
+		setFileName(fileName);
+		return loadIncidentFromFile();
+	}
+	
+	private static void registerPackagesAndExtension() {
+		
+		 
+		// generate EPackages from schemas	
+		XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
+			Collection<EObject> generatedPackages = xsdEcoreBuilder.generate(URI.createFileURI(metaModelSchemaFile));
+			
+			// register the packages loaded from XSD
+			for (EObject generatedEObject : generatedPackages) {
+			    if (generatedEObject instanceof EPackage) {
+			        EPackage generatedPackage = (EPackage) generatedEObject;
+			        EPackage.Registry.INSTANCE.put(generatedPackage.getNsURI(),
+			            generatedPackage);
+			    }
+			}
+
+			// add file extension to registry
+			ResourceFactoryRegistryImpl.INSTANCE.getExtensionToFactoryMap()
+			    .put("cpi", new XMIResourceFactoryImpl());
+		
+	}
+	
 	public String getFileName() {
 		return fileName;
 	}
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
+	public static void setFileName(String fileName) {
+		IncidentModelBuilder.fileName = fileName;
 	}
 
 	public IncidentDiagram getIncidentInstance() {
@@ -107,7 +171,7 @@ public class IncidentModelBuilder {
 	public static void main(String[]args) {
 		
 		//test1();
-		buildIncidentFromFile();
+		loadIncidentFromFile();
 	}
 	
 	
