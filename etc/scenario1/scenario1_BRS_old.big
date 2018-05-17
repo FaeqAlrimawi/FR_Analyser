@@ -1,0 +1,103 @@
+# Signature
+
+#physical structure
+ctrl Building = 0; #currently no connections to outside world
+ctrl Floor = 2; #connections can define upper and lower floors 
+##Rooms
+ctrl Room = 1;
+ctrl Hallway = 30; #number of connections to the rooms in the floor
+ctrl Lab = 1; #control refers to labs that has one connection to hallway (12 labs)
+ctrl Lab_2 = 2; #control refers to labs that has two connection to hallway (1 lab)
+ctrl Lab_4 = 4; #control refers to labs that has four connection to hallway (2 labs)
+ctrl Toilet = 1; #connection to hallway (3 toilets)
+ctrl Kitchen = 2; #connections to hallway and AC room (1 kitchen)
+ctrl Room = 1; #could define an AC room, or room A in the floor (AC room, room A)
+ctrl Lounge = 2;# (1 lounge)
+ctrl Stairs = 1; # (2 stairs)
+ctrl ElevatorsArea = 1; # 1 area
+
+##computingDevices
+ctrl Elevator = 1; #(7 in total: 6 elevators in elevator area and 1 emerbency elevator)
+ctrl Desktop = 1; # (15 desktops)
+ctrl Server = 1; # (2 servers, 1 in informatics lab the other in the empirical lab)
+atomic ctrl SmartLight = 1;
+ctrl HVAC = 1;
+atomic ctrl Server = 1;
+atomic ctrl FireAlarm = 1;
+atomic ctrl Workstation = 1;
+ctrl Laptop = 1;
+ctrl CardReader = 0;
+
+#Digital structure
+ctrl IPNetwork = 10; #defines 10 connections to desktops
+ctrl BusNetwork = 5; # 5 should be changed to the right number
+atomic ctrl Data = 0; # could be packets
+atomic ctrl Software = 0; #could be programs/processes, something that executes
+
+#Actors
+ctrl Visitor = 0;
+
+#context (defines some constrains over rules)
+ctrl Context = 1; #context contains one of the below states of working (workinghours, cardehours, and closedhours)
+atomic ctrl WorkingHours = 0; # defines the period between 8:30-19:00 as working hours
+atomic ctrl CardRequiredHours = 0; #defines the period between 19:00=22:00 as card required to access rooms
+atomic ctrl ClosedHours = 0; #defines the period between 22:00-8:30 as Closed hours
+atomic ctrl ClosedHours_2 = 0; #defines the period between 19:00-8:30 as Closed hours
+
+
+#defines keywords for the reaction rules
+atomic ctrl EnterRoom = 0;
+atomic ctrl ExitRoom = 0;
+atomic ctrl ConnectDevice = 0;
+atomic ctrl DisconnectDevice = 0;
+atomic ctrl GenerateData = 0;
+atomic ctrl CollectData = 0;
+atomic ctrl SendSoftware = 0; #7 number of actions
+ctrl RulesKeywords = 0;
+
+#initial state
+big instructorsLab = Lab{inst1}.(SmartLight{sm1} | HVAC{hvac1}.1 | CardReader.1 |
+ Desktop{desk1_1}.1 | Desktop{desk1_2}.1 | Desktop{desk1_3}.1);
+ 
+#big hallway =;
+
+#big informaticsLab = ;
+
+#big empiricalLab = ;
+
+#big elevatorsArea = ;
+
+#big researchLab = ;
+
+#big meetingRoom = ;
+
+#big stairs = ;
+
+big research_centre = 
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab |
+instructorsLab 
+|| RulesKeywords.(EnterRoom | ExitRoom | ConnectDevice | DisconnectDevice | GenerateData | CollectData| SendSoftware)
+;        
+
+react dummy = 
+
+Room {a} | Room {a} |Room {a} -> Room {a} | Room {a} |Room {a} |Room {a};
+@[0,1,2,2]
+
+# Reactive system
+begin brs
+  init research_centre;
+  rules = [ {dummy} ];
+
+end
+
+
+
+
+

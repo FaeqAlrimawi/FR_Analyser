@@ -1,0 +1,441 @@
+{
+  "nodes": [
+    {
+      "node_id": 0,
+      "control": {
+        "ctrl_name": "Building",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 1,
+      "control": {
+        "ctrl_name": "Floor",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 2,
+      "control": {
+        "ctrl_name": "Room",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 3,
+      "control": {
+        "ctrl_name": "SmartLight",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 4,
+      "control": {
+        "ctrl_name": "Room",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 5,
+      "control": {
+        "ctrl_name": "SmartLight",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 6,
+      "control": {
+        "ctrl_name": "HVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 7,
+      "control": {
+        "ctrl_name": "FireAlarm",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 8,
+      "control": {
+        "ctrl_name": "Room",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 9,
+      "control": {
+        "ctrl_name": "SmartLight",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 10,
+      "control": {
+        "ctrl_name": "Workstation",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 11,
+      "control": {
+        "ctrl_name": "Hallway",
+        "ctrl_params": [],
+        "ctrl_arity": 3
+      }
+    },
+    {
+      "node_id": 12,
+      "control": {
+        "ctrl_name": "Visitor",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 13,
+      "control": {
+        "ctrl_name": "Laptop",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 14,
+      "control": {
+        "ctrl_name": "Software",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 15,
+      "control": {
+        "ctrl_name": "InstallationBus",
+        "ctrl_params": [],
+        "ctrl_arity": 6
+      }
+    },
+    {
+      "node_id": 16,
+      "control": {
+        "ctrl_name": "RulesKeywords",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 17,
+      "control": {
+        "ctrl_name": "EnterRoom",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 18,
+      "control": {
+        "ctrl_name": "ExitRoom",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 19,
+      "control": {
+        "ctrl_name": "ConnectDevice",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 20,
+      "control": {
+        "ctrl_name": "DisconnectDevice",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 21,
+      "control": {
+        "ctrl_name": "GenerateData",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 22,
+      "control": {
+        "ctrl_name": "CollectData",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 23,
+      "control": {
+        "ctrl_name": "SendSoftware",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    }
+  ],
+  "place_graph": {
+    "num_regions": 2,
+    "num_nodes": 24,
+    "num_sites": 0,
+    "rn": [
+      {
+        "source": 0,
+        "target": 0
+      },
+      {
+        "source": 1,
+        "target": 16
+      }
+    ],
+    "rs": [],
+    "nn": [
+      {
+        "source": 0,
+        "target": 1
+      },
+      {
+        "source": 0,
+        "target": 15
+      },
+      {
+        "source": 1,
+        "target": 2
+      },
+      {
+        "source": 1,
+        "target": 4
+      },
+      {
+        "source": 1,
+        "target": 8
+      },
+      {
+        "source": 1,
+        "target": 11
+      },
+      {
+        "source": 2,
+        "target": 3
+      },
+      {
+        "source": 4,
+        "target": 5
+      },
+      {
+        "source": 4,
+        "target": 6
+      },
+      {
+        "source": 4,
+        "target": 7
+      },
+      {
+        "source": 8,
+        "target": 9
+      },
+      {
+        "source": 8,
+        "target": 10
+      },
+      {
+        "source": 11,
+        "target": 12
+      },
+      {
+        "source": 12,
+        "target": 13
+      },
+      {
+        "source": 13,
+        "target": 14
+      },
+      {
+        "source": 16,
+        "target": 17
+      },
+      {
+        "source": 16,
+        "target": 18
+      },
+      {
+        "source": 16,
+        "target": 19
+      },
+      {
+        "source": 16,
+        "target": 20
+      },
+      {
+        "source": 16,
+        "target": 21
+      },
+      {
+        "source": 16,
+        "target": 22
+      },
+      {
+        "source": 16,
+        "target": 23
+      }
+    ],
+    "ns": []
+  },
+  "link_graph": [
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 2,
+          "port_arity": 1
+        },
+        {
+          "node_id": 11,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 3,
+          "port_arity": 1
+        },
+        {
+          "node_id": 15,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 4,
+          "port_arity": 1
+        },
+        {
+          "node_id": 11,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 5,
+          "port_arity": 1
+        },
+        {
+          "node_id": 15,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 6,
+          "port_arity": 1
+        },
+        {
+          "node_id": 15,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 7,
+          "port_arity": 1
+        },
+        {
+          "node_id": 15,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 8,
+          "port_arity": 1
+        },
+        {
+          "node_id": 11,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 9,
+          "port_arity": 1
+        },
+        {
+          "node_id": 15,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 10,
+          "port_arity": 1
+        },
+        {
+          "node_id": 15,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 13,
+          "port_arity": 1
+        }
+      ]
+    }
+  ]
+}

@@ -4,14 +4,13 @@
 ctrl Building = 0; #currently no connections to outside world
 ctrl Floor = 2; #connections can define upper and lower floors 
 ##Rooms
-ctrl Room = 1;
-ctrl Hallway = 30; #number of connections to the rooms in the floor
+ctrl Room = 1; #could define an AC room, or room A in the floor (AC room, room A)
+ctrl Hallway = 16;#30; #number of connections to the rooms in the floor
 ctrl Lab = 1; #control refers to labs that has one connection to hallway (12 labs)
 ctrl Lab_2 = 2; #control refers to labs that has two connection to hallway (1 lab)
 ctrl Lab_4 = 4; #control refers to labs that has four connection to hallway (2 labs)
 ctrl Toilet = 1; #connection to hallway (3 toilets)
 ctrl Kitchen = 2; #connections to hallway and AC room (1 kitchen)
-ctrl Room = 1; #could define an AC room, or room A in the floor (AC room, room A)
 ctrl Lounge = 2;# (1 lounge)
 ctrl Stairs = 1; # (2 stairs)
 ctrl ElevatorsArea = 1; # 1 area
@@ -22,15 +21,15 @@ ctrl Desktop = 1; # (15 desktops)
 ctrl Server = 1; # (2 servers, 1 in informatics lab the other in the empirical lab)
 atomic ctrl SmartLight = 1;
 ctrl HVAC = 1;
-atomic ctrl Server = 1;
 atomic ctrl FireAlarm = 1;
 atomic ctrl Workstation = 1;
 ctrl Laptop = 1;
-ctrl CardReader = 0;
+ctrl CardReader = 1;
+ctrl CCTV = 1;
 
 #Digital structure
-ctrl IPNetwork = 10; #defines 10 connections to desktops
-ctrl BusNetwork = 5; # 5 should be changed to the right number
+ctrl IPNetwork = 18; #defines 10 connections to desktops
+ctrl BusNetwork = 22; # 5 should be changed to the right number
 atomic ctrl Data = 0; # could be packets
 atomic ctrl Software = 0; #could be programs/processes, something that executes
 
@@ -56,14 +55,56 @@ atomic ctrl SendSoftware = 0; #7 number of actions
 ctrl RulesKeywords = 0;
 
 #initial state
-big instructorsLab = Lab{inst1}.(SmartLight{sm1} | HVAC{hvac1}.1 | CardReader.1 |
- Desktop{desk1_1}.1 | Desktop{desk1_2}.1 | Desktop{desk1_3}.1);
+
+#define digital components
+big busNetwork = BusNetwork{busNet1, busNet2, busNet3, busNet4, busNet5, busNet6, busNet7, busNet8, busNet9, 
+busNet10, busNet11, busNet12, busNet13, busNet14, busNet15, busNet16, busNet17, busNet18
+, busNet19, busNet20, busNet21, busNet22}.1;
+
+big ipNetwork = IPNetwork{ipNet1,ipNet2,ipNet3,ipNet4,ipNet5,ipNet6,
+ipNet7,ipNet8,ipNet9,ipNet10,ipNet11,ipNet12,ipNet13,ipNet14,
+ipNet15,ipNet16,ipNet17,ipNet18}.1;
+
+#define physical components
+big instructorsLab1 = Lab{walkway1}.( SmartLight{busNet1} | HVAC{busNet2}.1 | CardReader{walkway1}.1 |
+ Desktop{ipNet1}.1 | Desktop{ipNet2}.1);
+
+ big instructorsLab2 = Lab{walkway2}.( SmartLight{busNet3} | HVAC{busNet4}.1 | CardReader{walkway2}.1 |
+ Desktop{ipNet3}.1 | Desktop{ipNet4}.1);
+
+big instructorsLab3 = Lab{walkway3}.( SmartLight{busNet5} | HVAC{busNet6}.1 | CardReader{walkway3}.1 |
+ Desktop{ipNet5}.1 | Desktop{ipNet6}.1);
+
+big instructorsLab4 = Lab{walkway4}.( SmartLight{busNet7} | HVAC{busNet8}.1 | CardReader{walkway4}.1 |
+ Desktop{ipNet7}.1 | Desktop{ipNet8}.1);
  
-#big hallway =;
+big instructorsLab5 = Lab{walkway5}.( SmartLight{busNet9} | HVAC{busNet10}.1 | CardReader{walkway5}.1 |
+ Desktop{ipNet9}.1 | Desktop{ipNet10}.1);
+ 
+big instructorsLab6 = Lab{walkway6}.( SmartLight{busNet11} | HVAC{busNet12}.1 | CardReader{walkway6}.1 |
+ Desktop{ipNet11}.1 | Desktop{ipNet12}.1);
 
-#big informaticsLab = ;
+big instructorsLab7 = Lab{walkway7}.( SmartLight{busNet13} | HVAC{busNet14}.1 | CardReader{walkway7}.1 |
+ Desktop{ipNet13}.1 | Desktop{ipNet14}.1);
+ 
+big instructorsLab8 = Lab{walkway8}.( SmartLight{busNet15} | HVAC{busNet16}.1 | CardReader{walkway8}.1 |
+ Desktop{ipNet15}.1 | Desktop{ipNet16}.1);
+ 
+big hallway = Hallway{walkway1,walkway2,walkway3,walkway4,walkway5,
+walkway6,walkway7,walkway8,walkway9,walkway10,walkway11,walkway12,
+walkway13,walkway14,walkway15,walkway16}
+.(CCTV{busNet17}.1 | CCTV{busNet18}.1 | Visitor.1);
 
-#big empiricalLab = ;
+big informaticsLab = Lab_4{walkway9,walkway10,walkway11,walkway12}
+.(Server{ipNet17}.1 | SmartLight{busNet19} | HVAC{busNet20}.1 |
+CardReader{walkway9}.1| CardReader{walkway10}.1| CardReader{walkway11}.1| CardReader{walkway12}.1
+);
+
+big empiricalLab = Lab_4{walkway13,walkway14,walkway15,walkway16}
+.(Server{ipNet18}.1 | SmartLight{busNet21} | HVAC{busNet22}.1 |
+CardReader{walkway13}.1| CardReader{walkway14}.1| CardReader{walkway15}.1| CardReader{walkway16}.1
+);
+
 
 #big elevatorsArea = ;
 
@@ -73,22 +114,32 @@ big instructorsLab = Lab{inst1}.(SmartLight{sm1} | HVAC{hvac1}.1 | CardReader.1 
 
 #big stairs = ;
 
-big research_centre = 
-instructorsLab |
-instructorsLab |
-instructorsLab |
-instructorsLab |
-instructorsLab |
-instructorsLab |
-instructorsLab |
-instructorsLab 
+
+
+big research_centre = Building.( 
+Floor{lowerFloor, upperFloor}.(
+instructorsLab1 |
+instructorsLab2 |
+instructorsLab3 |
+instructorsLab4 |
+instructorsLab5 |
+instructorsLab6 |
+instructorsLab7 |
+instructorsLab8 |
+hallway 
+)
+|
+busNetwork
+|
+ipNetwork
+)
 || RulesKeywords.(EnterRoom | ExitRoom | ConnectDevice | DisconnectDevice | GenerateData | CollectData| SendSoftware)
 ;        
 
 react dummy = 
 
-Room {a} | Room {a} |Room {a} -> Room {a} | Room {a} |Room {a} |Room {a};
-@[0,1,2,2]
+Room {a} | Room {a} |Room {a} -> Room {a} | Room {a} |Room {a} |Room {a}
+@[0,1,2,2];
 
 # Reactive system
 begin brs
