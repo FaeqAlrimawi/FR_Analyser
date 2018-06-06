@@ -4,23 +4,17 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceFactoryRegistryImpl;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.XMIResource;
-import org.eclipse.emf.ecore.xmi.impl.GenericXMLResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMLResourceFactoryImpl;
-import org.eclipse.uml2.uml.UMLPackage;
-import org.eclipse.uml2.uml.resource.UMLResource;
 import org.eclipse.xsd.ecore.XSDEcoreBuilder;
 
 import cyberPhysical_Incident.Activity;
@@ -110,7 +104,7 @@ public class IncidentModelBuilder {
 
 				XMIResource resource = new XMIResourceImpl(URI.createFileURI(fileName));
 				
-				resource.getContents().add(incidentDiagram);
+//				resource.getContents().add(incidentDiagram);
 				
 				resource.save(Collections.EMPTY_MAP);
 				
@@ -130,8 +124,7 @@ public class IncidentModelBuilder {
 	}
 	
 	private static void registerPackagesAndExtension() {
-		
-		 
+
 		// generate EPackages from schemas	
 		XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
 			Collection<EObject> generatedPackages = xsdEcoreBuilder.generate(URI.createFileURI(metaModelSchemaFile));
@@ -190,6 +183,7 @@ public class IncidentModelBuilder {
 			actors[i] = instance.createActor();
 			actors[i].setName("actor"+i);
 			inc.getActor().add(actors[i]);
+			
 		}
 
 		//create assets
@@ -197,6 +191,7 @@ public class IncidentModelBuilder {
 			assets[i] = instance.createAsset();
 			assets[i].setName("asset"+i);
 			inc.getAsset().add(assets[i]);
+		 
 		}
 		
 		//create activities
@@ -226,7 +221,7 @@ public class IncidentModelBuilder {
 			activities[i].getPreviousActivities().add(activities[i - 1]);
 		}
 
-	/*	System.out.println("Incident activity sequence:");
+		System.out.println("Incident activity sequence:");
 		for(Activity ac: inc.getActivity()) {
 			System.out.print(ac.getName()+"->");
 		}
@@ -240,7 +235,7 @@ public class IncidentModelBuilder {
 		System.out.println("Incident activity sequence:");
 		for(Activity ac: inc.getActivity()) {
 			System.out.print(ac.getName()+"->");
-		}*/
+		}
 		
 		//test conditions
 		Precondition pre = instance.createPrecondition();
@@ -352,9 +347,9 @@ public class IncidentModelBuilder {
 
 		
 		//merging activities
-		Activity act = inc.mergeActivities(acts); 
+		Activity act2 = inc.mergeActivities(acts); 
 
-		printActivityInfo(act);
+		printActivityInfo(act2);
 		
 		System.out.println("Incident activity sequence:");
 		for(Activity ac: inc.getActivity()) {
@@ -367,7 +362,7 @@ public class IncidentModelBuilder {
 		
 		static void printActivityInfo(Activity act) {
 			if(act != null) {
-				System.out.println("merged activity name: "+act.getName());
+			/*	System.out.println("merged activity name: "+act.getName());
 				
 				for(Activity ac : act.getPreviousActivities()) {
 					System.out.println("previous activity name: "+ac.getName());
@@ -388,7 +383,7 @@ public class IncidentModelBuilder {
 				if(post != null) {
 					System.out.println("post: " + ((BigraphExpression)post.getExpression()).getEntity().get(0).getName());
 				}
-				
+				*/
 			} else {
 				System.out.println("no merge");
 			}

@@ -147,6 +147,11 @@ public class GraphPathsAnalyser {
 		shortestPaths = new LinkedList<Integer>();
 		
 		//initial smallest size
+		
+		if(paths == null || paths.size() == 0) {
+			return shortestPaths;
+		}
+		
 		int numOfStates = paths.get(0).getStateTransitions().size();
 		int size;
 		
@@ -168,6 +173,11 @@ public class GraphPathsAnalyser {
 	
 	public LinkedList<Integer> getLongestPaths() {
 		longestPaths = new LinkedList<Integer>();
+		
+		if(paths == null || paths.size() == 0) {
+			return shortestPaths;
+		}
+		
 		
 		//initial smallest size
 		int numOfStates = paths.get(0).getStateTransitions().size();

@@ -35,10 +35,10 @@ public class JSONTerms {
 	public static final String BIGRAPHER_INNER = "inner";
 	public static final String BIGRAPHER_PORTS = "ports";
 	public static final String BIGRAPHER_CONTROL = "control";
-//	public static final String BIGRAPHER_CONTROL_ID = "ctrl_name";
-	public static final String BIGRAPHER_CONTROL_ID = "control_id";
-//	public static final String BIGRAPHER_CONTROL_ARITY = "ctrl_arity";
-	public static final String BIGRAPHER_CONTROL_ARITY = "control_arity";
+	public static final String BIGRAPHER_CNTRL_NAME = "ctrl_name";
+//	public static final String BIGRAPHER_CONTROL_ID = "control_id";
+	public static final String BIGRAPHER_CNTRL_ARITY = "ctrl_arity";
+//	public static final String BIGRAPHER_CONTROL_ARITY = "control_arity";
 	public static final String BIGRAPHER_NAME = "name";
 	
 	

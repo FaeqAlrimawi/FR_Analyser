@@ -16,8 +16,6 @@
 	<classpathentry kind="lib" path="lib/choco-2.1.5/choco-solver-2.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/bigraphspace.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/CyberPhysical_Incident.v1"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.common_2.12.0.v20160420-0247.jar"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.emf.mapping.xsd2ecore.editor_2.6.0.v20140203-1126.jar"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.emf.mapping.xsd2ecore_2.5.0.v20140203-1126.jar"/>
@@ -88,5 +86,8 @@
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.ui_2.12.0.v20160526-0356.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore_2.12.0.v20160526-0356.jar"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.uml2.uml-3.1.0.v201006071150.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CyberPhysical_Incident.v1"/>
+	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.wst.common.emf_1.2.500.v201701191735.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

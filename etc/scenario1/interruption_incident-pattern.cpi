@@ -9,7 +9,7 @@
     <type name="Hallway"/>
   </asset>
   <asset connections="location_SD1-Hallway" parentEntity="floorX" containedEntities="smartDevice1" name="location_SD1">
-    <type name="Room"/>
+    <type name="Lab"/>
   </asset>
   <asset connections="cyber1" parentEntity="location_SD1" name="smartDevice1" status="">
     <type name="SmartLight"/>
@@ -21,7 +21,7 @@
     <type name="Floor"/>
   </asset>
   <asset connections="location2-Hallway" parentEntity="floorX" containedEntities="HVAC" name="location2">
-    <type name="Room"/>
+    <type name="Lab"/>
   </asset>
   <asset connections="HVAC-IB" parentEntity="location2" name="HVAC">
     <type name="HVAC"/>

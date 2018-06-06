@@ -51,7 +51,7 @@ public class SystemInstanceHandler {
 					isDone = false;
 				}
 
-				print("ystemHandler>> Loading states...");
+				print("SystemHandler>> Loading states...");
 				// gete states as Bigraph objects
 				states = executor.getStates();
 

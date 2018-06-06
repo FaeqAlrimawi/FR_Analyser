@@ -230,7 +230,7 @@ public class BigrapherHandler implements SystemExecutor {
 					controlName = controlName.substring(0, controlName.indexOf("("));
 				}
 				controlName.trim();
-
+				
 				// create signature
 				sigBuilder.add(controlName, true, Integer.parseInt(controlArity));
 
@@ -328,7 +328,7 @@ public class BigrapherHandler implements SystemExecutor {
 	 * 
 	 * @return Signature object
 	 */
-	public  Signature createSignatureFromStates() {
+/*	public  Signature createSignatureFromStates() {
 		SignatureBuilder sigBuilder = new SignatureBuilder();
 		JSONArray ary;
 		Iterator<?> it;
@@ -368,6 +368,48 @@ public class BigrapherHandler implements SystemExecutor {
 		bigraphSignature = sigBuilder.makeSignature();
 		
 		return bigraphSignature;
+	}*/
+	
+	public  Signature createSignatureFromStates() {
+		SignatureBuilder sigBuilder = new SignatureBuilder();
+		JSONArray ary;
+		Iterator<?> it;
+		JSONObject tmpObj, tmpCtrl;
+		String tmp, tmpArity;
+		LinkedList<String> controls = new LinkedList<String>();
+		int numOfStates = createTransitionSystem().getNumberOfStates();
+		JSONParser parser = new JSONParser();
+		JSONObject state;
+
+		for (int i = 0; i < numOfStates; i++) {
+			try {
+				// read state from file
+				state = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + i + ".json"));
+				ary = (JSONArray) state.get(JSONTerms.BIGRAPHER_NODES);
+				it = ary.iterator();
+				while (it.hasNext()) {
+					tmpObj = (JSONObject) it.next(); // gets hold of node info
+
+					tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
+					tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_NAME).toString();
+					tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_ARITY).toString();
+
+					if (!controls.contains(tmp)) {
+						// to avoid duplicates
+						controls.add(tmp);
+						sigBuilder.add(tmp, true, Integer.parseInt(tmpArity));
+					}
+
+				}
+			} catch (IOException | ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		bigraphSignature = sigBuilder.makeSignature();
+		
+		return bigraphSignature;
 	}
 
 
@@ -378,7 +420,8 @@ public class BigrapherHandler implements SystemExecutor {
 		createTransitionSystem();
 		
 		//keywords used to identify actions performed in BRS
-		String [] rulesKeywords = {"EnterRoom", "ExitRoom","ConnectDevice", "Disconnectdevice", "GenerateData", "CollectData", "SendSoftware"};
+		String [] rulesKeywords = {"EnterRoom", "ExitRoom","ConnectIPDevice", "DisconnectIPDevice", "ConnectBusDevice", "DisconnectBusDevice", "SendData"
+									, "DisableHVAC", "EnterRoomWithoutCardReader"};
 		
 		//update digraph with action labels
 		LabelExtractor lbl = new LabelExtractor(rulesKeywords);
@@ -432,6 +475,7 @@ public class BigrapherHandler implements SystemExecutor {
 			for (int i = 0; i < numOfStates; i++) {
 				try {
 					// read state from file
+					
 					state = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + i + ".json"));
 					Bigraph bigraph = convertJSONtoBigraph(state);
 					states.put(i, bigraph);
@@ -457,7 +501,7 @@ public class BigrapherHandler implements SystemExecutor {
 	 *            the JSON object containing the bigtaph
 	 * @return Bigraph object
 	 */
-	public Bigraph convertJSONtoBigraph(JSONObject state) {
+/*	public Bigraph convertJSONtoBigraph(JSONObject state) {
 
 		String tmp;
 		String tmpArity;
@@ -655,11 +699,21 @@ public class BigrapherHandler implements SystemExecutor {
 
 		
 		return biBuilder.makeBigraph();
-	}
+	}*/
 
+	/**
+	 * converts a given bigraph in JSON format to a Bigraph object from the
+	 * LibBig library. A signature should be created first using the
+	 * buildSignature method.
+	 * 
+	 * @param state
+	 *            the JSON object containing the bigtaph
+	 * @return Bigraph object
+	 */
 	//updated implementation of the convertJSONtoBigraph method that correspond to Bigrapher v1.7.0
 	//need to update CONTROL_ID & CONTROL_ARITY in JSONTerms class before execution
-	/*public Bigraph convertJSONtoBigraph(JSONObject state) {
+		public Bigraph convertJSONtoBigraph(JSONObject state) {
+
 
 		String tmp;
 		String tmpArity;
@@ -688,9 +742,9 @@ public class BigrapherHandler implements SystemExecutor {
 		LinkedList<Site> libBigSites = new LinkedList<Site>();
 
 		// number of roots, sites, and nodes respectively
-		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_REGIONS).toString());
-		int numOfSites = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_SITES).toString());
-		int numOfNodes = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NODES).toString());
+		int numOfRoots = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NUM_REGIONS).toString());
+		int numOfSites = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NUM_SITES).toString());
+		int numOfNodes = Integer.parseInt(((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NUM_NODES).toString());
 		int edgeNumber = 0;
 		
 		// get controls & their arity [defines signature]. Controls are assumed
@@ -702,8 +756,8 @@ public class BigrapherHandler implements SystemExecutor {
 			tmpObj = (JSONObject) it.next(); // gets hold of node info
 
 			tmpCtrl = (JSONObject) tmpObj.get(JSONTerms.BIGRAPHER_CONTROL);
-			tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ID).toString();
-			tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CONTROL_ARITY).toString();
+			tmp = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_NAME).toString();
+			tmpArity = tmpCtrl.get(JSONTerms.BIGRAPHER_CNTRL_ARITY).toString();
 
 			// set node id
 			node.setId(tmpObj.get(JSONTerms.BIGRAPHER_NODE_ID).toString());
@@ -712,27 +766,40 @@ public class BigrapherHandler implements SystemExecutor {
 			nodes.put(node.getId(), node);
 		}
 
-		// get parents for nodes from the place_graph=> dag. Caution using the
+		// get parents for nodes from the place_graph=> 
 		// roots and sites numbers
-		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_DAG);
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_ROOT_NODE);
 		it = ary.iterator();
 		while (it.hasNext()) {
 			tmpObj = (JSONObject) it.next(); // gets hold of node info
 			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
 			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
-
-			if (src >= numOfRoots) {
-				// set parent node in the target node
-				nodes.get(Integer.toString(target)).setParent(nodes.get(Integer.toString(src - numOfRoots)));
-				// add child node to source node
-				nodes.get(Integer.toString(src - numOfRoots)).addChildNode(nodes.get(Integer.toString(target)));
-			} else { // source is a root
-				nodes.get(Integer.toString(target)).setParentRoot(src);
-
-			}
-
+			nodes.get(Integer.toString(target)).setParentRoot(src);
 		}
 
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_ROOT_SITE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+			nodes.get(Integer.toString(target)).setParentRoot(src);
+		}
+		
+		ary = (JSONArray) ((JSONObject) state.get(JSONTerms.BIGRAPHER_PLACE_GRAPH)).get(JSONTerms.BIGRAPHER_NODE_NODE);
+		it = ary.iterator();
+		while (it.hasNext()) {
+			tmpObj = (JSONObject) it.next(); // gets hold of node info
+			src = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_SOURCE).toString());
+			target = Integer.parseInt(tmpObj.get(JSONTerms.BIGRAPHER_TARGET).toString());
+			
+			// set parent node in the target node
+			nodes.get(Integer.toString(target)).setParent(nodes.get(Integer.toString(src)));
+			// add child node to source node
+			nodes.get(Integer.toString(src)).addChildNode(nodes.get(Integer.toString(target)));
+
+		}
+		
 		// get outer names and inner names for the nodes. Currently, focus on
 		// outer names
 		// while inner names are extracted they are not updated in the nodes
@@ -858,7 +925,8 @@ public class BigrapherHandler implements SystemExecutor {
 		
 		return biBuilder.makeBigraph();
 	}
-*/
+	
+	
 	private static Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots,
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 

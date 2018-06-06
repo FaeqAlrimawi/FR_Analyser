@@ -70,7 +70,7 @@ public class SystemMetaModelLevels {
 		IPConnection ipCon = instance.createIPConnection();
 		
 		//ports
-		Port p1 = instance.createPort();
+		/*Port p1 = instance.createPort();
 		Port p2 = instance.createPort();
 		Port p3 = instance.createPort();
 		Port p4 = instance.createPort();
@@ -183,7 +183,7 @@ public class SystemMetaModelLevels {
 		
 		Connection con = busCon.abstractConnection();
 		System.out.println(con.getName()+" "+con.getAsset1() +" "+con.getAsset2());
-		
+		*/
 		/*int length = 10;
 		Asset [] asts = new Asset[length];
 		Asset [] astsAbstracted = new Asset[length];

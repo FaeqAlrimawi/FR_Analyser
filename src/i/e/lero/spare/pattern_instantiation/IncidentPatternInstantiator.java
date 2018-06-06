@@ -331,8 +331,9 @@ private void executeScenario1(){
 		//ins.execute();
 		//ins.test();
 		//SystemInstanceHandler.loadStates();
-		ins.executeExample();
-		//ins.executeScenario1();
+		//ins.executeExample();
+		
+		ins.executeScenario1();
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output"; //could be derived i.e. the name of the BRS_output
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";

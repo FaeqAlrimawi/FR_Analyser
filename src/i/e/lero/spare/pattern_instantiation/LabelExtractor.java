@@ -104,7 +104,7 @@ public class LabelExtractor {
 	 * states are in json format
 	 * 
 	 */
-	public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
+/*	public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
 
 		JSONParser parser = new JSONParser();
 		String tmp;
@@ -178,8 +178,83 @@ public class LabelExtractor {
 		}
 
 		return label;
-	}
+	}*/
 
+	public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
+
+		JSONParser parser = new JSONParser();
+		String tmp;
+		ArrayList<String> srcControlNames = new ArrayList<String>();
+		ArrayList<String> desControlNames = new ArrayList<String>();
+		ArrayList<String> missingControls = new ArrayList<String>();
+		String label = "";
+		int index = 0;
+
+		boolean isLabelFound = false;
+
+		try {
+			JSONObject src = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateSrc + ".json"));
+			JSONObject des = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateDes + ".json"));
+
+			JSONArray arSrc = (JSONArray) src.get(JSONTerms.BIGRAPHER_NODES);
+			Iterator<JSONObject> itSrc = arSrc.iterator();
+
+			JSONArray arDes = (JSONArray) des.get(JSONTerms.BIGRAPHER_NODES);
+			Iterator<JSONObject> itDes = arDes.iterator();
+
+			// get controls in the source state file
+			while (itSrc.hasNext()) {
+				tmp = (String) ((JSONObject) itSrc.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CNTRL_NAME);
+				srcControlNames.add(tmp);
+			}
+
+			// get controls in the destination state file
+			while (itDes.hasNext()) {
+				tmp = (String) ((JSONObject) itDes.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CNTRL_NAME);
+				desControlNames.add(tmp);
+
+			}
+
+			// find controls of source state that are missing in the destination
+			// state
+			for (String controlName : srcControlNames) {
+				if (!desControlNames.contains(controlName)) {
+					missingControls.add(controlName);
+					// check if the control name is a rule keyword
+					for (String ruleKeyword : rulesKeywords) {
+						if (ruleKeyword.equalsIgnoreCase(controlName)) {
+							label = controlName;
+							isLabelFound = true;
+							break;
+						}
+					}
+				} else {
+					index = desControlNames.indexOf(controlName);
+					if (index != -1) {
+						desControlNames.remove(index);
+					}
+
+				}
+
+				if (isLabelFound) {
+					break;
+				}
+			}
+
+			// System.out.println(state.toString());
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return label;
+	}
 	public void createNewLabelledTransitionFile() {
 		StringBuilder res = new StringBuilder();
 		ArrayList<Integer> nodes = (ArrayList) transitionSystem.getDigraph().getNodes();
