@@ -242,7 +242,7 @@ private void executeScenario1(){
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
 		
-		for(int i=0; i<0;i++) {//adjust the length
+		for(int i=0; i<1;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			incidentInstances[i].start();

@@ -1159,11 +1159,43 @@
         "ctrl_params": [],
         "ctrl_arity": 0
       }
+    },
+    {
+      "node_id": 145,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 146,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardNotRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 147,
+      "control": {
+        "ctrl_name": "ChangeContextToOutSideWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 148,
+      "control": {
+        "ctrl_name": "ChangeContextToWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
     }
   ],
   "place_graph": {
     "num_regions": 4,
-    "num_nodes": 145,
+    "num_nodes": 149,
     "num_sites": 0,
     "rn": [
       {
@@ -1364,6 +1396,22 @@
       {
         "source": 9,
         "target": 144
+      },
+      {
+        "source": 9,
+        "target": 145
+      },
+      {
+        "source": 9,
+        "target": 146
+      },
+      {
+        "source": 9,
+        "target": 147
+      },
+      {
+        "source": 9,
+        "target": 148
       },
       {
         "source": 10,

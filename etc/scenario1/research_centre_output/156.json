@@ -3,77 +3,21 @@
     {
       "node_id": 0,
       "control": {
-        "ctrl_name": "Building",
+        "ctrl_name": "Context",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
       "node_id": 1,
       "control": {
-        "ctrl_name": "Floor",
+        "ctrl_name": "OutsideWorkingHours",
         "ctrl_params": [],
-        "ctrl_arity": 2
+        "ctrl_arity": 0
       }
     },
     {
       "node_id": 2,
-      "control": {
-        "ctrl_name": "Room",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 3,
-      "control": {
-        "ctrl_name": "Room_4",
-        "ctrl_params": [],
-        "ctrl_arity": 4
-      }
-    },
-    {
-      "node_id": 4,
-      "control": {
-        "ctrl_name": "Visitor",
-        "ctrl_params": [],
-        "ctrl_arity": 0
-      }
-    },
-    {
-      "node_id": 5,
-      "control": {
-        "ctrl_name": "Laptop",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 6,
-      "control": {
-        "ctrl_name": "HVAC",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 7,
-      "control": {
-        "ctrl_name": "Malware",
-        "ctrl_params": [],
-        "ctrl_arity": 0
-      }
-    },
-    {
-      "node_id": 8,
-      "control": {
-        "ctrl_name": "Server",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 9,
       "control": {
         "ctrl_name": "RulesKeywords",
         "ctrl_params": [],
@@ -81,17 +25,73 @@
       }
     },
     {
-      "node_id": 10,
+      "node_id": 3,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "Building",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 4,
+      "control": {
+        "ctrl_name": "Floor",
+        "ctrl_params": [],
+        "ctrl_arity": 2
+      }
+    },
+    {
+      "node_id": 5,
+      "control": {
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
     },
     {
+      "node_id": 6,
+      "control": {
+        "ctrl_name": "Room_4",
+        "ctrl_params": [],
+        "ctrl_arity": 4
+      }
+    },
+    {
+      "node_id": 7,
+      "control": {
+        "ctrl_name": "Visitor",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 8,
+      "control": {
+        "ctrl_name": "Laptop",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 9,
+      "control": {
+        "ctrl_name": "HVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 10,
+      "control": {
+        "ctrl_name": "Malware",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
       "node_id": 11,
       "control": {
-        "ctrl_name": "Desktop",
+        "ctrl_name": "Server",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -99,7 +99,7 @@
     {
       "node_id": 12,
       "control": {
-        "ctrl_name": "Desktop",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -131,7 +131,7 @@
     {
       "node_id": 16,
       "control": {
-        "ctrl_name": "Context",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -139,7 +139,7 @@
     {
       "node_id": 17,
       "control": {
-        "ctrl_name": "WorkingHours",
+        "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -147,7 +147,7 @@
     {
       "node_id": 18,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "CardReader",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -155,15 +155,15 @@
     {
       "node_id": 19,
       "control": {
-        "ctrl_name": "Status_On",
+        "ctrl_name": "Desktop",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
       "node_id": 20,
       "control": {
-        "ctrl_name": "CardReader",
+        "ctrl_name": "Desktop",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -1107,7 +1107,7 @@
     {
       "node_id": 138,
       "control": {
-        "ctrl_name": "DisconnectBusDevice",
+        "ctrl_name": "ConnectIPDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1115,7 +1115,7 @@
     {
       "node_id": 139,
       "control": {
-        "ctrl_name": "DisableHVAC",
+        "ctrl_name": "DisconnectIPDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1123,7 +1123,47 @@
     {
       "node_id": 140,
       "control": {
+        "ctrl_name": "DisconnectBusDevice",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 141,
+      "control": {
+        "ctrl_name": "DisableHVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 142,
+      "control": {
         "ctrl_name": "EnterRoomWithoutCardReader",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 143,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 144,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardNotRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 145,
+      "control": {
+        "ctrl_name": "ChangeContextToWorkingHours",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1131,12 +1171,12 @@
   ],
   "place_graph": {
     "num_regions": 4,
-    "num_nodes": 141,
+    "num_nodes": 146,
     "num_sites": 0,
     "rn": [
       {
         "source": 0,
-        "target": 0
+        "target": 3
       },
       {
         "source": 1,
@@ -1172,11 +1212,11 @@
       },
       {
         "source": 2,
-        "target": 16
+        "target": 0
       },
       {
         "source": 3,
-        "target": 9
+        "target": 2
       }
     ],
     "rs": [],
@@ -1186,168 +1226,196 @@
         "target": 1
       },
       {
-        "source": 0,
-        "target": 121
-      },
-      {
-        "source": 0,
-        "target": 122
-      },
-      {
-        "source": 1,
-        "target": 2
-      },
-      {
-        "source": 1,
-        "target": 3
-      },
-      {
-        "source": 1,
-        "target": 13
-      },
-      {
-        "source": 1,
-        "target": 21
-      },
-      {
-        "source": 1,
-        "target": 28
-      },
-      {
-        "source": 1,
-        "target": 35
-      },
-      {
-        "source": 1,
-        "target": 42
-      },
-      {
-        "source": 1,
-        "target": 49
-      },
-      {
-        "source": 1,
-        "target": 56
-      },
-      {
-        "source": 1,
-        "target": 63
-      },
-      {
-        "source": 1,
-        "target": 70
-      },
-      {
-        "source": 1,
-        "target": 85
-      },
-      {
-        "source": 1,
-        "target": 89
-      },
-      {
-        "source": 1,
-        "target": 94
-      },
-      {
-        "source": 1,
-        "target": 98
-      },
-      {
-        "source": 1,
-        "target": 102
-      },
-      {
-        "source": 1,
-        "target": 106
-      },
-      {
-        "source": 1,
-        "target": 110
-      },
-      {
-        "source": 1,
-        "target": 118
+        "source": 2,
+        "target": 137
       },
       {
         "source": 2,
+        "target": 138
+      },
+      {
+        "source": 2,
+        "target": 139
+      },
+      {
+        "source": 2,
+        "target": 140
+      },
+      {
+        "source": 2,
+        "target": 141
+      },
+      {
+        "source": 2,
+        "target": 142
+      },
+      {
+        "source": 2,
+        "target": 143
+      },
+      {
+        "source": 2,
+        "target": 144
+      },
+      {
+        "source": 2,
+        "target": 145
+      },
+      {
+        "source": 3,
         "target": 4
       },
       {
-        "source": 2,
-        "target": 10
-      },
-      {
-        "source": 2,
-        "target": 11
-      },
-      {
-        "source": 2,
-        "target": 12
-      },
-      {
-        "source": 2,
-        "target": 18
-      },
-      {
-        "source": 2,
-        "target": 20
+        "source": 3,
+        "target": 121
       },
       {
         "source": 3,
-        "target": 6
-      },
-      {
-        "source": 3,
-        "target": 8
-      },
-      {
-        "source": 3,
-        "target": 79
-      },
-      {
-        "source": 3,
-        "target": 81
-      },
-      {
-        "source": 3,
-        "target": 82
-      },
-      {
-        "source": 3,
-        "target": 83
-      },
-      {
-        "source": 3,
-        "target": 84
+        "target": 122
       },
       {
         "source": 4,
         "target": 5
       },
       {
-        "source": 6,
+        "source": 4,
+        "target": 6
+      },
+      {
+        "source": 4,
+        "target": 13
+      },
+      {
+        "source": 4,
+        "target": 21
+      },
+      {
+        "source": 4,
+        "target": 28
+      },
+      {
+        "source": 4,
+        "target": 35
+      },
+      {
+        "source": 4,
+        "target": 42
+      },
+      {
+        "source": 4,
+        "target": 49
+      },
+      {
+        "source": 4,
+        "target": 56
+      },
+      {
+        "source": 4,
+        "target": 63
+      },
+      {
+        "source": 4,
+        "target": 70
+      },
+      {
+        "source": 4,
+        "target": 85
+      },
+      {
+        "source": 4,
+        "target": 89
+      },
+      {
+        "source": 4,
+        "target": 94
+      },
+      {
+        "source": 4,
+        "target": 98
+      },
+      {
+        "source": 4,
+        "target": 102
+      },
+      {
+        "source": 4,
+        "target": 106
+      },
+      {
+        "source": 4,
+        "target": 110
+      },
+      {
+        "source": 4,
+        "target": 118
+      },
+      {
+        "source": 5,
         "target": 7
       },
       {
+        "source": 5,
+        "target": 12
+      },
+      {
+        "source": 5,
+        "target": 16
+      },
+      {
+        "source": 5,
+        "target": 18
+      },
+      {
+        "source": 5,
+        "target": 19
+      },
+      {
+        "source": 5,
+        "target": 20
+      },
+      {
         "source": 6,
+        "target": 9
+      },
+      {
+        "source": 6,
+        "target": 11
+      },
+      {
+        "source": 6,
+        "target": 79
+      },
+      {
+        "source": 6,
+        "target": 81
+      },
+      {
+        "source": 6,
+        "target": 82
+      },
+      {
+        "source": 6,
+        "target": 83
+      },
+      {
+        "source": 6,
+        "target": 84
+      },
+      {
+        "source": 7,
+        "target": 8
+      },
+      {
+        "source": 9,
+        "target": 10
+      },
+      {
+        "source": 9,
         "target": 80
       },
       {
-        "source": 9,
-        "target": 137
-      },
-      {
-        "source": 9,
-        "target": 138
-      },
-      {
-        "source": 9,
-        "target": 139
-      },
-      {
-        "source": 9,
-        "target": 140
+        "source": 12,
+        "target": 17
       },
       {
         "source": 13,
@@ -1356,14 +1424,6 @@
       {
         "source": 14,
         "target": 15
-      },
-      {
-        "source": 16,
-        "target": 17
-      },
-      {
-        "source": 18,
-        "target": 19
       },
       {
         "source": 21,
@@ -1707,6 +1767,16 @@
   "link_graph": [
     {
       "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 12,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
       "outer": [
         {
           "name": "busNet"
@@ -1714,23 +1784,19 @@
       ],
       "ports": [
         {
-          "node_id": 5,
+          "node_id": 8,
           "port_arity": 1
         },
         {
-          "node_id": 6,
+          "node_id": 9,
           "port_arity": 1
         },
         {
-          "node_id": 10,
+          "node_id": 16,
           "port_arity": 1
         },
         {
           "node_id": 18,
-          "port_arity": 1
-        },
-        {
-          "node_id": 20,
           "port_arity": 1
         },
         {
@@ -1940,7 +2006,7 @@
       ],
       "ports": [
         {
-          "node_id": 16,
+          "node_id": 0,
           "port_arity": 1
         }
       ]
@@ -1992,11 +2058,11 @@
       ],
       "ports": [
         {
-          "node_id": 2,
+          "node_id": 5,
           "port_arity": 1
         },
         {
-          "node_id": 3,
+          "node_id": 6,
           "port_arity": 1
         },
         {
@@ -2086,7 +2152,7 @@
       ],
       "ports": [
         {
-          "node_id": 3,
+          "node_id": 6,
           "port_arity": 1
         },
         {
@@ -2124,7 +2190,7 @@
       ],
       "ports": [
         {
-          "node_id": 3,
+          "node_id": 6,
           "port_arity": 1
         },
         {
@@ -2154,7 +2220,7 @@
       ],
       "ports": [
         {
-          "node_id": 3,
+          "node_id": 6,
           "port_arity": 1
         },
         {
@@ -2184,15 +2250,15 @@
       ],
       "ports": [
         {
-          "node_id": 8,
-          "port_arity": 1
-        },
-        {
           "node_id": 11,
           "port_arity": 1
         },
         {
-          "node_id": 12,
+          "node_id": 19,
+          "port_arity": 1
+        },
+        {
+          "node_id": 20,
           "port_arity": 1
         },
         {
@@ -2270,7 +2336,7 @@
       ],
       "ports": [
         {
-          "node_id": 1,
+          "node_id": 4,
           "port_arity": 1
         }
       ]
@@ -2284,7 +2350,7 @@
       ],
       "ports": [
         {
-          "node_id": 1,
+          "node_id": 4,
           "port_arity": 1
         }
       ]

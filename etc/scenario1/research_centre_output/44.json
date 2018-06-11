@@ -67,13 +67,21 @@
     {
       "node_id": 8,
       "control": {
-        "ctrl_name": "Room_2",
+        "ctrl_name": "RulesKeywords",
         "ctrl_params": [],
-        "ctrl_arity": 2
+        "ctrl_arity": 0
       }
     },
     {
       "node_id": 9,
+      "control": {
+        "ctrl_name": "Room",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 10,
       "control": {
         "ctrl_name": "Visitor",
         "ctrl_params": [],
@@ -81,7 +89,7 @@
       }
     },
     {
-      "node_id": 10,
+      "node_id": 11,
       "control": {
         "ctrl_name": "Laptop",
         "ctrl_params": [],
@@ -89,19 +97,11 @@
       }
     },
     {
-      "node_id": 11,
+      "node_id": 12,
       "control": {
         "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 12,
-      "control": {
-        "ctrl_name": "RulesKeywords",
-        "ctrl_params": [],
-        "ctrl_arity": 0
       }
     },
     {
@@ -115,7 +115,7 @@
     {
       "node_id": 14,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "PhysicalConnection",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -123,9 +123,9 @@
     {
       "node_id": 15,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "NoCard",
         "ctrl_params": [],
-        "ctrl_arity": 1
+        "ctrl_arity": 0
       }
     },
     {
@@ -859,13 +859,29 @@
     {
       "node_id": 107,
       "control": {
+        "ctrl_name": "Room_2",
+        "ctrl_params": [],
+        "ctrl_arity": 2
+      }
+    },
+    {
+      "node_id": 108,
+      "control": {
+        "ctrl_name": "SmartLight",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 109,
+      "control": {
         "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
     },
     {
-      "node_id": 108,
+      "node_id": 110,
       "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
@@ -873,27 +889,11 @@
       }
     },
     {
-      "node_id": 109,
+      "node_id": 111,
       "control": {
         "ctrl_name": "Room_2",
         "ctrl_params": [],
         "ctrl_arity": 2
-      }
-    },
-    {
-      "node_id": 110,
-      "control": {
-        "ctrl_name": "Elevator",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 111,
-      "control": {
-        "ctrl_name": "Elevator",
-        "ctrl_params": [],
-        "ctrl_arity": 1
       }
     },
     {
@@ -931,7 +931,7 @@
     {
       "node_id": 116,
       "control": {
-        "ctrl_name": "CardReader",
+        "ctrl_name": "Elevator",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -939,7 +939,7 @@
     {
       "node_id": 117,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "Elevator",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -947,7 +947,7 @@
     {
       "node_id": 118,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "CardReader",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -955,7 +955,7 @@
     {
       "node_id": 119,
       "control": {
-        "ctrl_name": "CCTV",
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -963,15 +963,15 @@
     {
       "node_id": 120,
       "control": {
-        "ctrl_name": "Malware",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
       "node_id": 121,
       "control": {
-        "ctrl_name": "BusNetwork",
+        "ctrl_name": "CCTV",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -979,15 +979,15 @@
     {
       "node_id": 122,
       "control": {
-        "ctrl_name": "IPNetwork",
+        "ctrl_name": "Malware",
         "ctrl_params": [],
-        "ctrl_arity": 1
+        "ctrl_arity": 0
       }
     },
     {
       "node_id": 123,
       "control": {
-        "ctrl_name": "PhysicalConnection",
+        "ctrl_name": "BusNetwork",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -995,9 +995,9 @@
     {
       "node_id": 124,
       "control": {
-        "ctrl_name": "NoCard",
+        "ctrl_name": "IPNetwork",
         "ctrl_params": [],
-        "ctrl_arity": 0
+        "ctrl_arity": 1
       }
     },
     {
@@ -1151,11 +1151,35 @@
         "ctrl_params": [],
         "ctrl_arity": 0
       }
+    },
+    {
+      "node_id": 144,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 145,
+      "control": {
+        "ctrl_name": "ChangeContextToOutSideWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 146,
+      "control": {
+        "ctrl_name": "ChangeContextToWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
     }
   ],
   "place_graph": {
     "num_regions": 4,
-    "num_nodes": 144,
+    "num_nodes": 147,
     "num_sites": 0,
     "rn": [
       {
@@ -1168,7 +1192,7 @@
       },
       {
         "source": 1,
-        "target": 123
+        "target": 14
       },
       {
         "source": 1,
@@ -1200,7 +1224,7 @@
       },
       {
         "source": 3,
-        "target": 12
+        "target": 8
       }
     ],
     "rs": [],
@@ -1211,11 +1235,11 @@
       },
       {
         "source": 0,
-        "target": 121
+        "target": 123
       },
       {
         "source": 0,
-        "target": 122
+        "target": 124
       },
       {
         "source": 1,
@@ -1223,15 +1247,11 @@
       },
       {
         "source": 1,
-        "target": 8
+        "target": 9
       },
       {
         "source": 1,
         "target": 13
-      },
-      {
-        "source": 1,
-        "target": 14
       },
       {
         "source": 1,
@@ -1287,11 +1307,15 @@
       },
       {
         "source": 1,
-        "target": 109
+        "target": 107
       },
       {
         "source": 1,
-        "target": 117
+        "target": 111
+      },
+      {
+        "source": 1,
+        "target": 119
       },
       {
         "source": 2,
@@ -1315,75 +1339,83 @@
       },
       {
         "source": 8,
-        "target": 9
+        "target": 137
       },
       {
         "source": 8,
-        "target": 11
+        "target": 138
       },
       {
         "source": 8,
-        "target": 107
+        "target": 139
+      },
+      {
+        "source": 8,
+        "target": 140
+      },
+      {
+        "source": 8,
+        "target": 141
+      },
+      {
+        "source": 8,
+        "target": 142
+      },
+      {
+        "source": 8,
+        "target": 143
+      },
+      {
+        "source": 8,
+        "target": 144
+      },
+      {
+        "source": 8,
+        "target": 145
+      },
+      {
+        "source": 8,
+        "target": 146
       },
       {
         "source": 9,
         "target": 10
       },
       {
+        "source": 9,
+        "target": 12
+      },
+      {
+        "source": 9,
+        "target": 16
+      },
+      {
+        "source": 9,
+        "target": 18
+      },
+      {
+        "source": 9,
+        "target": 19
+      },
+      {
+        "source": 9,
+        "target": 20
+      },
+      {
         "source": 10,
-        "target": 120
+        "target": 11
       },
       {
-        "source": 12,
-        "target": 137
-      },
-      {
-        "source": 12,
-        "target": 138
-      },
-      {
-        "source": 12,
-        "target": 139
-      },
-      {
-        "source": 12,
-        "target": 140
-      },
-      {
-        "source": 12,
-        "target": 141
-      },
-      {
-        "source": 12,
-        "target": 142
-      },
-      {
-        "source": 12,
-        "target": 143
+        "source": 11,
+        "target": 122
       },
       {
         "source": 13,
-        "target": 119
+        "target": 121
       },
       {
         "source": 14,
         "target": 15
-      },
-      {
-        "source": 14,
-        "target": 16
-      },
-      {
-        "source": 14,
-        "target": 18
-      },
-      {
-        "source": 14,
-        "target": 19
-      },
-      {
-        "source": 14,
-        "target": 20
       },
       {
         "source": 16,
@@ -1678,40 +1710,44 @@
         "target": 108
       },
       {
+        "source": 107,
+        "target": 109
+      },
+      {
         "source": 109,
         "target": 110
       },
       {
-        "source": 109,
-        "target": 111
-      },
-      {
-        "source": 109,
+        "source": 111,
         "target": 112
       },
       {
-        "source": 109,
+        "source": 111,
         "target": 113
       },
       {
-        "source": 109,
+        "source": 111,
         "target": 114
       },
       {
-        "source": 109,
+        "source": 111,
         "target": 115
       },
       {
-        "source": 109,
+        "source": 111,
         "target": 116
       },
       {
-        "source": 117,
+        "source": 111,
+        "target": 117
+      },
+      {
+        "source": 111,
         "target": 118
       },
       {
-        "source": 123,
-        "target": 124
+        "source": 119,
+        "target": 120
       },
       {
         "source": 125,
@@ -1743,6 +1779,16 @@
   "link_graph": [
     {
       "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 12,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
       "outer": [
         {
           "name": "busNet"
@@ -1754,15 +1800,7 @@
           "port_arity": 1
         },
         {
-          "node_id": 10,
-          "port_arity": 1
-        },
-        {
           "node_id": 11,
-          "port_arity": 1
-        },
-        {
-          "node_id": 15,
           "port_arity": 1
         },
         {
@@ -1946,11 +1984,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 107,
+          "node_id": 108,
           "port_arity": 1
         },
         {
-          "node_id": 116,
+          "node_id": 109,
           "port_arity": 1
         },
         {
@@ -1958,11 +1996,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 119,
+          "node_id": 120,
           "port_arity": 1
         },
         {
           "node_id": 121,
+          "port_arity": 1
+        },
+        {
+          "node_id": 123,
           "port_arity": 1
         }
       ]
@@ -1990,14 +2032,6 @@
       ],
       "ports": [
         {
-          "node_id": 109,
-          "port_arity": 1
-        },
-        {
-          "node_id": 110,
-          "port_arity": 1
-        },
-        {
           "node_id": 111,
           "port_arity": 1
         },
@@ -2015,6 +2049,14 @@
         },
         {
           "node_id": 115,
+          "port_arity": 1
+        },
+        {
+          "node_id": 116,
+          "port_arity": 1
+        },
+        {
+          "node_id": 117,
           "port_arity": 1
         }
       ]
@@ -2036,7 +2078,7 @@
           "port_arity": 1
         },
         {
-          "node_id": 8,
+          "node_id": 9,
           "port_arity": 1
         },
         {
@@ -2100,15 +2142,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 109,
+          "node_id": 107,
           "port_arity": 1
         },
         {
-          "node_id": 117,
+          "node_id": 111,
           "port_arity": 1
         },
         {
-          "node_id": 123,
+          "node_id": 119,
           "port_arity": 1
         }
       ]
@@ -2121,10 +2163,6 @@
         }
       ],
       "ports": [
-        {
-          "node_id": 8,
-          "port_arity": 1
-        },
         {
           "node_id": 13,
           "port_arity": 1
@@ -2139,6 +2177,10 @@
         },
         {
           "node_id": 88,
+          "port_arity": 1
+        },
+        {
+          "node_id": 107,
           "port_arity": 1
         },
         {
@@ -2292,7 +2334,7 @@
           "port_arity": 1
         },
         {
-          "node_id": 122,
+          "node_id": 124,
           "port_arity": 1
         }
       ]

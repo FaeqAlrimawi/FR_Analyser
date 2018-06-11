@@ -14,7 +14,7 @@
   <asset xsi:type="environment:DigitalAsset" connections="FA-DN Server-DN SL3-DN HVAC-DN SL1-DN Workstation-DN SL2-DN" name="busNetwork" description="" control="BusNetwork"/>
   <asset xsi:type="environment:Actor" name="Visitor1" control="Visitor" containedAssets="Laptop1" parentAsset="hallway" role="Offender"/>
   <asset xsi:type="environment:Laptop" name="Laptop1" control="Laptop" containedAssets="SoftwareX" parentAsset="Visitor1"/>
-  <asset xsi:type="environment:Application" name="SoftwareX" control="Software" parentAsset="Laptop1"/>
+  <asset xsi:type="environment:Application" name="SoftwareX" control="Malware" parentAsset="Laptop1"/>
   <asset xsi:type="environment:Lab" connections="instructorsLab1_hallway" name="instructorsLab1" control="Lab" containedAssets="desktop1_3 desktop1_1 desktop1_2" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Desktop" connections="d1_1" name="desktop1_1" description="" control="Desktop" parentAsset="instructorsLab1"/>
   <asset xsi:type="environment:Desktop" connections="d1_2" name="desktop1_2" control="Desktop" parentAsset="instructorsLab1"/>

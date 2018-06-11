@@ -168,6 +168,10 @@ public class GraphPathsAnalyser {
 				shortestPaths.add(i);
 			}
 		}
+		
+		//this sets the number of actions for the shortest paths
+		shortestPaths.add(numOfStates-1);
+		
 		return shortestPaths;
 	}
 	
@@ -196,6 +200,10 @@ public class GraphPathsAnalyser {
 				longestPaths.add(i);
 			}
 		}
+		
+		//this sets the number of actions for the longest paths
+		longestPaths.add(numOfStates-1);
+				
 		return longestPaths;
 	}
 	
@@ -211,10 +219,18 @@ public class GraphPathsAnalyser {
 		str.append(newLine).append("top paths (based on common actions): ").append(topPaths).append(newLine);
 		
 		//get shortest paths
-		str.append(newLine).append("Shortest Paths: ").append(shortestPaths).append(newLine);
+		if(shortestPaths.size() >0) {
+			str.append(newLine).append("Shortest Paths (").append(shortestPaths.get(shortestPaths.size()-1)).append(" actions): ").append(shortestPaths).append(newLine);	
+		} else {
+			str.append(newLine).append("Shortest Paths: [NONE]");
+		}
 		
 		//get longest paths
-		str.append(newLine).append("Longest Paths: ").append(longestPaths).append(newLine);
+		if(longestPaths.size() >0) {
+			str.append(newLine).append("Longest Paths (").append(longestPaths.get(longestPaths.size()-1)).append(" actions): ").append(longestPaths).append(newLine);	
+		} else {
+			str.append(newLine).append("Longest Paths: [NONE]");
+		}
 		
 		return str.toString();
 	}

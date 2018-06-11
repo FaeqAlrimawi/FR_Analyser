@@ -67,13 +67,21 @@
     {
       "node_id": 8,
       "control": {
+        "ctrl_name": "RulesKeywords",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 9,
+      "control": {
         "ctrl_name": "Hallway",
         "ctrl_params": [],
         "ctrl_arity": 4
       }
     },
     {
-      "node_id": 9,
+      "node_id": 10,
       "control": {
         "ctrl_name": "Room",
         "ctrl_params": [],
@@ -81,7 +89,7 @@
       }
     },
     {
-      "node_id": 10,
+      "node_id": 11,
       "control": {
         "ctrl_name": "Visitor",
         "ctrl_params": [],
@@ -89,7 +97,7 @@
       }
     },
     {
-      "node_id": 11,
+      "node_id": 12,
       "control": {
         "ctrl_name": "PhysicalConnection",
         "ctrl_params": [],
@@ -97,17 +105,9 @@
       }
     },
     {
-      "node_id": 12,
-      "control": {
-        "ctrl_name": "NoCard",
-        "ctrl_params": [],
-        "ctrl_arity": 0
-      }
-    },
-    {
       "node_id": 13,
       "control": {
-        "ctrl_name": "RulesKeywords",
+        "ctrl_name": "NoCard",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -827,7 +827,7 @@
     {
       "node_id": 103,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "Room",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -835,7 +835,7 @@
     {
       "node_id": 104,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -843,13 +843,21 @@
     {
       "node_id": 105,
       "control": {
+        "ctrl_name": "HVAC",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 106,
+      "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 106,
+      "node_id": 107,
       "control": {
         "ctrl_name": "Room_2",
         "ctrl_params": [],
@@ -857,7 +865,7 @@
       }
     },
     {
-      "node_id": 107,
+      "node_id": 108,
       "control": {
         "ctrl_name": "SmartLight",
         "ctrl_params": [],
@@ -865,7 +873,7 @@
       }
     },
     {
-      "node_id": 108,
+      "node_id": 109,
       "control": {
         "ctrl_name": "HVAC",
         "ctrl_params": [],
@@ -873,7 +881,7 @@
       }
     },
     {
-      "node_id": 109,
+      "node_id": 110,
       "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
@@ -881,19 +889,11 @@
       }
     },
     {
-      "node_id": 110,
+      "node_id": 111,
       "control": {
         "ctrl_name": "Room_2",
         "ctrl_params": [],
         "ctrl_arity": 2
-      }
-    },
-    {
-      "node_id": 111,
-      "control": {
-        "ctrl_name": "Elevator",
-        "ctrl_params": [],
-        "ctrl_arity": 1
       }
     },
     {
@@ -939,7 +939,7 @@
     {
       "node_id": 117,
       "control": {
-        "ctrl_name": "CardReader",
+        "ctrl_name": "Elevator",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -947,7 +947,7 @@
     {
       "node_id": 118,
       "control": {
-        "ctrl_name": "Room",
+        "ctrl_name": "CardReader",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -1159,11 +1159,35 @@
         "ctrl_params": [],
         "ctrl_arity": 0
       }
+    },
+    {
+      "node_id": 145,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 146,
+      "control": {
+        "ctrl_name": "ChangeContextToOutSideWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 147,
+      "control": {
+        "ctrl_name": "ChangeContextToWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
     }
   ],
   "place_graph": {
     "num_regions": 4,
-    "num_nodes": 145,
+    "num_nodes": 148,
     "num_sites": 0,
     "rn": [
       {
@@ -1176,7 +1200,7 @@
       },
       {
         "source": 1,
-        "target": 11
+        "target": 12
       },
       {
         "source": 1,
@@ -1208,7 +1232,7 @@
       },
       {
         "source": 3,
-        "target": 13
+        "target": 8
       }
     ],
     "rs": [],
@@ -1231,11 +1255,11 @@
       },
       {
         "source": 1,
-        "target": 8
+        "target": 9
       },
       {
         "source": 1,
-        "target": 9
+        "target": 10
       },
       {
         "source": 1,
@@ -1291,15 +1315,15 @@
       },
       {
         "source": 1,
-        "target": 106
+        "target": 103
       },
       {
         "source": 1,
-        "target": 110
+        "target": 107
       },
       {
         "source": 1,
-        "target": 118
+        "target": 111
       },
       {
         "source": 2,
@@ -1323,59 +1347,67 @@
       },
       {
         "source": 8,
-        "target": 120
-      },
-      {
-        "source": 9,
-        "target": 10
-      },
-      {
-        "source": 9,
-        "target": 103
-      },
-      {
-        "source": 9,
-        "target": 104
-      },
-      {
-        "source": 10,
-        "target": 121
-      },
-      {
-        "source": 11,
-        "target": 12
-      },
-      {
-        "source": 13,
         "target": 137
       },
       {
-        "source": 13,
+        "source": 8,
         "target": 138
       },
       {
-        "source": 13,
+        "source": 8,
         "target": 139
       },
       {
-        "source": 13,
+        "source": 8,
         "target": 140
       },
       {
-        "source": 13,
+        "source": 8,
         "target": 141
       },
       {
-        "source": 13,
+        "source": 8,
         "target": 142
       },
       {
-        "source": 13,
+        "source": 8,
         "target": 143
       },
       {
-        "source": 13,
+        "source": 8,
         "target": 144
+      },
+      {
+        "source": 8,
+        "target": 145
+      },
+      {
+        "source": 8,
+        "target": 146
+      },
+      {
+        "source": 8,
+        "target": 147
+      },
+      {
+        "source": 9,
+        "target": 120
+      },
+      {
+        "source": 10,
+        "target": 11
+      },
+      {
+        "source": 10,
+        "target": 119
+      },
+      {
+        "source": 11,
+        "target": 121
+      },
+      {
+        "source": 12,
+        "target": 13
       },
       {
         "source": 14,
@@ -1674,52 +1706,56 @@
         "target": 102
       },
       {
-        "source": 104,
+        "source": 103,
+        "target": 104
+      },
+      {
+        "source": 103,
         "target": 105
       },
       {
-        "source": 106,
-        "target": 107
+        "source": 105,
+        "target": 106
       },
       {
-        "source": 106,
+        "source": 107,
         "target": 108
       },
       {
-        "source": 108,
+        "source": 107,
         "target": 109
       },
       {
-        "source": 110,
-        "target": 111
+        "source": 109,
+        "target": 110
       },
       {
-        "source": 110,
+        "source": 111,
         "target": 112
       },
       {
-        "source": 110,
+        "source": 111,
         "target": 113
       },
       {
-        "source": 110,
+        "source": 111,
         "target": 114
       },
       {
-        "source": 110,
+        "source": 111,
         "target": 115
       },
       {
-        "source": 110,
+        "source": 111,
         "target": 116
       },
       {
-        "source": 110,
+        "source": 111,
         "target": 117
       },
       {
-        "source": 118,
-        "target": 119
+        "source": 111,
+        "target": 118
       },
       {
         "source": 121,
@@ -1952,15 +1988,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 103,
-          "port_arity": 1
-        },
-        {
           "node_id": 104,
           "port_arity": 1
         },
         {
-          "node_id": 107,
+          "node_id": 105,
           "port_arity": 1
         },
         {
@@ -1968,7 +2000,11 @@
           "port_arity": 1
         },
         {
-          "node_id": 117,
+          "node_id": 109,
+          "port_arity": 1
+        },
+        {
+          "node_id": 118,
           "port_arity": 1
         },
         {
@@ -2008,10 +2044,6 @@
       ],
       "ports": [
         {
-          "node_id": 110,
-          "port_arity": 1
-        },
-        {
           "node_id": 111,
           "port_arity": 1
         },
@@ -2034,6 +2066,10 @@
         {
           "node_id": 116,
           "port_arity": 1
+        },
+        {
+          "node_id": 117,
+          "port_arity": 1
         }
       ]
     },
@@ -2054,15 +2090,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 8,
-          "port_arity": 1
-        },
-        {
           "node_id": 9,
           "port_arity": 1
         },
         {
-          "node_id": 11,
+          "node_id": 10,
+          "port_arity": 1
+        },
+        {
+          "node_id": 12,
           "port_arity": 1
         },
         {
@@ -2118,15 +2154,15 @@
           "port_arity": 1
         },
         {
-          "node_id": 106,
+          "node_id": 103,
           "port_arity": 1
         },
         {
-          "node_id": 110,
+          "node_id": 107,
           "port_arity": 1
         },
         {
-          "node_id": 118,
+          "node_id": 111,
           "port_arity": 1
         }
       ]
@@ -2140,7 +2176,7 @@
       ],
       "ports": [
         {
-          "node_id": 8,
+          "node_id": 9,
           "port_arity": 1
         },
         {
@@ -2156,7 +2192,7 @@
           "port_arity": 1
         },
         {
-          "node_id": 106,
+          "node_id": 107,
           "port_arity": 1
         },
         {
@@ -2178,7 +2214,7 @@
       ],
       "ports": [
         {
-          "node_id": 8,
+          "node_id": 9,
           "port_arity": 1
         },
         {
@@ -2208,7 +2244,7 @@
       ],
       "ports": [
         {
-          "node_id": 8,
+          "node_id": 9,
           "port_arity": 1
         },
         {

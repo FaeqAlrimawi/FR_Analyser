@@ -70,6 +70,10 @@ atomic ctrl GenerateData = 0;
 atomic ctrl CollectData = 0;
 atomic ctrl SendData = 0;
 atomic ctrl DisableHVAC = 0;
+atomic ctrl ChangeAccessToCardRequired = 0;
+atomic ctrl ChangeAccessToCardNotRequired = 0;
+atomic ctrl ChangeContextToOutSideWorkingHours = 0; 
+atomic ctrl ChangeContextToWorkingHours = 0;
 ctrl RulesKeywords = 0;
 
 #initial state
@@ -275,12 +279,12 @@ visitor_laptop | Desktop{ipNet} || RulesKeywords.(id)
 react connect_to_smartlight = 
 visitor_laptop | SmartLight{busNet} || RulesKeywords.(ConnectBusDevice | id)
 ->
-visitor_connected_to_bus | SmartLight{busNet} || RulesKeywords.(id)
+visitor_connected_to_bus | /busNet SmartLight{busNet} || RulesKeywords.(id)
 ;
 
 #disconnect from smart light
 react disconnect_from_smartlight = 
-visitor_connected_to_bus | SmartLight{busNet} || RulesKeywords.(DisconnectBusDevice | id)
+visitor_connected_to_bus | /busNet SmartLight{busNet} || RulesKeywords.(DisconnectBusDevice | id)
 ->
 visitor_laptop | SmartLight{busNet} || RulesKeywords.(id)
 ;
@@ -289,12 +293,12 @@ visitor_laptop | SmartLight{busNet} || RulesKeywords.(id)
 react connect_to_hvac = 
 visitor_laptop | HVAC{busNet} || RulesKeywords.(ConnectBusDevice | id)
 ->
-visitor_connected_to_bus | HVAC{busNet} || RulesKeywords.(id)
+visitor_connected_to_bus | /busNet HVAC{busNet} || RulesKeywords.(id)
 ;
 
 #disconnect from hvac
 react disconnect_from_hvac = 
-visitor_connected_to_bus | HVAC{busNet} || RulesKeywords.(DisconnectBusDevice | id)
+visitor_connected_to_bus | /busNet HVAC{busNet} || RulesKeywords.(DisconnectBusDevice | id)
 ->
 visitor_laptop | HVAC{busNet} || RulesKeywords.(id)
 ;
@@ -303,12 +307,12 @@ visitor_laptop | HVAC{busNet} || RulesKeywords.(id)
 react connect_to_firealarm = 
 visitor_laptop | FireAlarm{busNet} || RulesKeywords.(ConnectBusDevice | id)
 ->
-visitor_connected_to_bus | FireAlarm{busNet} || RulesKeywords.(id)
+visitor_connected_to_bus | /busNet FireAlarm{busNet} || RulesKeywords.(id)
 ;
 
 #disconnect from fire alarm
 react disconnect_from_firealarm = 
-visitor_connected_to_bus | FireAlarm{busNet} || RulesKeywords.(DisconnectBusDevice | id)
+visitor_connected_to_bus | /busNet FireAlarm{busNet} || RulesKeywords.(DisconnectBusDevice | id)
 ->
 visitor_laptop | FireAlarm{busNet} || RulesKeywords.(id)
 ;
@@ -317,12 +321,12 @@ visitor_laptop | FireAlarm{busNet} || RulesKeywords.(id)
 react connect_to_computingdevice = 
 visitor_laptop | ComputingDevice{busNet} || RulesKeywords.(ConnectBusDevice | id)
 ->
-visitor_connected_to_bus | ComputingDevice{busNet} || RulesKeywords.(id)
+visitor_connected_to_bus | /busNet ComputingDevice{busNet} || RulesKeywords.(id)
 ;
 
 #disconnect from computing device
 react disconnect_from_computingdevice = 
-visitor_connected_to_bus | ComputingDevice{busNet} || RulesKeywords.(DisconnectBusDevice | id)
+visitor_connected_to_bus | /busNet ComputingDevice{busNet} || RulesKeywords.(DisconnectBusDevice | id)
 ->
 visitor_laptop | ComputingDevice{busNet} || RulesKeywords.(id)
 ;
@@ -355,30 +359,33 @@ malware_target_disabled || RulesKeywords.(id)
 @[1,2]
 ;
 
-#change context
-react change_to_outside_working_hours = 
-context_working_hours 
-->
-context_outside_working_hours;
+
 
 #change access to rooms to reuqire card
 react change_access_to_card_required = 
-context_outside_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1
+context_outside_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1 || RulesKeywords.(ChangeAccessToCardRequired | id)
 ->
-context_outside_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1_card_required;
+context_outside_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1_card_required || RulesKeywords.(id)
+;
 
+#change context
+react change_to_outside_working_hours = 
+context_working_hours || RulesKeywords.(ChangeContextToOutSideWorkingHours | id)
+->
+context_outside_working_hours || RulesKeywords.(id)
+;
 
 react change_to_working_hours = 
-context_outside_working_hours
+context_outside_working_hours || RulesKeywords.(ChangeContextToWorkingHours | id)
 ->
-context_working_hours
+context_working_hours || RulesKeywords.(id)
 ;
 
 #change access to rooms to card not required
 react change_access_to_card_not_required = 
-context_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1_card_required
+context_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1_card_required || RulesKeywords.(ChangeAccessToCardNotRequired | id)
 ->
-context_outside_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1
+context_outside_working_hours || Room{hallway1}.(CardReader{busNet} | id) || connection_to_hallway1 || RulesKeywords.(id)
 ;
 
 #Reactive system

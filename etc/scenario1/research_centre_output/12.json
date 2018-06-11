@@ -43,7 +43,7 @@
     {
       "node_id": 5,
       "control": {
-        "ctrl_name": "Desktop",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -99,7 +99,7 @@
     {
       "node_id": 12,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -107,23 +107,23 @@
     {
       "node_id": 13,
       "control": {
-        "ctrl_name": "HVAC",
-        "ctrl_params": [],
-        "ctrl_arity": 1
-      }
-    },
-    {
-      "node_id": 14,
-      "control": {
         "ctrl_name": "Status_On",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
     },
     {
-      "node_id": 15,
+      "node_id": 14,
       "control": {
         "ctrl_name": "CardReader",
+        "ctrl_params": [],
+        "ctrl_arity": 1
+      }
+    },
+    {
+      "node_id": 15,
+      "control": {
+        "ctrl_name": "Desktop",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -1107,7 +1107,7 @@
     {
       "node_id": 138,
       "control": {
-        "ctrl_name": "DisconnectIPDevice",
+        "ctrl_name": "ConnectIPDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1115,7 +1115,7 @@
     {
       "node_id": 139,
       "control": {
-        "ctrl_name": "ConnectBusDevice",
+        "ctrl_name": "DisconnectIPDevice",
         "ctrl_params": [],
         "ctrl_arity": 0
       }
@@ -1151,11 +1151,43 @@
         "ctrl_params": [],
         "ctrl_arity": 0
       }
+    },
+    {
+      "node_id": 144,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 145,
+      "control": {
+        "ctrl_name": "ChangeAccessToCardNotRequired",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 146,
+      "control": {
+        "ctrl_name": "ChangeContextToOutSideWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
+    },
+    {
+      "node_id": 147,
+      "control": {
+        "ctrl_name": "ChangeContextToWorkingHours",
+        "ctrl_params": [],
+        "ctrl_arity": 0
+      }
     }
   ],
   "place_graph": {
     "num_regions": 4,
-    "num_nodes": 144,
+    "num_nodes": 148,
     "num_sites": 0,
     "rn": [
       {
@@ -1307,7 +1339,7 @@
       },
       {
         "source": 2,
-        "target": 13
+        "target": 14
       },
       {
         "source": 2,
@@ -1354,6 +1386,22 @@
         "target": 143
       },
       {
+        "source": 6,
+        "target": 144
+      },
+      {
+        "source": 6,
+        "target": 145
+      },
+      {
+        "source": 6,
+        "target": 146
+      },
+      {
+        "source": 6,
+        "target": 147
+      },
+      {
         "source": 7,
         "target": 119
       },
@@ -1366,8 +1414,8 @@
         "target": 11
       },
       {
-        "source": 13,
-        "target": 14
+        "source": 12,
+        "target": 13
       },
       {
         "source": 17,
@@ -1743,6 +1791,16 @@
   "link_graph": [
     {
       "inner": [],
+      "outer": [],
+      "ports": [
+        {
+          "node_id": 5,
+          "port_arity": 1
+        }
+      ]
+    },
+    {
+      "inner": [],
       "outer": [
         {
           "name": "busNet"
@@ -1750,15 +1808,15 @@
       ],
       "ports": [
         {
+          "node_id": 4,
+          "port_arity": 1
+        },
+        {
           "node_id": 12,
           "port_arity": 1
         },
         {
-          "node_id": 13,
-          "port_arity": 1
-        },
-        {
-          "node_id": 15,
+          "node_id": 14,
           "port_arity": 1
         },
         {
@@ -2216,11 +2274,7 @@
       ],
       "ports": [
         {
-          "node_id": 4,
-          "port_arity": 1
-        },
-        {
-          "node_id": 5,
+          "node_id": 15,
           "port_arity": 1
         },
         {
