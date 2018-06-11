@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.batik.parser.PathArrayProducer;
 
@@ -16,6 +17,8 @@ public class IncidentPatternInstantiator {
 	
 	private String xqueryFile = "match_query.xq";
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
+	CountDownLatch latch;
+	
 	
 	public void execute() {
 		
@@ -247,12 +250,23 @@ private void executeScenario1(){
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
+		//create a latch to let the main thread wait for the other threads to finish execute
+		latch = new CountDownLatch(1);
 		
 		for(int i=0; i<1;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
+	
 			incidentInstances[i].start();
 		}
+		
+		/*try {
+			latch.await();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
 		
 		System.out.println("End time: " + dtf.format(LocalDateTime.now()));
 	}
@@ -352,11 +366,11 @@ private void executeScenario1(){
 	}
 
 	
-	class PotentialIncidentInstance implements Runnable {
+	class PotentialIncidentInstance extends Thread {
 
 		private String[] systemAssetNames;
 		private String[] incidentAssetNames;
-		private Thread t;
+		//private Thread t;
 		private long threadID;
 		private String BRSFileName;
 		private String outputFolder;
@@ -448,6 +462,7 @@ private void executeScenario1(){
 			System.out.println("Thread ["+threadID+"]>>Terminated");
 			System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
+			//latch.countDown();
 			/*inc.generateDistinctPaths();
 			LinkedList<GraphPath> paths = inc.getAllPaths();
 			
@@ -474,10 +489,11 @@ private void executeScenario1(){
 		public void start() {
 			System.out.println(">>Thread [" + threadID +"] is starting...\n");
 			//System.out.println("system assets: " + Arrays.toString(systemAssetNames));
-			if (t == null) {
+			/*if (t == null) {
 				t = new Thread(this, "" + threadID);
 				t.start();
-			}
+			}*/
+			run();
 		}
 
 		public String[] getSystemAssetNames() {
