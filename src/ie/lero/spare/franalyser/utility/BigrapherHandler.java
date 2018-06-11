@@ -2,6 +2,7 @@ package ie.lero.spare.franalyser.utility;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -421,12 +422,15 @@ public class BigrapherHandler implements SystemExecutor {
 		
 		//keywords used to identify actions performed in BRS
 		String [] rulesKeywords = {"EnterRoom", "ExitRoom","ConnectIPDevice", "DisconnectIPDevice", "ConnectBusDevice", "DisconnectBusDevice", "SendData"
-									, "DisableHVAC", "EnterRoomWithoutCardReader"};
+									, "DisableHVAC", "EnterRoomWithoutCardReader", "ChangeContextToOutSideWorkingHours", "ChangeContextToWorkingHours"};
 		
 		//update digraph with action labels
+		rulesKeywords = getActionNamesFromBRSFile();
 		LabelExtractor lbl = new LabelExtractor(rulesKeywords);
 		
-		lbl.updateDigraphLabels();
+		System.out.println(lbl.updateDigraphLabels());
+		
+		//getActionNamesFromBRSFile();
 		
 		return transitionSystem;
 		//add action labels to transitions, if there are keywords provided
@@ -435,6 +439,47 @@ public class BigrapherHandler implements SystemExecutor {
 		
 	}
 
+	private String[] getActionNamesFromBRSFile() {
+		
+		String[] lines = FileManipulator.readFileNewLine(bigrapherFileName);
+		String tmp = "";
+		int i = 0;
+		for (i = 0; i < lines.length; i++) {
+			//look for the line that contains RulesKeywords and that is not a comment
+			if (lines[i].contains("RulesKeywords") && !lines[i].startsWith("#") && !lines[i].contains("ctrl")) {
+				break;
+			}
+		}
+		
+		//if the keywords not found!
+		if(i == lines.length) {
+			return null;
+		}
+		
+		tmp = lines[i];
+		while(!lines[i].contains(";") && i<lines.length) {
+			i++;
+			tmp += lines[i];
+			
+		}
+		
+		tmp = tmp.substring(tmp.indexOf("RulesKeywords"), tmp.indexOf(";"));
+		tmp = tmp.replace("RulesKeywords", "");
+		tmp = tmp.replace(".", "");
+		tmp = tmp.replace("(", "");
+		tmp = tmp.replace(")", "");
+		
+		String [] actionsNames = tmp.split("\\|");
+		
+		//remove spaces
+		for(int j=0;j<actionsNames.length;j++) {
+			actionsNames[j] = actionsNames[j].trim();
+		}
+		
+		return actionsNames;
+	}
+	
+	
 	@Override
 	public Signature getBigraphSignature() {
 		

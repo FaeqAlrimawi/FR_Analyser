@@ -135,7 +135,8 @@ big context = Context{c}.(WorkingHours);
 #big stairs = ;
 
 big actions = RulesKeywords.(EnterRoom | ExitRoom | ConnectIPDevice | DisconnectIPDevice | ConnectBusDevice | DisconnectBusDevice | 
- SendData | DisableHVAC | EnterRoomWithoutCardReader);
+ SendData | DisableHVAC | EnterRoomWithoutCardReader | 
+ ChangeAccessToCardRequired | ChangeAccessToCardNotRequired | ChangeContextToOutSideWorkingHours | ChangeContextToWorkingHours);
  
 #initial state
 big research_centre = Building.( 

@@ -206,9 +206,9 @@ public class BigraphAnalyser {
 			print("state matched");		
 		}*/
 		
-		
-		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\nCreated redex: "+ red+"\n\nOriginal state: "+states.get(0)+"\n\nCreated state:"+st+"\n\n");
-		//print("\nidentifyRelevantStates: " + pred.getName()+" \nOriginal redex:"+redex.toString());
+		print("Pred: " + pred.getName()+" type:"+ pred.getPredicateType().toString());
+		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\n\n");
+		//print("\nidentifyRelevantStates: \nState-0:" + states.get(0));
 		
 		//check outernames defined each node whether they are less or more than that of in a control in the signature
 		//assuming knowledge is partial, if the number of outernames in a redex node is less than that in the signature (and knolwdege is partial for that node),
@@ -225,14 +225,15 @@ public class BigraphAnalyser {
 			print("original matched");		
 		}*/
 
-		////to test for more than the know states number
+		////for testing only. Tests the time it takes to search for states in general by increasing the number of iterations. 
+		//Should be removed when
 		int iterations = 1;
+		
 		int length = states.size();
 		
 		//print("number of states matched to: " + length*iterations);
 		//print starting time of matching
 		//print("["+ +"] start the matching process...");
-		////
 		
 		for(int i =0; i<length*iterations;i++) {	
 			if(matcher.match(states.get(i%length), redex).iterator().hasNext()){
@@ -242,20 +243,7 @@ public class BigraphAnalyser {
 			}
 		}
 		
-		//print("["+ +"] matching ended...");
-		
-			/*Iterator<? extends Match> t = matcher.match(states.get(i), redex).iterator();
-			int cnt = 0;
-			while(t.hasNext()){
-				Match m = t.next();
-				//pred.addBigraphState(i);
-				//areStatesIdentified = true;
-				print("state " + i + " matched...match:");//+m.toString());		
-			cnt++;
-			}
-			
-			print("number of time matched for state " + i + " is:"+cnt);*/
-			
+		System.out.println("states: "+pred.getBigraphStates());
 		return areStatesIdentified;
 	}
 

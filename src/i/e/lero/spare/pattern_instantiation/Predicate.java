@@ -436,6 +436,7 @@ public class Predicate {
 			}
 		}
 		
+		//System.out.println("a "+biBuilder.makeBigraph());
 		return biBuilder.makeBigraph();
 	}
 	

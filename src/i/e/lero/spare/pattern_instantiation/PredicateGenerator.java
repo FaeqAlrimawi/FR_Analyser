@@ -90,7 +90,7 @@ public class PredicateGenerator {
 			for (String activity : activities.keySet()) {
 				for (PredicateType type : types) {
 					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
-
+					
 					// if there is no condition returend then skip creating a
 					// predicate for it
 					if (condition == null || condition.isNull(JSONTerms.ENTITY)) {

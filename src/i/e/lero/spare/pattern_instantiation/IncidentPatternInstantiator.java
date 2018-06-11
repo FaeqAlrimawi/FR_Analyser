@@ -7,6 +7,7 @@ import org.apache.batik.parser.PathArrayProducer;
 
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
+import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class IncidentPatternInstantiator {
@@ -241,7 +242,7 @@ private void executeScenario1(){
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
 		
-		for(int i=0; i<lst.size();i++) {//adjust the length
+		for(int i=0; i<0;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			incidentInstances[i].start();
@@ -411,6 +412,9 @@ private void executeScenario1(){
 			//it prints transitions between pre and post within one activity, post of current to pre of next activity, pre of current to pre of next 
 			//predicateHandler.printAll();
 			
+			for(IncidentActivity act : predicateHandler.getIncidentActivities().values()) {
+				
+			}
 			
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
