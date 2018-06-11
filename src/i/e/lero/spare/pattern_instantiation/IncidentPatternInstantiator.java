@@ -1,5 +1,7 @@
 package i.e.lero.spare.pattern_instantiation;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -13,7 +15,8 @@ import ie.lero.spare.franalyser.utility.XqueryExecuter;
 public class IncidentPatternInstantiator {
 	
 	private String xqueryFile = "match_query.xq";
-
+	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
+	
 	public void execute() {
 		
 			//handles system representation: analysing system output (states, transitions) to generate bigraphs
@@ -188,6 +191,9 @@ private void executeScenario1(){
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
 		
+		java.util.Date date = new java.util.Date();
+		
+		System.out.println("Start time: " + dtf.format(LocalDateTime.now()));
 		////start executing the scenario \\\\
 		Mapper m = new Mapper(xQueryMatcherFile);
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
@@ -246,7 +252,9 @@ private void executeScenario1(){
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			incidentInstances[i].start();
-		}	
+		}
+		
+		System.out.println("End time: " + dtf.format(LocalDateTime.now()));
 	}
 
 	public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile) {

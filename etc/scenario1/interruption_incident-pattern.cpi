@@ -175,7 +175,6 @@
             <connectivity name="cyber2"/>
             <site/>
           </entity>
-       
           <site/>
         </entity>
       </expression>
@@ -186,6 +185,7 @@
           <entity name="HVAC">
             <entity name="HVACmalware" />
             <connectivity name="cyber2"/>
+			<site/>
           </entity>
           <site/>
         </entity>
@@ -195,6 +195,7 @@
           </entity>
           <entity name="offender1">
             <entity name="laptopX">
+              <entity name="HVACmalware"/>
               <connectivity name="cyber1"/>
             </entity>
             <site/>
