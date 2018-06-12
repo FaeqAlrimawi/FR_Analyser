@@ -1,5 +1,9 @@
 package i.e.lero.spare.pattern_instantiation;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -12,13 +16,15 @@ import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
+import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternInstantiator {
 	
 	private String xqueryFile = "match_query.xq";
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	CountDownLatch latch;
-	
+	private File scenario1File;
+	BufferedWriter bufferWriter;
 	
 	public void execute() {
 		
@@ -190,22 +196,43 @@ private void executeScenario1(){
 		String BRS_outputFolder = "etc/scenario1/research_centre_output";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
+		String outputFileName = "etc/scenario1/output1559.txt";
 		
+		try {
+			
+		//output file
+		scenario1File = new File(outputFileName);
+		
+		//if (!scenario1File.exists()) {
+		//scenario1File.createNewFile();
+        //}
+		
+		FileWriter fw = new FileWriter(scenario1File.getAbsoluteFile());
+		bufferWriter = new BufferedWriter(fw);
+		        
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
 		
-		java.util.Date date = new java.util.Date();
+		StopWatch timer = new StopWatch();
 		
-		System.out.println("Start time: " + dtf.format(LocalDateTime.now()));
+		LocalDateTime startingTime = LocalDateTime.now();
+		
+		String startTime = "Start time: " + dtf.format(startingTime);
+		
+		print(startTime);
+		
+		//start a timer
+		timer.start();
+		
 		////start executing the scenario \\\\
 		Mapper m = new Mapper(xQueryMatcherFile);
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
-		System.out.println(">>Matching incident pattern entities to system assets");
+		print(">>Matching incident pattern entities to system assets");
 		AssetMap am = m.findMatches(); 
 		
 		// if there are incident assets with no matches from space model then exit
 		if (am.hasAssetsWithNoMatch()) {
-			System.out.println(">>Some incident entities have no matches in the system assets. These are:");
+			print(">>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				System.out.println(Arrays.toString(asts));
@@ -220,8 +247,8 @@ private void executeScenario1(){
 		}*/
 		
 		//print matched assets
-		System.out.println(">>Entity-Asset map:");
-		System.out.println(am.toString());
+		print(">>Entity-Asset map:");
+		print(am.toString());
 		
 		//generate sequences
 		LinkedList<String[]> lst = am.generateUniqueCombinations();
@@ -229,7 +256,7 @@ private void executeScenario1(){
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
 		if(lst == null || lst.isEmpty()) {
-			System.out.println(">>No combinations found.... exisitng program");
+			print(">>No combinations found.... exisitng program");
 			return;
 		}
 		
@@ -239,11 +266,11 @@ private void executeScenario1(){
 			System.out.println(Arrays.toString(s));
 		}*/
 		
-		System.out.println(">>Initialise the System");
+		print(">>Initialise the System");
 		//initialise BRS system 
 		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
 		if (!isInitialised) {
-			System.out.println(">>System could not be initialised....execution is terminated");
+			print(">>System could not be initialised....execution is terminated");
 		}
 		
 		//create threads that handle each sequence generated from asset matching
@@ -255,20 +282,40 @@ private void executeScenario1(){
 		
 		for(int i=0; i<1;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			print(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 	
 			incidentInstances[i].start();
 		}
 		
-		/*try {
+		try {
 			latch.await();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		*/
 		
-		System.out.println("End time: " + dtf.format(LocalDateTime.now()));
+		LocalDateTime EndingTime = LocalDateTime.now();
+		print("End time: " + dtf.format(EndingTime));
+		
+		timer.stop();
+		
+		long timePassed = timer.getEllapsedMillis();
+		
+		int hours = (int)(timePassed/3600000)%60;
+		int mins = (int)(timePassed/60000)%60;
+		int secs = (int)(timePassed/1000)%60;
+		int secMils = (int)timePassed%1000;
+		
+		//if time passed is more than 1 minute
+		print("time ellapsed: "+timePassed+" ms");
+		print("Execution time: " +  hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms");
+		
+		bufferWriter.close();
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile) {
@@ -404,7 +451,7 @@ private void executeScenario1(){
 		 	//state transitions are updated in the predicates, which can be accessed through predicateHandler
 			BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler);
 			
-			System.out.println("\nThread["+threadID+"]>>Identifying states and their transitions that satisfy the pattern activities...");
+			print("\nThread["+threadID+"]>>Identifying states and their transitions that satisfy the pattern activities...");
 
 			//identify states and transitions that satisfy the pre-/post-conditions of each activity
 			analyser.analyse();
@@ -419,9 +466,10 @@ private void executeScenario1(){
 			 //print all possible state transitions satisfying conditions
 				
 			 if(!predicateHandler.areAllSatisfied()){
-				 System.out.println("\nThread["+threadID+"]>>Activities are not satisfied:" + 
+				 print("\nThread["+threadID+"]>>Activities are not satisfied:" + 
 						 predicateHandler.getActivitiesNotSatisfied());
-				 System.out.println("\nThread["+threadID+"]>>Terminating thread");
+				 print("\nThread["+threadID+"]>>Terminating thread");
+				 latch.countDown();
 				 return;
 			 }
 			 
@@ -434,35 +482,30 @@ private void executeScenario1(){
 			//it prints transitions between pre and post within one activity, post of current to pre of next activity, pre of current to pre of next 
 			//predicateHandler.printAll();
 			
-			for(IncidentActivity act : predicateHandler.getIncidentActivities().values()) {
-				
-			}
-			
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 			
-			//write instantiation output to a text file
 			
-			
-			System.out.println("\nThread["+threadID+"]>>State transitions that satisfy the incident:");
+			print("\nThread["+threadID+"]>>State transitions that satisfy the incident:");
 			for(int i=0; i<paths.size();i++) {
-				System.out.println("P["+i+"]: "+paths.get(i).toPrettyString());
+				print("P["+i+"]: "+paths.get(i).toPrettyString());
 			}
 			
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
 			pathsAnalyser.analyse();
-			System.out.println(pathsAnalyser.print());
+			
+			print(pathsAnalyser.print());
 			//another way is to combine the transitions found for each activity from the initial one to the final one
 			//predicateHandler.printAll();
 			
 //			System.out.println("\nThread["+threadID+"]>>Summary of the incident pattern activities");
 //			System.out.println(predicateHandler.getSummary());
 			
-			System.out.println("Thread ["+threadID+"]>>Terminated");
-			System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			print("Thread ["+threadID+"]>>Terminated");
+			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
-			//latch.countDown();
+			latch.countDown();
 			/*inc.generateDistinctPaths();
 			LinkedList<GraphPath> paths = inc.getAllPaths();
 			
@@ -487,7 +530,7 @@ private void executeScenario1(){
 		}
 		
 		public void start() {
-			System.out.println(">>Thread [" + threadID +"] is starting...\n");
+			print(">>Thread [" + threadID +"] is starting...\n");
 			//System.out.println("system assets: " + Arrays.toString(systemAssetNames));
 			/*if (t == null) {
 				t = new Thread(this, "" + threadID);
@@ -536,5 +579,18 @@ private void executeScenario1(){
 			this.outputFolder = outputFolder;
 		}
 
+	}
+	
+	public void print(String msg) {
+		
+		System.out.println(msg);
+		
+		try {
+			bufferWriter.write(msg);
+			bufferWriter.newLine();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

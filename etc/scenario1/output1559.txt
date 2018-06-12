@@ -1,0 +1,198 @@
+Start time: 2018/06/12 20:57:38
+>>Matching incident pattern entities to system assets
+>>Entity-Asset map:
+hallway:hallway
+location_SD1:instructorsLab2,empiricalLab,informaticsLab
+smartDevice1:SL1,SL2,SL3
+busNetwork:busNetwork
+floorX:fourteenth_floor
+location2:empiricalLab
+HVAC:AirConditioning
+laptopX:Laptop1
+HVACmalware:SoftwareX
+offender1:Visitor1
+
+>>Initialise the System
+>>Asset set[0]: [hallway, instructorsLab2, SL1, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+>>Thread [0] is starting...
+
+
+Thread[0]>>Identifying states and their transitions that satisfy the pattern activities...
+
+Thread[0]>>State transitions that satisfy the incident:
+P[0]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46
+P[1]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[SendData]=>99
+P[2]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[SendData]=>105
+P[3]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[SendData]=>113
+P[4]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ConnectBusDevice]=>44=[SendData]=>144
+P[5]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeAccessToCardNotRequired]=>44=[SendData]=>144
+P[6]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeAccessToCardNotRequired]=>144
+P[7]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145
+P[8]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ConnectBusDevice]=>45=[SendData]=>145
+P[9]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeContextToOutSideWorkingHours]=>45=[SendData]=>145
+P[10]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeContextToOutSideWorkingHours]=>145
+P[11]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[DisableHVAC]=>146
+P[12]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ConnectBusDevice]=>87=[SendData]=>224
+P[13]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeContextToOutSideWorkingHours]=>87=[SendData]=>224
+P[14]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[SendData]=>105=[ChangeContextToOutSideWorkingHours]=>224
+P[15]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224
+P[16]: 0=[EnterRoom]=>3=[ChangeAccessToCardNotRequired]=>28=[ConnectBusDevice]=>97=[SendData]=>254
+P[17]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[ChangeAccessToCardNotRequired]=>97=[SendData]=>254
+P[18]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[SendData]=>99=[ChangeAccessToCardNotRequired]=>254
+P[19]: 0=[EnterRoom]=>3=[ChangeContextToOutSideWorkingHours]=>29=[ConnectBusDevice]=>98=[SendData]=>255
+P[20]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[ChangeContextToOutSideWorkingHours]=>98=[SendData]=>255
+P[21]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[SendData]=>99=[ChangeContextToOutSideWorkingHours]=>255
+P[22]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[SendData]=>99=[DisableHVAC]=>256
+P[23]: 0=[EnterRoom]=>2=[ChangeAccessToCardNotRequired]=>31=[ConnectBusDevice]=>104=[SendData]=>264
+P[24]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeAccessToCardNotRequired]=>104=[SendData]=>264
+P[25]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[SendData]=>105=[ChangeAccessToCardNotRequired]=>264
+P[26]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[SendData]=>105=[DisableHVAC]=>265
+P[27]: 0=[EnterRoom]=>1=[ChangeAccessToCardNotRequired]=>34=[ConnectBusDevice]=>111=[SendData]=>276
+P[28]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[ChangeAccessToCardNotRequired]=>111=[SendData]=>276
+P[29]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[SendData]=>113=[ChangeAccessToCardNotRequired]=>276
+P[30]: 0=[EnterRoom]=>1=[ChangeContextToOutSideWorkingHours]=>35=[ConnectBusDevice]=>112=[SendData]=>277
+P[31]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[ChangeContextToOutSideWorkingHours]=>112=[SendData]=>277
+P[32]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[SendData]=>113=[ChangeContextToOutSideWorkingHours]=>277
+P[33]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[SendData]=>113=[DisableHVAC]=>278
+P[34]: 0=[EnterRoom]=>8=[ConnectIPDevice]=>13=[DisconnectIPDevice]=>42=[ConnectBusDevice]=>131=[SendData]=>302
+P[35]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ConnectBusDevice]=>44=[SendData]=>144=[DisableHVAC]=>337
+P[36]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeAccessToCardNotRequired]=>44=[SendData]=>144=[DisableHVAC]=>337
+P[37]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeAccessToCardNotRequired]=>144=[DisableHVAC]=>337
+P[38]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[DisableHVAC]=>146=[ChangeAccessToCardNotRequired]=>337
+P[39]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[DisableHVAC]=>338
+P[40]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[DisableHVAC]=>338
+P[41]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeContextToOutSideWorkingHours]=>45=[SendData]=>145=[DisableHVAC]=>338
+P[42]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeContextToOutSideWorkingHours]=>145=[DisableHVAC]=>338
+P[43]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[DisableHVAC]=>146=[ChangeContextToOutSideWorkingHours]=>338
+P[44]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[ChangeAccessToCardRequired]=>339
+P[45]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[ChangeAccessToCardRequired]=>148=[SendData]=>339
+P[46]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ChangeAccessToCardRequired]=>53=[ConnectBusDevice]=>148=[SendData]=>339
+P[47]: 0=[ChangeContextToOutSideWorkingHours]=>5=[ChangeAccessToCardRequired]=>23=[EnterRoom]=>53=[ConnectBusDevice]=>148=[SendData]=>339
+P[48]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[ChangeAccessToCardRequired]=>339
+P[49]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ConnectBusDevice]=>45=[ChangeAccessToCardRequired]=>148=[SendData]=>339
+P[50]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ChangeAccessToCardRequired]=>53=[ConnectBusDevice]=>148=[SendData]=>339
+P[51]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeContextToOutSideWorkingHours]=>45=[SendData]=>145=[ChangeAccessToCardRequired]=>339
+P[52]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeContextToOutSideWorkingHours]=>45=[ChangeAccessToCardRequired]=>148=[SendData]=>339
+P[53]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeContextToOutSideWorkingHours]=>145=[ChangeAccessToCardRequired]=>339
+P[54]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[ChangeContextToWorkingHours]=>340
+P[55]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[ChangeContextToWorkingHours]=>149=[SendData]=>340
+P[56]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>10=[ChangeContextToWorkingHours]=>54=[ConnectBusDevice]=>149=[SendData]=>340
+P[57]: 0=[ChangeContextToOutSideWorkingHours]=>5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>54=[ConnectBusDevice]=>149=[SendData]=>340
+P[58]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[ChangeContextToWorkingHours]=>340
+P[59]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ConnectBusDevice]=>45=[ChangeContextToWorkingHours]=>149=[SendData]=>340
+P[60]: 0=[EnterRoom]=>8=[ChangeContextToOutSideWorkingHours]=>10=[ChangeContextToWorkingHours]=>54=[ConnectBusDevice]=>149=[SendData]=>340
+P[61]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeContextToOutSideWorkingHours]=>45=[SendData]=>145=[ChangeContextToWorkingHours]=>340
+P[62]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeContextToOutSideWorkingHours]=>45=[ChangeContextToWorkingHours]=>149=[SendData]=>340
+P[63]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeContextToOutSideWorkingHours]=>145=[ChangeContextToWorkingHours]=>340
+P[64]: 0=[ChangeAccessToCardNotRequired]=>4=[ChangeAccessToCardRequired]=>26=[EnterRoom]=>55=[ConnectBusDevice]=>150=[SendData]=>341
+P[65]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ConnectBusDevice]=>44=[SendData]=>144=[ChangeAccessToCardRequired]=>341
+P[66]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ConnectBusDevice]=>44=[ChangeAccessToCardRequired]=>150=[SendData]=>341
+P[67]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ChangeAccessToCardRequired]=>55=[ConnectBusDevice]=>150=[SendData]=>341
+P[68]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeAccessToCardNotRequired]=>44=[SendData]=>144=[ChangeAccessToCardRequired]=>341
+P[69]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeAccessToCardNotRequired]=>44=[ChangeAccessToCardRequired]=>150=[SendData]=>341
+P[70]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeAccessToCardNotRequired]=>144=[ChangeAccessToCardRequired]=>341
+P[71]: 0=[ChangeAccessToCardNotRequired]=>4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>56=[ConnectBusDevice]=>151=[SendData]=>342
+P[72]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ConnectBusDevice]=>44=[SendData]=>144=[ChangeContextToWorkingHours]=>342
+P[73]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ConnectBusDevice]=>44=[ChangeContextToWorkingHours]=>151=[SendData]=>342
+P[74]: 0=[EnterRoom]=>8=[ChangeAccessToCardNotRequired]=>9=[ChangeContextToWorkingHours]=>56=[ConnectBusDevice]=>151=[SendData]=>342
+P[75]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeAccessToCardNotRequired]=>44=[SendData]=>144=[ChangeContextToWorkingHours]=>342
+P[76]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[ChangeAccessToCardNotRequired]=>44=[ChangeContextToWorkingHours]=>151=[SendData]=>342
+P[77]: 0=[EnterRoom]=>8=[ConnectBusDevice]=>12=[SendData]=>46=[ChangeAccessToCardNotRequired]=>144=[ChangeContextToWorkingHours]=>342
+P[78]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ChangeAccessToCardRequired]=>84=[ConnectBusDevice]=>222=[SendData]=>460
+P[79]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ConnectBusDevice]=>87=[ChangeAccessToCardRequired]=>222=[SendData]=>460
+P[80]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[ChangeAccessToCardRequired]=>460
+P[81]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeContextToOutSideWorkingHours]=>87=[ChangeAccessToCardRequired]=>222=[SendData]=>460
+P[82]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeContextToOutSideWorkingHours]=>87=[SendData]=>224=[ChangeAccessToCardRequired]=>460
+P[83]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[SendData]=>105=[ChangeContextToOutSideWorkingHours]=>224=[ChangeAccessToCardRequired]=>460
+P[84]: 0=[ChangeContextToOutSideWorkingHours]=>5=[ChangeAccessToCardRequired]=>23=[EnterRoom]=>84=[ConnectBusDevice]=>222=[SendData]=>460
+P[85]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ChangeAccessToCardRequired]=>84=[ConnectBusDevice]=>222=[SendData]=>460
+P[86]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[ChangeAccessToCardRequired]=>222=[SendData]=>460
+P[87]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[ChangeAccessToCardRequired]=>460
+P[88]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ChangeContextToWorkingHours]=>85=[ConnectBusDevice]=>223=[SendData]=>461
+P[89]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ConnectBusDevice]=>87=[ChangeContextToWorkingHours]=>223=[SendData]=>461
+P[90]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[ChangeContextToWorkingHours]=>461
+P[91]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeContextToOutSideWorkingHours]=>87=[ChangeContextToWorkingHours]=>223=[SendData]=>461
+P[92]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeContextToOutSideWorkingHours]=>87=[SendData]=>224=[ChangeContextToWorkingHours]=>461
+P[93]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[SendData]=>105=[ChangeContextToOutSideWorkingHours]=>224=[ChangeContextToWorkingHours]=>461
+P[94]: 0=[ChangeContextToOutSideWorkingHours]=>5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>85=[ConnectBusDevice]=>223=[SendData]=>461
+P[95]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ChangeContextToWorkingHours]=>85=[ConnectBusDevice]=>223=[SendData]=>461
+P[96]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[ChangeContextToWorkingHours]=>223=[SendData]=>461
+P[97]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[ChangeContextToWorkingHours]=>461
+P[98]: 0=[EnterRoom]=>2=[ChangeContextToOutSideWorkingHours]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[DisableHVAC]=>462
+P[99]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeContextToOutSideWorkingHours]=>87=[SendData]=>224=[DisableHVAC]=>462
+P[100]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[SendData]=>105=[ChangeContextToOutSideWorkingHours]=>224=[DisableHVAC]=>462
+P[101]: 0=[ChangeContextToOutSideWorkingHours]=>5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[DisableHVAC]=>462
+P[102]: 0=[EnterRoom]=>1=[ChangeContextToOutSideWorkingHours]=>35=[ChangeContextToWorkingHours]=>89=[ConnectBusDevice]=>236=[SendData]=>476
+P[103]: 0=[EnterRoom]=>1=[ChangeContextToOutSideWorkingHours]=>35=[ConnectBusDevice]=>112=[ChangeContextToWorkingHours]=>236=[SendData]=>476
+P[104]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[ChangeContextToOutSideWorkingHours]=>112=[ChangeContextToWorkingHours]=>236=[SendData]=>476
+P[105]: 0=[ChangeContextToOutSideWorkingHours]=>5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>89=[ConnectBusDevice]=>236=[SendData]=>476
+P[106]: 0=[EnterRoom]=>3=[ChangeContextToOutSideWorkingHours]=>29=[ChangeContextToWorkingHours]=>88=[ConnectBusDevice]=>238=[SendData]=>484
+P[107]: 0=[EnterRoom]=>3=[ChangeContextToOutSideWorkingHours]=>29=[ConnectBusDevice]=>98=[ChangeContextToWorkingHours]=>238=[SendData]=>484
+P[108]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[ChangeContextToOutSideWorkingHours]=>98=[ChangeContextToWorkingHours]=>238=[SendData]=>484
+P[109]: 0=[ChangeContextToOutSideWorkingHours]=>5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>88=[ConnectBusDevice]=>238=[SendData]=>484
+P[110]: 0=[EnterRoom]=>2=[ChangeAccessToCardNotRequired]=>31=[ChangeContextToWorkingHours]=>94=[ConnectBusDevice]=>240=[SendData]=>488
+P[111]: 0=[EnterRoom]=>2=[ChangeAccessToCardNotRequired]=>31=[ConnectBusDevice]=>104=[ChangeContextToWorkingHours]=>240=[SendData]=>488
+P[112]: 0=[EnterRoom]=>2=[ConnectBusDevice]=>33=[ChangeAccessToCardNotRequired]=>104=[ChangeContextToWorkingHours]=>240=[SendData]=>488
+P[113]: 0=[ChangeAccessToCardNotRequired]=>4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>94=[ConnectBusDevice]=>240=[SendData]=>488
+P[114]: 0=[EnterRoom]=>3=[ChangeAccessToCardNotRequired]=>28=[ChangeContextToWorkingHours]=>93=[ConnectBusDevice]=>241=[SendData]=>493
+P[115]: 0=[EnterRoom]=>3=[ChangeAccessToCardNotRequired]=>28=[ConnectBusDevice]=>97=[ChangeContextToWorkingHours]=>241=[SendData]=>493
+P[116]: 0=[EnterRoom]=>3=[ConnectBusDevice]=>30=[ChangeAccessToCardNotRequired]=>97=[ChangeContextToWorkingHours]=>241=[SendData]=>493
+P[117]: 0=[ChangeAccessToCardNotRequired]=>4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>93=[ConnectBusDevice]=>241=[SendData]=>493
+P[118]: 0=[EnterRoom]=>1=[ChangeAccessToCardNotRequired]=>34=[ChangeContextToWorkingHours]=>92=[ConnectBusDevice]=>243=[SendData]=>496
+P[119]: 0=[EnterRoom]=>1=[ChangeAccessToCardNotRequired]=>34=[ConnectBusDevice]=>111=[ChangeContextToWorkingHours]=>243=[SendData]=>496
+P[120]: 0=[EnterRoom]=>1=[ConnectBusDevice]=>37=[ChangeAccessToCardNotRequired]=>111=[ChangeContextToWorkingHours]=>243=[SendData]=>496
+P[121]: 0=[ChangeAccessToCardNotRequired]=>4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>92=[ConnectBusDevice]=>243=[SendData]=>496
+P[122]: 4=[ChangeAccessToCardRequired]=>26=[EnterRoom]=>55=[ConnectBusDevice]=>150=[SendData]=>341
+P[123]: 4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>56=[ConnectBusDevice]=>151=[SendData]=>342
+P[124]: 4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>94=[ConnectBusDevice]=>240=[SendData]=>488
+P[125]: 4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>93=[ConnectBusDevice]=>241=[SendData]=>493
+P[126]: 4=[ChangeContextToWorkingHours]=>27=[EnterRoom]=>92=[ConnectBusDevice]=>243=[SendData]=>496
+P[127]: 5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145
+P[128]: 5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224
+P[129]: 5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[DisableHVAC]=>338
+P[130]: 5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[ChangeAccessToCardRequired]=>339
+P[131]: 5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[ChangeAccessToCardRequired]=>148=[SendData]=>339
+P[132]: 5=[EnterRoom]=>10=[ChangeAccessToCardRequired]=>53=[ConnectBusDevice]=>148=[SendData]=>339
+P[133]: 5=[ChangeAccessToCardRequired]=>23=[EnterRoom]=>53=[ConnectBusDevice]=>148=[SendData]=>339
+P[134]: 5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[SendData]=>145=[ChangeContextToWorkingHours]=>340
+P[135]: 5=[EnterRoom]=>10=[ConnectBusDevice]=>45=[ChangeContextToWorkingHours]=>149=[SendData]=>340
+P[136]: 5=[EnterRoom]=>10=[ChangeContextToWorkingHours]=>54=[ConnectBusDevice]=>149=[SendData]=>340
+P[137]: 5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>54=[ConnectBusDevice]=>149=[SendData]=>340
+P[138]: 5=[ChangeAccessToCardRequired]=>23=[EnterRoom]=>84=[ConnectBusDevice]=>222=[SendData]=>460
+P[139]: 5=[EnterRoom]=>25=[ChangeAccessToCardRequired]=>84=[ConnectBusDevice]=>222=[SendData]=>460
+P[140]: 5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[ChangeAccessToCardRequired]=>222=[SendData]=>460
+P[141]: 5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[ChangeAccessToCardRequired]=>460
+P[142]: 5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>85=[ConnectBusDevice]=>223=[SendData]=>461
+P[143]: 5=[EnterRoom]=>25=[ChangeContextToWorkingHours]=>85=[ConnectBusDevice]=>223=[SendData]=>461
+P[144]: 5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[ChangeContextToWorkingHours]=>223=[SendData]=>461
+P[145]: 5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[ChangeContextToWorkingHours]=>461
+P[146]: 5=[EnterRoom]=>25=[ConnectBusDevice]=>87=[SendData]=>224=[DisableHVAC]=>462
+P[147]: 5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>89=[ConnectBusDevice]=>236=[SendData]=>476
+P[148]: 5=[ChangeContextToWorkingHours]=>24=[EnterRoom]=>88=[ConnectBusDevice]=>238=[SendData]=>484
+P[149]: 23=[EnterRoom]=>53=[ConnectBusDevice]=>148=[SendData]=>339
+P[150]: 23=[EnterRoom]=>84=[ConnectBusDevice]=>222=[SendData]=>460
+P[151]: 24=[EnterRoom]=>54=[ConnectBusDevice]=>149=[SendData]=>340
+P[152]: 24=[EnterRoom]=>85=[ConnectBusDevice]=>223=[SendData]=>461
+P[153]: 24=[EnterRoom]=>89=[ConnectBusDevice]=>236=[SendData]=>476
+P[154]: 24=[EnterRoom]=>88=[ConnectBusDevice]=>238=[SendData]=>484
+P[155]: 26=[EnterRoom]=>55=[ConnectBusDevice]=>150=[SendData]=>341
+P[156]: 27=[EnterRoom]=>56=[ConnectBusDevice]=>151=[SendData]=>342
+P[157]: 27=[EnterRoom]=>94=[ConnectBusDevice]=>240=[SendData]=>488
+P[158]: 27=[EnterRoom]=>93=[ConnectBusDevice]=>241=[SendData]=>493
+P[159]: 27=[EnterRoom]=>92=[ConnectBusDevice]=>243=[SendData]=>496
+
+common actions:{ConnectBusDevice=159, EnterRoom=159, SendData=159, ChangeContextToOutSideWorkingHours=70, ChangeContextToWorkingHours=60, ChangeAccessToCardNotRequired=41, ChangeAccessToCardRequired=35, DisableHVAC=18, ConnectIPDevice=0, DisconnectIPDevice=0}
+
+top paths (based on common actions): []
+
+Shortest Paths (3 actions): [0, 1, 2, 3, 127, 128, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 3]
+
+Longest Paths (5 actions): [34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 5]
+
+Thread [0]>>Terminated
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+End time: 2018/06/12 20:59:49
+time ellapsed: 130850 ms
+Execution time: 0h:2m:10s:850ms
