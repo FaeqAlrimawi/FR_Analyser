@@ -518,6 +518,7 @@ private void executeScenario1(){
 			//predicateHandler.printAll();
 			
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
+			 print("\nThread ["+threadID+"]>>Generating potential incident instances...");
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 			
 			//store system assets and incident entities
@@ -540,7 +541,6 @@ private void executeScenario1(){
 			.append("\"num\":").append(size).append(",")
 			.append("\"instances\":[");
 	
-			print("\nThread["+threadID+"]>>State transitions that satisfy the incident:");
 			for(int i=0; i<size;i++) {
 				jsonStr.append("{\"instance_id\":").append(i).append(",")
 				.append(paths.get(i).toJSON())
@@ -560,7 +560,7 @@ private void executeScenario1(){
 			obj = null;
 			
 			print(paths.size()+" Potential incident instances were generated. Please see details in:");
-			print("\nFile: "+ threadFile.getAbsolutePath());
+			print("File: "+ threadFile.getAbsolutePath());
 			
 			print("\nThread ["+threadID+"]>>Analysing generated potential incident instances...");
 			//create an analysis object for the identified paths

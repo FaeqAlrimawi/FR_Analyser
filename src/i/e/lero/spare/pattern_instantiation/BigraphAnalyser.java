@@ -22,7 +22,7 @@ public class BigraphAnalyser {
 	private Matcher matcher;
 	private int threadPoolSize = 100;
 	private ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-	private double partitionSizePercentage = 0.1; //represents the size of the partiition as a percentage of the number of states
+	private double partitionSizePercentage = 0.05; //represents the size of the partiition as a percentage of the number of states
 	private int partitionSize = 0;
 	
 	public BigraphAnalyser() {
