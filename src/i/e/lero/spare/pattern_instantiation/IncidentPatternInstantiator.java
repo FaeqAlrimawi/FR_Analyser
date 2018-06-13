@@ -198,7 +198,8 @@ private void executeScenario1(){
 		String BRS_outputFolder = "etc/scenario1/research_centre_output";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-		String outputFileName = "etc/scenario1/output1559.txt";
+		String outputFileName = "etc/scenario1/log.txt";
+		int numberOfThreads = 0;
 		
 		try {
 			
@@ -276,17 +277,28 @@ private void executeScenario1(){
 		}
 		
 		//create threads that handle each sequence generated from asset matching
-		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+		numberOfThreads = lst.size();
+		
+		//For testing, number of threads is set to certain number
+		//numberOfThreads = 1;
+				
+		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[numberOfThreads];
+		Thread [] threads = new Thread[numberOfThreads];
+		
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
-		//create a latch to let the main thread wait for the other threads to finish execute
-		latch = new CountDownLatch(1);
+		System.out.println("threads: "+ numberOfThreads);
 		
-		for(int i=0; i<1;i++) {//adjust the length
+		
+		//create a latch to let the main thread wait for the other threads to finish execute
+		latch = new CountDownLatch(numberOfThreads);
+		
+		for(int i=0; i<numberOfThreads;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			print(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 	
-			incidentInstances[i].start();
+			threads[i] = new Thread(incidentInstances[i]);
+			threads[i].start();
 		}
 		
 		try {
@@ -415,11 +427,11 @@ private void executeScenario1(){
 	}
 
 	
-	class PotentialIncidentInstance extends Thread {
+	class PotentialIncidentInstance implements Runnable {
 
 		private String[] systemAssetNames;
 		private String[] incidentAssetNames;
-		//private Thread t;
+		private Thread t;
 		private long threadID;
 		private String BRSFileName;
 		private String outputFolder;
@@ -563,7 +575,7 @@ private void executeScenario1(){
 				t = new Thread(this, "" + threadID);
 				t.start();
 			}*/
-			run();
+			
 		}
 
 		public String[] getSystemAssetNames() {

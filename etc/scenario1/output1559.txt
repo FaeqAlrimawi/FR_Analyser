@@ -1,0 +1,138 @@
+Start time: 2018/06/13 13:42:47
+>>Matching incident pattern entities to system assets
+>>Entity-Asset map:
+hallway:hallway
+location_SD1:instructorsLab2,empiricalLab,informaticsLab
+smartDevice1:SL1,SL2,SL3
+busNetwork:busNetwork
+floorX:fourteenth_floor
+location2:empiricalLab
+HVAC:AirConditioning
+laptopX:Laptop1
+HVACmalware:SoftwareX
+offender1:Visitor1
+
+>>Initialise the System
+>>Asset set[0]: [hallway, instructorsLab2, SL1, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+>>Asset set[1]: [hallway, informaticsLab, SL1, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+>>Asset set[2]: [hallway, instructorsLab2, SL2, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+>>Asset set[3]: [hallway, informaticsLab, SL2, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+>>Asset set[4]: [hallway, instructorsLab2, SL3, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+>>Asset set[5]: [hallway, informaticsLab, SL3, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+
+Thread[4]>>Identifying states and their transitions that satisfy the pattern activities...
+
+Thread[5]>>Identifying states and their transitions that satisfy the pattern activities...
+
+Thread[0]>>Identifying states and their transitions that satisfy the pattern activities...
+
+Thread[1]>>Identifying states and their transitions that satisfy the pattern activities...
+
+Thread[2]>>Identifying states and their transitions that satisfy the pattern activities...
+
+Thread[3]>>Identifying states and their transitions that satisfy the pattern activities...
+
+Thread[0]>>State transitions that satisfy the incident:
+2 Potential incident instances were generated. Please see details in:
+File: D:\workspace-neon\FR_Analyser\etc\scenario1\output\0.json
+
+common actions:{ConnectBusDevice=1, EnterRoom=1, SendData=1}
+
+top paths (based on common actions): [0, 1]
+
+Shortest Paths (3 actions): [0, 1, 3]
+
+Longest Paths (3 actions): [0, 1, 3]
+
+Thread [0]>>Terminated
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+Thread[2]>>State transitions that satisfy the incident:
+2 Potential incident instances were generated. Please see details in:
+File: D:\workspace-neon\FR_Analyser\etc\scenario1\output\2.json
+
+common actions:{ConnectBusDevice=1, EnterRoom=1, SendData=1}
+
+top paths (based on common actions): [0, 1]
+
+Shortest Paths (3 actions): [0, 1, 3]
+
+Longest Paths (3 actions): [0, 1, 3]
+
+Thread [2]>>Terminated
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+Thread[4]>>State transitions that satisfy the incident:
+2 Potential incident instances were generated. Please see details in:
+File: D:\workspace-neon\FR_Analyser\etc\scenario1\output\4.json
+
+common actions:{ConnectBusDevice=1, EnterRoom=1, SendData=1}
+
+top paths (based on common actions): [0, 1]
+
+Shortest Paths (3 actions): [0, 1, 3]
+
+Longest Paths (3 actions): [0, 1, 3]
+
+Thread [4]>>Terminated
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+Thread[1]>>State transitions that satisfy the incident:
+1 Potential incident instances were generated. Please see details in:
+File: D:\workspace-neon\FR_Analyser\etc\scenario1\output\1.json
+
+common actions:{ConnectBusDevice=0, EnterRoom=0, SendData=0}
+
+top paths (based on common actions): [0]
+
+Shortest Paths (3 actions): [0, 3]
+
+Longest Paths (3 actions): [0, 3]
+
+Thread [1]>>Terminated
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+Thread[5]>>State transitions that satisfy the incident:
+1 Potential incident instances were generated. Please see details in:
+File: D:\workspace-neon\FR_Analyser\etc\scenario1\output\5.json
+
+common actions:{ConnectBusDevice=0, EnterRoom=0, SendData=0}
+
+top paths (based on common actions): [0]
+
+Shortest Paths (3 actions): [0, 3]
+
+Longest Paths (3 actions): [0, 3]
+
+Thread [5]>>Terminated
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+Thread[3]>>State transitions that satisfy the incident:
+1 Potential incident instances were generated. Please see details in:
+File: D:\workspace-neon\FR_Analyser\etc\scenario1\output\3.json
+
+common actions:{ConnectBusDevice=0, EnterRoom=0, SendData=0}
+
+top paths (based on common actions): [0]
+
+Shortest Paths (3 actions): [0, 3]
+
+Longest Paths (3 actions): [0, 3]
+
+Thread [3]>>Terminated
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+End time: 2018/06/13 13:43:44
+time ellapsed: 56285 ms
+Execution time: 0h:0m:56s:285ms
