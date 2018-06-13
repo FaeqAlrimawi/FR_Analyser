@@ -202,7 +202,7 @@ private void executeScenario1(){
 		
 		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		String outputFileName = "etc/scenario1/log.txt";
@@ -560,7 +560,9 @@ private void executeScenario1(){
 			obj = null;
 			
 			print(paths.size()+" Potential incident instances were generated. Please see details in:");
-			print("File: "+ threadFile.getAbsolutePath());
+			print("\nFile: "+ threadFile.getAbsolutePath());
+			
+			print("\nThread ["+threadID+"]>>Analysing generated potential incident instances...");
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
 			pathsAnalyser.analyse();
@@ -572,7 +574,7 @@ private void executeScenario1(){
 //			System.out.println("\nThread["+threadID+"]>>Summary of the incident pattern activities");
 //			System.out.println(predicateHandler.getSummary());
 			
-			print("Thread ["+threadID+"]>>Terminated");
+			print("\nThread ["+threadID+"]>>Terminated");
 			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
 			/*inc.generateDistinctPaths();
