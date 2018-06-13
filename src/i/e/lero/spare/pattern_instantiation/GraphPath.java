@@ -123,6 +123,36 @@ public class GraphPath {
 		return res.toString();
 	}
 	
+	public String toJSON() {
+		StringBuilder res = new StringBuilder();
+		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+		String action;
+		
+		res.append("\"transitions\":[");
+		
+		if(stateTransitions.size() == 1) {
+			res.append("{\"source\":").append(stateTransitions.get(0)).append(",")
+			.append("\"target\":").append(stateTransitions.get(0)).append(",")
+			.append("\"action\":\"\"}");
+			
+			return res.toString();
+		}
+		
+		for(int i=0;i<stateTransitions.size()-1;i++) {
+			action = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1));
+			res.append("{\"source\":").append(stateTransitions.get(i)).append(",")
+			.append("\"target\":").append(stateTransitions.get(i+1)).append(",")
+			.append("\"action\":\"").append(action).append("\"}");
+			
+			//if not last transitions
+			if(i < stateTransitions.size()-2) {
+				res.append(",");
+			}
+		}
+		res.append("]");
+		return res.toString();
+	}
+	
 	public boolean isSubPath(GraphPath path) {
 		
 		boolean isSubpath = false;

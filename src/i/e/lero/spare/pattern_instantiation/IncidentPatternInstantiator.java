@@ -11,9 +11,11 @@ import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
 
 import org.apache.batik.parser.PathArrayProducer;
+import org.json.JSONObject;
 
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
+import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.util.StopWatch;
@@ -203,9 +205,9 @@ private void executeScenario1(){
 		//output file
 		scenario1File = new File(outputFileName);
 		
-		//if (!scenario1File.exists()) {
-		//scenario1File.createNewFile();
-        //}
+		if (!scenario1File.exists()) {
+			scenario1File.createNewFile();
+        }
 		
 		FileWriter fw = new FileWriter(scenario1File.getAbsoluteFile());
 		bufferWriter = new BufferedWriter(fw);
@@ -442,6 +444,22 @@ private void executeScenario1(){
 		@Override
 		public void run() {
 		
+			StringBuilder jsonStr = new StringBuilder();
+			String fileName = "etc/scenario1/output/"+threadID+".json";
+			File threadFile = new File(fileName);
+			BufferedWriter threadWriter;
+			FileWriter fw;
+			
+			try {
+				
+				if (!threadFile.exists()) {
+					threadFile.createNewFile();
+		        }
+				
+			fw = new FileWriter(threadFile.getAbsoluteFile());
+			
+			threadWriter = new BufferedWriter(fw);
+			
 			//this object allows the conversion of incident activities conditions into bigraphs
 			//which later can be matched against states of the system (also presented in Bigraph)
 			PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentAssetNames);
@@ -470,6 +488,7 @@ private void executeScenario1(){
 						 predicateHandler.getActivitiesNotSatisfied());
 				 print("\nThread["+threadID+"]>>Terminating thread");
 				 latch.countDown();
+				 threadWriter.close();
 				 return;
 			 }
 			 
@@ -486,11 +505,27 @@ private void executeScenario1(){
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 			
 			
+			jsonStr.append("{\"paths\":[");
 			print("\nThread["+threadID+"]>>State transitions that satisfy the incident:");
 			for(int i=0; i<paths.size();i++) {
-				print("P["+i+"]: "+paths.get(i).toPrettyString());
+				jsonStr.append("{\"path_id\":").append(i).append(",")
+				.append(paths.get(i).toJSON())
+				.append("}");
+				if(i < paths.size()-1) {
+					jsonStr.append(",");
+				}
 			}
+			jsonStr.append("]}");
 			
+			JSONObject obj = new JSONObject(jsonStr.toString());
+			
+			//write paths to a file
+			threadWriter.write(obj.toString(4));
+			threadWriter.close();
+			obj = null;
+			
+			print(paths.size()+" Potential incident instances were generated. Please see details in:");
+			print("File: "+ threadFile.getAbsolutePath());
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
 			pathsAnalyser.analyse();
@@ -513,20 +548,12 @@ private void executeScenario1(){
 				System.out.println(p.toSimpleString());
 			}*/
 			//System.out.println(predic.toString());
-		}
-		
-		/**
-		 * Returns information about the paths that satisfy an incident pattern. Information include:
-		 * 	-Most common actions
-		 *  -shortest 10% of the paths
-		 *  -others??
-		 * @param paths the list of paths
-		 */
-		private String analysePaths(LinkedList<GraphPath> paths) {
-			StringBuilder str = new StringBuilder();
 			
 			
-			return str.toString();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		public void start() {
