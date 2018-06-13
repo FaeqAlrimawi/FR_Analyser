@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import dk.brics.automaton.StatePair;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
@@ -28,11 +29,13 @@ public class BigraphAnalyser {
 	private LinkedList<GraphPath> paths;
 	private boolean isDebugging = true;
 	private HashMap<Integer, Bigraph> states;
-	Matcher matcher;
-	int threadPoolSize = 10;
-	int maxWaitingTime = 24;
-	TimeUnit timeUnit = TimeUnit.HOURS;
-	ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+	private Matcher matcher;
+	private int threadPoolSize = 100;
+	private ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+	private double partitionSizePercentage = 0.1; //represents the size of the partiition as a percentage of the number of states
+	private int partitionSize = 0;
+	private int maxWaitingTime = 24;
+	private TimeUnit timeUnit = TimeUnit.HOURS;
 	
 	public BigraphAnalyser() {
 		predicateHandler = null;
@@ -48,8 +51,15 @@ public class BigraphAnalyser {
 
 	public PredicateHandler analyse() {
 		
+		//set partition size
+		//also can determine if partitioning is needed depending on the number of states
+		partitionSize = (int)(states.size()*this.partitionSizePercentage);
+		
 		identifyRelevantStates();
-		return identifyStateTransitions();
+		predicateHandler =  identifyStateTransitions();
+		
+		
+		return predicateHandler;
 
 	}
 
@@ -64,11 +74,16 @@ public class BigraphAnalyser {
 	public PredicateHandler identifyRelevantStates() {
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
 
+		LinkedList<Future<Integer>> results = new LinkedList<Future<Integer>>();
+		
+		try {
 		for (String nm : activitiesName) {
-			identifyRelevantStates(nm);
+			//identifyRelevantStates(nm);
+			results.add(executor.submit(new ActivityMatcher(nm)));	
 		}
-
-		executor.shutdown();
+		
+		
+		
 		return predicateHandler;
 	}
 
@@ -238,34 +253,45 @@ public class BigraphAnalyser {
 		}*/
 
 		////for testing only. Tests the time it takes to search for states in general by increasing the number of iterations. 
-		//Should be removed when
-		int iterations = 1;
-		
-		int length = states.size();
 		
 		//print("number of states matched to: " + length*iterations);
 		//print starting time of matching
 		//print("["+ +"] start the matching process...");
 		
-		int half1 = states.size()/2;
-		int half2 = states.size() - half1;
-		
+		//divid the states array for mult-threading
 		try {
-		Future<LinkedList<Integer>> result1 = executor.submit(new BigraphMatcher(half1, half2, redex));
-		Future<LinkedList<Integer>> result2 = executor.submit(new BigraphMatcher(half2, states.size(), redex));
+			
+		LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
 		
-		//combine states into result1
-		result1.get().addAll(result2.get());
+		LinkedList<Integer> statesResults = new LinkedList<Integer>();
 		
+		//run tasks
+		int index=0;
+		int size = states.size()/partitionSize;
+		
+		for(index=0;index<size-1;index++) {
+			results.add(executor.submit(new BigraphMatcher(partitionSize*index, partitionSize*(index+1), redex.clone())));
+		}
+		
+		//last partition takes the residue as well
+		results.add(executor.submit(new BigraphMatcher(partitionSize*index, states.size(), redex.clone())));
+		
+		//get results
+		for(int i=0;i<size;i++) {
+			statesResults.addAll(results.get(i).get());
+		}
+			
 		//set the predicate states
-		pred.setBigraphStates(result1.get());
+		pred.setBigraphStates(statesResults);
+		
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		/*for(int i =0; i<length*iterations;i++) {	
-			if(matcher.match(states.get(i%length), redex).iterator().hasNext()){
+		//should be kept in case number of states is not high
+		/*for(int i =0; i<states.size();i++) {	
+			if(matcher.match(states.get(i), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;
 				//print("state " + i%length + " matched");		
@@ -322,17 +348,17 @@ public class BigraphAnalyser {
 		int indexStart;
 		int indexEnd;
 		Bigraph redex;
+		LinkedList<Integer> matchedStates;
 		
 		public BigraphMatcher(int indexStart, int indexEnd, Bigraph redex){
 			this.indexStart = indexStart;
 			this.indexEnd = indexEnd;
 			this.redex = redex;
+			matchedStates = new LinkedList<Integer>();
 		}
 		
 		@Override
-		public LinkedList<Integer> call() throws Exception {
-			LinkedList<Integer> matchedStates = new LinkedList<Integer>();
-			
+		public LinkedList<Integer> call() throws Exception {			
 			for(int i = indexStart; i<indexEnd; i++) {
 				if(matcher.match(states.get(i), redex).iterator().hasNext()){
 					matchedStates.add(i);
@@ -340,6 +366,87 @@ public class BigraphAnalyser {
 			}
 			
 			return matchedStates;
+		}
+		
+	}
+	
+	class ActivityMatcher implements Callable<Integer>{
+
+		private String activityName;
+		
+		public ActivityMatcher(String activityName) {
+			this.activityName = activityName;
+			System.out.println(activityName);
+		}
+		
+		@Override
+		public Integer call() throws Exception {
+			// TODO Auto-generated method stub
+			ArrayList<Predicate> preds = predicateHandler.getActivityPredicates(activityName);
+
+			for (Predicate p : preds) {
+				identifyRelevantStates(p);
+			}
+			
+			return null;
+		}
+		
+		public boolean identifyRelevantStates(Predicate pred) {
+			
+			boolean areStatesIdentified = false;
+				
+			if(pred == null) {
+				return false;
+			}
+			
+			Bigraph redex = pred.getBigraphPredicate();
+			
+			if(redex == null) {
+				return false;
+			}		
+			
+			//divid the states array for mult-threading
+			try {
+				
+			LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
+			
+			LinkedList<Integer> statesResults = new LinkedList<Integer>();
+			
+			//run tasks
+			int index=0;
+			int size = states.size()/partitionSize;
+			
+			for(index=0;index<size-1;index++) {
+				results.add(executor.submit(new BigraphMatcher(partitionSize*index, partitionSize*(index+1), redex.clone())));
+			}
+			
+			//last partition takes the residue as well
+			results.add(executor.submit(new BigraphMatcher(partitionSize*index, states.size(), redex.clone())));
+			
+			//get results
+			for(int i=0;i<size;i++) {
+				statesResults.addAll(results.get(i).get());
+			}
+				
+			//set the predicate states
+			pred.setBigraphStates(statesResults);
+			
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//should be kept in case number of states is not high
+			/*for(int i =0; i<states.size();i++) {	
+				if(matcher.match(states.get(i), redex).iterator().hasNext()){
+					pred.addBigraphState(i);
+					areStatesIdentified = true;
+					//print("state " + i%length + " matched");		
+				}
+			}*/
+			
+			System.out.println(pred.getName()+"-states: "+pred.getBigraphStates());
+			return areStatesIdentified;
 		}
 		
 	}

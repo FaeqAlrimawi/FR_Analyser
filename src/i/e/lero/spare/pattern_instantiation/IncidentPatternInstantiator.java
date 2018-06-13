@@ -30,7 +30,7 @@ public class IncidentPatternInstantiator {
 	//CountDownLatch latch;
 	private File scenario1File;
 	BufferedWriter bufferWriter;
-	int threadPoolSize = 10;
+	int threadPoolSize = 1;
 	int maxWaitingTime = 24;
 	TimeUnit timeUnit = TimeUnit.HOURS;
 	
@@ -202,7 +202,7 @@ private void executeScenario1(){
 		
 		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		String outputFileName = "etc/scenario1/log.txt";
@@ -295,7 +295,7 @@ private void executeScenario1(){
 		//create a latch to let the main thread wait for the other threads to finish execute
 		//latch = new CountDownLatch(lst.size());
 		
-		for(int i=0; i<lst.size();i++) {//adjust the length
+		for(int i=0; i<1;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			print(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			
