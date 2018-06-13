@@ -9,6 +9,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.batik.parser.PathArrayProducer;
 import org.json.JSONObject;
@@ -24,9 +27,13 @@ public class IncidentPatternInstantiator {
 	
 	private String xqueryFile = "match_query.xq";
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
-	CountDownLatch latch;
+	//CountDownLatch latch;
 	private File scenario1File;
 	BufferedWriter bufferWriter;
+	int threadPoolSize = 10;
+	int maxWaitingTime = 24;
+	TimeUnit timeUnit = TimeUnit.HOURS;
+	
 	
 	public void execute() {
 		
@@ -195,11 +202,10 @@ private void executeScenario1(){
 		
 		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		String outputFileName = "etc/scenario1/log.txt";
-		int numberOfThreads = 0;
 		
 		try {
 			
@@ -277,32 +283,31 @@ private void executeScenario1(){
 		}
 		
 		//create threads that handle each sequence generated from asset matching
-		numberOfThreads = lst.size();
-		
+		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
 		//For testing, number of threads is set to certain number
 		//numberOfThreads = 1;
 				
-		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[numberOfThreads];
-		Thread [] threads = new Thread[numberOfThreads];
+		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+		//Thread [] threads = new Thread[numberOfThreads];
 		
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
-		System.out.println("threads: "+ numberOfThreads);
-		
-		
 		//create a latch to let the main thread wait for the other threads to finish execute
-		latch = new CountDownLatch(numberOfThreads);
+		//latch = new CountDownLatch(lst.size());
 		
-		for(int i=0; i<numberOfThreads;i++) {//adjust the length
+		for(int i=0; i<lst.size();i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			print(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
-	
-			threads[i] = new Thread(incidentInstances[i]);
-			threads[i].start();
+			
+			executor.submit(incidentInstances[i]);
+			
+			//threads[i] = new Thread(incidentInstances[i]);
+			//threads[i].start();
 		}
 		
 		try {
-			latch.await();
+			executor.shutdown();
+			executor.awaitTermination(maxWaitingTime, timeUnit);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -499,7 +504,6 @@ private void executeScenario1(){
 				 print("\nThread["+threadID+"]>>Activities are not satisfied:" + 
 						 predicateHandler.getActivitiesNotSatisfied());
 				 print("\nThread["+threadID+"]>>Terminating thread");
-				 latch.countDown();
 				 threadWriter.close();
 				 return;
 			 }
@@ -571,7 +575,6 @@ private void executeScenario1(){
 			print("Thread ["+threadID+"]>>Terminated");
 			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
-			latch.countDown();
 			/*inc.generateDistinctPaths();
 			LinkedList<GraphPath> paths = inc.getAllPaths();
 			
@@ -584,8 +587,8 @@ private void executeScenario1(){
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-		}
+			} 
+ 		}
 		
 		public void start() {
 			print(">>Thread [" + threadID +"] is starting...\n");

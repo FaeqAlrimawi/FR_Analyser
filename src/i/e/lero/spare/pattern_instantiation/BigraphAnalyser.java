@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -22,6 +29,10 @@ public class BigraphAnalyser {
 	private boolean isDebugging = true;
 	private HashMap<Integer, Bigraph> states;
 	Matcher matcher;
+	int threadPoolSize = 10;
+	int maxWaitingTime = 24;
+	TimeUnit timeUnit = TimeUnit.HOURS;
+	ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
 	
 	public BigraphAnalyser() {
 		predicateHandler = null;
@@ -57,6 +68,7 @@ public class BigraphAnalyser {
 			identifyRelevantStates(nm);
 		}
 
+		executor.shutdown();
 		return predicateHandler;
 	}
 
@@ -206,7 +218,7 @@ public class BigraphAnalyser {
 			print("state matched");		
 		}*/
 		
-		print("Pred: " + pred.getName()+" type:"+ pred.getPredicateType().toString());
+		print("Pred: " + pred.getName());
 		//print("\nidentifyRelevantStates: \nOriginal redex:"+redex.toString()+"\n\n");
 		//print("\nidentifyRelevantStates: \nState-0:" + states.get(0));
 		
@@ -235,13 +247,30 @@ public class BigraphAnalyser {
 		//print starting time of matching
 		//print("["+ +"] start the matching process...");
 		
-		for(int i =0; i<length*iterations;i++) {	
+		int half1 = states.size()/2;
+		int half2 = states.size() - half1;
+		
+		try {
+		Future<LinkedList<Integer>> result1 = executor.submit(new BigraphMatcher(half1, half2, redex));
+		Future<LinkedList<Integer>> result2 = executor.submit(new BigraphMatcher(half2, states.size(), redex));
+		
+		//combine states into result1
+		result1.get().addAll(result2.get());
+		
+		//set the predicate states
+		pred.setBigraphStates(result1.get());
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		/*for(int i =0; i<length*iterations;i++) {	
 			if(matcher.match(states.get(i%length), redex).iterator().hasNext()){
 				pred.addBigraphState(i);
 				areStatesIdentified = true;
 				//print("state " + i%length + " matched");		
 			}
-		}
+		}*/
 		
 		System.out.println("states: "+pred.getBigraphStates());
 		return areStatesIdentified;
@@ -288,4 +317,30 @@ public class BigraphAnalyser {
 		a.identifyRelevantStates(p);
 	}*/
 
+	class BigraphMatcher implements Callable<LinkedList<Integer>> {
+
+		int indexStart;
+		int indexEnd;
+		Bigraph redex;
+		
+		public BigraphMatcher(int indexStart, int indexEnd, Bigraph redex){
+			this.indexStart = indexStart;
+			this.indexEnd = indexEnd;
+			this.redex = redex;
+		}
+		
+		@Override
+		public LinkedList<Integer> call() throws Exception {
+			LinkedList<Integer> matchedStates = new LinkedList<Integer>();
+			
+			for(int i = indexStart; i<indexEnd; i++) {
+				if(matcher.match(states.get(i), redex).iterator().hasNext()){
+					matchedStates.add(i);
+				}
+			}
+			
+			return matchedStates;
+		}
+		
+	}
 }
