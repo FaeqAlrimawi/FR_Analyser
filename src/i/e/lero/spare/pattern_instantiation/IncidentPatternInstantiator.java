@@ -195,7 +195,7 @@ private void executeScenario1(){
 		
 		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		String outputFileName = "etc/scenario1/log.txt";
@@ -516,18 +516,37 @@ private void executeScenario1(){
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 			
+			//store system assets and incident entities
+			jsonStr.append("{\"map\":[");
 			
-			jsonStr.append("{\"paths\":[");
+			for(int i =0;i<systemAssetNames.length;i++) {
+				jsonStr.append("{\"incident_entity_name\":\"").append(incidentAssetNames[i]).append("\",")
+					.append("\"system_asset_name\":\"").append(systemAssetNames[i]).append("\"}");
+				
+				if(i<systemAssetNames.length-1) {
+					jsonStr.append(",");
+				}
+				
+			}
+			jsonStr.append("],");
+			
+			int size = paths.size();
+			
+			jsonStr.append("\"potential_incident_instances\":{")
+			.append("\"num\":").append(size).append(",")
+			.append("\"instances\":[");
+	
 			print("\nThread["+threadID+"]>>State transitions that satisfy the incident:");
-			for(int i=0; i<paths.size();i++) {
-				jsonStr.append("{\"path_id\":").append(i).append(",")
+			for(int i=0; i<size;i++) {
+				jsonStr.append("{\"instance_id\":").append(i).append(",")
 				.append(paths.get(i).toJSON())
 				.append("}");
-				if(i < paths.size()-1) {
+				if(i < size-1) {
 					jsonStr.append(",");
 				}
 			}
-			jsonStr.append("]}");
+			jsonStr.append("]}}");
+			
 			
 			JSONObject obj = new JSONObject(jsonStr.toString());
 			

@@ -67,7 +67,7 @@ public class GraphPathsAnalyser {
 					cnt++;
 					commonActions.put(action, cnt);
 				} else {//if it is a new action
-					commonActions.put(action, 0);
+					commonActions.put(action, 1);
 				}
 			}
 		}
@@ -211,6 +211,7 @@ public class GraphPathsAnalyser {
 		
 		StringBuilder str = new StringBuilder();
 		String newLine = "\n";
+		int actionsNum = 0;
 		
 		//get common paths
 		str.append(newLine).append("common actions:").append(commonActions).append(newLine);
@@ -220,14 +221,20 @@ public class GraphPathsAnalyser {
 		
 		//get shortest paths
 		if(shortestPaths.size() >0) {
-			str.append(newLine).append("Shortest Paths (").append(shortestPaths.get(shortestPaths.size()-1)).append(" actions): ").append(shortestPaths).append(newLine);	
+			actionsNum = shortestPaths.getLast();
+			shortestPaths.removeLast();
+			str.append(newLine).append("Shortest Paths (").append(actionsNum).append(" actions): ").append(shortestPaths).append(newLine);
+			shortestPaths.add(actionsNum);
 		} else {
 			str.append(newLine).append("Shortest Paths: [NONE]");
 		}
 		
 		//get longest paths
 		if(longestPaths.size() >0) {
-			str.append(newLine).append("Longest Paths (").append(longestPaths.get(longestPaths.size()-1)).append(" actions): ").append(longestPaths).append(newLine);	
+			actionsNum = longestPaths.getLast();
+			longestPaths.removeLast();
+			str.append(newLine).append("Longest Paths (").append(actionsNum).append(" actions): ").append(longestPaths).append(newLine);	
+			longestPaths.add(actionsNum);
 		} else {
 			str.append(newLine).append("Longest Paths: [NONE]");
 		}
