@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Hashtable;
 import java.awt.event.ActionEvent;
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
@@ -43,6 +44,14 @@ import javax.swing.event.HyperlinkEvent;
 import javax.swing.JTextField;
 import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import javax.swing.JSeparator;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class IncidentPatternInstantiationGUI {
 
@@ -55,7 +64,9 @@ public class IncidentPatternInstantiationGUI {
 	private StringBuilder screenOutput = new StringBuilder();
 	private String bigraphFileName = "sb3.big";
 	private JFrame frmForensicReadinessAnalysis;
-	
+	private int windowWidth = 2100;
+	private int windowHeight = 1100;
+	private int threadPoolSize = 4;
 	/**
 	 * Launch the application.
 	 */
@@ -97,28 +108,30 @@ public class IncidentPatternInstantiationGUI {
 		frmForensicReadinessAnalysis.getContentPane().setBackground(SystemColor.window);
 		frmForensicReadinessAnalysis.setBackground(UIManager.getColor("InternalFrame.inactiveTitleGradient"));
 		frmForensicReadinessAnalysis.setFont(new Font("Dialog", Font.PLAIN, 12));
-		frmForensicReadinessAnalysis.setTitle("Incident Pattern Instantiation");
-		frmForensicReadinessAnalysis.setBounds(100, 100, 1200, 1091);
+		frmForensicReadinessAnalysis.setTitle("Potential Incident Generation");
+		frmForensicReadinessAnalysis.setBounds(100, 100, windowWidth, windowHeight);
 		frmForensicReadinessAnalysis.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmForensicReadinessAnalysis.getContentPane().setLayout(null);
 		frmForensicReadinessAnalysis.setLocationByPlatform(true);
 		
 		JPanel panel = new JPanel();
+		
 		panel.setBackground(SystemColor.window);
 		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Log", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(26, 239, 1116, 710);
+		panel.setBounds(668, 100, 1332, 750);
 		frmForensicReadinessAnalysis.getContentPane().add(panel);
 		panel.setLayout(null);
 		JScrollPane spane = new JScrollPane();
 		spane.setViewportBorder(null);
-		spane.setBounds(new Rectangle(26, 41, 1060, 641));
+		spane.setBounds(new Rectangle(50, 50, panel.getWidth()-100, panel.getHeight()-100));
 		
 		spane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		spane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		panel.add(spane);
 		
-		JEditorPane dtrpnTest = new JEditorPane();
-		dtrpnTest.addHyperlinkListener(new HyperlinkListener() {
+		JEditorPane logger = new JEditorPane();
+		
+		logger.addHyperlinkListener(new HyperlinkListener() {
 			public void hyperlinkUpdate(HyperlinkEvent arg0) {
 				if (arg0.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
 				System.out.println(arg0.getURL().getPath());
@@ -136,16 +149,18 @@ public class IncidentPatternInstantiationGUI {
 				}
 			}
 		});
-		spane.setViewportView(dtrpnTest);
-		dtrpnTest.setEditorKit(JEditorPane.createEditorKitForContentType("text/html"));
-		dtrpnTest.setForeground(Color.WHITE);
-		dtrpnTest.setBackground(Color.BLACK);
-		dtrpnTest.setEditable(false);
+		spane.setViewportView(logger);
+		logger.setEditorKit(JEditorPane.createEditorKitForContentType("text"));
+		logger.setForeground(Color.WHITE);
+		logger.setBackground(Color.BLACK);
+		logger.setEditable(false);
+		logger.setBounds(spane.getBounds());
+		logger.setText("<!DOCTYPE html><html><body><p style=\"color:white;font-size:40;\">starting...</p></body></html>");
 		
 		JPanel panel_4 = new JPanel();
 		panel_4.setBorder(new TitledBorder(null, "Incident Pattern", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel_4.setBackground(SystemColor.window);
-		panel_4.setBounds(604, 28, 436, 120);
+		panel_4.setBounds(45, 100, 478, 120);
 		frmForensicReadinessAnalysis.getContentPane().add(panel_4);
 		panel_4.setLayout(new BoxLayout(panel_4, BoxLayout.X_AXIS));
 		
@@ -167,13 +182,13 @@ public class IncidentPatternInstantiationGUI {
 		btnIncidentxml.setContentAreaFilled(false);
 		btnIncidentxml.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				FileManipulator.openFile("incident.xml");
+				FileManipulator.openFile("etc/scenario1/interruption_incident-pattern.cpi");
 			}
 		});
 		btnIncidentxml.setForeground(new Color(0, 0, 255));
 		
 		JPanel panel_3 = new JPanel();
-		panel_3.setBounds(100, 28, 478, 120);
+		panel_3.setBounds(45, 262, 478, 120);
 		frmForensicReadinessAnalysis.getContentPane().add(panel_3);
 		panel_3.setBackground(SystemColor.window);
 		panel_3.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Research Center Representation", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
@@ -182,7 +197,7 @@ public class IncidentPatternInstantiationGUI {
 		JButton btnSpacexml = new JButton("Research center model");
 		btnSpacexml.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				FileManipulator.openFile("etc/research_centre_model.environment");
+				FileManipulator.openFile("etc/scenario1/research_centre_model.cps");
 			}
 		});
 		panel_3.add(btnSpacexml);
@@ -214,21 +229,53 @@ public class IncidentPatternInstantiationGUI {
 		});
 		btnSbbig.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				FileManipulator.openFile("etc/research_centre_system.big");
+				FileManipulator.openFile("etc/scenario1/research_centre_system.big");
 			}
 		});
 		btnSbbig.setForeground(Color.BLUE);
 		btnSbbig.setContentAreaFilled(false);
 		btnSbbig.setBackground(Color.CYAN);
 		
-		JButton btnNewButton = new JButton("Start Analysis");
+		JButton btnNewButton = new JButton("generate incident instances");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IncidentPatternInstantiator inc = new IncidentPatternInstantiator();
-				//inc.execute();
+				
+				inc.execute(threadPoolSize);
 			}
 		});
-		btnNewButton.setBounds(350, 166, 478, 62);
+		btnNewButton.setBounds(45, 788, 478, 62);
 		frmForensicReadinessAnalysis.getContentPane().add(btnNewButton);
+		
+		JSeparator separator = new JSeparator();
+		separator.setOrientation(SwingConstants.VERTICAL);
+		separator.setBounds(587, 100, 48, 750);
+		frmForensicReadinessAnalysis.getContentPane().add(separator);
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBackground(SystemColor.window);
+		panel_1.setForeground(Color.BLACK);
+		panel_1.setBorder(new TitledBorder(null, "Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		panel_1.setBounds(45, 428, 478, 236);
+		frmForensicReadinessAnalysis.getContentPane().add(panel_1);
+		panel_1.setLayout(null);
+		
+		JLabel lblThreadPoolSize = new JLabel("Thread pool size");
+		lblThreadPoolSize.setFont(new Font("Tahoma", Font.PLAIN, 24));
+		lblThreadPoolSize.setBounds(26, 64, 212, 40);
+		panel_1.add(lblThreadPoolSize);
+		
+		JSpinner spinner = new JSpinner();
+		spinner.getModel().setValue(threadPoolSize);
+		
+		spinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				threadPoolSize = (int)spinner.getModel().getValue();
+				
+			}
+		});
+		spinner.setModel(new SpinnerNumberModel(4, 1, 10, 1));
+		spinner.setBounds(212, 64, 54, 40);
+		panel_1.add(spinner);
 	}
 }

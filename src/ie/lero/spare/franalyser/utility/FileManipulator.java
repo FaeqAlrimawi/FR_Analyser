@@ -1,5 +1,6 @@
 package ie.lero.spare.franalyser.utility;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -69,8 +70,9 @@ public class FileManipulator {
 	    } else if (lcOSName.startsWith("windows")) {
 	        try {
 	        
-				 run.exec("rundll32 url.dll, FileProtocolHandler " +fileName);
-				 return true;
+				 //run.exec("rundll32 url.dll, FileProtocolHandler " +fileName);
+	        	Desktop.getDesktop().open(new File(fileName)); 
+	        	return true;
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
