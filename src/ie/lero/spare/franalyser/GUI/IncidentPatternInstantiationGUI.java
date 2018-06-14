@@ -225,7 +225,7 @@ public class IncidentPatternInstantiationGUI {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				IncidentPatternInstantiator inc = new IncidentPatternInstantiator();
-				inc.execute();
+				//inc.execute();
 			}
 		});
 		btnNewButton.setBounds(350, 166, 478, 62);

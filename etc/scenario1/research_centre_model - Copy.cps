@@ -11,10 +11,10 @@
   <asset xsi:type="environment:FireAlarm" connections="FA-DN" name="FireAlarm1" control="FireAlarm" parentAsset="hallway"/>
   <asset xsi:type="environment:Server" connections="Server-DN" name="Server1" control="Server" parentAsset="empiricalLab"/>
   <asset xsi:type="environment:Workstation" connections="Workstation-DN" name="Workstation1" control="Workstation" parentAsset="informaticsLab"/>
-  <asset xsi:type="environment:DigitalAsset" connections="Server-DN SL2-DN Workstation-DN FA-DN SL1-DN HVAC-DN SL3-DN" name="busNetwork" description="" control="BusNetwork"/>
+  <asset xsi:type="environment:DigitalAsset" connections="Server-DN digitalConnection145 SL2-DN Workstation-DN FA-DN SL1-DN HVAC-DN SL3-DN" name="busNetwork" description="" control="BusNetwork"/>
   <asset xsi:type="environment:Actor" name="Visitor1" control="Visitor" containedAssets="Laptop1" parentAsset="hallway" role="Offender"/>
   <asset xsi:type="environment:Laptop" name="Laptop1" control="Laptop" containedAssets="SoftwareX" parentAsset="Visitor1"/>
-  <asset xsi:type="environment:Application" name="SoftwareX" control="Malware" parentAsset="Laptop1"/>
+  <asset xsi:type="environment:Application" name="SoftwareX" control="Software" parentAsset="Laptop1"/>
   <asset xsi:type="environment:Lab" connections="instructorsLab1_hallway" name="instructorsLab1" control="Lab" containedAssets="desktop1_2 desktop1_1 desktop1_3" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Desktop" connections="d1_1" name="desktop1_1" description="" control="Desktop" parentAsset="instructorsLab1"/>
   <asset xsi:type="environment:Desktop" connections="d1_2" name="desktop1_2" control="Desktop" parentAsset="instructorsLab1"/>
@@ -71,6 +71,7 @@
   <asset xsi:type="environment:Desktop" connections="d8_2" name="desktop8_2" control="Desktop" parentAsset="instructorsLab8"/>
   <asset xsi:type="environment:Server" name="server1" control="Server" parentAsset="empiricalLab"/>
   <asset xsi:type="environment:Server" name="server2" control="Server" parentAsset="informaticsLab"/>
+  <asset xsi:type="environment:SmartLight" connections="digitalConnection145" name="smartLight635" control="SmartLight" parentAsset="instructorsLab3"/>
   <connection xsi:type="environment:DigitalConnection" asset1="busNetwork" asset2="FireAlarm1" name="FA-DN"/>
   <connection xsi:type="environment:DigitalConnection" asset1="busNetwork" asset2="AirConditioning" name="HVAC-DN"/>
   <connection xsi:type="environment:DigitalConnection" asset1="busNetwork" asset2="Server1" name="Server-DN"/>
@@ -130,4 +131,5 @@
   <connection xsi:type="environment:PhysicalConnection" asset1="hallway" asset2="lounge1" name="lounge_hallway1"/>
   <connection xsi:type="environment:PhysicalConnection" asset1="hallway" asset2="lounge1" name="lounge_hallway2"/>
   <connection xsi:type="environment:IPConnection" asset1="IPnetwork1" asset2="desktop8_2" name="d8_2"/>
+  <connection xsi:type="environment:DigitalConnection" asset1="smartLight635" asset2="busNetwork" name="digitalConnection145" description=""/>
 </environment:EnvironmentDiagram>

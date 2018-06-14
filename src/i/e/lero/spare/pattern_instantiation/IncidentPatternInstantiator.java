@@ -30,11 +30,11 @@ public class IncidentPatternInstantiator {
 	//CountDownLatch latch;
 	private File scenario1File;
 	BufferedWriter bufferWriter;
-	int threadPoolSize = 1;
+	int threadPoolSize = 10;
 	int maxWaitingTime = 24;
 	TimeUnit timeUnit = TimeUnit.HOURS;
 	
-	public void execute() {
+	/*public void execute() {
 		
 			//handles system representation: analysing system output (states, transitions) to generate bigraphs
 			initialiseBigraphSystem("BRS-fileName","outputFolder");
@@ -73,7 +73,8 @@ public class IncidentPatternInstantiator {
 			}
 			
 	}
-
+*/
+	
 	/**
 	 * This method intialises the BRS system by executing the BRS file, then loading states as Bigraph objects 
 	 * @param BRSFileName The BRS file describing the system components and its evolution
@@ -101,7 +102,7 @@ public class IncidentPatternInstantiator {
 
 	}
 	
-	public void test() {
+/*	public void test() {
 		String BRSFileName = "savannah_BigrapherExample/savannah-general.big";
 		String outputFolder = "savannah_BigrapherExample/output10000";
 		
@@ -121,7 +122,8 @@ public class IncidentPatternInstantiator {
 		PotentialIncidentInstance incidentInstances = new PotentialIncidentInstance(null, null, 1);
 		incidentInstances.start();
 	}
-
+*/
+	
 	/**
 	 * This method details the steps for mapping an incident pattern to a system representation
 	 * it requires: 1-incident pattern file (i.e. *.cpi), 2-system model (i.e. *.environment), and 3-Bigraph representation of the system (i.e. *.big)
@@ -197,14 +199,14 @@ public class IncidentPatternInstantiator {
 		}	
 	}
 	
-private void executeScenario1(){
+	private void executeScenario1(){
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-		String outputFileName = "etc/scenario1/log.txt";
+		String outputFileName = "etc/scenario1/log_test1.txt";
 		
 		try {
 			
@@ -247,12 +249,6 @@ private void executeScenario1(){
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
-		
-		//print matched assets
-		/*for(String n : am.getIncidentAssetNames()) {
-			//getIncidetnAssetWithNoMatch method has some issues
-			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
-		}*/
 		
 		//print matched assets
 		print(">>Entity-Asset map:");
@@ -298,9 +294,13 @@ private void executeScenario1(){
 		
 		try {
 			executor.shutdown();
-			executor.awaitTermination(maxWaitingTime, timeUnit);
+			
+			//if it returns false then maximum waiting time is reached
+			if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
+				print("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+			}
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		
@@ -328,14 +328,14 @@ private void executeScenario1(){
 		}
 	}
 
-	public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile) {
+	/*public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile) {
 		String outputFolder = BRSFile.split("\\.")[0]+"_output";
 		System.out.println(outputFolder);
 		
 		//generateSequences(incidentPatternFile, systemModelFile, BRSFile, outputFolder);
-	}
+	}*/
 	
-	public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile, String BRSoutputFolder) {
+	/*public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile, String BRSoutputFolder) {
 		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = BRSFile;
 		String BRS_outputFolder = BRSoutputFolder;
@@ -361,10 +361,10 @@ private void executeScenario1(){
 		}
 		
 		//print matched assets
-		/*for(String n : am.getIncidentAssetNames()) {
+		for(String n : am.getIncidentAssetNames()) {
 			//getIncidetnAssetWithNoMatch method has some issues
 			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
-		}*/
+		}
 		
 		//print matched assets
 		System.out.println(">>Entity-Asset map:");
@@ -381,10 +381,10 @@ private void executeScenario1(){
 		}
 		
 		//print sequences 
-	/*	System.out.println("Sequences ["+lst.size()+"]");
+		System.out.println("Sequences ["+lst.size()+"]");
 		for (String[] s : lst) {
 			System.out.println(Arrays.toString(s));
-		}*/
+		}
 		
 		System.out.println(">>Initialise the System");
 		//initialise BRS system 
@@ -403,23 +403,15 @@ private void executeScenario1(){
 			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			incidentInstances[i].start();
 		}	
-	}
+	}*/
 	
 	public static void main(String[] args) {
+		
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
-
-		//ins.execute();
-		//ins.test();
-		//SystemInstanceHandler.loadStates();
+		
 		//ins.executeExample();
 		
 		ins.executeScenario1();
-		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output"; //could be derived i.e. the name of the BRS_output
-		String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-		
-		//ins.generateSequences(incidentPatternFile, systemModelFile, BRS_file);
 	}
 
 	
@@ -566,8 +558,8 @@ private void executeScenario1(){
 //			System.out.println("\nThread["+threadID+"]>>Summary of the incident pattern activities");
 //			System.out.println(predicateHandler.getSummary());
 			
-			print("\nThread ["+threadID+"]>>Terminated");
-			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			print("\nThread ["+threadID+"]>>Finished Succefully");
+			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
 			/*inc.generateDistinctPaths();
 			LinkedList<GraphPath> paths = inc.getAllPaths();
