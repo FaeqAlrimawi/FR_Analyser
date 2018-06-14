@@ -74,8 +74,6 @@ atomic ctrl ChangeAccessToCardRequired = 0;
 atomic ctrl ChangeAccessToCardNotRequired = 0;
 atomic ctrl ChangeContextToOutSideWorkingHours = 0; 
 atomic ctrl ChangeContextToWorkingHours = 0;
-atomic ctrl TurnOnHVAC = 0;
-atomic ctrl TurnOffHVAC = 0;
 ctrl RulesKeywords = 0;
 
 #initial state
@@ -142,8 +140,7 @@ big context = Context{c}.(WorkingHours);
 
 big actions = RulesKeywords.(EnterRoom | ExitRoom | ConnectIPDevice | DisconnectIPDevice | ConnectBusDevice | DisconnectBusDevice | 
  SendData | DisableHVAC | EnterRoomWithoutCardReader | 
- ChangeAccessToCardRequired | ChangeAccessToCardNotRequired | ChangeContextToOutSideWorkingHours | ChangeContextToWorkingHours |
- TurnOnHVAC | TurnOffHVAC);
+ ChangeAccessToCardRequired | ChangeAccessToCardNotRequired | ChangeContextToOutSideWorkingHours | ChangeContextToWorkingHours);
  
 #initial state
 big research_centre = Building.( 
@@ -347,19 +344,6 @@ actor_connected_to_bus_with_data  || HVAC{busNet} || RulesKeywords.(SendData | i
 actor_connected_to_bus  ||  HVAC{busNet}.(Data |  id) || RulesKeywords.(id)
 ;
 
-react turn_on_hvac = 
-HVAC{busNet}.Status_Off || RulesKeywords.(TurnOnHVAC | id)
-->
-HVAC{busNet}.Status_On || RulesKeywords.(id)
-;
-
-
-react turn_off_hvac = 
-HVAC{busNet}.Status_On || RulesKeywords.(TurnOffHVAC | id)
-->
-HVAC{busNet}.Status_Off || RulesKeywords.(id)
-;
-
 #if visitor laptop is connected then send malware to hvac, which its container has server [malicious action]
 react visitor_send_malware = 
 visitor_connected_to_bus_with_malware  || malware_target || RulesKeywords.(SendData | id)
@@ -424,7 +408,6 @@ begin brs
   , disable_hvac
   , change_to_outside_working_hours, change_to_working_hours
   , change_access_to_card_required, change_access_to_card_not_required
-  , turn_on_hvac, turn_off_hvac
   } 
  ,
  {enter_room_outside_working_hours_without_cardreader}
