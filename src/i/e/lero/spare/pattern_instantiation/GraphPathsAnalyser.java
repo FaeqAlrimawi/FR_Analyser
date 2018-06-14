@@ -23,13 +23,14 @@ public class GraphPathsAnalyser {
 		this.paths = paths;
 	}
 	
-	public void analyse() {
+	public String analyse() {
 		
 		getCommonActions();
 		getTopPaths();
 		getShortestPaths();
 		getLongestPaths();
 
+		return print();
 	}
 
 	public LinkedList<GraphPath> getPaths() {

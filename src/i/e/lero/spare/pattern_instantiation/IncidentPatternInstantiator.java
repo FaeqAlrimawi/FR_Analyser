@@ -34,7 +34,6 @@ public class IncidentPatternInstantiator {
 	int maxWaitingTime = 24;
 	TimeUnit timeUnit = TimeUnit.HOURS;
 	
-	
 	public void execute() {
 		
 			//handles system representation: analysing system output (states, transitions) to generate bigraphs
@@ -200,9 +199,9 @@ public class IncidentPatternInstantiator {
 	
 private void executeScenario1(){
 		
-		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
+		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		String outputFileName = "etc/scenario1/log.txt";
@@ -244,7 +243,7 @@ private void executeScenario1(){
 			print(">>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
-				System.out.println(Arrays.toString(asts));
+				print(Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
@@ -265,7 +264,7 @@ private void executeScenario1(){
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
 		if(lst == null || lst.isEmpty()) {
-			print(">>No combinations found.... exisitng program");
+			print(">>No combinations found.");
 			return;
 		}
 		
@@ -279,30 +278,22 @@ private void executeScenario1(){
 		//initialise BRS system 
 		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
 		if (!isInitialised) {
-			print(">>System could not be initialised....execution is terminated");
+			print(">>System could not be initialised. Execution is halted.");
 		}
 		
 		//create threads that handle each sequence generated from asset matching
 		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-		//For testing, number of threads is set to certain number
-		//numberOfThreads = 1;
-				
+		
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
-		//Thread [] threads = new Thread[numberOfThreads];
 		
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
-		//create a latch to let the main thread wait for the other threads to finish execute
-		//latch = new CountDownLatch(lst.size());
-		
-		for(int i=0; i<1;i++) {//adjust the length
+		for(int i=0; i<lst.size();i++) {//adjust the length
+			
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			print(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			
 			executor.submit(incidentInstances[i]);
-			
-			//threads[i] = new Thread(incidentInstances[i]);
-			//threads[i].start();
 		}
 		
 		try {
@@ -436,34 +427,35 @@ private void executeScenario1(){
 
 		private String[] systemAssetNames;
 		private String[] incidentAssetNames;
-		private Thread t;
+		//private Thread t;
 		private long threadID;
-		private String BRSFileName;
-		private String outputFolder;
-
+		//private String BRSFileName;
+		//private String outputFolder;
+		private String outputFileName;
+		
 		public PotentialIncidentInstance(String[] sa, String[] ia, long id) {
-			// TODO Auto-generated constructor stub
+			
 			systemAssetNames = sa;
 			incidentAssetNames = ia;
 			threadID = id;
+			
+			//default output
+			setOutputFileName("etc/scenario1/output/"+threadID+".json");
 		}
 
-		// could be removed as this class will be handling states from the
-		// memory
-		public PotentialIncidentInstance(String[] sa, String[] ia, long id, String fileName) {
-			// TODO Auto-generated constructor stub
-			systemAssetNames = sa;
-			incidentAssetNames = ia;
-			threadID = id;
-			BRSFileName = fileName;
+		
+		public PotentialIncidentInstance(String[] sa, String[] ia, long id, String outputFileName) {
+	
+			this(sa, ia, id);
+			setOutputFileName(outputFileName);
 		}
-
+		
 		@Override
 		public void run() {
 		
 			StringBuilder jsonStr = new StringBuilder();
-			String fileName = "etc/scenario1/output/"+threadID+".json";
-			File threadFile = new File(fileName);
+			
+			File threadFile = new File(outputFileName);
 			BufferedWriter threadWriter;
 			FileWriter fw;
 			
@@ -486,7 +478,7 @@ private void executeScenario1(){
 		 	//state transitions are updated in the predicates, which can be accessed through predicateHandler
 			BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler);
 			
-			print("\nThread["+threadID+"]>>Identifying states and their transitions that satisfy the pattern activities...");
+			print("\nThread["+threadID+"]>>Identifying states and their transitions...");
 
 			//identify states and transitions that satisfy the pre-/post-conditions of each activity
 			analyser.analyse();
@@ -559,15 +551,15 @@ private void executeScenario1(){
 			threadWriter.close();
 			obj = null;
 			
-			print(paths.size()+" Potential incident instances were generated. Please see details in:");
+			print("\nThread ["+threadID+"]>>" + paths.size()+"Potential incident instances were generated. Please see details in:");
 			print("File: "+ threadFile.getAbsolutePath());
 			
 			print("\nThread ["+threadID+"]>>Analysing generated potential incident instances...");
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
-			pathsAnalyser.analyse();
+			print(pathsAnalyser.analyse());
 			
-			print(pathsAnalyser.print());
+			//print(pathsAnalyser.print());
 			//another way is to combine the transitions found for each activity from the initial one to the final one
 			//predicateHandler.printAll();
 			
@@ -626,7 +618,15 @@ private void executeScenario1(){
 			this.threadID = threadID;
 		}
 
-		public String getBRSFileName() {
+		public String getOutputFileName() {
+			return outputFileName;
+		}
+
+		public void setOutputFileName(String outputFileName) {
+			this.outputFileName = outputFileName;
+		}
+
+		/*public String getBRSFileName() {
 			return BRSFileName;
 		}
 
@@ -640,8 +640,9 @@ private void executeScenario1(){
 
 		public void setOutputFolder(String outputFolder) {
 			this.outputFolder = outputFolder;
-		}
+		}*/
 
+		
 	}
 	
 	public void print(String msg) {
