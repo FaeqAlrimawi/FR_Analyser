@@ -8,7 +8,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.management.ThreadInfo;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.awt.event.ActionEvent;
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
@@ -32,6 +34,8 @@ import javax.swing.border.TitledBorder;
 import java.awt.Rectangle;
 import java.awt.Font;
 import java.awt.SystemColor;
+import java.awt.Toolkit;
+
 import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.event.MouseAdapter;
@@ -56,9 +60,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.JTabbedPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JList;
+import javax.swing.JScrollBar;
 
 public class IncidentPatternInstantiationGUI implements IncidentPatternInstantiationListener{
 
@@ -71,8 +77,8 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 	private StringBuilder screenOutput = new StringBuilder();
 	private String bigraphFileName = "sb3.big";
 	private JFrame frmForensicReadinessAnalysis;
-	private int windowWidth = 2100;
-	private int windowHeight = 1900;
+	private int windowWidth = (int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
+	private int windowHeight = (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
 	private int threadPoolSize = 4;
 	private JProgressBar progressBar;
 	private static IncidentPatternInstantiationGUI window;
@@ -80,7 +86,9 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 	private JEditorPane logger;
 	private JLabel labelProgressBar;
 	private JTextPane textPane;
-	
+	private JList<String> listAssetSets;
+	private int margin = 100;
+	private int margin_medium = 50;
 	/**
 	 * Launch the application.
 	 */
@@ -108,10 +116,10 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 	 */
 	public IncidentPatternInstantiationGUI() {
 		initialize();
-		mapper = new Mapper("match_query.xq");
+		/*mapper = new Mapper("match_query.xq");
 		assetMap = new AssetMap();
 		//predicateGenerator = new PredicateGenerator(assetMap);
-		predicateHandler = new PredicateHandler();
+		predicateHandler = new PredicateHandler();*/
 	}
 
 	/**
@@ -132,7 +140,7 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		
 		panel.setBackground(SystemColor.window);
 		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Log", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(45, 1011, 1983, 773);
+		panel.setBounds(45, windowHeight-(773+margin), windowWidth-margin, 773);
 		frmForensicReadinessAnalysis.getContentPane().add(panel);
 		panel.setLayout(null);
 		JScrollPane spane = new JScrollPane();
@@ -291,13 +299,15 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		panel_1.add(spinner);
 		
 		JSeparator separator_1 = new JSeparator();
-		separator_1.setBounds(45, 974, 1988, 22);
+		separator_1.setBounds(45, panel.getY()-margin_medium, windowWidth-margin, 22);
+		
 		frmForensicReadinessAnalysis.getContentPane().add(separator_1);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(612, 84, 1416, 854);
+		tabbedPane.setBounds(612, 84, windowWidth-margin_medium-612, 854);
 		JPanel summaryPanel = new JPanel();
 		summaryPanel.setForeground(SystemColor.window);
+		summaryPanel.setBorder(tabbedPane.getBorder());
 		JPanel instancesListPanel = new JPanel();
 		JPanel instanceViewerPanel = new JPanel();
 		
@@ -307,7 +317,8 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
-		progressBar.setBounds(36, 72, 1359, 34);
+		progressBar.setBounds(summaryPanel.getX()+margin_medium, summaryPanel.getY()+margin_medium, tabbedPane.getWidth()-margin, 34);
+		
 		summaryPanel.add(progressBar);
 		
 		labelProgressBar = new JLabel("");
@@ -315,6 +326,7 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		summaryPanel.add(labelProgressBar);
 		
 		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportBorder(new TitledBorder(null, "Asset Map Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		scrollPane.setBounds(36, 134, 632, 337);
 		summaryPanel.add(scrollPane);
 		
@@ -331,6 +343,19 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		separator_2.setOrientation(SwingConstants.VERTICAL);
 		separator_2.setBounds(694, 134, 23, 337);
 		summaryPanel.add(separator_2);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setViewportBorder(new TitledBorder(null, "Asset Sets Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		scrollPane_1.setBounds(715, 134, 680, 337);
+		summaryPanel.add(scrollPane_1);
+		
+		listAssetSets = new JList<String>();
+		scrollPane_1.setViewportView(listAssetSets);
+		
+		listAssetSets.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+		listAssetSets.setLayoutOrientation(JList.VERTICAL_WRAP);
+		listAssetSets.setVisibleRowCount(-1);
+	
 		tabbedPane.setBackgroundAt(0, SystemColor.desktop);
 		tabbedPane.add("Instances List", instancesListPanel);
 		tabbedPane.add("Instance Details", instanceViewerPanel);
@@ -372,8 +397,26 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 	}
 
 	@Override
-	public void updateAssetSetInfo(String msg) {
+	public void updateAssetMapInfo(String msg) {
 		// TODO Auto-generated method stub
 		textPane.setText(textPane.getText()+"\n"+msg);
+	}
+
+	@Override
+	public void updateAssetSetInfo(LinkedList<String[]> assetSets) {
+		// TODO Auto-generated method stub
+		StringBuilder str = new StringBuilder();
+		
+		//JLabel [] labels = new JLabel[assetSets.size()];
+		String [] labels = new String[assetSets.size()];
+		for(int i=0;i<assetSets.size();i++) {
+			//listAssetSets.add(new JLabel("set ["+i+"]"));
+			str.delete(0, str.length());
+			str.append("set [").append(i).append("]: ")
+			.append(Arrays.toString(assetSets.get(i)));
+			labels[i] = str.toString();
+		}
+		
+		listAssetSets.setListData(labels);
 	}
 }

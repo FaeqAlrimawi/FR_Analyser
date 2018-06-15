@@ -46,9 +46,9 @@ public class IncidentPatternInstantiator {
 	
 //	 private SwingPropertyChangeSupport propChangeSupport =  new SwingPropertyChangeSupport(this);
 	 
-	public void execute(int threadPoolSize, IncidentPatternInstantiationListener listen) {
+	public void execute(int threadPoolSiz, IncidentPatternInstantiationListener listen) {
 		
-		this.threadPoolSize = threadPoolSize;
+		this.threadPoolSize = threadPoolSiz;
 		//this.logger = logger;
 		listener = listen;
 		
@@ -99,7 +99,7 @@ public class IncidentPatternInstantiator {
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				print(Arrays.toString(asts));
-				listener.updateAssetSetInfo(">>Some incident entities have no matches in the system assets. These are:\n"+Arrays.toString(asts));
+				listener.updateAssetMapInfo(">>Some incident entities have no matches in the system assets. These are:\n"+Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
@@ -107,11 +107,13 @@ public class IncidentPatternInstantiator {
 		//print matched assets
 		print(">>Entity-Asset map:");
 		print(am.toString());
-		listener.updateAssetSetInfo(">>Entity-Asset map:");
-		listener.updateAssetSetInfo(am.toString());
+		listener.updateAssetMapInfo(">>Entity-Asset map:");
+		listener.updateAssetMapInfo(am.toString());
+		
 		//generate sequences
 		LinkedList<String[]> lst = am.generateUniqueCombinations();
 		listener.updateProgress(10);
+		listener.updateAssetSetInfo(lst);
 		
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
