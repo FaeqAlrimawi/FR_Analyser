@@ -319,6 +319,7 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		summaryPanel.add(scrollPane);
 		
 		textPane = new JTextPane();
+		textPane.setToolTipText("Shows information about the asset map");
 		scrollPane.setViewportView(textPane);
 		textPane.setEditable(false);
 		
