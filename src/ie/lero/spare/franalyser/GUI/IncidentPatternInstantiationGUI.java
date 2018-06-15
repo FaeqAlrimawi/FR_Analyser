@@ -58,6 +58,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JList;
 
 public class IncidentPatternInstantiationGUI implements IncidentPatternInstantiationListener{
 
@@ -314,12 +315,21 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		summaryPanel.add(labelProgressBar);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(36, 134, 1359, 392);
+		scrollPane.setBounds(36, 134, 632, 337);
 		summaryPanel.add(scrollPane);
 		
 		textPane = new JTextPane();
 		scrollPane.setViewportView(textPane);
 		textPane.setEditable(false);
+		
+		JList list = new JList();
+		list.setBounds(46, 515, 1214, 138);
+		summaryPanel.add(list);
+		
+		JSeparator separator_2 = new JSeparator();
+		separator_2.setOrientation(SwingConstants.VERTICAL);
+		separator_2.setBounds(694, 134, 23, 337);
+		summaryPanel.add(separator_2);
 		tabbedPane.setBackgroundAt(0, SystemColor.desktop);
 		tabbedPane.add("Instances List", instancesListPanel);
 		tabbedPane.add("Instance Details", instanceViewerPanel);
