@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.management.ThreadInfo;
 import java.util.Hashtable;
 import java.awt.event.ActionEvent;
 import org.eclipse.wb.swing.FocusTraversalOnArray;
@@ -52,8 +53,13 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.JTabbedPane;
+import javax.swing.JProgressBar;
+import javax.swing.JTextPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
-public class IncidentPatternInstantiationGUI {
+public class IncidentPatternInstantiationGUI implements IncidentPatternInstantiationListener{
 
 	private Mapper mapper;
 	private AssetMap assetMap;
@@ -65,8 +71,15 @@ public class IncidentPatternInstantiationGUI {
 	private String bigraphFileName = "sb3.big";
 	private JFrame frmForensicReadinessAnalysis;
 	private int windowWidth = 2100;
-	private int windowHeight = 1100;
+	private int windowHeight = 1900;
 	private int threadPoolSize = 4;
+	private JProgressBar progressBar;
+	private static IncidentPatternInstantiationGUI window;
+	private Thread instanceThread;
+	private JEditorPane logger;
+	private JLabel labelProgressBar;
+	private JTextPane textPane;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -80,7 +93,7 @@ public class IncidentPatternInstantiationGUI {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					IncidentPatternInstantiationGUI window = new IncidentPatternInstantiationGUI();
+					window = new IncidentPatternInstantiationGUI();
 					window.frmForensicReadinessAnalysis.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -118,7 +131,7 @@ public class IncidentPatternInstantiationGUI {
 		
 		panel.setBackground(SystemColor.window);
 		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Log", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(668, 100, 1332, 750);
+		panel.setBounds(45, 1011, 1983, 773);
 		frmForensicReadinessAnalysis.getContentPane().add(panel);
 		panel.setLayout(null);
 		JScrollPane spane = new JScrollPane();
@@ -129,7 +142,7 @@ public class IncidentPatternInstantiationGUI {
 		spane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		panel.add(spane);
 		
-		JEditorPane logger = new JEditorPane();
+		logger = new JEditorPane();
 		
 		logger.addHyperlinkListener(new HyperlinkListener() {
 			public void hyperlinkUpdate(HyperlinkEvent arg0) {
@@ -239,24 +252,22 @@ public class IncidentPatternInstantiationGUI {
 		JButton btnNewButton = new JButton("generate incident instances");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				IncidentPatternInstantiator inc = new IncidentPatternInstantiator();
-				
-				inc.execute(threadPoolSize);
+					window.createInstance();
 			}
 		});
-		btnNewButton.setBounds(45, 788, 478, 62);
+		btnNewButton.setBounds(45, 851, 478, 62);
 		frmForensicReadinessAnalysis.getContentPane().add(btnNewButton);
 		
 		JSeparator separator = new JSeparator();
 		separator.setOrientation(SwingConstants.VERTICAL);
-		separator.setBounds(587, 100, 48, 750);
+		separator.setBounds(587, 79, 48, 859);
 		frmForensicReadinessAnalysis.getContentPane().add(separator);
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBackground(SystemColor.window);
 		panel_1.setForeground(Color.BLACK);
 		panel_1.setBorder(new TitledBorder(null, "Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(45, 428, 478, 236);
+		panel_1.setBounds(45, 536, 478, 236);
 		frmForensicReadinessAnalysis.getContentPane().add(panel_1);
 		panel_1.setLayout(null);
 		
@@ -277,5 +288,81 @@ public class IncidentPatternInstantiationGUI {
 		spinner.setModel(new SpinnerNumberModel(4, 1, 10, 1));
 		spinner.setBounds(212, 64, 54, 40);
 		panel_1.add(spinner);
+		
+		JSeparator separator_1 = new JSeparator();
+		separator_1.setBounds(45, 974, 1988, 22);
+		frmForensicReadinessAnalysis.getContentPane().add(separator_1);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(612, 84, 1416, 854);
+		JPanel summaryPanel = new JPanel();
+		summaryPanel.setForeground(SystemColor.window);
+		JPanel instancesListPanel = new JPanel();
+		JPanel instanceViewerPanel = new JPanel();
+		
+		//tabbedPane.add(summaryPanel);
+		tabbedPane.add("Summary", summaryPanel);
+		summaryPanel.setLayout(null);
+		
+		progressBar = new JProgressBar();
+		progressBar.setStringPainted(true);
+		progressBar.setBounds(36, 72, 1359, 34);
+		summaryPanel.add(progressBar);
+		
+		labelProgressBar = new JLabel("");
+		labelProgressBar.setBounds(36, 28, 201, 33);
+		summaryPanel.add(labelProgressBar);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(36, 134, 1359, 392);
+		summaryPanel.add(scrollPane);
+		
+		textPane = new JTextPane();
+		scrollPane.setViewportView(textPane);
+		textPane.setEditable(false);
+		tabbedPane.setBackgroundAt(0, SystemColor.desktop);
+		tabbedPane.add("Instances List", instancesListPanel);
+		tabbedPane.add("Instance Details", instanceViewerPanel);
+		
+		frmForensicReadinessAnalysis.getContentPane().add(tabbedPane);
+	}
+
+	@Override
+	public void updateProgress(int progress) {
+		// TODO Auto-generated method stub
+		progressBar.setValue(progressBar.getValue()+progress);
+	}
+
+	@Override
+	public void updateLogger(String msg) {
+		// TODO Auto-generated method stub
+		logger.setText(logger.getText()+msg);
+	}
+	
+	public void createInstance() {
+		
+		Runnable instance = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				IncidentPatternInstantiator inc = new IncidentPatternInstantiator();
+				inc.execute(threadPoolSize, window);
+			}
+			
+		};
+		
+		instanceThread = new Thread(instance);
+		instanceThread.start();
+		logger.setText("");
+		progressBar.setValue(0);
+		labelProgressBar.setText("Running...");
+		
+	}
+
+	@Override
+	public void updateAssetSetInfo(String msg) {
+		// TODO Auto-generated method stub
+		textPane.setText(textPane.getText()+"\n"+msg);
 	}
 }

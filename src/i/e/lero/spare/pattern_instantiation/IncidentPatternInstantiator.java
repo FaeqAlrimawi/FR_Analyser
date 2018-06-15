@@ -20,6 +20,7 @@ import org.apache.batik.parser.PathArrayProducer;
 import org.json.JSONObject;
 
 import ie.lero.spare.franalyser.GUI.IncidentPatternInstantiationGUI;
+import ie.lero.spare.franalyser.GUI.IncidentPatternInstantiationListener;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
@@ -40,17 +41,20 @@ public class IncidentPatternInstantiator {
 	//IncidentPatternInstantiationGUI logger;
 	//String loggerFormatStart = "<!DOCTYPE html><html><body><p style=\"color:white;font-size:40;\">";
 	//String loggerFormatEnd = "</p></body></html>";
+	IncidentPatternInstantiationListener listener;
+	int incrementValue = 10;
 	
 //	 private SwingPropertyChangeSupport propChangeSupport =  new SwingPropertyChangeSupport(this);
 	 
-	public void execute(int threadPoolSize) {
+	public void execute(int threadPoolSize, IncidentPatternInstantiationListener listen) {
 		
 		this.threadPoolSize = threadPoolSize;
 		//this.logger = logger;
+		listener = listen;
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		String outputFileName = "etc/scenario1/log_test1.txt";
@@ -95,6 +99,7 @@ public class IncidentPatternInstantiator {
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				print(Arrays.toString(asts));
+				listener.updateAssetSetInfo(">>Some incident entities have no matches in the system assets. These are:\n"+Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
@@ -102,9 +107,11 @@ public class IncidentPatternInstantiator {
 		//print matched assets
 		print(">>Entity-Asset map:");
 		print(am.toString());
-		
+		listener.updateAssetSetInfo(">>Entity-Asset map:");
+		listener.updateAssetSetInfo(am.toString());
 		//generate sequences
 		LinkedList<String[]> lst = am.generateUniqueCombinations();
+		listener.updateProgress(10);
 		
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
@@ -118,6 +125,9 @@ public class IncidentPatternInstantiator {
 		for (String[] s : lst) {
 			System.out.println(Arrays.toString(s));
 		}*/
+		
+		
+		incrementValue = (int)Math.ceil(90.0/lst.size());
 		
 		print(">>Initialise the System");
 		//initialise BRS system 
@@ -578,6 +588,7 @@ public class IncidentPatternInstantiator {
 
 			//identify states and transitions that satisfy the pre-/post-conditions of each activity
 			analyser.analyse();
+			listener.updateProgress(incrementValue/3);
 			//System.out.println("\nThread["+threadID+"]>>Identification is completed");
 			
 			 //creating activities diagraph could be done internally in the PredicateHandler class
@@ -649,6 +660,7 @@ public class IncidentPatternInstantiator {
 			
 			print("\nThread ["+threadID+"]>>" + paths.size()+"Potential incident instances were generated. Please see details in:");
 			print("File: "+ threadFile.getAbsolutePath());
+			listener.updateProgress(incrementValue/3);
 			
 			print("\nThread ["+threadID+"]>>Analysing generated potential incident instances...");
 			//create an analysis object for the identified paths
@@ -665,6 +677,7 @@ public class IncidentPatternInstantiator {
 			print("\nThread ["+threadID+"]>>Finished Succefully");
 			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
+			listener.updateProgress(incrementValue/3 + incrementValue%3);
 			/*inc.generateDistinctPaths();
 			LinkedList<GraphPath> paths = inc.getAllPaths();
 			
@@ -744,7 +757,7 @@ public class IncidentPatternInstantiator {
 	public void print(String msg) {
 		
 		System.out.println(msg);
-		//logger.log(msg);
+		listener.updateLogger(msg);
 		
 		
 		try {
