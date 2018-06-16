@@ -114,7 +114,7 @@ public class BigraphAnalyser {
 		results.add(executor.submit(new BigraphMatcher(partitionSize*index, states.size(), redex.clone())));
 		
 		//get results
-		for(int i=0;i<size;i++) {
+		for(int i=0;i<results.size();i++) {
 			statesResults.addAll(results.get(i).get());
 		}
 			

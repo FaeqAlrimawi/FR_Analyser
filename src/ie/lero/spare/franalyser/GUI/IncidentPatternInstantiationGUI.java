@@ -3,6 +3,8 @@ package ie.lero.spare.franalyser.GUI;
 import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,6 +46,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.JTextField;
@@ -65,6 +68,17 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JList;
 import javax.swing.JScrollBar;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class IncidentPatternInstantiationGUI implements IncidentPatternInstantiationListener{
 
@@ -77,18 +91,27 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 	private StringBuilder screenOutput = new StringBuilder();
 	private String bigraphFileName = "sb3.big";
 	private JFrame frmForensicReadinessAnalysis;
-	private int windowWidth = (int)Toolkit.getDefaultToolkit().getScreenSize().getWidth();
-	private int windowHeight = (int)Toolkit.getDefaultToolkit().getScreenSize().getHeight();
-	private int threadPoolSize = 4;
+	private int windowWidth = 2500;//(int)(Toolkit.getDefaultToolkit().getScreenSize().getWidth()*0.75);
+	private int windowHeight = 2000;//(int)(Toolkit.getDefaultToolkit().getScreenSize().getHeight()*0.9);
+	private int threadPoolSize = 1;
 	private JProgressBar progressBar;
 	private static IncidentPatternInstantiationGUI window;
 	private Thread instanceThread;
 	private JEditorPane logger;
 	private JLabel labelProgressBar;
 	private JTextPane textPane;
-	private JList<String> listAssetSets;
 	private int margin = 100;
 	private int margin_medium = 50;
+	private JTextField txtIncidentPattern;
+	private JTextField txtSystemModel;
+	private String incidentPatternFilePath;
+	private String systemModelFilePath;
+	private JScrollPane assetSetScroll_2;
+	private JPanel assetSetPanel;
+	private JCheckBox [] checkBoxsAssetSets;
+	private IncidentPatternInstantiator incidentInstantiator;
+	private JButton btnAnalyseSelectedSets;
+	
 	/**
 	 * Launch the application.
 	 */
@@ -140,7 +163,7 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		
 		panel.setBackground(SystemColor.window);
 		panel.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Log", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel.setBounds(45, windowHeight-(773+margin), windowWidth-margin, 773);
+		panel.setBounds(45, 1306, 2400, 594);
 		frmForensicReadinessAnalysis.getContentPane().add(panel);
 		panel.setLayout(null);
 		JScrollPane spane = new JScrollPane();
@@ -179,108 +202,209 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		logger.setBounds(spane.getBounds());
 		logger.setText("<!DOCTYPE html><html><body><p style=\"color:white;font-size:40;\">starting...</p></body></html>");
 		
-		JPanel panel_4 = new JPanel();
-		panel_4.setBorder(new TitledBorder(null, "Incident Pattern", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_4.setBackground(SystemColor.window);
-		panel_4.setBounds(45, 100, 478, 120);
-		frmForensicReadinessAnalysis.getContentPane().add(panel_4);
-		panel_4.setLayout(new BoxLayout(panel_4, BoxLayout.X_AXIS));
-		
-		JButton btnIncidentxml = new JButton("Incident Pattern");
-		btnIncidentxml.setHorizontalAlignment(SwingConstants.LEFT);
-		panel_4.add(btnIncidentxml);
-		btnIncidentxml.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent arg0) {
-				btnIncidentxml.setForeground(SystemColor.textHighlight);
-			//	btnIncidentxml.u
-			}
-			@Override
-			public void mouseExited(MouseEvent arg0) {
-				btnIncidentxml.setForeground(new Color(0, 0, 255));
-			}
-		});
-		//btnIncidentxml.setBorderPainted(false);
-		btnIncidentxml.setContentAreaFilled(false);
-		btnIncidentxml.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				FileManipulator.openFile("etc/scenario1/interruption_incident-pattern.cpi");
-			}
-		});
-		btnIncidentxml.setForeground(new Color(0, 0, 255));
-		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBounds(45, 262, 478, 120);
-		frmForensicReadinessAnalysis.getContentPane().add(panel_3);
-		panel_3.setBackground(SystemColor.window);
-		panel_3.setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), "Research Center Representation", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(0, 0, 0)));
-		panel_3.setLayout(new BoxLayout(panel_3, BoxLayout.X_AXIS));
-		
-		JButton btnSpacexml = new JButton("Research center model");
-		btnSpacexml.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				FileManipulator.openFile("etc/scenario1/research_centre_model.cps");
-			}
-		});
-		panel_3.add(btnSpacexml);
-		btnSpacexml.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				btnSpacexml.setForeground(SystemColor.textHighlight);
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				btnSpacexml.setForeground(new Color(0, 0, 255));
-			}
-		});
-		btnSpacexml.setForeground(Color.BLUE);
-		btnSpacexml.setContentAreaFilled(false);
-		btnSpacexml.setBackground(Color.CYAN);
-		
-		JButton btnSbbig = new JButton("BRS model");
-		panel_3.add(btnSbbig);
-		btnSbbig.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseEntered(MouseEvent e) {
-				btnSbbig.setForeground(SystemColor.textHighlight);
-			}
-			@Override
-			public void mouseExited(MouseEvent e) {
-				btnSbbig.setForeground(new Color(0, 0, 255));
-			}
-		});
-		btnSbbig.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				FileManipulator.openFile("etc/scenario1/research_centre_system.big");
-			}
-		});
-		btnSbbig.setForeground(Color.BLUE);
-		btnSbbig.setContentAreaFilled(false);
-		btnSbbig.setBackground(Color.CYAN);
-		
-		JButton btnNewButton = new JButton("generate incident instances");
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-					window.createInstance();
-			}
-		});
-		btnNewButton.setBounds(45, 851, 478, 62);
-		frmForensicReadinessAnalysis.getContentPane().add(btnNewButton);
-		
 		JSeparator separator = new JSeparator();
 		separator.setOrientation(SwingConstants.VERTICAL);
-		separator.setBounds(587, 79, 48, 859);
+		separator.setBounds(587, 79, 48, 1179);
 		frmForensicReadinessAnalysis.getContentPane().add(separator);
 		
+		JSeparator separator_1 = new JSeparator();
+		separator_1.setBounds(45, 1286, windowWidth-margin, 22);
+		
+		frmForensicReadinessAnalysis.getContentPane().add(separator_1);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(612, 84, 1838, 1174);
+		JPanel summaryPanel = new JPanel();
+		summaryPanel.setForeground(SystemColor.window);
+		summaryPanel.setBorder(tabbedPane.getBorder());
+		JPanel instancesListPanel = new JPanel();
+		JPanel instanceViewerPanel = new JPanel();
+		
+		//tabbedPane.add(summaryPanel);
+		tabbedPane.add("Summary", summaryPanel);
+		summaryPanel.setLayout(null);
+		
+		progressBar = new JProgressBar();
+		progressBar.setStringPainted(true);
+		progressBar.setBounds(summaryPanel.getX()+margin_medium, summaryPanel.getY()+margin_medium+10, tabbedPane.getWidth()-margin, 34);
+		
+		summaryPanel.add(progressBar);
+		
+		labelProgressBar = new JLabel("");
+		labelProgressBar.setBounds(50, 28, 201, 33);
+		summaryPanel.add(labelProgressBar);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setViewportBorder(new TitledBorder(null, "Asset Map Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		scrollPane.setBounds(36, 134, 632, 418);
+		summaryPanel.add(scrollPane);
+		
+		textPane = new JTextPane();
+		textPane.setToolTipText("Shows information about the asset map");
+		scrollPane.setViewportView(textPane);
+		textPane.setEditable(false);
+		
+		JSeparator separator_2 = new JSeparator();
+		separator_2.setOrientation(SwingConstants.VERTICAL);
+		separator_2.setBounds(694, 134, 23, 418);
+		summaryPanel.add(separator_2);
+		
+		assetSetScroll_2 = new JScrollPane();
+		assetSetScroll_2.setViewportBorder(new TitledBorder(null, "Asset Sets Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		assetSetScroll_2.setBounds(719, 134, 1069, 418);
+		summaryPanel.add(assetSetScroll_2);
+		
+		assetSetPanel = new JPanel();
+		assetSetScroll_2.setViewportView(assetSetPanel);
+		assetSetPanel.setLayout(new BoxLayout(assetSetPanel, BoxLayout.Y_AXIS));
+		
+		btnAnalyseSelectedSets = new JButton("Analyse selected sets");
+		btnAnalyseSelectedSets.setEnabled(false);
+		btnAnalyseSelectedSets.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				analyseSelectedAssetsets();
+			}
+		});
+		btnAnalyseSelectedSets.setBounds(1495, 556, 295, 51);
+		summaryPanel.add(btnAnalyseSelectedSets);
+		tabbedPane.setBackgroundAt(0, SystemColor.desktop);
+		tabbedPane.add("Instances List", instancesListPanel);
+		tabbedPane.add("Instance Details", instanceViewerPanel);
+		
+		frmForensicReadinessAnalysis.getContentPane().add(tabbedPane);
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setBackground(SystemColor.window);
+		panel_2.setBounds(12, 79, 549, 1179);
+		frmForensicReadinessAnalysis.getContentPane().add(panel_2);
+		
+		txtIncidentPattern = new JTextField();
+		txtIncidentPattern.setToolTipText("incident pattern file");
+		txtIncidentPattern.setBounds(26, 50, 364, 63);
+		txtIncidentPattern.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent arg0) {
+				if(txtIncidentPattern.getText().isEmpty()) {
+					txtIncidentPattern.setForeground(Color.lightGray);
+					txtIncidentPattern.setText("incident pattern...");
+				}
+			}
+		});
+		txtIncidentPattern.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				
+			}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(txtIncidentPattern.getForeground().equals(Color.LIGHT_GRAY)){
+					txtIncidentPattern.setForeground(Color.black);
+					txtIncidentPattern.setText("");
+				}
+				
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				
+			}
+		});
+		txtIncidentPattern.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+			
+			}
+		});
+		panel_2.setLayout(null);
+		txtIncidentPattern.setForeground(Color.LIGHT_GRAY);
+		txtIncidentPattern.setText("Incident pattern...");
+		txtIncidentPattern.setColumns(10);
+		panel_2.add(txtIncidentPattern);
+		
+		JButton btnBrowse = new JButton("Browse");
+		btnBrowse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JFileChooser fc = new JFileChooser();
+				int returnVal = fc.showOpenDialog(frmForensicReadinessAnalysis);
+
+		        if (returnVal == JFileChooser.APPROVE_OPTION) {
+		            File file = fc.getSelectedFile();
+		            incidentPatternFilePath = file.toURI().toString();
+		            
+		            txtIncidentPattern.setText(file.getName());
+		            txtIncidentPattern.setForeground(Color.black);
+		        } else {
+		            incidentPatternFilePath = "";
+		        }
+			}
+		});
+		btnBrowse.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+			}
+		});
+		btnBrowse.setBounds(404, 50, 119, 63);
+		panel_2.add(btnBrowse);
+		
+		txtSystemModel = new JTextField();
+		txtSystemModel.setToolTipText("system model file");
+		txtSystemModel.setBounds(26, 162, 364, 63);
+		txtSystemModel.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				if(txtSystemModel.getText().isEmpty()) {
+					txtSystemModel.setForeground(Color.LIGHT_GRAY);
+					txtSystemModel.setText("system model...");
+				}
+			}
+		});
+		txtSystemModel.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+			}
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if(txtSystemModel.getForeground().equals(Color.LIGHT_GRAY)) {
+					txtSystemModel.setText("");
+					txtSystemModel.setForeground(Color.black);	
+				}
+				
+			}
+		});
+		txtSystemModel.setText("System model...");
+		txtSystemModel.setForeground(Color.LIGHT_GRAY);
+		txtSystemModel.setColumns(10);
+		panel_2.add(txtSystemModel);
+		
+		JButton button = new JButton("Browse");
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFileChooser fc = new JFileChooser();
+				int returnVal = fc.showOpenDialog(frmForensicReadinessAnalysis);
+
+		        if (returnVal == JFileChooser.APPROVE_OPTION) {
+		            File file = fc.getSelectedFile();
+		            systemModelFilePath = file.toURI().toString();
+		            txtSystemModel.setText(file.getName());
+		            txtSystemModel.setForeground(Color.black);
+		        } else {
+		            systemModelFilePath = "";
+		        }
+			}
+		});
+		button.setBounds(404, 162, 119, 63);
+		panel_2.add(button);
+		
 		JPanel panel_1 = new JPanel();
+		panel_1.setBounds(36, 415, 487, 236);
+		panel_2.add(panel_1);
 		panel_1.setBackground(SystemColor.window);
 		panel_1.setForeground(Color.BLACK);
 		panel_1.setBorder(new TitledBorder(null, "Options", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_1.setBounds(45, 536, 478, 236);
-		frmForensicReadinessAnalysis.getContentPane().add(panel_1);
 		panel_1.setLayout(null);
 		
 		JLabel lblThreadPoolSize = new JLabel("Thread pool size");
+		lblThreadPoolSize.setToolTipText("determines the number of threads that can be running in parallel. Max. is 10");
 		lblThreadPoolSize.setFont(new Font("Tahoma", Font.PLAIN, 24));
 		lblThreadPoolSize.setBounds(26, 64, 212, 40);
 		panel_1.add(lblThreadPoolSize);
@@ -294,73 +418,19 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 				
 			}
 		});
-		spinner.setModel(new SpinnerNumberModel(4, 1, 10, 1));
+		spinner.setModel(new SpinnerNumberModel(1, 1, 10, 1));
 		spinner.setBounds(212, 64, 54, 40);
 		panel_1.add(spinner);
 		
-		JSeparator separator_1 = new JSeparator();
-		separator_1.setBounds(45, panel.getY()-margin_medium, windowWidth-margin, 22);
-		
-		frmForensicReadinessAnalysis.getContentPane().add(separator_1);
-		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(612, 84, windowWidth-margin_medium-612, 854);
-		JPanel summaryPanel = new JPanel();
-		summaryPanel.setForeground(SystemColor.window);
-		summaryPanel.setBorder(tabbedPane.getBorder());
-		JPanel instancesListPanel = new JPanel();
-		JPanel instanceViewerPanel = new JPanel();
-		
-		//tabbedPane.add(summaryPanel);
-		tabbedPane.add("Summary", summaryPanel);
-		summaryPanel.setLayout(null);
-		
-		progressBar = new JProgressBar();
-		progressBar.setStringPainted(true);
-		progressBar.setBounds(summaryPanel.getX()+margin_medium, summaryPanel.getY()+margin_medium, tabbedPane.getWidth()-margin, 34);
-		
-		summaryPanel.add(progressBar);
-		
-		labelProgressBar = new JLabel("");
-		labelProgressBar.setBounds(36, 28, 201, 33);
-		summaryPanel.add(labelProgressBar);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setViewportBorder(new TitledBorder(null, "Asset Map Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		scrollPane.setBounds(36, 134, 632, 337);
-		summaryPanel.add(scrollPane);
-		
-		textPane = new JTextPane();
-		textPane.setToolTipText("Shows information about the asset map");
-		scrollPane.setViewportView(textPane);
-		textPane.setEditable(false);
-		
-		JList list = new JList();
-		list.setBounds(46, 515, 1214, 138);
-		summaryPanel.add(list);
-		
-		JSeparator separator_2 = new JSeparator();
-		separator_2.setOrientation(SwingConstants.VERTICAL);
-		separator_2.setBounds(694, 134, 23, 337);
-		summaryPanel.add(separator_2);
-		
-		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setViewportBorder(new TitledBorder(null, "Asset Sets Info", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		scrollPane_1.setBounds(715, 134, 680, 337);
-		summaryPanel.add(scrollPane_1);
-		
-		listAssetSets = new JList<String>();
-		scrollPane_1.setViewportView(listAssetSets);
-		
-		listAssetSets.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-		listAssetSets.setLayoutOrientation(JList.VERTICAL_WRAP);
-		listAssetSets.setVisibleRowCount(-1);
-	
-		tabbedPane.setBackgroundAt(0, SystemColor.desktop);
-		tabbedPane.add("Instances List", instancesListPanel);
-		tabbedPane.add("Instance Details", instanceViewerPanel);
-		
-		frmForensicReadinessAnalysis.getContentPane().add(tabbedPane);
+		JButton btnNewButton = new JButton("generate incident instances");
+		btnNewButton.setBounds(36, 738, 487, 62);
+		panel_2.add(btnNewButton);
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					window.createInstance();
+			}
+		});
+		panel_2.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{txtIncidentPattern}));
 	}
 
 	@Override
@@ -382,8 +452,14 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 			@Override
 			public void run() {
 				// TODO Auto-generated method stub
-				IncidentPatternInstantiator inc = new IncidentPatternInstantiator();
-				inc.execute(threadPoolSize, window);
+				incidentInstantiator = new IncidentPatternInstantiator();
+				if(incidentPatternFilePath == null || incidentPatternFilePath.isEmpty()) {
+					//execute with default file names
+					incidentInstantiator.execute(threadPoolSize, window);	
+				} else {
+					incidentInstantiator.execute(incidentPatternFilePath, systemModelFilePath, threadPoolSize, window);
+				}
+				
 			}
 			
 		};
@@ -409,14 +485,79 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		
 		//JLabel [] labels = new JLabel[assetSets.size()];
 		String [] labels = new String[assetSets.size()];
+		
+		checkBoxsAssetSets = new JCheckBox[assetSets.size()+2];
+		
+		checkBoxsAssetSets[0] = new JCheckBox("All ("+assetSets.size()+")");
+		checkBoxsAssetSets[1] = new JCheckBox("None");
+		
+		checkBoxsAssetSets[0].addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(checkBoxsAssetSets[0].isSelected()) {
+					checkBoxsAssetSets[1].setSelected(false);
+					for(int i=2; i<checkBoxsAssetSets.length;i++) {
+						checkBoxsAssetSets[i].setSelected(true);
+					}
+				}
+			}
+		});
+		checkBoxsAssetSets[0].setSelected(true);
+		checkBoxsAssetSets[1].addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				if(checkBoxsAssetSets[1].isSelected()) {
+					checkBoxsAssetSets[0].setSelected(false);
+					for(int i=2; i<checkBoxsAssetSets.length;i++) {
+						checkBoxsAssetSets[i].setSelected(false);
+					}
+				}
+			}
+		});
+		assetSetPanel.add(checkBoxsAssetSets[0]);
+		assetSetPanel.add(checkBoxsAssetSets[1]);
+		
 		for(int i=0;i<assetSets.size();i++) {
 			//listAssetSets.add(new JLabel("set ["+i+"]"));
 			str.delete(0, str.length());
 			str.append("set [").append(i).append("]: ")
 			.append(Arrays.toString(assetSets.get(i)));
 			labels[i] = str.toString();
+			checkBoxsAssetSets[i+2] = new JCheckBox(labels[i]);
+			
+			//listAssetSets.add(checks[i]);
+			//checks[i].setBounds(assetSetScroll_2.getX()+10, assetSetScroll_2.getY()+10, assetSetScroll_2.getWidth()-20, 50);
+			checkBoxsAssetSets[i+2].setSelected(true);
+			assetSetPanel.add(checkBoxsAssetSets[i+2]);			
 		}
 		
-		listAssetSets.setListData(labels);
+		
+		assetSetPanel.validate();
+		btnAnalyseSelectedSets.setEnabled(true);
+		
+		//listAssetSets.setListData(checks);
+	}
+	
+	private void analyseSelectedAssetsets() {
+		LinkedList<Integer> selectedSets = new LinkedList<Integer>();
+		
+		if(checkBoxsAssetSets[0].isSelected()) {
+			for(int i=2;i<checkBoxsAssetSets.length;i++) {
+				selectedSets.add(i-2);
+			}
+		} else {
+			for(int i=2;i<checkBoxsAssetSets.length;i++) {
+				if(checkBoxsAssetSets[i].isSelected()) {
+					selectedSets.add(i-2);
+				}
+			}
+		}
+		
+		incidentInstantiator.setAssetSetsSelected(selectedSets);
+		incidentInstantiator.setSetsSelected(true);
 	}
 }

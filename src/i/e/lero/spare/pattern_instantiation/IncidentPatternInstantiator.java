@@ -43,11 +43,11 @@ public class IncidentPatternInstantiator {
 	//String loggerFormatEnd = "</p></body></html>";
 	IncidentPatternInstantiationListener listener;
 	int incrementValue = 10;
-	
+	boolean isSetsSelected = false;
+	LinkedList<Integer> assetSetsSelected;
 //	 private SwingPropertyChangeSupport propChangeSupport =  new SwingPropertyChangeSupport(this);
-	 
-	public void execute(int threadPoolSiz, IncidentPatternInstantiationListener listen) {
-		
+	
+	public void execute(String incidentPatternFile, String systemModelFile, int threadPoolSiz, IncidentPatternInstantiationListener listen) {
 		this.threadPoolSize = threadPoolSiz;
 		//this.logger = logger;
 		listener = listen;
@@ -55,8 +55,8 @@ public class IncidentPatternInstantiator {
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
-		String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
+		//String systemModelFile = "etc/scenario1/research_centre_model.cps";
+		//String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		String outputFileName = "etc/scenario1/log_test1.txt";
 		
 		try {
@@ -145,10 +145,17 @@ public class IncidentPatternInstantiator {
 		
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
-		for(int i=0; i<lst.size();i++) {//adjust the length
+		
+		while(!isSetsSelected) {
+			//wait user input
+			Thread.sleep(500);
+		}
+		
+		
+		for(int i=0; i<assetSetsSelected.size();i++) {//adjust the length
 			
-			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-			print(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			incidentInstances[i] = new PotentialIncidentInstance(lst.get(assetSetsSelected.get(i)), incidentAssetNames, i);
+			print(">>Asset set["+assetSetsSelected.get(i)+"]: "+ Arrays.toString(lst.get(assetSetsSelected.get(i))));
 			
 			executor.submit(incidentInstances[i]);
 		}
@@ -186,10 +193,27 @@ public class IncidentPatternInstantiator {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+	}
+	
+	public void execute(int threadPoolSiz, IncidentPatternInstantiationListener listen) {
+		
+		String systemModelFile = "etc/scenario1/research_centre_model.cps";
+		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
+		
+		execute(incidentPatternFile,  systemModelFile, threadPoolSiz, listen);
 			
 	}
 
+	public void execute(String incidentPatternFile, String systemModelFile, IncidentPatternInstantiationListener listen) {
+		
+		execute(incidentPatternFile,  systemModelFile, 4, listen);
+			
+	}
+	
 	
 	/**
 	 * This method intialises the BRS system by executing the BRS file, then loading states as Bigraph objects 
@@ -770,4 +794,22 @@ public class IncidentPatternInstantiator {
 			e.printStackTrace();
 		}
 	}
+
+	public boolean isSetsSelected() {
+		return isSetsSelected;
+	}
+
+	public void setSetsSelected(boolean isSetsSelected) {
+		this.isSetsSelected = isSetsSelected;
+	}
+
+	public LinkedList<Integer> getAssetSetsSelected() {
+		return assetSetsSelected;
+	}
+
+	public void setAssetSetsSelected(LinkedList<Integer> assetSetsSelected) {
+		this.assetSetsSelected = assetSetsSelected;
+	}
+	
+	
 }

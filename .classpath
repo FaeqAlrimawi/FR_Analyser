@@ -89,5 +89,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/CyberPhysical_Incident.v1"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.wst.common.emf_1.2.500.v201701191735.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
+	<classpathentry kind="lib" path="jgoodies-forms-1.8.0.jar" sourcepath="jgoodies-forms-1.8.0-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
