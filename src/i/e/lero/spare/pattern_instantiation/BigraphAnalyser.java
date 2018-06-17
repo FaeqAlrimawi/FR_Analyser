@@ -115,7 +115,10 @@ public class BigraphAnalyser {
 		
 		//get results
 		for(int i=0;i<results.size();i++) {
-			statesResults.addAll(results.get(i).get());
+			LinkedList<Integer> res = results.get(i).get();
+			
+			if(res != null && !res.isEmpty())
+			statesResults.addAll(res);
 		}
 			
 		//set the predicate states

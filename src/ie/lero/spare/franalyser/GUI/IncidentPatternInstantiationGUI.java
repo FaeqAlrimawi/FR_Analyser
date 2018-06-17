@@ -231,7 +231,7 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		summaryPanel.add(progressBar);
 		
 		labelProgressBar = new JLabel("");
-		labelProgressBar.setBounds(50, 28, 201, 33);
+		labelProgressBar.setBounds(50, 24, 467, 33);
 		summaryPanel.add(labelProgressBar);
 		
 		JScrollPane scrollPane = new JScrollPane();
@@ -538,12 +538,14 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 		
 		assetSetPanel.validate();
 		btnAnalyseSelectedSets.setEnabled(true);
+		labelProgressBar.setText("Select asset sets to analyse.");
 		
 		//listAssetSets.setListData(checks);
 	}
 	
 	private void analyseSelectedAssetsets() {
 		LinkedList<Integer> selectedSets = new LinkedList<Integer>();
+		
 		
 		if(checkBoxsAssetSets[0].isSelected()) {
 			for(int i=2;i<checkBoxsAssetSets.length;i++) {
@@ -557,7 +559,18 @@ public class IncidentPatternInstantiationGUI implements IncidentPatternInstantia
 			}
 		}
 		
-		incidentInstantiator.setAssetSetsSelected(selectedSets);
-		incidentInstantiator.setSetsSelected(true);
+		if(selectedSets.size()>0) {
+			labelProgressBar.setText("Analysing...");
+			incidentInstantiator.setAssetSetsSelected(selectedSets);
+			incidentInstantiator.setSetsSelected(true);
+		} else {
+			labelProgressBar.setText("No asset sets are selected.");
+		}
+		
+	}
+	
+	private void cancelExecution(){
+		labelProgressBar.setText("Execution cancelled.");
+		progressBar.setValue(0);
 	}
 }
