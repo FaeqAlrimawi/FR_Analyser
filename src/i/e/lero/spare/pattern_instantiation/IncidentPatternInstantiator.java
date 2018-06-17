@@ -129,7 +129,7 @@ public class IncidentPatternInstantiator {
 		}*/
 		
 		
-		incrementValue = (int)Math.ceil(90.0/lst.size());
+		
 		
 		print(">>Initialise the System");
 		//initialise BRS system 
@@ -151,6 +151,9 @@ public class IncidentPatternInstantiator {
 			Thread.sleep(500);
 		}
 		
+		if(assetSetsSelected.size()>0) {
+			incrementValue = (int)Math.ceil(90.0/assetSetsSelected.size());	
+		}
 		
 		for(int i=0; i<assetSetsSelected.size();i++) {//adjust the length
 			
