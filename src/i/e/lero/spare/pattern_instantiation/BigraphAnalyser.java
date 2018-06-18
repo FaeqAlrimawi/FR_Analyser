@@ -1,5 +1,7 @@
 package i.e.lero.spare.pattern_instantiation;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,6 +14,7 @@ import java.util.concurrent.Future;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
+import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class BigraphAnalyser {
 
@@ -22,17 +25,21 @@ public class BigraphAnalyser {
 	private Matcher matcher;
 	private int threadPoolSize = 100;
 	private ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-	private double partitionSizePercentage = 0.05; //represents the size of the partiition as a percentage of the number of states
+	private double partitionSizePercentage = 0.02; //represents the size of the partiition as a percentage of the number of states
 	private int partitionSize = 1;
 	private int numberOfPartitions = 1;
 	private boolean noThreading = false;
 	private int minimumPartitionSize = 1;
+	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
+	private boolean isTestingTime = true;
+	private LocalDateTime timeNow;
+	private StopWatch timer = new StopWatch();
 	
 	public BigraphAnalyser() {
 		predicateHandler = null;
 		states = SystemInstanceHandler.getStates();
 		matcher = new Matcher();
-		
+	
 		setParitionSize();	
 		
 	}
@@ -44,11 +51,10 @@ public class BigraphAnalyser {
 		if(states.size() < 100) {
 			noThreading = true;
 		} else {
-			int tries = 100;
+			int tries = 0;
 			partitionSize = (int)(states.size()*partitionSizePercentage);
 			
 			while (tries < 100 && partitionSize < minimumPartitionSize) {
-				
 				//percentage is increase by a certain number to increase the size of the partition (but nothing above 50%)
 				partitionSizePercentage *= 1.5;
 				
@@ -74,6 +80,16 @@ public class BigraphAnalyser {
 			numberOfPartitions = states.size()/partitionSize;
 			
 		}
+		
+		if(isTestingTime) {
+			if(noThreading) {
+				print("number of states: "+states.size()+"\nNo threads");
+			} else {
+				print("number of states: "+states.size()+"\npartition size: "+partitionSize + "\nnumber of partitions: "+ numberOfPartitions+"\nthread pool size: " + threadPoolSize);
+			}
+					
+		}
+	
 	}
 
 	public BigraphAnalyser(PredicateHandler predHandler) {
@@ -124,8 +140,18 @@ public class BigraphAnalyser {
 	}
 	
 	public boolean identifyRelevantStates(Predicate pred) {
+		
+		
 		boolean areStatesIdentified = false;
-
+		
+		if(isTestingTime) {
+			timeNow =  LocalDateTime.now();
+			String startTime = "Start time: " + dtf.format(timeNow);
+			//print(startTime);
+			timer.reset();
+			timer.start();
+		}
+		
 		if(pred == null) {
 			return false;
 		}
@@ -184,7 +210,22 @@ public class BigraphAnalyser {
 		}
 		
 	
-		
+		if(isTestingTime) {
+			timer.stop();
+			timeNow = LocalDateTime.now();	
+			//print("\n[End time: " + dtf.format(EndingTime) +"]");
+			
+			long timePassed = timer.getEllapsedMillis();
+			
+			int hours = (int)(timePassed/3600000)%60;
+			int mins = (int)(timePassed/60000)%60;
+			int secs = (int)(timePassed/1000)%60;
+			int secMils = (int)timePassed%1000;
+			
+			//execution time
+			print("\nExecution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+		}
+
 		System.out.println(pred.getName()+"-states: "+pred.getBigraphStates());
 		return areStatesIdentified;
 	}
@@ -221,7 +262,7 @@ public class BigraphAnalyser {
 	
 	private void print(String msg) {
 		if(isDebugging) {
-			System.out.println("BigraphAnalyser: "+msg);
+			System.out.println(msg);
 		}
 	}
 	/*public static void main(String[] args){
