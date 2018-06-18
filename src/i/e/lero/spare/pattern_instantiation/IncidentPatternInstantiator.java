@@ -46,7 +46,8 @@ public class IncidentPatternInstantiator {
 	boolean isSetsSelected = false;
 	LinkedList<Integer> assetSetsSelected;
 	private String logFileName;
-		
+	private String logFolder;	
+	private boolean isSaveLog = false;
 	
 	public BufferedWriter createLogFile(String logFileName) {
 		
@@ -57,12 +58,14 @@ public class IncidentPatternInstantiator {
 	public BufferedWriter createLogFile() {
 		
 		BufferedWriter bufferWriter = null;
-		String folderName = "log";
+		
+		logFolder = "etc/scenario1/log";
+		
 		boolean isFolderCreated = true;
 		File file = null;
 		
 		try {
-		File folder = new File(folderName);
+		File folder = new File(logFolder);
 		
 		
 		
@@ -75,7 +78,7 @@ public class IncidentPatternInstantiator {
 				logFileName = logFileName+".txt";
 			}
 			
-			file = new File(folderName+"/"+logFileName);
+			file = new File(logFolder+"/"+logFileName);
 			if (!file.exists()) {
 				file.createNewFile();	
 	        }	
@@ -115,11 +118,10 @@ public class IncidentPatternInstantiator {
 		String startTime = "Start time: " + dtf.format(startingTime);
 		
 		//set log file name
-		logFileName = "log_"+startingTime.toLocalDate()+".txt";
+		logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
 		bufferWriter = createLogFile();
 		
 		print(startTime);
-		
 		
 		//start a timer
 		timer.start();
@@ -396,11 +398,11 @@ public class IncidentPatternInstantiator {
 		LocalDateTime startingTime = LocalDateTime.now();
 			
 		String startTime = "Start time: " + dtf.format(startingTime);
-			
-		logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
 		
-		System.out.println(logFileName);
-		bufferWriter = createLogFile();
+		if(isSaveLog) {
+			logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
+			bufferWriter = createLogFile();
+		}
 		
 		print(startTime);
 		
@@ -424,6 +426,8 @@ public class IncidentPatternInstantiator {
 		}
 		
 		//print matched assets
+		print(">>Number of Assets (also entities) =  "+am.getIncidentAssetNames().length);
+		print(">>Incident entities order: " + Arrays.toString(am.getIncidentAssetNames()));
 		print(">>Entity-Asset map:");
 		print(am.toString());
 		
@@ -496,7 +500,7 @@ public class IncidentPatternInstantiator {
 			bufferWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			print(e.getMessage());
 		}
 		
 	}
@@ -748,7 +752,7 @@ public class IncidentPatternInstantiator {
 			
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				print(e.getMessage());
 			} 
  		}
 		
@@ -822,11 +826,14 @@ public class IncidentPatternInstantiator {
 		}
 		
 		try {
-			bufferWriter.write(msg);
-			bufferWriter.newLine();
+			if(isSaveLog) {
+				bufferWriter.write(msg);
+				bufferWriter.newLine();	
+			}
+			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			print(e.getMessage());
 		}
 	}
 
