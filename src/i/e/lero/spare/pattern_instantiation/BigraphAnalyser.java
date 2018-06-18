@@ -23,17 +23,20 @@ public class BigraphAnalyser {
 	private boolean isDebugging = true;
 	private HashMap<Integer, Bigraph> states;
 	private Matcher matcher;
-	private int threadPoolSize = 100;
+	private int threadPoolSize = 1;
 	private ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-	private double partitionSizePercentage = 0.02; //represents the size of the partiition as a percentage of the number of states
+	private double partitionSizePercentage = 0.0645; //represents the size of the partiition as a percentage of the number of states
 	private int partitionSize = 1;
 	private int numberOfPartitions = 1;
-	private boolean noThreading = false;
+	private boolean noThreading = true;
 	private int minimumPartitionSize = 1;
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	private boolean isTestingTime = true;
 	private LocalDateTime timeNow;
 	private StopWatch timer = new StopWatch();
+	private long times [];
+	private int timeIndex = 0;
+	private int averageTime = 0;
 	
 	public BigraphAnalyser() {
 		predicateHandler = null;
@@ -48,13 +51,21 @@ public class BigraphAnalyser {
 		
 		//set partition size
 		//also can determine if partitioning is needed depending on the number of states
+		
+		//set thread pool size to be the number of available processors
+		//seems half of the processors is a good number
+		
+		
 		if(states.size() < 100) {
 			noThreading = true;
 		} else {
 			int tries = 0;
-			partitionSize = (int)(states.size()*partitionSizePercentage);
 			
-			while (tries < 100 && partitionSize < minimumPartitionSize) {
+			threadPoolSize = Runtime.getRuntime().availableProcessors();
+			//probalby will be fixed to 100 (maybe more, more testing is needed)
+			partitionSize = 100;//(int)(states.size()*partitionSizePercentage);
+			
+			/*while (tries < 100 && partitionSize < minimumPartitionSize) {
 				//percentage is increase by a certain number to increase the size of the partition (but nothing above 50%)
 				partitionSizePercentage *= 1.5;
 				
@@ -75,17 +86,20 @@ public class BigraphAnalyser {
 			//if the partition size is not increased after the number of tries then no threading is done
 			if(tries == 100) {
 				noThreading = true;
-			}
+			}*/
 			
 			numberOfPartitions = states.size()/partitionSize;
 			
 		}
 		
 		if(isTestingTime) {
+			times = new long[6];
+			
 			if(noThreading) {
 				print("number of states: "+states.size()+"\nNo threads");
 			} else {
-				print("number of states: "+states.size()+"\npartition size: "+partitionSize + "\nnumber of partitions: "+ numberOfPartitions+"\nthread pool size: " + threadPoolSize);
+				print("number of states: "+states.size()+"\npartition size: "+partitionSize + " ("+ (partitionSize/states.size())*100+ "%)"+
+						"\nnumber of partitions: "+ numberOfPartitions+"\nthread pool size: " + threadPoolSize);
 			}
 					
 		}
@@ -224,6 +238,17 @@ public class BigraphAnalyser {
 			
 			//execution time
 			print("\nExecution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+			times[timeIndex] = timePassed;
+			timeIndex++;
+			
+			if(timeIndex == 6) {
+				for(long time : times) {
+					averageTime+=time;
+				}
+				averageTime /=6;
+				print("Average execution time = "+ averageTime+"ms");
+			}
+			
 		}
 
 		System.out.println(pred.getName()+"-states: "+pred.getBigraphStates());
