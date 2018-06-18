@@ -35,7 +35,7 @@ public class IncidentPatternInstantiator {
 	LinkedList<Integer> assetSetsSelected;
 	private String logFileName;
 	private String logFolder;	
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
 	private boolean isPrintToScreen = true;
 	
 	public BufferedWriter createLogFile(String logFileName) {
@@ -385,7 +385,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_5000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -759,7 +759,7 @@ public class IncidentPatternInstantiator {
 //			System.out.println("\nThread["+threadID+"]>>Summary of the incident pattern activities");
 //			System.out.println(predicateHandler.getSummary());
 			
-			print("\nThread ["+threadID+"]>>Finished Succefully");
+			print("\nThread ["+threadID+"]>>Finished Successfully");
 			print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
 			if(listener != null) {

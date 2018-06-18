@@ -22,14 +22,58 @@ public class BigraphAnalyser {
 	private Matcher matcher;
 	private int threadPoolSize = 100;
 	private ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
-	private double partitionSizePercentage = 0.33; //represents the size of the partiition as a percentage of the number of states
-	private int partitionSize = 0;
+	private double partitionSizePercentage = 0.05; //represents the size of the partiition as a percentage of the number of states
+	private int partitionSize = 1;
+	private int numberOfPartitions = 1;
+	private boolean noThreading = false;
+	private int minimumPartitionSize = 1;
 	
 	public BigraphAnalyser() {
 		predicateHandler = null;
 		states = SystemInstanceHandler.getStates();
 		matcher = new Matcher();
-
+		
+		setParitionSize();	
+		
+	}
+	
+	private void setParitionSize() {
+		
+		//set partition size
+		//also can determine if partitioning is needed depending on the number of states
+		if(states.size() < 100) {
+			noThreading = true;
+		} else {
+			int tries = 100;
+			partitionSize = (int)(states.size()*partitionSizePercentage);
+			
+			while (tries < 100 && partitionSize < minimumPartitionSize) {
+				
+				//percentage is increase by a certain number to increase the size of the partition (but nothing above 50%)
+				partitionSizePercentage *= 1.5;
+				
+				if(partitionSizePercentage >0.5) {
+					partitionSizePercentage = 0.5;
+					partitionSize = (int)(states.size()*partitionSizePercentage);
+					
+					if(partitionSize < minimumPartitionSize) {
+						tries = 100;
+					}
+					break;
+				}
+				
+				partitionSize = (int)(states.size()*partitionSizePercentage);
+				tries++;
+			}
+			
+			//if the partition size is not increased after the number of tries then no threading is done
+			if(tries == 100) {
+				noThreading = true;
+			}
+			
+			numberOfPartitions = states.size()/partitionSize;
+			
+		}
 	}
 
 	public BigraphAnalyser(PredicateHandler predHandler) {
@@ -39,12 +83,9 @@ public class BigraphAnalyser {
 
 	public PredicateHandler analyse() {
 		
-		//set partition size
-		//also can determine if partitioning is needed depending on the number of states
-		partitionSize = (int)(states.size()*this.partitionSizePercentage);
-		
 		identifyRelevantStates();
 		predicateHandler =  identifyStateTransitions();
+		
 		executor.shutdown();
 		
 		return predicateHandler;
@@ -95,23 +136,27 @@ public class BigraphAnalyser {
 			return false;
 		}		
 		
-		//divid the states array for mult-threading
+		//divide the states array for mult-threading
+		if(!noThreading) {	
 		try {
 			
+		
 		LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
 		
 		LinkedList<Integer> statesResults = new LinkedList<Integer>();
 		
 		//run tasks
 		int index=0;
-		int size = states.size()/partitionSize;
 		
-		for(index=0;index<size-1;index++) {
+		for(index=0;index<numberOfPartitions;index++) {
 			results.add(executor.submit(new BigraphMatcher(partitionSize*index, partitionSize*(index+1), redex.clone())));
 		}
 		
 		//last partition takes the residue as well
-		results.add(executor.submit(new BigraphMatcher(partitionSize*index, states.size(), redex.clone())));
+		if(index*partitionSize < states.size()) {
+			results.add(executor.submit(new BigraphMatcher(partitionSize*index, states.size(), redex.clone())));	
+		}
+		
 		
 		//get results
 		for(int i=0;i<results.size();i++) {
@@ -128,15 +173,17 @@ public class BigraphAnalyser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		//should be kept in case number of states is not high
-		/*for(int i =0; i<states.size();i++) {	
-			if(matcher.match(states.get(i), redex).iterator().hasNext()){
-				pred.addBigraphState(i);
-				areStatesIdentified = true;
-				//print("state " + i%length + " matched");		
+		} else {
+			for(int i =0; i<states.size();i++) {	
+				if(matcher.match(states.get(i), redex).iterator().hasNext()){
+					pred.addBigraphState(i);
+					areStatesIdentified = true;
+					//print("state " + i%length + " matched");		
+				}
 			}
-		}*/
+		}
+		
+	
 		
 		System.out.println(pred.getName()+"-states: "+pred.getBigraphStates());
 		return areStatesIdentified;
