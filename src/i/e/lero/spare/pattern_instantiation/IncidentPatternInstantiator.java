@@ -30,7 +30,7 @@ import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternInstantiator {
 	
-	private String xqueryFile = "match_query.xq";
+	private String xqueryFile = "etc/match_query.xq";
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	//CountDownLatch latch;
 	private File scenario1File;
@@ -45,7 +45,51 @@ public class IncidentPatternInstantiator {
 	int incrementValue = 10;
 	boolean isSetsSelected = false;
 	LinkedList<Integer> assetSetsSelected;
-//	 private SwingPropertyChangeSupport propChangeSupport =  new SwingPropertyChangeSupport(this);
+	private String logFileName;
+		
+	
+	public BufferedWriter createLogFile(String logFileName) {
+		
+		this.logFileName = logFileName;
+		return createLogFile();
+	}
+	
+	public BufferedWriter createLogFile() {
+		
+		BufferedWriter bufferWriter = null;
+		String folderName = "log";
+		boolean isFolderCreated = true;
+		File file = null;
+		
+		try {
+		File folder = new File(folderName);
+		
+		
+		
+		if(!folder.exists()) {
+			isFolderCreated = folder.mkdir();
+		}
+		
+		if(isFolderCreated) {
+			if(!logFileName.endsWith(".txt")) {
+				logFileName = logFileName+".txt";
+			}
+			
+			file = new File(folderName+"/"+logFileName);
+			if (!file.exists()) {
+				file.createNewFile();	
+	        }	
+		}
+		
+		FileWriter fw = new FileWriter(file.getAbsoluteFile());
+		bufferWriter = new BufferedWriter(fw);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return bufferWriter;
+	}
 	
 	public void execute(String incidentPatternFile, String systemModelFile, int threadPoolSiz, IncidentPatternInstantiationListener listen) {
 		this.threadPoolSize = threadPoolSiz;
@@ -60,16 +104,6 @@ public class IncidentPatternInstantiator {
 		String outputFileName = "etc/scenario1/log_test1.txt";
 		
 		try {
-			
-		//output file
-		scenario1File = new File(outputFileName);
-		
-		if (!scenario1File.exists()) {
-			scenario1File.createNewFile();
-        }
-		
-		FileWriter fw = new FileWriter(scenario1File.getAbsoluteFile());
-		bufferWriter = new BufferedWriter(fw);
 		        
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
@@ -79,6 +113,10 @@ public class IncidentPatternInstantiator {
 		LocalDateTime startingTime = LocalDateTime.now();
 		
 		String startTime = "Start time: " + dtf.format(startingTime);
+		
+		//set log file name
+		logFileName = "log_"+startingTime.toLocalDate()+".txt";
+		bufferWriter = createLogFile();
 		
 		print(startTime);
 		
@@ -127,9 +165,6 @@ public class IncidentPatternInstantiator {
 		for (String[] s : lst) {
 			System.out.println(Arrays.toString(s));
 		}*/
-		
-		
-		
 		
 		print(">>Initialise the System");
 		//initialise BRS system 
@@ -224,7 +259,7 @@ public class IncidentPatternInstantiator {
 	 * @param outputFolder Output folder
 	 * @return
 	 */
-	public boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
+	private boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
 		
 		//first execute the system. If the execution is not successful then return false
 		//a pre-requiste for this is to have the BRS tool installed on the system
@@ -346,31 +381,26 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-		String outputFileName = "etc/scenario1/log_test1.txt";
-		
-		try {
-			
-		//output file
-		scenario1File = new File(outputFileName);
-		
-		if (!scenario1File.exists()) {
-			scenario1File.createNewFile();
-        }
-		
-		FileWriter fw = new FileWriter(scenario1File.getAbsoluteFile());
-		bufferWriter = new BufferedWriter(fw);
-		        
+		//String logFileName = "etc/scenario1/log.txt";
+
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
+	
+		try {
 		
 		StopWatch timer = new StopWatch();
-		
+			
 		LocalDateTime startingTime = LocalDateTime.now();
-		
+			
 		String startTime = "Start time: " + dtf.format(startingTime);
+			
+		logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
+		
+		System.out.println(logFileName);
+		bufferWriter = createLogFile();
 		
 		print(startTime);
 		
@@ -462,13 +492,13 @@ public class IncidentPatternInstantiator {
 		//if time passed is more than 1 minute
 		print("time ellapsed: "+timePassed+" ms");
 		print("Execution time: " +  hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms");
-		
-		bufferWriter.close();
-		
+	
+			bufferWriter.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 	}
 
 	/*public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile) {
@@ -786,8 +816,10 @@ public class IncidentPatternInstantiator {
 	public void print(String msg) {
 		
 		System.out.println(msg);
-		listener.updateLogger(msg);
 		
+		if(listener != null) {
+		listener.updateLogger(msg);
+		}
 		
 		try {
 			bufferWriter.write(msg);
