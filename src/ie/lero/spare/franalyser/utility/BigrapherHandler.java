@@ -427,15 +427,9 @@ public class BigrapherHandler implements SystemExecutor {
 		rulesKeywords = getActionNamesFromBRSFile();
 		LabelExtractor lbl = new LabelExtractor(rulesKeywords);
 		
-		System.out.println(lbl.updateDigraphLabels());
-		
-		//getActionNamesFromBRSFile();
+		lbl.updateDigraphLabels();
 		
 		return transitionSystem;
-		//add action labels to transitions, if there are keywords provided
-		//for testing, keywords are provided as string array. They can be provided via a file.
-		
-		
 	}
 
 	private String[] getActionNamesFromBRSFile() {

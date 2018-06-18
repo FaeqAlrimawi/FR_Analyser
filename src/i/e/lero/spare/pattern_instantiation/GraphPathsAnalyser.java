@@ -215,29 +215,29 @@ public class GraphPathsAnalyser {
 		int actionsNum = 0;
 		
 		//get common paths
-		str.append(newLine).append("common actions:").append(commonActions).append(newLine);
+		str.append(newLine).append("-common actions:").append(commonActions).append(newLine);
 		
 		//get top paths based on the common actions i.e. paths that contain all common actions
-		str.append(newLine).append("top paths (based on common actions): ").append(topPaths).append(newLine);
+		str.append("-top paths (based on common actions): ").append(topPaths).append(newLine);
 		
 		//get shortest paths
 		if(shortestPaths.size() >0) {
 			actionsNum = shortestPaths.getLast();
 			shortestPaths.removeLast();
-			str.append(newLine).append("Shortest Paths (").append(actionsNum).append(" actions): ").append(shortestPaths).append(newLine);
+			str.append("-Shortest Paths (").append(actionsNum).append(" actions): ").append(shortestPaths).append(newLine);
 			shortestPaths.add(actionsNum);
 		} else {
-			str.append(newLine).append("Shortest Paths: [NONE]");
+			str.append("-Shortest Paths: [NONE]");
 		}
 		
 		//get longest paths
 		if(longestPaths.size() >0) {
 			actionsNum = longestPaths.getLast();
 			longestPaths.removeLast();
-			str.append(newLine).append("Longest Paths (").append(actionsNum).append(" actions): ").append(longestPaths).append(newLine);	
+			str.append("-Longest Paths (").append(actionsNum).append(" actions): ").append(longestPaths).append(newLine);	
 			longestPaths.add(actionsNum);
 		} else {
-			str.append(newLine).append("Longest Paths: [NONE]");
+			str.append("-Longest Paths: [NONE]");
 		}
 		
 		return str.toString();
