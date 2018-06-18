@@ -8,23 +8,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.JEditorPane;
-import javax.swing.event.SwingPropertyChangeSupport;
-
-import org.apache.batik.parser.PathArrayProducer;
 import org.json.JSONObject;
 
-import ie.lero.spare.franalyser.GUI.IncidentPatternInstantiationGUI;
 import ie.lero.spare.franalyser.GUI.IncidentPatternInstantiationListener;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
-import ie.lero.spare.franalyser.utility.Digraph;
-import ie.lero.spare.franalyser.utility.FileManipulator;
-import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.util.StopWatch;
 
@@ -32,22 +23,18 @@ public class IncidentPatternInstantiator {
 	
 	private String xqueryFile = "etc/match_query.xq";
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
-	//CountDownLatch latch;
-	private File scenario1File;
 	BufferedWriter bufferWriter;
 	int threadPoolSize = 1;
 	int maxWaitingTime = 48;
 	TimeUnit timeUnit = TimeUnit.HOURS;
-	//IncidentPatternInstantiationGUI logger;
-	//String loggerFormatStart = "<!DOCTYPE html><html><body><p style=\"color:white;font-size:40;\">";
-	//String loggerFormatEnd = "</p></body></html>";
 	IncidentPatternInstantiationListener listener;
 	int incrementValue = 10;
 	boolean isSetsSelected = false;
 	LinkedList<Integer> assetSetsSelected;
 	private String logFileName;
 	private String logFolder;	
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
+	private boolean isPrintToScreen = true;
 	
 	public BufferedWriter createLogFile(String logFileName) {
 		
@@ -262,15 +249,7 @@ public class IncidentPatternInstantiator {
 	 * @return
 	 */
 	private boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
-		
-		//first execute the system. If the execution is not successful then return false
-		//a pre-requiste for this is to have the BRS tool installed on the system
-		/*if(!SystemInstanceHandler.isSystemAnalysed()) {
-			if(!SystemInstanceHandler.analyseSystem(BRSFileName)) {
-				return false;
-			}
-		}*/
-		
+
 		//create a handler for bigrapher tool
 		BigrapherHandler bigrapherHandler = new BigrapherHandler(BRSFileName, outputFolder);
 		
@@ -383,7 +362,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_5000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -397,7 +376,7 @@ public class IncidentPatternInstantiator {
 			
 		LocalDateTime startingTime = LocalDateTime.now();
 			
-		String startTime = "Start time: " + dtf.format(startingTime);
+		String startTime = "[Start time: " + dtf.format(startingTime)+"]";
 		
 		if(isSaveLog) {
 			logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
@@ -412,12 +391,12 @@ public class IncidentPatternInstantiator {
 		////start executing the scenario \\\\
 		Mapper m = new Mapper(xQueryMatcherFile);
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
-		print(">>Matching incident pattern entities to system assets");
+		print("\n>>Matching incident pattern entities to system assets");
 		AssetMap am = m.findMatches(); 
 		
 		// if there are incident assets with no matches from space model then exit
 		if (am.hasAssetsWithNoMatch()) {
-			print(">>Some incident entities have no matches in the system assets. These are:");
+			print("\n>>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				print(Arrays.toString(asts));
@@ -426,20 +405,39 @@ public class IncidentPatternInstantiator {
 		}
 		
 		//print matched assets
-		print(">>Number of Assets (also entities) =  "+am.getIncidentAssetNames().length);
-		print(">>Incident entities order: " + Arrays.toString(am.getIncidentAssetNames()));
-		print(">>Entity-Asset map:");
+		print("\n>>Number of Assets (also entities) =  "+am.getIncidentAssetNames().length);
+		print("\n>>Incident entities order: " + Arrays.toString(am.getIncidentAssetNames()));
+		print("\n>>Entity-Asset map:");
 		print(am.toString());
+		print("\n>>Generating asset sets..");
 		
 		//generate sequences
 		LinkedList<String[]> lst = am.generateUniqueCombinations();
 		
+		print("\n>>Asset sets ("+lst.size()+"):");
+		
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
 		if(lst == null || lst.isEmpty()) {
-			print(">>No combinations found.");
+			print("\n>>No combinations found. Terminating execution.");
 			return;
+		 }
+		
+		//print the sets only if there are less than 200. Else, print a 100 but save the rest to a file
+		if(lst.size()<200) {
+			for(int i=0; i<lst.size();i++) {//adjust the length
+				print("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			}
+		} else {
+			for(int i=0; i<lst.size();i++) {//adjust the length
+				if(i>=100) {
+					isPrintToScreen = false;
+				}
+				print("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			}
+			isPrintToScreen = true;
 		}
+		
 		
 		//print sequences 
 	/*	System.out.println("Sequences ["+lst.size()+"]");
@@ -447,11 +445,11 @@ public class IncidentPatternInstantiator {
 			System.out.println(Arrays.toString(s));
 		}*/
 		
-		print(">>Initialise the System");
+		print("\n>>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
 		//initialise BRS system 
 		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
 		if (!isInitialised) {
-			print(">>System could not be initialised. Execution is halted.");
+			print(">>System could not be initialised. Execution is terminated.");
 		}
 		
 		//create threads that handle each sequence generated from asset matching
@@ -462,7 +460,6 @@ public class IncidentPatternInstantiator {
 		String [] incidentAssetNames = am.getIncidentAssetNames();
 		
 		for(int i=0; i<lst.size();i++) {//adjust the length
-			
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			print(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			
@@ -819,7 +816,9 @@ public class IncidentPatternInstantiator {
 	
 	public void print(String msg) {
 		
-		System.out.println(msg);
+		if(isPrintToScreen) {
+			System.out.println(msg);
+		}
 		
 		if(listener != null) {
 		listener.updateLogger(msg);
