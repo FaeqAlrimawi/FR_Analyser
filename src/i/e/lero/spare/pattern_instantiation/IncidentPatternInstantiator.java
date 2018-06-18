@@ -36,7 +36,7 @@ public class IncidentPatternInstantiator {
 	private String logFileName;
 	private String logFolder;	
 	private boolean isSaveLog = false;
-	private boolean isPrintToScreen = false;
+	private boolean isPrintToScreen = true;
 	
 	public BufferedWriter createLogFile(String logFileName) {
 		
@@ -131,6 +131,8 @@ public class IncidentPatternInstantiator {
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				print(Arrays.toString(asts));
 				listener.updateAssetMapInfo(">>Some incident entities have no matches in the system assets. These are:\n"+Arrays.toString(asts));
+				listener.updateAssetMapInfo("Execution is terminated");
+				print("Execution is terminated");
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
@@ -153,7 +155,7 @@ public class IncidentPatternInstantiator {
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
 		if(lst == null || lst.isEmpty()) {
-			print(">>No combinations found.");
+			print(">>No combinations found. Execution is terminated");
 			return;
 		}
 		
@@ -168,13 +170,16 @@ public class IncidentPatternInstantiator {
 			print("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
 		}
 		isPrintToScreen = true;
-
+		
 		print("\n>>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
-	
-		//initialise BRS system 
+		
+		//initialise the system (load states and transition system)
 		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
-		if (!isInitialised) {
-			print(">>System could not be initialised. Execution is halted.");
+		
+		if (isInitialised) {
+			print(">>Initialisation completed successfully");
+		} else {
+			print(">>Initialisation was NOT completed successfully. Execution is terminated");
 		}
 		
 		print("\n>>Number of States= "+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
@@ -267,7 +272,7 @@ public class IncidentPatternInstantiator {
 	 * @return
 	 */
 	private boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
-
+		
 		//create a handler for bigrapher tool
 		BigrapherHandler bigrapherHandler = new BigrapherHandler(BRSFileName, outputFolder);
 		
@@ -275,7 +280,7 @@ public class IncidentPatternInstantiator {
 		
 		SystemInstanceHandler.setExecutor(bigrapherHandler);
 		
-		return SystemInstanceHandler.analyseSystem();
+		return SystemInstanceHandler.analyseBRS(this);
 
 	}
 	
@@ -458,11 +463,14 @@ public class IncidentPatternInstantiator {
 		
 		//initialise BRS system 
 		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
-		if (!isInitialised) {
-			print(">>System could not be initialised. Execution is terminated");
+		
+		if (isInitialised) {
+			print(">>Initialisation completed successfully");
+		} else {
+			print(">>Initialisation was NOT completed successfully. Execution is terminated");
 		}
 		
-		print("\n>>Number of States= "+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
+		print(">>Number of States= "+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
 		print(">>State Transitions:");
 		print(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 		

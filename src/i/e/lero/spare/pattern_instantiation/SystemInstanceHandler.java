@@ -1,5 +1,6 @@
 package i.e.lero.spare.pattern_instantiation;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -17,61 +18,98 @@ public class SystemInstanceHandler {
 	private static Signature globalBigraphSignature;
 	private static boolean isDebugging = true;
 	private static String errorSign = "## ";
-	public static boolean analyseSystem() {
-
+	private IncidentPatternInstantiator instantiatorInstance = null;
+	
+	public static boolean analyseBRS(IncidentPatternInstantiator instance) {
+		
 		boolean isDone = false;
 		
 		if (executor == null) {
-			print("SystemHandler>> Bigraph System Executor is not set");
+			instance.print("BRSHandler>> Bigraph System Executor is not set");
 			isDone = false;
 		} else {
-			print("SystemHandler>> Executing the Bigraphical Reactive System (BRS)...");
+			instance.print("BRSHandler>> Executing the Bigraphical Reactive System (BRS)...");
 			outputFolder = executor.execute();
 
 			if (outputFolder != null) {
-				print("SystemHandler>> Creating Bigraph Signature...");
+				instance.print("BRSHandler>> Creating Bigraph Signature...");
 
 				// get the signature
 				globalBigraphSignature = executor.getBigraphSignature();
 
 				if (globalBigraphSignature != null) {
 				} else {
-					print("SystemHandler>> " + errorSign + "Something went wrong creating the Bigraph signature");
+					instance.print("BRSHandler>> " + errorSign + "Something went wrong creating the Bigraph signature");
 					isDone = false;
 				}
 
-				print("SystemHandler>> Creating Bigraph transition system...");
+				instance.print("BRSHandler>> Creating Bigraph transition system...");
 				// get the transition system
 				transitionSystem = executor.getTransitionSystem();
 
 				if (transitionSystem != null) {
 				} else {
-					print("SystemHandler>> " + errorSign
+					instance.print("BRSHandler>> " + errorSign
 							+ "something went wrong while creating the Bigraph transition system");
 					isDone = false;
 				}
 
-				print("SystemHandler>> Loading states...");
+				instance.print("BRSHandler>> Loading states...");
 				// gete states as Bigraph objects
 				states = executor.getStates();
 
 				if (states != null) {
 				} else {
-					print("SystemHandler>> " + errorSign
+					instance.print("BRSHandler>> " + errorSign
 							+ "something went wrong while loading the Bigraph system states");
 					isDone = false;
 				}
 
 				isDone = true;
 			} else {
-				print("SystemHandler>> " + errorSign + "something went wrong while executing the BRS");
+				instance.print("BRSHandler>> " + errorSign + "something went wrong while executing the BRS");
 				isDone = false;
 			}
+		}
 
-			if (isDone) {
-				print("SystemHandler>> Initialisation completed successfully");
+		return isDone;
+	}
+	
+	public static boolean analyseBRS() {
+		
+		boolean isDone = false;
+		
+		if (executor == null) {
+			isDone = false;
+		} else {
+			outputFolder = executor.execute();
+			if (outputFolder != null) {
+
+				// get the signature
+				globalBigraphSignature = executor.getBigraphSignature();
+
+				if (globalBigraphSignature != null) {
+				} else {
+					isDone = false;
+				}
+				// get the transition system
+				transitionSystem = executor.getTransitionSystem();
+
+				if (transitionSystem != null) {
+				} else {
+					isDone = false;
+				}
+				// gete states as Bigraph objects
+				states = executor.getStates();
+
+				if (states != null) {
+				} else {
+					isDone = false;
+				}
+
+				isDone = true;
 			} else {
-				print("SystemHandler>> Initialisation was NOT completed successfully...");
+				isDone = false;
 			}
 		}
 
@@ -163,43 +201,3 @@ public class SystemInstanceHandler {
 
 }
 
-class BigraphMatcherThread implements Runnable {
-
-	private int startIndex;
-	private int endIndex;
-	private LinkedList<Integer> statesMatched;
-	private Bigraph redex;
-	private String threadID;
-	private Thread t;
-	
-	 public BigraphMatcherThread(int start, int end, Bigraph redex) {
-		startIndex = start;
-		endIndex = end;
-		statesMatched = new LinkedList<Integer>();		
-		this.redex = redex;
-		threadID= "bla";
-	}
-	 
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		Matcher matcher = new Matcher();
-		
-		for(int i=startIndex;i<endIndex;i++) {
-			if (matcher.match(SystemInstanceHandler.getStates().get(i), redex).iterator().hasNext()) {
-				statesMatched.add(i);
-				System.out.println("state " + i + " matched");
-		}
-		}
-	}
-	
-	public void start() {
-		//System.out.println("Starting " + threadID);
-		if (t == null) {
-			t = new Thread(this, "" + threadID);
-			t.start();
-		}
-	}
-
-
-}
