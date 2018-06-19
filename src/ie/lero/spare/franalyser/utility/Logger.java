@@ -22,7 +22,8 @@ public class Logger implements Runnable{
 	private BlockingQueue<String> msgQ = new ArrayBlockingQueue<String>(2000);
 	private BufferedWriter bufferWriter;
 	private LocalDateTime timeNow;
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
+	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"); 
+	private DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS"); 
 	private static Logger logger = new Logger();
 	public static String terminatingString = "LoggingDone";
 	
@@ -120,7 +121,7 @@ public class Logger implements Runnable{
 	public void print(String msg) {
 		
 		if(isPrintToScreen) {
-			System.out.println(msg);
+			System.out.println("["+dtfTime.format(LocalDateTime.now())+"]: "+msg);
 		}
 		
 		if(listener != null) {

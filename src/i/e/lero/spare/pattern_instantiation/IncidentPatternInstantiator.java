@@ -389,7 +389,7 @@ public class IncidentPatternInstantiator {
 			
 		LocalDateTime startingTime = LocalDateTime.now();
 			
-		String startTime = "[Start time: " + dtf.format(startingTime)+"]";
+		//String startTime = "[Start time: " + dtf.format(startingTime)+"]";
 		
 		if(isSaveLog) {
 			logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
@@ -397,9 +397,15 @@ public class IncidentPatternInstantiator {
 		}
 		
 		//logger.print(startTime);
-		msgQ.put(startTime);
+		//msgQ.put(startTime);
 		
-		//start a timer
+		
+		msgQ.put("Executing Scenario1");
+		msgQ.put("Incident pattern file \""+incidentPatternFile+"\"");
+		msgQ.put("System model file \""+systemModelFile+"\"");
+		msgQ.put("BRS file \""+BRS_file+"\" & states floder \""+BRS_outputFolder+"\"");
+		
+		//start a timer to see how long it takes for the whole execution to finish
 		timer.start();
 		
 		////start executing the scenario \\\\
@@ -490,9 +496,9 @@ public class IncidentPatternInstantiator {
 		
 		//calculate execution time
 		timer.stop();
-		LocalDateTime EndingTime = LocalDateTime.now();
+		//LocalDateTime EndingTime = LocalDateTime.now();
 		
-		msgQ.put("[End time: " + dtf.format(EndingTime) +"]");
+		//msgQ.put("[End time: " + dtf.format(EndingTime) +"]");
 		
 		long timePassed = timer.getEllapsedMillis();
 		
