@@ -5,12 +5,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
@@ -28,7 +30,7 @@ public class BigraphAnalyser {
 	private double partitionSizePercentage = 0.0645; //represents the size of the partiition as a percentage of the number of states
 	private int partitionSize = 1;
 	private int numberOfPartitions = 1;
-	private boolean noThreading = true;
+	private boolean isThreading = true;
 	private int minimumPartitionSize = 1;
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	private boolean isTestingTime = true;
@@ -37,14 +39,34 @@ public class BigraphAnalyser {
 	private long times [];
 	private int timeIndex = 0;
 	private int averageTime = 0;
+	private BlockingQueue<String> msgQ;
+	private int threadID;
 	
 	public BigraphAnalyser() {
+		
 		predicateHandler = null;
 		states = SystemInstanceHandler.getStates();
 		matcher = new Matcher();
-	
+		msgQ = Logger.getInstance().getMsgQ();
+		threadID = -1;
+		
 		setParitionSize();	
 		
+	}
+	
+	public BigraphAnalyser(PredicateHandler predHandler) {
+		this();
+		predicateHandler = predHandler;
+	}
+
+	public BigraphAnalyser(PredicateHandler predHandler, int threadID) {
+		
+		states = SystemInstanceHandler.getStates();
+		matcher = new Matcher();
+		msgQ = Logger.getInstance().getMsgQ();
+		predicateHandler = predHandler;
+		this.threadID=  threadID;
+		setParitionSize();
 	}
 	
 	private void setParitionSize() {
@@ -55,15 +77,15 @@ public class BigraphAnalyser {
 		//set thread pool size to be the number of available processors
 		//seems half of the processors is a good number
 		
-		
+		try {
 		if(states.size() < 100) {
-			noThreading = true;
+			isThreading = false;
 		} else {
 			int tries = 0;
 			
-			threadPoolSize = Runtime.getRuntime().availableProcessors();
+			threadPoolSize = Runtime.getRuntime().availableProcessors()/2;
 			//probalby will be fixed to 100 (maybe more, more testing is needed)
-			partitionSize = 100;//(int)(states.size()*partitionSizePercentage);
+			partitionSize = 500;//(int)(states.size()*partitionSizePercentage);
 			
 			/*while (tries < 100 && partitionSize < minimumPartitionSize) {
 				//percentage is increase by a certain number to increase the size of the partition (but nothing above 50%)
@@ -95,22 +117,24 @@ public class BigraphAnalyser {
 		if(isTestingTime) {
 			times = new long[6];
 			
-			if(noThreading) {
-				print("number of states: "+states.size()+"\nNo threads");
+			if(isThreading) {
+			
+					msgQ.put("Thread["+threadID+"]>>number of states: "+states.size()+"\npartition size: "+partitionSize + " ("+ (int)((partitionSize*1.0/states.size())*10000)/100.0+ "%)"+
+							"\nnumber of partitions: "+ numberOfPartitions+"\nthread pool size: " + threadPoolSize);
+				
 			} else {
-				print("number of states: "+states.size()+"\npartition size: "+partitionSize + " ("+ (partitionSize/states.size())*100+ "%)"+
-						"\nnumber of partitions: "+ numberOfPartitions+"\nthread pool size: " + threadPoolSize);
+				msgQ.put("Thread["+threadID+"]>>number of states: "+states.size()+"\nNo threads");
 			}
 					
+		}
+			} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	
 	}
 
-	public BigraphAnalyser(PredicateHandler predHandler) {
-		this();
-		predicateHandler = predHandler;
-	}
-
+	
 	public PredicateHandler analyse() {
 		
 		identifyRelevantStates();
@@ -166,6 +190,8 @@ public class BigraphAnalyser {
 			timer.start();
 		}
 		
+		try {
+			
 		if(pred == null) {
 			return false;
 		}
@@ -177,10 +203,8 @@ public class BigraphAnalyser {
 		}		
 		
 		//divide the states array for mult-threading
-		if(!noThreading) {	
-		try {
-			
-		
+		if(isThreading) {	
+
 		LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
 		
 		LinkedList<Integer> statesResults = new LinkedList<Integer>();
@@ -209,10 +233,6 @@ public class BigraphAnalyser {
 		//set the predicate states
 		pred.setBigraphStates(statesResults);
 		
-		} catch (InterruptedException | ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		} else {
 			for(int i =0; i<states.size();i++) {	
 				if(matcher.match(states.get(i), redex).iterator().hasNext()){
@@ -237,7 +257,7 @@ public class BigraphAnalyser {
 			int secMils = (int)timePassed%1000;
 			
 			//execution time
-			print("\nExecution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+			msgQ.put("Thread["+threadID+"]>>Execution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
 			times[timeIndex] = timePassed;
 			timeIndex++;
 			
@@ -246,13 +266,20 @@ public class BigraphAnalyser {
 					averageTime+=time;
 				}
 				averageTime /=6;
-				print("Average execution time = "+ averageTime+"ms");
+				msgQ.put("Thread["+threadID+"]>>Average execution time = "+ averageTime+"ms");
 			}
 			
 		}
 
-		System.out.println(pred.getName()+"-states: "+pred.getBigraphStates());
+		msgQ.put("Thread["+threadID+"]>>"+pred.getName()+"-states: "+pred.getBigraphStates());
+		
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		return areStatesIdentified;
+		
 	}
 
 	public PredicateHandler identifyStateTransitions() {

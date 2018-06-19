@@ -1,0 +1,49 @@
+[Start time: 2018/06/19 15:41:04]
+>>Matching incident pattern entities to system assets
+>>Number of Assets (also entities) =  10
+>>Incident entities order: [hallway, location_SD1, smartDevice1, busNetwork, floorX, location2, HVAC, laptopX, HVACmalware, offender1]
+>>Entity-Asset map:
+hallway => {hallway}
+location_SD1 => {instructorsLab2,empiricalLab,informaticsLab}
+smartDevice1 => {SL1,SL2,SL3}
+busNetwork => {busNetwork}
+floorX => {fourteenth_floor}
+location2 => {empiricalLab}
+HVAC => {AirConditioning}
+laptopX => {Laptop1}
+HVACmalware => {SoftwareX}
+offender1 => {Visitor1}
+
+>>Generating asset sets..
+>>Asset sets (6):
+-Set[0]: [hallway, instructorsLab2, SL1, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+-Set[1]: [hallway, informaticsLab, SL1, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+-Set[2]: [hallway, instructorsLab2, SL2, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+-Set[3]: [hallway, informaticsLab, SL2, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+-Set[4]: [hallway, instructorsLab2, SL3, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+-Set[5]: [hallway, informaticsLab, SL3, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+>>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...
+>>Initialisation completed successfully
+>>Number of States= 102
+>>State Transitions:
+
+    0 -> [Edge [state=1, probability=-1.0, label = EnterRoom], Edge [state=2, probability=-1.0, label = EnterRoom], Edge [state=3, probability=-1.0, label = EnterRoom], Edge [state=4, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=5, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=6, probability=-1.0, label = EnterRoom], Edge [state=7, probability=-1.0, label = EnterRoom], Edge [state=8, probability=-1.0, label = EnterRoom]]
+    1 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=34, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=35, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=36, probability=-1.0, label = ConnectBusDevice], Edge [state=37, probability=-1.0, label = ConnectBusDevice]]
+    2 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=25, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=31, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=32, probability=-1.0, label = ConnectBusDevice], Edge [state=33, probability=-1.0, label = ConnectBusDevice]]
+    3 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=28, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=29, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=30, probability=-1.0, label = ConnectBusDevice]]
+    4 -> [Edge [state=15, probability=-1.0, label = EnterRoom], Edge [state=19, probability=-1.0, label = EnterRoom], Edge [state=26, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=27, probability=-1.0, label = ChangeContextToWorkingHours]]
+    5 -> [Edge [state=10, probability=-1.0, label = EnterRoom], Edge [state=16, probability=-1.0, label = EnterRoom], Edge [state=20, probability=-1.0, label = EnterRoom], Edge [state=23, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=24, probability=-1.0, label = ChangeContextToWorkingHours], Edge [state=25, probability=-1.0, label = EnterRoom]]
+    6 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=19, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=20, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=21, probability=-1.0, label = ConnectBusDevice], Edge [state=22, probability=-1.0, label = ConnectBusDevice]]
+    7 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=15, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=16, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=17, probability=-1.0, label = ConnectBusDevice], Edge [state=18, probability=-1.0, label = ConnectBusDevice]]
+    8 -> [Edge [state=9, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=10, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=11, probability=-1.0, label = ConnectBusDevice], Edge [state=12, probability=-1.0, label = ConnectBusDevice], Edge [state=13, probability=-1.0, label = ConnectIPDevice], Edge [state=14, probability=-1.0, label = ExitRoom]]
+    9 -> [Edge [state=38, probability=-1.0, label = ExitRoom], Edge [state=40, probability=-1.0, label = ConnectIPDevice], Edge [state=44, probability=-1.0, label = ConnectBusDevice], Edge [state=49, probability=-1.0, label = ConnectBusDevice], Edge [state=55, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=56, probability=-1.0, label = ChangeContextToWorkingHours]]
+    10 -> [Edge [state=39, probability=-1.0, label = ExitRoom], Edge [state=41, probability=-1.0, label = ConnectIPDevice], Edge [state=45, probability=-1.0, label = ConnectBusDevice], Edge [state=50, probability=-1.0, label = ConnectBusDevice], Edge [state=53, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=54, probability=-1.0, label = ChangeContextToWorkingHours]]
+    11 -> [Edge [state=47, probability=-1.0, label = DisconnectBusDevice], Edge [state=49, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=50, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=51, probability=-1.0, label = SendData], Edge [state=52, probability=-1.0, label = ExitRoom]]
+    12 -> [Edge [state=44, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=45, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=46, probability=-1.0, label = SendData], Edge [state=47, probability=-1.0, label = DisconnectBusDevice], Edge [state=48, probability=-1.0, label = ExitRoom]]
+    13 -> [Edge [state=40, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=41, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=42, probability=-1.0, label = DisconnectIPDevice], Edge [state=43, probability=-1.0, label = ExitRoom]]
+    14 -> [Edge [state=38, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=39, probability=-1.0, label = ChangeContextToOutSideWorkingHours]]
+    15 -> [Edge [state=38, probability=-1.0, label = ExitRoom], Edge [state=57, probability=-1.0, label = ConnectBusDevice], Edge [state=62, probability=-1.0, label = ConnectBusDevice], Edge [state=68, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=69, probability=-1.0, label = ChangeContextToWorkingHours]]
+    16 -> [Edge [state=39, probability=-1.0, label = ExitRoom], Edge [state=58, probability=-1.0, label = ConnectBusDevice], Edge [state=63, probability=-1.0, label = ConnectBusDevice], Edge [state=66, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=67, probability=-1.0, label = ChangeContextToWorkingHours]]
+    17 -> [Edge [state=60, probability=-1.0, label = DisconnectBusDevice], Edge [state=62, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=63, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=64, probability=-1.0, label = SendData], Edge [state=65, probability=-1.0, label = ExitRoom]]
+    18 -> [Edge [state=57, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=58, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=59, probability=-1.0, label = SendData], Edge [state=60, probability=-1.0, label = DisconnectBusDevice], Edge [state=61, probability=-1.0, label = ExitRoom]]
+    19 -> [Edge [state=38, probability=-1.0, label = ExitRoom], Edge [state=70, probability=-1.0, label = ConnectBusDevice], Edge [state=76, probability=-1.0, label = ConnectBusDevice], Edge [state=82, probability=-1.0, 
