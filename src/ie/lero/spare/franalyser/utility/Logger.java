@@ -15,7 +15,7 @@ public class Logger implements Runnable{
 
 	//private BlockingQueue msgQ;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = true;
+	private boolean isSaveLog = false;
 	private IncidentPatternInstantiationListener listener;
 	private String logFolder = "etc/scenario1/log";;
 	private String logFileName;
@@ -119,8 +119,11 @@ public class Logger implements Runnable{
 	
 	public void print(String msg) {
 		
+		String timeStamp = "["+dtfTime.format(LocalDateTime.now())+"]";
+		msg = timeStamp+" : "+msg;
+		
 		if(isPrintToScreen) {
-			System.out.println("["+dtfTime.format(LocalDateTime.now())+"]: "+msg);
+			System.out.println(msg);
 		}
 		
 		if(listener != null) {
