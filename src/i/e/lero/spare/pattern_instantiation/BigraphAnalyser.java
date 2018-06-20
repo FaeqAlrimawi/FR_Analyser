@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -25,12 +26,13 @@ public class BigraphAnalyser {
 	private boolean isDebugging = true;
 	private HashMap<Integer, Bigraph> states;
 	private Matcher matcher;
+	private it.uniud.mads.jlibbig.core.std.BigraphMatcher bigraphMatcher;
 	private int threadPoolSize = 1;
 	private ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
 	private double partitionSizePercentage = 0.0645; //represents the size of the partiition as a percentage of the number of states
 	private int partitionSize = 1;
 	private int numberOfPartitions = 1;
-	private boolean isThreading = true;
+	private boolean isThreading = false;
 	private int minimumPartitionSize = 1;
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	private boolean isTestingTime = true;
@@ -41,12 +43,14 @@ public class BigraphAnalyser {
 	private int averageTime = 0;
 	private BlockingQueue<String> msgQ;
 	private int threadID;
+	private boolean isLite = true;
 	
 	public BigraphAnalyser() {
 		
 		predicateHandler = null;
 		states = SystemInstanceHandler.getStates();
 		matcher = new Matcher();
+		bigraphMatcher = new it.uniud.mads.jlibbig.core.std.BigraphMatcher();
 		msgQ = Logger.getInstance().getMsgQ();
 		threadID = -1;
 		
@@ -63,6 +67,7 @@ public class BigraphAnalyser {
 		
 		states = SystemInstanceHandler.getStates();
 		matcher = new Matcher();
+		bigraphMatcher = new it.uniud.mads.jlibbig.core.std.BigraphMatcher();
 		msgQ = Logger.getInstance().getMsgQ();
 		predicateHandler = predHandler;
 		this.threadID=  threadID;
@@ -119,11 +124,11 @@ public class BigraphAnalyser {
 			
 			if(isThreading) {
 			
-					msgQ.put("Thread["+threadID+"]>>number of states: "+states.size()+"\npartition size: "+partitionSize + " ("+ (int)((partitionSize*1.0/states.size())*10000)/100.0+ "%)"+
-							"\nnumber of partitions: "+ numberOfPartitions+"\nthread pool size: " + threadPoolSize);
+					msgQ.put("Thread["+threadID+"]>>number of states: "+states.size()+", partition size: "+partitionSize + " ("+ (int)((partitionSize*1.0/states.size())*10000)/100.0+ "%)"+
+							", number of partitions: "+ numberOfPartitions+", thread pool size: " + threadPoolSize+", Lite matching is " + isLite);
 				
 			} else {
-				msgQ.put("Thread["+threadID+"]>>number of states: "+states.size()+"\nNo threads");
+				msgQ.put("Thread["+threadID+"]>>number of states: "+states.size()+"\nNo threads"+", Lite matching is " + isLite);
 			}
 					
 		}
@@ -234,13 +239,35 @@ public class BigraphAnalyser {
 		pred.setBigraphStates(statesResults);
 		
 		} else {
-			for(int i =0; i<states.size();i++) {	
-				if(matcher.match(states.get(i), redex).iterator().hasNext()){
-					pred.addBigraphState(i);
+			/*for(int i =0; i<states.size();i++) {
+				int cnt = 0;
+				Iterator res = matcher.match(states.get(i), redex).iterator();
+				//proabably getes stuck here
+				while(res.hasNext()){
+					//pred.addBigraphState(i);
+					res.next();
+					cnt++;
 					areStatesIdentified = true;
 					//print("state " + i%length + " matched");		
 				}
+				
+				System.out.println("matches for state ["+i+"] = " + cnt);*/
+			if(isLite) {
+			for(int i =0; i<states.size();i++) {		
+				if(bigraphMatcher.matchBigraph(states.get(i), redex)) {
+					pred.addBigraphState(i);
+				} 
 			}
+			} else {
+				for(int i =0; i<states.size();i++) {	
+				if(matcher.match(states.get(i), redex).iterator().hasNext()){
+					pred.addBigraphState(i);
+					//areStatesIdentified = true;
+					//print("state " + i%length + " matched");		
+				}
+			}
+			}
+			
 		}
 		
 	

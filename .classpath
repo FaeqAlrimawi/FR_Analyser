@@ -12,8 +12,6 @@
 	<classpathentry kind="lib" path="lib/batik-1.9/batik-squiggle-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/batik-1.9/batik-svgpp-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/batik-1.9/batik-ttf2svg-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/jlibbig/jlibbig.core-0.1.jar"/>
-	<classpathentry kind="lib" path="lib/choco-2.1.5/choco-solver-2.1.5.jar"/>
 	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/bigraphspace.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.common_2.12.0.v20160420-0247.jar"/>
@@ -90,5 +88,6 @@
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.wst.common.emf_1.2.500.v201701191735.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/jgoodies-forms-1.8.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/jlibbig"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

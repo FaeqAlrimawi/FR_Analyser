@@ -1,0 +1,31 @@
+Thread[0]>>number of states: 102
+No threads, Lite matching is false
+Thread[0]>>Identifying states and their transitions...
+Thread[0]>>Execution time: 6709ms [0h:0m:6s:709ms]
+Thread[0]>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+Thread[0]>>Execution time: 4148ms [0h:0m:4s:148ms]
+Thread[0]>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+Thread[0]>>Execution time: 4500ms [0h:0m:4s:500ms]
+Thread[0]>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+Thread[0]>>Execution time: 3913ms [0h:0m:3s:913ms]
+Thread[0]>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+Thread[0]>>Execution time: 4093ms [0h:0m:4s:93ms]
+Thread[0]>>activity3_Precondition-states: [12, 30, 33, 37, 44, 45, 87, 97, 98]
+Thread[0]>>Execution time: 3932ms [0h:0m:3s:932ms]
+Thread[0]>>Average execution time = 4549ms
+Thread[0]>>activity3_Postcondition-states: [46, 99]
+Thread [0]>>Generating potential incident instances...
+Thread [0]>>2 Potential incident instances were generated. Please see details in:
+File: D:\workspace-neon\FR_Analyser\etc\scenario1\output\0.json
+Thread [0]>>Analysing generated potential incident instances...
+
+-common actions:{ConnectBusDevice=2, EnterRoom=2, SendData=2}
+-top paths (based on common actions): [0, 1]
+-Shortest Paths (3 actions): [0, 1]
+-Longest Paths (3 actions): [0, 1]
+
+Thread [0]>>Finished Successfully
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+Execution time: 29036ms [0h:0m:29s:36ms]
