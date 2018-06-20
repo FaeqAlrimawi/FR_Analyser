@@ -399,7 +399,7 @@ public class IncidentPatternInstantiator {
 		//msgQ.put(startTime);
 		
 		
-		msgQ.put("////Executing Scenario1\\\\");
+		msgQ.put("////Executing Scenario1\\\\\\\\");
 		msgQ.put("*Incident pattern file \""+incidentPatternFile+"\"");
 		msgQ.put("*System model file \""+systemModelFile+"\"");
 		msgQ.put("*BRS file \""+BRS_file+"\" & states floder \""+BRS_outputFolder+"\"");
