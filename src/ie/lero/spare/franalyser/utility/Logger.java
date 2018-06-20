@@ -35,7 +35,6 @@ public class Logger implements Runnable{
 		createLogFile();
 	}
 	
-	
 	public static Logger getInstance() {
 		
 		if(logger == null) {

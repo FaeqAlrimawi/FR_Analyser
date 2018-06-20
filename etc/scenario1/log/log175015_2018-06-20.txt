@@ -1,0 +1,3 @@
+Thread[0]>>number of states: 1559, partition size: 100 (6.41%), number of partitions: 15, thread pool size: 8, Lite matching is true
+Thread[0]>>Identifying states and their transitions...
+Execution time: 12425ms [0h:0m:12s:425ms]

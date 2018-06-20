@@ -6,18 +6,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.util.StopWatch;
+import net.sf.saxon.expr.IsLastExpression;
 
 public class BigraphAnalyser {
 
@@ -26,24 +29,30 @@ public class BigraphAnalyser {
 	private boolean isDebugging = true;
 	private HashMap<Integer, Bigraph> states;
 	private Matcher matcher;
-	private it.uniud.mads.jlibbig.core.std.BigraphMatcher bigraphMatcher;
 	private int threadPoolSize = 1;
-	private ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+	private ExecutorService executor; //= Executors.newFixedThreadPool(threadPoolSize);
 	private double partitionSizePercentage = 0.0645; //represents the size of the partiition as a percentage of the number of states
 	private int partitionSize = 1;
 	private int numberOfPartitions = 1;
-	private boolean isThreading = false;
+	private boolean isThreading = true;
 	private int minimumPartitionSize = 1;
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
-	private boolean isTestingTime = true;
-	private LocalDateTime timeNow;
-	private StopWatch timer = new StopWatch();
-	private long times [];
-	private int timeIndex = 0;
-	private int averageTime = 0;
 	private BlockingQueue<String> msgQ;
 	private int threadID;
+	private int maxWaitingTime = 24;
+	private TimeUnit timeUnit = TimeUnit.HOURS;
+	
+	//for testing
 	private boolean isLite = true;
+	private int numberOfConditions = 0;
+	private boolean isLastCondition = false;
+	private boolean isLastActivity = false;
+	private boolean isTestingTime = true;
+	private int timeIndex = 0;
+	private int averageTime = 0;
+	private LocalDateTime timeNow;
+	private it.uniud.mads.jlibbig.core.std.BigraphMatcher bigraphMatcher;
+	private StopWatch timer = new StopWatch();
+	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	
 	public BigraphAnalyser() {
 		
@@ -88,9 +97,10 @@ public class BigraphAnalyser {
 		} else {
 			int tries = 0;
 			
-			threadPoolSize = Runtime.getRuntime().availableProcessors()/2;
+			threadPoolSize = Runtime.getRuntime().availableProcessors()+2;
+			executor = Executors.newFixedThreadPool(threadPoolSize);
 			//probalby will be fixed to 100 (maybe more, more testing is needed)
-			partitionSize = 500;//(int)(states.size()*partitionSizePercentage);
+			partitionSize = 100;//(int)(states.size()*partitionSizePercentage);
 			
 			/*while (tries < 100 && partitionSize < minimumPartitionSize) {
 				//percentage is increase by a certain number to increase the size of the partition (but nothing above 50%)
@@ -120,7 +130,6 @@ public class BigraphAnalyser {
 		}
 		
 		if(isTestingTime) {
-			times = new long[6];
 			
 			if(isThreading) {
 			
@@ -145,7 +154,19 @@ public class BigraphAnalyser {
 		identifyRelevantStates();
 		predicateHandler =  identifyStateTransitions();
 		
-		executor.shutdown();
+		try {
+		List<Runnable> list  = executor.shutdownNow();
+		
+		if(list != null)
+		msgQ.put("Thread["+threadID+"]>>number of tasks that did not start executing = " + list.size());
+		
+		/*if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
+			msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+		}*/
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return predicateHandler;
 
@@ -164,8 +185,26 @@ public class BigraphAnalyser {
 		
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
 		
-		for (String nm : activitiesName) {
-			identifyRelevantStates(nm);
+		for (int i =0;i<activitiesName.size();i++) {
+			if(i == activitiesName.size()-1) {
+				isLastActivity = true;
+			}
+			
+			identifyRelevantStates(activitiesName.get(i));
+		}
+		
+		if(isLastCondition) {
+			averageTime /=numberOfConditions;
+			int avgHours = (int)(averageTime/3600000)%60;
+			int avgMins = (int)(averageTime/60000)%60;
+			int avgSecs = (int)(averageTime/1000)%60;
+			int avgMils = (int)averageTime%1000;
+			try {
+				msgQ.put("Thread["+threadID+"]>>Average matching time of predicates = "+ averageTime+"ms ["+ avgHours+"h:"+ avgMins+"m:"+ avgSecs+"s:"+ avgMils+"ms]");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		return predicateHandler;
@@ -173,12 +212,30 @@ public class BigraphAnalyser {
 
 	// could be transfered to predicateHandler class
 	public ArrayList<Predicate> identifyRelevantStates(String activityName) {
+		
 		ArrayList<Predicate> preds = predicateHandler.getActivityPredicates(activityName);
-
-		for (Predicate p : preds) {
-			identifyRelevantStates(p);
+		
+		LinkedList<Future<Integer>> futurePreds = new LinkedList<Future<Integer>>();
+		try {
+			
+		for (int i = 0;i< preds.size();i++) {
+			futurePreds.clear();
+			if(isLastActivity && i == preds.size()-1) {
+				isLastCondition = true;
+			}
+			//identifyRelevantStates(preds.get(i));
+			futurePreds.add(executor.submit(new PredicateMatcher(preds.get(i))));
+			msgQ.put("Thread["+threadID+"]>>Executing predicate "+ preds.get(i).getName());
 		}
 
+		for(int i = 0; i< futurePreds.size();i++) {
+				futurePreds.get(i).get();
+		}
+		
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return preds;
 	}
 	
@@ -209,7 +266,7 @@ public class BigraphAnalyser {
 		
 		//divide the states array for mult-threading
 		if(isThreading) {	
-
+			
 		LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
 		
 		LinkedList<Integer> statesResults = new LinkedList<Integer>();
@@ -239,38 +296,50 @@ public class BigraphAnalyser {
 		pred.setBigraphStates(statesResults);
 		
 		} else {
-			/*for(int i =0; i<states.size();i++) {
-				int cnt = 0;
-				Iterator res = matcher.match(states.get(i), redex).iterator();
-				//proabably getes stuck here
-				while(res.hasNext()){
-					//pred.addBigraphState(i);
-					res.next();
-					cnt++;
-					areStatesIdentified = true;
-					//print("state " + i%length + " matched");		
-				}
-				
-				System.out.println("matches for state ["+i+"] = " + cnt);*/
 			if(isLite) {
-			for(int i =0; i<states.size();i++) {		
+			long avr = 0;
+			long timePassed = 0;
+			StopWatch timer = new StopWatch();
+			for(int i =0; i<states.size();i++) {
+				timer.reset();
+				timer.start();
 				if(bigraphMatcher.matchBigraph(states.get(i), redex)) {
 					pred.addBigraphState(i);
 				} 
+				timer.stop();
+				timePassed = timer.getEllapsedMillis();
+				avr+=timePassed;
+
+				//execution time
+				msgQ.put("Lite Bigraph state-redex matching time =  " +  timePassed+"ms");
 			}
+			msgQ.put("Lite Average time for matching operation = " + avr/states.size()+"ms");
+				
 			} else {
-				for(int i =0; i<states.size();i++) {	
+				long avr = 0;
+				long timePassed = 0;
+				StopWatch timer = new StopWatch();
+				for(int i =0; i<states.size();i++) {
+				timer.reset();
+				timer.start();
 				if(matcher.match(states.get(i), redex).iterator().hasNext()){
 					pred.addBigraphState(i);
 					//areStatesIdentified = true;
 					//print("state " + i%length + " matched");		
 				}
+				timer.stop();
+				timePassed = timer.getEllapsedMillis();
+				avr+=timePassed;
+				
+				//execution time
+				msgQ.put("Normal Bigraph state-redex matching time =  " +  timePassed+"ms");
 			}
+				msgQ.put("Normal Average time for matching operation = " + avr/states.size()+"ms");
 			}
 			
 		}
 		
-	
+		msgQ.put("Thread["+threadID+"]>>"+pred.getName()+"-states: "+pred.getBigraphStates());
 		if(isTestingTime) {
 			timer.stop();
 			timeNow = LocalDateTime.now();	
@@ -284,21 +353,22 @@ public class BigraphAnalyser {
 			int secMils = (int)timePassed%1000;
 			
 			//execution time
-			msgQ.put("Thread["+threadID+"]>>Execution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
-			times[timeIndex] = timePassed;
-			timeIndex++;
+			msgQ.put("Thread["+threadID+"]>>predicate matching time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+			averageTime += timePassed;
+			numberOfConditions++;
 			
-			if(timeIndex == 6) {
-				for(long time : times) {
-					averageTime+=time;
-				}
-				averageTime /=6;
-				msgQ.put("Thread["+threadID+"]>>Average execution time = "+ averageTime+"ms");
+			if(isLastCondition) {
+				averageTime /=numberOfConditions;
+				int avgHours = (int)(averageTime/3600000)%60;
+				int avgMins = (int)(averageTime/60000)%60;
+				int avgSecs = (int)(averageTime/1000)%60;
+				int avgMils = (int)averageTime%1000;
+				msgQ.put("Thread["+threadID+"]>>Average matching time of predicates = "+ averageTime+"ms ["+ avgHours+"h:"+ avgMins+"m:"+ avgSecs+"s:"+ avgMils+"ms]");
 			}
 			
 		}
 
-		msgQ.put("Thread["+threadID+"]>>"+pred.getName()+"-states: "+pred.getBigraphStates());
+		
 		
 		} catch (InterruptedException | ExecutionException e) {
 			// TODO Auto-generated catch block
@@ -383,7 +453,6 @@ public class BigraphAnalyser {
 		
 		public ActivityMatcher(String activityName) {
 			this.activityName = activityName;
-			System.out.println(activityName);
 		}
 		
 		@Override
@@ -457,4 +526,146 @@ public class BigraphAnalyser {
 		}
 		
 	}*/
+	
+	class PredicateMatcher implements Callable<Integer>{
+
+		private Predicate pred;
+		
+		public PredicateMatcher(Predicate pred) {
+			this.pred = pred;
+		}
+		
+		@Override
+		public Integer call() throws Exception {
+			
+			//this represents the identifyRelevantStates(Predicate pred) function
+			boolean areStatesIdentified = false;
+			StopWatch timer = new StopWatch();
+			
+			if(isTestingTime) {
+				timeNow =  LocalDateTime.now();
+				String startTime = "Start time: " + dtf.format(timeNow);
+				//print(startTime);
+				timer.reset();
+				timer.start();
+			}
+			
+			try {
+				
+			if(pred == null) {
+				return -1;
+			}
+			
+			Bigraph redex = pred.getBigraphPredicate();
+			
+			if(redex == null) {
+				return -1;
+			}		
+			
+			//divide the states array for mult-threading
+			if(isThreading) {	
+				
+			LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
+			
+			LinkedList<Integer> statesResults = new LinkedList<Integer>();
+			
+			//run tasks
+			int index=0;
+			
+			for(index=0;index<numberOfPartitions;index++) {
+				results.add(executor.submit(new BigraphMatcher(partitionSize*index, partitionSize*(index+1), redex.clone())));
+			}
+			
+			//last partition takes the residue as well
+			if(index*partitionSize < states.size()) {
+				results.add(executor.submit(new BigraphMatcher(partitionSize*index, states.size(), redex.clone())));	
+			}
+			
+			
+			//get results
+			for(int i=0;i<results.size();i++) {
+				LinkedList<Integer> res = results.get(i).get();
+				
+				if(res != null && !res.isEmpty())
+				statesResults.addAll(res);
+			}
+				
+			//set the predicate states
+			pred.setBigraphStates(statesResults);
+			
+			} else {
+				if(isLite) {
+				long avr = 0;
+				long timePassed = 0;
+				StopWatch timer2 = new StopWatch();
+				for(int i =0; i<states.size();i++) {
+					timer2.reset();
+					timer2.start();
+					if(bigraphMatcher.matchBigraph(states.get(i), redex)) {
+						pred.addBigraphState(i);
+					} 
+					timer2.stop();
+					timePassed = timer2.getEllapsedMillis();
+					avr+=timePassed;
+
+					//execution time
+					msgQ.put("Lite Bigraph state-redex matching time =  " +  timePassed+"ms");
+				}
+				msgQ.put("Lite Average time for matching operation = " + avr/states.size()+"ms");
+					
+				} else {
+					long avr = 0;
+					long timePassed = 0;
+					StopWatch timer2 = new StopWatch();
+					for(int i =0; i<states.size();i++) {
+					timer2.reset();
+					timer2.start();
+					if(matcher.match(states.get(i), redex).iterator().hasNext()){
+						pred.addBigraphState(i);
+						//areStatesIdentified = true;
+						//print("state " + i%length + " matched");		
+					}
+					timer2.stop();
+					timePassed = timer2.getEllapsedMillis();
+					avr+=timePassed;
+					
+					//execution time
+					msgQ.put("Normal Bigraph state-redex matching time =  " +  timePassed+"ms");
+				}
+					msgQ.put("Normal Average time for matching operation = " + avr/states.size()+"ms");
+				}
+				
+			}
+			
+			msgQ.put("Thread["+threadID+"]>>"+pred.getName()+"-states: "+pred.getBigraphStates());
+			
+			if(isTestingTime) {
+				timer.stop();
+				timeNow = LocalDateTime.now();	
+				//print("\n[End time: " + dtf.format(EndingTime) +"]");
+				
+				long timePassed = timer.getEllapsedMillis();
+				
+				int hours = (int)(timePassed/3600000)%60;
+				int mins = (int)(timePassed/60000)%60;
+				int secs = (int)(timePassed/1000)%60;
+				int secMils = (int)timePassed%1000;
+				
+				//execution time
+				msgQ.put("Thread["+threadID+"]>>predicate matching time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+				averageTime += timePassed;
+				numberOfConditions++;
+				
+			}
+
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+			return 1;
+		}
+		
+	}
 }
