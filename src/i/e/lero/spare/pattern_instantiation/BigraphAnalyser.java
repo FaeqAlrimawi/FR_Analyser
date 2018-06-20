@@ -33,11 +33,11 @@ public class BigraphAnalyser {
 	private double partitionSizePercentage = 0.0645; //represents the size of the partiition as a percentage of the number of states
 	private int partitionSize = 1;
 	private int numberOfPartitions = 1;
-	private boolean isThreading = true;
+	private boolean isThreading = true; //this is for threading bigraph matching in the identifyRelevantStates function
 	private ExecutorService executor; //= Executors.newFixedThreadPool(threadPoolSize);
-	private boolean isPredicateThreading = true;
-	private int numberofActivityParallelExecution = 2;
-	private ExecutorService activityExecutor = Executors.newFixedThreadPool(numberofActivityParallelExecution*2);
+	private boolean isPredicateThreading = true; //this is to thread the conditions of the activities (this is separate from threading bigraph matching)
+	private int numberofActivityParallelExecution = 1; //determines how many activities should be threaded
+	private ExecutorService activityExecutor = Executors.newFixedThreadPool(numberofActivityParallelExecution*2); //pool size for parallel running
 	private int minimumPartitionSize = 1;
 	private BlockingQueue<String> msgQ;
 	private int threadID;

@@ -374,7 +374,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_5000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -399,10 +399,10 @@ public class IncidentPatternInstantiator {
 		//msgQ.put(startTime);
 		
 		
-		msgQ.put("Executing Scenario1");
-		msgQ.put("Incident pattern file \""+incidentPatternFile+"\"");
-		msgQ.put("System model file \""+systemModelFile+"\"");
-		msgQ.put("BRS file \""+BRS_file+"\" & states floder \""+BRS_outputFolder+"\"");
+		msgQ.put("////Executing Scenario1\\\\");
+		msgQ.put("*Incident pattern file \""+incidentPatternFile+"\"");
+		msgQ.put("*System model file \""+systemModelFile+"\"");
+		msgQ.put("*BRS file \""+BRS_file+"\" & states floder \""+BRS_outputFolder+"\"");
 		
 		//start a timer to see how long it takes for the whole execution to finish
 		timer.start();
@@ -528,7 +528,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_5000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -739,8 +739,8 @@ public class IncidentPatternInstantiator {
 		
 		//ins.executeExample();
 		
-		//ins.executeScenario1();
-		ins.test1();
+		ins.executeScenario1();
+		//ins.test1();
 	}
 
 	
@@ -832,7 +832,7 @@ public class IncidentPatternInstantiator {
 			//predicateHandler.printAll();
 			
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
-			 msgQ.put("Thread ["+threadID+"]>>Generating potential incident instances...");
+			 msgQ.put("Thread["+threadID+"]>>Generating potential incident instances...");
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 			
 			//store system assets and incident entities
@@ -873,7 +873,7 @@ public class IncidentPatternInstantiator {
 			threadWriter.close();
 			obj = null;
 			
-			msgQ.put("Thread ["+threadID+"]>>" + paths.size()+" Potential incident instances were generated. Please see details in:");
+			msgQ.put("Thread["+threadID+"]>>" + paths.size()+" Potential incident instances were generated. Please see details in:");
 			
 			msgQ.put("File: "+ threadFile.getAbsolutePath());
 			
@@ -881,7 +881,7 @@ public class IncidentPatternInstantiator {
 				listener.updateProgress(incrementValue/3);	
 			}
 			
-			msgQ.put("Thread ["+threadID+"]>>Analysing generated potential incident instances...");
+			msgQ.put("Thread["+threadID+"]>>Analysing generated potential incident instances...");
 			
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
@@ -894,8 +894,8 @@ public class IncidentPatternInstantiator {
 //			System.out.println("\nThread["+threadID+"]>>Summary of the incident pattern activities");
 //			System.out.println(predicateHandler.getSummary());
 			
-			msgQ.put("Thread ["+threadID+"]>>Finished Successfully");
-			msgQ.put("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			msgQ.put("Thread["+threadID+"]>>Finished Successfully");
+			msgQ.put("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
 			if(listener != null) {
 				listener.updateProgress(incrementValue/3 + incrementValue%3);

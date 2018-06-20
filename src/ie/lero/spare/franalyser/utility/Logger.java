@@ -15,7 +15,7 @@ public class Logger implements Runnable{
 
 	//private BlockingQueue msgQ;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
 	private IncidentPatternInstantiationListener listener;
 	private String logFolder = "etc/scenario1/log";;
 	private String logFileName;
