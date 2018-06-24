@@ -132,6 +132,21 @@ public class AssetMap {
 		return result.toString();
 	}
 	
+	public String toStringCompact() { 
+		StringBuilder result = new StringBuilder("");
+		
+		for(int i=0;i<incidentAssetNames.length;i++) {
+			result.append(incidentAssetNames[i]).append(":");
+			for(int j=0;j<spaceAssetMatches[i].length;j++) {
+				result.append(spaceAssetMatches[i][j]).append(",");
+			}
+			result.deleteCharAt(result.length()-1);
+			result.append(";");
+		}
+		
+		return result.toString();
+	}
+	
 	/**
 	 * Checks if there are any duplicate names in the given array
 	 * @param strs String array containing the system assets

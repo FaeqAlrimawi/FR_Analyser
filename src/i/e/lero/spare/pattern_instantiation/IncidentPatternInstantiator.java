@@ -142,8 +142,8 @@ public class IncidentPatternInstantiator {
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
 				print(Arrays.toString(asts));
-				listener.updateAssetMapInfo(">>Some incident entities have no matches in the system assets. These are:\n"+Arrays.toString(asts));
-				listener.updateAssetMapInfo("Execution is terminated");
+				//listener.updateAssetMapInfo(">>Some incident entities have no matches in the system assets. These are:\n"+Arrays.toString(asts));
+				//listener.updateAssetMapInfo("Execution is terminated");
 				print("Execution is terminated");
 			return; // execution stops if there are incident entities with
 					// no matching
@@ -156,7 +156,7 @@ public class IncidentPatternInstantiator {
 		print(am.toString());
 		print("\n>>Generating asset sets..");
 		
-		listener.updateAssetMapInfo(am.toString());
+		listener.updateAssetMapInfo(am.toStringCompact());
 		
 		//generate sequences
 		LinkedList<String[]> lst = am.generateUniqueCombinations();
@@ -271,7 +271,7 @@ public class IncidentPatternInstantiator {
 
 	public void execute(String incidentPatternFile, String systemModelFile, IncidentPatternInstantiationListener listen) {
 		
-		execute(incidentPatternFile,  systemModelFile, 4, listen);
+		execute(incidentPatternFile,  systemModelFile, 1, listen);
 			
 	}
 	
