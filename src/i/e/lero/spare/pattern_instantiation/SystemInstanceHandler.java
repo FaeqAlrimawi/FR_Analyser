@@ -1,12 +1,11 @@
 package i.e.lero.spare.pattern_instantiation;
 
-import java.time.Instant;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
 
+import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
-import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Signature;
 
 public class SystemInstanceHandler {
@@ -18,64 +17,68 @@ public class SystemInstanceHandler {
 	private static Signature globalBigraphSignature;
 	private static boolean isDebugging = true;
 	private static String errorSign = "## ";
-	private IncidentPatternInstantiator instantiatorInstance = null;
 	
-	public static boolean analyseBRS(IncidentPatternInstantiator instance) {
+	public static boolean analyseBRS() {
 		
 		boolean isDone = false;
+		BlockingQueue<String> msgQ = Logger.getInstance().getMsgQ();
 		
+		try {
 		if (executor == null) {
-			instance.print("BRSHandler>> Bigraph System Executor is not set");
+			msgQ.put("BRSHandler>> Bigraph System Executor is not set");
 			isDone = false;
 		} else {
-			instance.print("BRSHandler>> Executing the Bigraphical Reactive System (BRS)...");
+			msgQ.put("BRSHandler>> Executing the Bigraphical Reactive System (BRS)...");
 			outputFolder = executor.execute();
 
 			if (outputFolder != null) {
-				instance.print("BRSHandler>> Creating Bigraph Signature...");
+				msgQ.put("BRSHandler>> Creating Bigraph Signature...");
 
 				// get the signature
 				globalBigraphSignature = executor.getBigraphSignature();
 
 				if (globalBigraphSignature != null) {
 				} else {
-					instance.print("BRSHandler>> " + errorSign + "Something went wrong creating the Bigraph signature");
+					msgQ.put("BRSHandler>> " + errorSign + "Something went wrong creating the Bigraph signature");
 					isDone = false;
 				}
 
-				instance.print("BRSHandler>> Creating Bigraph transition system...");
+				msgQ.put("BRSHandler>> Creating Bigraph transition system...");
 				// get the transition system
 				transitionSystem = executor.getTransitionSystem();
 
 				if (transitionSystem != null) {
 				} else {
-					instance.print("BRSHandler>> " + errorSign
+					msgQ.put("BRSHandler>> " + errorSign
 							+ "something went wrong while creating the Bigraph transition system");
 					isDone = false;
 				}
 
-				instance.print("BRSHandler>> Loading states...");
+				msgQ.put("BRSHandler>> Loading states...");
 				// gete states as Bigraph objects
 				states = executor.getStates();
 
 				if (states != null) {
 				} else {
-					instance.print("BRSHandler>> " + errorSign
+					msgQ.put("BRSHandler>> " + errorSign
 							+ "something went wrong while loading the Bigraph system states");
 					isDone = false;
 				}
 
 				isDone = true;
 			} else {
-				instance.print("BRSHandler>> " + errorSign + "something went wrong while executing the BRS");
+				msgQ.put("BRSHandler>> " + errorSign + "something went wrong while executing the BRS");
 				isDone = false;
 			}
 		}
 
+		}catch(InterruptedException e) {
+			e.printStackTrace();
+		}
 		return isDone;
 	}
 	
-	public static boolean analyseBRS() {
+/*	public static boolean analyseBRS() {
 		
 		boolean isDone = false;
 		
@@ -114,7 +117,7 @@ public class SystemInstanceHandler {
 		}
 
 		return isDone;
-	}
+	}*/
 
 /*	public static boolean analyseSystem(String fileName, SystemExecutor exec) {
 		executor = exec;
