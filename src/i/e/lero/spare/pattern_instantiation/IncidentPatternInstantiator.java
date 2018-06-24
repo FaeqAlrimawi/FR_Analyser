@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -26,7 +27,7 @@ public class IncidentPatternInstantiator {
 	
 	private String xqueryFile = "etc/match_query.xq";
 	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
-	BufferedWriter bufferWriter;
+	//BufferedWriter bufferWriter;
 	int threadPoolSize = 1;
 	int maxWaitingTime = 48;
 	TimeUnit timeUnit = TimeUnit.HOURS;
@@ -41,7 +42,7 @@ public class IncidentPatternInstantiator {
 	private BlockingQueue<String> msgQ;
 	
 	
-	public IncidentPatternInstantiator() {
+	public void runLogger() {
 		
 		//runn a logger
 		new Thread(Logger.getInstance()).start();
@@ -49,82 +50,29 @@ public class IncidentPatternInstantiator {
 		msgQ = Logger.getInstance().getMsgQ();
 	}
 	
-	public BufferedWriter createLogFile(String logFileName) {
-		
-		this.logFileName = logFileName;
-		return createLogFile();
-	}
-	
-	public BufferedWriter createLogFile() {
-		
-		BufferedWriter bufferWriter = null;
-		
-		logFolder = "etc/scenario1/log";
-		
-		boolean isFolderCreated = true;
-		File file = null;
-		
-		try {
-		File folder = new File(logFolder);
-		
-		
-		
-		if(!folder.exists()) {
-			isFolderCreated = folder.mkdir();
-		}
-		
-		if(isFolderCreated) {
-			if(!logFileName.endsWith(".txt")) {
-				logFileName = logFileName+".txt";
-			}
-			
-			file = new File(logFolder+"/"+logFileName);
-			if (!file.exists()) {
-				file.createNewFile();	
-	        }	
-		}
-		
-		FileWriter fw = new FileWriter(file.getAbsoluteFile());
-		bufferWriter = new BufferedWriter(fw);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return bufferWriter;
-	}
-	
 	public void execute(String incidentPatternFile, String systemModelFile, int threadPoolSiz, IncidentPatternInstantiationListener listen) {
 		
 		this.threadPoolSize = threadPoolSiz;
-		//this.logger = logger;
 		listener = listen;
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
-		//String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		//String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-		String outputFileName = "etc/scenario1/log_test1.txt";
 		
 		try {
-		        
+		    
+		//start logging
+		runLogger();
+		
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
 		
 		StopWatch timer = new StopWatch();
-		
-		LocalDateTime startingTime = LocalDateTime.now();
-		
-		String startTime = "Start time: " + dtf.format(startingTime);
-		
-		//set log file name
-		if(isSaveLog) {
-			logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
-			bufferWriter = createLogFile();	
-		}
-		
-		print(startTime);
+	
+		msgQ.put("////Executing Scenario1\\\\\\\\");
+		msgQ.put("*Incident pattern file \""+incidentPatternFile+"\"");
+		msgQ.put("*System model file \""+systemModelFile+"\"");
+		msgQ.put("*BRS file \""+BRS_file+"\" & states floder \""+BRS_outputFolder+"\"");
 		
 		//start a timer
 		timer.start();
@@ -132,30 +80,27 @@ public class IncidentPatternInstantiator {
 		////start executing the scenario \\\\
 		Mapper m = new Mapper(xQueryMatcherFile);
 		
-		print(">>Matching incident pattern entities to system assets");
+		msgQ.put(">>Matching incident pattern entities to system assets");
 		
 		AssetMap am = m.findMatches(); 
 		
 		// if there are incident assets with no matches from space model then exit
 		if (am.hasAssetsWithNoMatch()) {
-			print(">>Some incident entities have no matches in the system assets. These are:");
+			msgQ.put(">>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
 			String[] asts = am.getIncidentAssetsWithNoMatch();
-				print(Arrays.toString(asts));
-				//listener.updateAssetMapInfo(">>Some incident entities have no matches in the system assets. These are:\n"+Arrays.toString(asts));
-				//listener.updateAssetMapInfo("Execution is terminated");
-				print("Execution is terminated");
+			msgQ.put(Arrays.toString(asts));
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
 		
 		//print matched assets
-		print("\n>>Number of Assets (also entities) =  "+am.getIncidentAssetNames().length);
-		print("\n>>Incident entities order: " + Arrays.toString(am.getIncidentAssetNames()));
-		print("\n>>Entity-Asset map:");
-		print(am.toString());
-		print("\n>>Generating asset sets..");
-		
+		msgQ.put(">>Number of Assets (also entities) =  " + am.getIncidentAssetNames().length);
+		msgQ.put(">>Incident entities order: " + Arrays.toString(am.getIncidentAssetNames()));
+		msgQ.put(">>Entity-Asset map:");
+		msgQ.put(am.toString());
+		msgQ.put(">>Generating asset sets..");
+
 		listener.updateAssetMapInfo(am.toStringCompact());
 		
 		//generate sequences
@@ -167,37 +112,41 @@ public class IncidentPatternInstantiator {
 		//checks if there are sequences generated or not. if not, then execution is terminated
 		//this can be loosened to allow same asset to be mapped to two entities
 		if(lst == null || lst.isEmpty()) {
-			print(">>No combinations found. Execution is terminated");
+			msgQ.put(">>No combinations found. Terminating execution");
 			return;
-		}
+		 }
 		
-		print("\n>>Asset sets ("+lst.size()+"):");
+		msgQ.put(">>Asset sets ("+lst.size()+"):");
 		
 		//print the sets only if there are less than 200. Else, print a 100 but save the rest to a file
-		for (int i = 0; i < lst.size(); i++) {// adjust the length
-			if (isPrintToScreen && i >= 100) {
-				isPrintToScreen = false;
-				System.out.println("-... [See log file (" + logFolder + "/" + logFileName + ") for the rest]");
-			}
-			print("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
-		}
-		isPrintToScreen = true;
+		boolean oldIsPrintToScreen = isPrintToScreen;
 		
-		print("\n>>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
+		//print the sets only if there are less than 200. Else, print a 100 but save the rest to a file
+		for(int i=0; i<lst.size();i++) {//adjust the length
+			if(isPrintToScreen && i>=100) {
+				isPrintToScreen = false;
+				System.out.println("-... [See log file ("+logFolder+"/"+logFileName+") for the rest]");
+			}
+			msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
+		}
+		
+		isPrintToScreen = oldIsPrintToScreen;
+		
+		msgQ.put(">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
 		
 		//initialise the system (load states and transition system)
 		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
 		
 		if (isInitialised) {
-			print(">>Initialisation completed successfully");
+			msgQ.put(">>Initialisation completed successfully");
 		} else {
-			print(">>Initialisation was NOT completed successfully. Execution is terminated");
+			msgQ.put(">>Initialisation was NOT completed successfully. Execution is terminated");
 		}
-		
-		print("\n>>Number of States= "+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
-		print(">>State Transitions:");
-		print(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
-		
+	
+		msgQ.put(">>Number of States= "+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
+		msgQ.put(">>State Transitions:");
+		msgQ.put(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
+	
 		//create threads that handle each sequence generated from asset matching
 		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
 		
@@ -215,9 +164,10 @@ public class IncidentPatternInstantiator {
 			incrementValue = (int)Math.ceil(90.0/assetSetsSelected.size());	
 		}
 		
+		msgQ.put(">>Creating threads for asset sets. ["+threadPoolSize+"] thread(s) are running in parallel.");
+		
 		for(int i=0; i<assetSetsSelected.size();i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(assetSetsSelected.get(i)), incidentAssetNames, i);
-			print("\n>>Thread ["+i+"] is submitted for executing asset set ["+assetSetsSelected.get(i)+"]");
 			executor.submit(incidentInstances[i]);
 		}
 		
@@ -226,7 +176,7 @@ public class IncidentPatternInstantiator {
 			
 			//if it returns false then maximum waiting time is reached
 			if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
-				print("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+				msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 			}
 		} catch (InterruptedException e) {
 			
@@ -234,9 +184,6 @@ public class IncidentPatternInstantiator {
 		}
 		
 		timer.stop();
-		LocalDateTime EndingTime = LocalDateTime.now();
-		
-		print("\n[End time: " + dtf.format(EndingTime) +"]");
 		
 		long timePassed = timer.getEllapsedMillis();
 		int hours = (int)(timePassed/3600000)%60;
@@ -244,16 +191,12 @@ public class IncidentPatternInstantiator {
 		int secs = (int)(timePassed/1000)%60;
 		int secMils = (int)timePassed%1000;
 		
+		msgQ.put("////Execution finished\\\\\\\\");
 		//execution time
-		print("Execution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
-			
-		if(isSaveLog) {
-			bufferWriter.close();	
-		}
+		msgQ.put("Execution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
 		
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		msgQ.put(Logger.terminatingString);
+		
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -374,7 +317,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_5000";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -386,19 +329,6 @@ public class IncidentPatternInstantiator {
 		
 		StopWatch timer = new StopWatch();
 			
-		LocalDateTime startingTime = LocalDateTime.now();
-			
-		//String startTime = "[Start time: " + dtf.format(startingTime)+"]";
-		
-		if(isSaveLog) {
-			logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
-			bufferWriter = createLogFile();
-		}
-		
-		//logger.print(startTime);
-		//msgQ.put(startTime);
-		
-		
 		msgQ.put("////Executing Scenario1\\\\\\\\");
 		msgQ.put("*Incident pattern file \""+incidentPatternFile+"\"");
 		msgQ.put("*System model file \""+systemModelFile+"\"");
@@ -409,6 +339,7 @@ public class IncidentPatternInstantiator {
 		
 		////start executing the scenario \\\\
 		Mapper m = new Mapper(xQueryMatcherFile);
+		
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		msgQ.put(">>Matching incident pattern entities to system assets");
 		AssetMap am = m.findMatches(); 
@@ -507,17 +438,12 @@ public class IncidentPatternInstantiator {
 		int secMils = (int)timePassed%1000;
 		
 		//execution time
+		msgQ.put("////Execution finished\\\\\\\\");
 		msgQ.put("Execution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
 	
-		if(isSaveLog) {
-			bufferWriter.close();	
-		}
-		
 		//stop logging after all finished
 		msgQ.put(Logger.terminatingString);
 		
-		} catch (IOException e) {
-			e.printStackTrace();
 		}catch (InterruptedException e) {
 			e.printStackTrace();
 		} 
@@ -542,16 +468,6 @@ public class IncidentPatternInstantiator {
 			
 		LocalDateTime startingTime = LocalDateTime.now();
 			
-		//String startTime = "[Start time: " + dtf.format(startingTime)+"]";
-		
-		if(isSaveLog) {
-			logFileName = "log"+startingTime.getHour()+startingTime.getMinute()+startingTime.getSecond()+"_"+startingTime.toLocalDate()+".txt";
-			bufferWriter = createLogFile();
-		}
-		
-		//logger.print(startTime);
-		//msgQ.put(startTime);
-		
 		//start a timer to see how long it takes for the whole execution to finish
 		timer.start();
 		
@@ -641,97 +557,14 @@ public class IncidentPatternInstantiator {
 		//execution time
 		msgQ.put("Execution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
 	
-		if(isSaveLog) {
-			bufferWriter.close();	
-		}
-		
 		//stop logging after all finished
 		msgQ.put(Logger.terminatingString);
 		
-		} catch (IOException e) {
-			e.printStackTrace();
 		}catch (InterruptedException e) {
 			e.printStackTrace();
 		} 
 		
 	}
-
-	/*public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile) {
-		String outputFolder = BRSFile.split("\\.")[0]+"_output";
-		System.out.println(outputFolder);
-		
-		//generateSequences(incidentPatternFile, systemModelFile, BRSFile, outputFolder);
-	}*/
-	
-	/*public void generateSequences(String incidentPatternFile, String systemModelFile, String BRSFile, String BRSoutputFolder) {
-		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
-		String BRS_file = BRSFile;
-		String BRS_outputFolder = BRSoutputFolder;
-		
-		
-		XqueryExecuter.SPACE_DOC = systemModelFile;
-		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
-		
-		////start executing the scenario \\\\
-		Mapper m = new Mapper(xQueryMatcherFile);
-		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
-		System.out.println(">>Matching incident pattern entities to system assets");
-		AssetMap am = m.findMatches(); 
-		
-		// if there are incident assets with no matches from space model then exit
-		if (am.hasAssetsWithNoMatch()) {
-			System.out.println(">>Some incident entities have no matches in the system assets. These are:");
-			//getIncidetnAssetWithNoMatch method has some issues
-			String[] asts = am.getIncidentAssetsWithNoMatch();
-				System.out.println(Arrays.toString(asts));
-			return; // execution stops if there are incident entities with
-					// no matching
-		}
-		
-		//print matched assets
-		for(String n : am.getIncidentAssetNames()) {
-			//getIncidetnAssetWithNoMatch method has some issues
-			System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)));
-		}
-		
-		//print matched assets
-		System.out.println(">>Entity-Asset map:");
-		System.out.println(am.toString());
-		
-		//generate sequences
-		LinkedList<String[]> lst = am.generateUniqueCombinations();
-		
-		//checks if there are sequences generated or not. if not, then execution is terminated
-		//this can be loosened to allow same asset to be mapped to two entities
-		if(lst == null || lst.isEmpty()) {
-			System.out.println(">>No combinations found.... exisitng program");
-			return;
-		}
-		
-		//print sequences 
-		System.out.println("Sequences ["+lst.size()+"]");
-		for (String[] s : lst) {
-			System.out.println(Arrays.toString(s));
-		}
-		
-		System.out.println(">>Initialise the System");
-		//initialise BRS system 
-		boolean isInitialised = initialiseBigraphSystem( BRS_file, BRS_outputFolder); 
-		if (!isInitialised) {
-			System.out.println(">>System could not be initialised....execution is terminated");
-		}
-		
-		//create threads that handle each sequence generated from asset matching
-		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
-		String [] incidentAssetNames = am.getIncidentAssetNames();
-		
-		
-		for(int i=0; i<lst.size();i++) {//adjust the length
-			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-			System.out.println(">>Asset set["+i+"]: "+ Arrays.toString(lst.get(i)));
-			incidentInstances[i].start();
-		}	
-	}*/
 	
 	public static void main(String[] args) {
 		
@@ -743,7 +576,6 @@ public class IncidentPatternInstantiator {
 		//ins.test1();
 	}
 
-	
 	class PotentialIncidentInstance implements Runnable {
 
 		private String[] systemAssetNames;
@@ -775,6 +607,9 @@ public class IncidentPatternInstantiator {
 		@Override
 		public void run() {
 		
+			StopWatch timer = new StopWatch();
+			
+			timer.start();
 			StringBuilder jsonStr = new StringBuilder();
 			
 			File threadFile = new File(outputFileName);
@@ -814,13 +649,13 @@ public class IncidentPatternInstantiator {
 			}
 			
 			 //print all possible state transitions satisfying conditions	
-			 if(!predicateHandler.areAllSatisfied()){
+			/* if(!predicateHandler.areAllSatisfied()){
 				 msgQ.put("Thread["+threadID+"]>>Activities are not satisfied:" + 
 						 predicateHandler.getActivitiesNotSatisfied());
 				 msgQ.put("Thread["+threadID+"]>>Terminating thread");
 				 threadWriter.close();
 				 return;
-			 }
+			 }*/
 			 
 			 //how to represent all possible paths to the given sequence of assets?
 			 //incidentpath can be used to hold one path, but now it is holding everything
@@ -894,8 +729,18 @@ public class IncidentPatternInstantiator {
 //			System.out.println("\nThread["+threadID+"]>>Summary of the incident pattern activities");
 //			System.out.println(predicateHandler.getSummary());
 			
+			long timePassed = timer.getEllapsedMillis();
+			
+			int hours = (int)(timePassed/3600000)%60;
+			int mins = (int)(timePassed/60000)%60;
+			int secs = (int)(timePassed/1000)%60;
+			int secMils = (int)timePassed%1000;
+			
+			//execution time
+			msgQ.put("Thread["+threadID+"]>>Execution time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+		
 			msgQ.put("Thread["+threadID+"]>>Finished Successfully");
-			msgQ.put("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+			msgQ.put("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
 			
 			if(listener != null) {
 				listener.updateProgress(incrementValue/3 + incrementValue%3);
@@ -912,7 +757,7 @@ public class IncidentPatternInstantiator {
 			
 			} catch (IOException | InterruptedException e) {
 				// TODO Auto-generated catch block
-				print(e.getMessage());
+				e.printStackTrace();
 			} 
  		}
 		
@@ -977,7 +822,7 @@ public class IncidentPatternInstantiator {
 		
 	}
 	
-	public void print(String msg) {
+/*	public void print(String msg) {
 		
 		if(isPrintToScreen) {
 			System.out.println(msg);
@@ -987,18 +832,9 @@ public class IncidentPatternInstantiator {
 		listener.updateLogger(msg);
 		}
 		
-		try {
-			if(isSaveLog) {
-				bufferWriter.write(msg);
-				bufferWriter.newLine();	
-			}
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			print(e.getMessage());
-		}
+		
 	}
-
+*/
 	public boolean isSetsSelected() {
 		return isSetsSelected;
 	}

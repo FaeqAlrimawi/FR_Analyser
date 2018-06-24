@@ -162,11 +162,11 @@ public class BigraphAnalyser {
 			
 			identifyRelevantStates();
 	
-			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>identifying state transitions...");
+			//msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>identifying state transitions...");
 			
-			predicateHandler =  identifyStateTransitions();
+			//predicateHandler =  identifyStateTransitions();
 		
-			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>transitions identified");
+			//msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>transitions identified");
 		 executor.shutdown();
 		 activityExecutor.shutdown();
 		
