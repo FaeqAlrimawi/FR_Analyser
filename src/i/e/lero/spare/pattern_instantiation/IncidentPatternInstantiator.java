@@ -40,8 +40,8 @@ public class IncidentPatternInstantiator {
 	private boolean isSaveLog = false;
 	private boolean isPrintToScreen = false;
 	private BlockingQueue<String> msgQ;
-	
-	
+	ExecutorService executor;
+	ExecutorService executorSaver = Executors.newFixedThreadPool(3);
 	public void runLogger() {
 		
 		//runn a logger
@@ -148,7 +148,7 @@ public class IncidentPatternInstantiator {
 		msgQ.put(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 	
 		//create threads that handle each sequence generated from asset matching
-		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+		executor = Executors.newFixedThreadPool(threadPoolSize);
 		
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		
@@ -173,11 +173,20 @@ public class IncidentPatternInstantiator {
 		
 		try {
 			executor.shutdown();
+			executorSaver.shutdown();
 			
 			//if it returns false then maximum waiting time is reached
 			if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
 				msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 			}
+			
+			msgQ.put(">>Instantiation is completed. Still saving generated instances...");
+			
+			//if it returns false then maximum waiting time is reached
+			if (!executorSaver.awaitTermination(maxWaitingTime, timeUnit)) {
+				msgQ.put("Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+			}
+			
 		} catch (InterruptedException e) {
 			
 			e.printStackTrace();
@@ -404,7 +413,7 @@ public class IncidentPatternInstantiator {
 		msgQ.put(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 		
 		//create threads that handle each sequence generated from asset matching
-		ExecutorService executor = Executors.newFixedThreadPool(threadPoolSize);
+		executor = Executors.newFixedThreadPool(threadPoolSize);
 		
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		
@@ -416,14 +425,21 @@ public class IncidentPatternInstantiator {
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			executor.submit(incidentInstances[i]);
 		}
-			
 		
 		//no more tasks will be added so it will execute the submitted ones and then terminate
 		executor.shutdown();
-			
+		executorSaver.shutdown();
+		
 		//if it returns false then maximum waiting time is reached
 		if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
 			msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+		}
+		
+		msgQ.put(">>Instantiation is completed. Still saving generated instances...");
+		
+		//if it returns false then maximum waiting time is reached
+		if (!executorSaver.awaitTermination(maxWaitingTime, timeUnit)) {
+			msgQ.put("Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 		}
 		
 		//calculate execution time
@@ -612,23 +628,10 @@ public class IncidentPatternInstantiator {
 			StopWatch timer = new StopWatch();
 			
 			timer.start();
-			StringBuilder jsonStr = new StringBuilder();
-			
-			File threadFile = new File(outputFileName);
-			BufferedWriter threadWriter;
-			FileWriter fw;
 			
 			msgQ = Logger.getInstance().getMsgQ();
 			
 			try {
-				
-				if (!threadFile.exists()) {
-					threadFile.createNewFile();
-		        }
-				
-			fw = new FileWriter(threadFile.getAbsoluteFile());
-			
-			threadWriter = new BufferedWriter(fw);
 			
 			//this object allows the conversion of incident activities conditions into bigraphs
 			//which later can be matched against states of the system (also presented in Bigraph)
@@ -671,48 +674,10 @@ public class IncidentPatternInstantiator {
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
 			 msgQ.put("Thread["+threadID+"]>>Generating potential incident instances...");
 			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
-			
-			//store system assets and incident entities
-			jsonStr.append("{\"map\":[");
-			
-			for(int i =0;i<systemAssetNames.length;i++) {
-				jsonStr.append("{\"incident_entity_name\":\"").append(incidentEntityNames[i]).append("\",")
-					.append("\"system_asset_name\":\"").append(systemAssetNames[i]).append("\"}");
-				
-				if(i<systemAssetNames.length-1) {
-					jsonStr.append(",");
-				}
-				
-			}
-			jsonStr.append("],");
-			
-			int size = paths.size();
-			
-			jsonStr.append("\"potential_incident_instances\":{")
-			.append("\"num\":").append(size).append(",")
-			.append("\"instances\":[");
-	
-			for(int i=0; i<size;i++) {
-				jsonStr.append("{\"instance_id\":").append(i).append(",")
-				.append(paths.get(i).toJSON())
-				.append("}");
-				if(i < size-1) {
-					jsonStr.append(",");
-				}
-			}
-			jsonStr.append("]}}");
-			
-			
-			JSONObject obj = new JSONObject(jsonStr.toString());
-			
-			//write paths to a file
-			threadWriter.write(obj.toString(4));
-			threadWriter.close();
-			obj = null;
-			
-			msgQ.put("Thread["+threadID+"]>>" + paths.size()+" Potential incident instances were generated. Please see details in:");
-			
-			msgQ.put("File: "+ threadFile.getAbsolutePath());
+						
+			//create and run an instance saver to store instances to a file
+			InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames, systemAssetNames, paths);
+			executorSaver.submit(saver);
 			
 			if(listener != null) {
 				listener.updateProgress(incrementValue/3);	
@@ -757,7 +722,7 @@ public class IncidentPatternInstantiator {
 			//System.out.println(predic.toString());
 			
 			
-			} catch (IOException | InterruptedException e) {
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
@@ -853,5 +818,91 @@ public class IncidentPatternInstantiator {
 		this.assetSetsSelected = assetSetsSelected;
 	}
 	
+	class InstancesSaver implements Runnable {
+
+		String outputFileName;
+		String [] systemAssetNames;
+		String [] incidentEntityNames;
+		LinkedList<GraphPath> paths;
+		int threadID;
+		BlockingQueue<String> msgQ = Logger.getInstance().getMsgQ();
+		
+		public InstancesSaver( int threadID, String file, String [] entityNames, String[] astNames, LinkedList<GraphPath> paths){ 
+			
+			this.threadID = threadID;
+			outputFileName = file;
+			incidentEntityNames = entityNames;
+			systemAssetNames = astNames;
+			this.paths = paths;
+		}
+		
+		@Override
+		public void run() {
+			
+			File threadFile = new File(outputFileName);
+			BufferedWriter threadWriter;
+			FileWriter fw;
+			StringBuilder jsonStr = new StringBuilder();
+			
+			try {
+				
+				msgQ.put("Thread["+threadID+"]>>InstanceSaver>>Storing generated instances...");
+				if (!threadFile.exists()) {
+					threadFile.createNewFile();
+		        }
+				
+			fw = new FileWriter(threadFile.getAbsoluteFile());
+			
+			threadWriter = new BufferedWriter(fw);
+			
+			//add the map between incident entities to system assets
+			jsonStr.append("{\"map\":[");
+			
+			for(int i =0;i<systemAssetNames.length;i++) {
+				jsonStr.append("{\"incident_entity_name\":\"").append(incidentEntityNames[i]).append("\",")
+					.append("\"system_asset_name\":\"").append(systemAssetNames[i]).append("\"}");
+				
+				if(i<systemAssetNames.length-1) {
+					jsonStr.append(",");
+				}
+				
+			}
+			jsonStr.append("],");
+			
+			int size = paths.size();
+			
+			//add instances generated. Format: {instance_id:1,transitions:[{source:3,target:4,action:"enter"},...,{...}]}
+			jsonStr.append("\"potential_incident_instances\":{")
+			.append("\"num\":").append(size).append(",")
+			.append("\"instances\":[");
 	
+			for(int i=0; i<size;i++) {
+				jsonStr.append("{\"instance_id\":").append(i).append(",")
+				.append(paths.get(i).toJSON())
+				.append("}");
+				if(i < size-1) {
+					jsonStr.append(",");
+				}	
+				
+			}
+			jsonStr.append("]}}");
+			
+			JSONObject obj = new JSONObject(jsonStr.toString());
+			
+			//write paths to a file
+			threadWriter.write(obj.toString(4));
+			threadWriter.close();
+			
+			msgQ.put("Thread["+threadID+"]>>InstanceSave>>Instances are stored in file: "+ threadFile.getAbsolutePath());
+			
+			obj = null;
+			
+		} catch (IOException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+			
+	}
+	}
 }

@@ -139,10 +139,10 @@ public class BigraphAnalyser {
 			if(isThreading) {
 			
 					msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", partition size: "+partitionSize + " ("+ (int)((partitionSize*1.0/states.size())*10000)/100.0+ "%)"+
-							", number of partitions: "+ numberOfPartitions+", thread pool size: " + threadPoolSize+", Lite matching is " + isLite);
+							", number of partitions: "+ numberOfPartitions+", thread pool size: " + threadPoolSize);
 				
 			} else {
-				msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", No threads"+", Lite matching is " + isLite);
+				msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", No threads");
 			}
 					
 		}
