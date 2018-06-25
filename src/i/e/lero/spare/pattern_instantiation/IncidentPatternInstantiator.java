@@ -682,11 +682,12 @@ public class IncidentPatternInstantiator {
 				listener.updateProgress(incrementValue/3);	
 			}
 			
-			msgQ.put("Thread["+threadID+"]>>Analysing generated potential incident instances...");
+			msgQ.put("Thread["+threadID+"]>>Analysing ["+paths.size()+"] of generated potential incident instances...");
 			
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
-			msgQ.put(pathsAnalyser.analyse());
+			String result = pathsAnalyser.analyse();
+			msgQ.put(result);
 			
 			//print(pathsAnalyser.print());
 			//another way is to combine the transitions found for each activity from the initial one to the final one
@@ -769,38 +770,9 @@ public class IncidentPatternInstantiator {
 			this.outputFileName = outputFileName;
 		}
 
-		/*public String getBRSFileName() {
-			return BRSFileName;
-		}
-
-		public void setBRSFileName(String bRSFileName) {
-			BRSFileName = bRSFileName;
-		}
-
-		public String getOutputFolder() {
-			return outputFolder;
-		}
-
-		public void setOutputFolder(String outputFolder) {
-			this.outputFolder = outputFolder;
-		}*/
-
 		
 	}
 	
-/*	public void print(String msg) {
-		
-		if(isPrintToScreen) {
-			System.out.println(msg);
-		}
-		
-		if(listener != null) {
-		listener.updateLogger(msg);
-		}
-		
-		
-	}
-*/
 	public boolean isSetsSelected() {
 		return isSetsSelected;
 	}

@@ -25,10 +25,10 @@ public class GraphPathsAnalyser {
 	
 	public String analyse() {
 		
-		getCommonActions();
-		getTopPaths();
+		//getCommonActions();
+		//getTopPaths();
 		getShortestPaths();
-		getLongestPaths();
+		//getLongestPaths();
 
 		return print();
 	}
@@ -215,13 +215,17 @@ public class GraphPathsAnalyser {
 		int actionsNum = 0;
 		
 		//get common paths
+		if(commonActions != null) {
 		str.append(newLine).append("-common actions:").append(commonActions).append(newLine);
+		}
 		
 		//get top paths based on the common actions i.e. paths that contain all common actions
+		if(topPaths != null) {
 		str.append("-top paths (based on common actions): ").append(topPaths).append(newLine);
+		}
 		
 		//get shortest paths
-		if(shortestPaths.size() >0) {
+		if(shortestPaths != null && shortestPaths.size() >0) {
 			actionsNum = shortestPaths.getLast();
 			shortestPaths.removeLast();
 			str.append("-Shortest Paths (").append(actionsNum).append(" actions): ").append(shortestPaths).append(newLine);
@@ -231,7 +235,7 @@ public class GraphPathsAnalyser {
 		}
 		
 		//get longest paths
-		if(longestPaths.size() >0) {
+		if(longestPaths != null && longestPaths.size() >0) {
 			actionsNum = longestPaths.getLast();
 			longestPaths.removeLast();
 			str.append("-Longest Paths (").append(actionsNum).append(" actions): ").append(longestPaths).append(newLine);	
