@@ -43,7 +43,7 @@ public class BigraphAnalyser {
 	private ExecutorService executor; //= Executors.newFixedThreadPool(threadPoolSize);
 	private boolean isPredicateThreading = true; //this is to thread the conditions of the activities (this is separate from threading bigraph matching)
 	private int numberofActivityParallelExecution = 1; //determines how many activities should be threaded
-	private ExecutorService activityExecutor = Executors.newFixedThreadPool(numberofActivityParallelExecution*2); //pool size for parallel running
+	private ExecutorService predicateExecutor = Executors.newFixedThreadPool(numberofActivityParallelExecution*2); //pool size for parallel running
 	private int minimumPartitionSize = 1;
 	private BlockingQueue<String> msgQ;
 	private int threadID;
@@ -119,29 +119,6 @@ public class BigraphAnalyser {
 			//probalby will be fixed to 100 (maybe more, more testing is needed)
 			partitionSize = 100;//(int)(states.size()*partitionSizePercentage);
 			
-			/*while (tries < 100 && partitionSize < minimumPartitionSize) {
-				//percentage is increase by a certain number to increase the size of the partition (but nothing above 50%)
-				partitionSizePercentage *= 1.5;
-				
-				if(partitionSizePercentage >0.5) {
-					partitionSizePercentage = 0.5;
-					partitionSize = (int)(states.size()*partitionSizePercentage);
-					
-					if(partitionSize < minimumPartitionSize) {
-						tries = 100;
-					}
-					break;
-				}
-				
-				partitionSize = (int)(states.size()*partitionSizePercentage);
-				tries++;
-			}
-			
-			//if the partition size is not increased after the number of tries then no threading is done
-			if(tries == 100) {
-				noThreading = true;
-			}*/
-			
 			numberOfPartitions = states.size()/partitionSize;
 			
 		}
@@ -174,9 +151,9 @@ public class BigraphAnalyser {
 			
 			if(isPredicateThreading) {
 				identifyRelevantStatesWithThreading();
-				 activityExecutor.shutdown();
+				predicateExecutor.shutdown();
 					
-					if (!activityExecutor.awaitTermination(maxWaitingTime, timeUnit)) {
+					if (!predicateExecutor.awaitTermination(maxWaitingTime, timeUnit)) {
 						msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 					}
 			} else {
@@ -322,7 +299,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>Executing predicate "+ preds.get(i).getName());
 			
 			if(isPredicateThreading) {
-				predicateResults.add(activityExecutor.submit(new PredicateMatcher(preds.get(i))));
+				predicateResults.add(predicateExecutor.submit(new PredicateMatcher(preds.get(i))));
 			} else {
 				identifyRelevantStates(preds.get(i));	
 			}
@@ -736,7 +713,8 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 			//divide the states array for mult-threading
 			if(isThreading) {	
 				
-			LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
+				LinkedList<Integer> statesResults = new LinkedList<Integer>();
+			/*LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
 			
 			LinkedList<LinkedList<Integer>> forkJojnResults = new LinkedList<LinkedList<Integer>>();
 			
@@ -762,8 +740,8 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 				
 				if(res != null && !res.isEmpty())
 				statesResults.addAll(res);
-			}
-				
+			}*/
+			statesResults = mainPool.submit(new PartialBigraphMatcher(0, states.size(), redex)).get();	
 			//set the predicate states
 			pred.setBigraphStates(statesResults);
 			
