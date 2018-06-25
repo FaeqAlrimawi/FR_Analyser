@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
@@ -46,6 +47,8 @@ public class BigrapherHandler implements SystemExecutor {
 	private Signature bigraphSignature;
 	private static HashMap<Integer, Bigraph> states;
 	private ForkJoinPool mainPool;
+	private int maxWaitingTime = 24;
+	private TimeUnit timeUnit = TimeUnit.HOURS;
 	
 	private boolean isTesting = true; //used to skip executing the bigrapher file
 	
@@ -61,7 +64,7 @@ public class BigrapherHandler implements SystemExecutor {
 		
 		bigrapherFileName = BRSfileName;
 		this.outputFolder = outputFolder;
-		mainPool = new ForkJoinPool();
+	//	mainPool = new ForkJoinPool();
 	}
 	
 	/**
@@ -514,19 +517,43 @@ public class BigrapherHandler implements SystemExecutor {
 		states = new HashMap<Integer, Bigraph>();
 		// should rethink how to know how many states are there/ Currently
 		// depends on the transition file
-
+		
+		JSONObject state;
+		JSONParser parser = new JSONParser();
+		
 		int numOfStates = transitionSystem.getNumberOfStates();
-	
-		try {
+		
+		if (bigraphSignature != null) {
+		for (int i = 0; i < numOfStates; i++) {
+			try {
+				// read state from file
+				
+				state = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + i + ".json"));
+				Bigraph bigraph = convertJSONtoBigraph(state);
+				states.put(i, bigraph);
+
+			} catch (IOException | ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+		}
+		/*try {
 		if (bigraphSignature != null) {
 			states = mainPool.submit(new StateLoader(0, numOfStates)).get();
 		} else {
 			return null;
 		}
 		
+		mainPool.shutdown();
+		
+		if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
+			//msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+		}
 		}catch(ExecutionException | InterruptedException e){
 			e.printStackTrace();
-		}
+		}*/
+		
 		return states;
 	}
 
@@ -1003,16 +1030,16 @@ public class BigrapherHandler implements SystemExecutor {
 		return loadStates();
 	}
 
-	class StateLoader extends RecursiveTask<HashMap<Integer, Bigraph>> {
+/*	class StateLoader extends RecursiveTask<HashMap<Integer, Bigraph>> {
 
 		private static final long serialVersionUID = 1L;
 		private int indexStart;
 		private int indexEnd;
 		//private LinkedList<Bigraph> states;
-		private Bigraph redex;
+		//private Bigraph redex;
 		private HashMap<Integer, Bigraph> states;
 		
-		private final static int THRESHOLD = 500; //threshold for the number of states on which task is further subdivided into halfs
+		private final static int THRESHOLD = 1000; //threshold for the number of states on which task is further subdivided into halfs
 		
 		//for testing
 		//protected int numOfParts = 0;
@@ -1089,7 +1116,7 @@ public class BigrapherHandler implements SystemExecutor {
 				}	
 		}
 		
-		/**
+		*//**
 		 * converts a given bigraph in JSON format to a Bigraph object from the
 		 * LibBig library. A signature should be created first using the
 		 * buildSignature method.
@@ -1097,7 +1124,7 @@ public class BigrapherHandler implements SystemExecutor {
 		 * @param state
 		 *            the JSON object containing the bigtaph
 		 * @return Bigraph object
-		 */
+		 *//*
 		//updated implementation of the convertJSONtoBigraph method that correspond to Bigrapher v1.7.0
 		//need to update CONTROL_ID & CONTROL_ARITY in JSONTerms class before execution
 			public Bigraph convertJSONtoBigraph(JSONObject state) {
@@ -1346,5 +1373,5 @@ public class BigrapherHandler implements SystemExecutor {
 			return n;
 
 		}
-	}
+	}*/
 }
