@@ -1,0 +1,357 @@
+[17:36:05:658] : ////Executing Scenario1\\\\
+[17:36:05:660] : *Incident pattern file "etc/scenario1/interruption_incident-pattern.cpi"
+[17:36:05:660] : *System model file "etc/scenario1/research_centre_model.cps"
+[17:36:05:660] : *BRS file "etc/scenario1/research_centre_system.big" & states floder "etc/scenario1/research_centre_output_100"
+[17:36:05:660] : >>Matching incident pattern entities to system assets
+[17:36:06:391] : >>Number of Assets (also entities) =  10
+[17:36:06:391] : >>Incident entities order: [hallway, location_SD1, smartDevice1, busNetwork, floorX, location2, HVAC, laptopX, HVACmalware, offender1]
+[17:36:06:391] : >>Entity-Asset map:
+[17:36:06:392] : hallway => {hallway}
+location_SD1 => {instructorsLab2,empiricalLab,informaticsLab}
+smartDevice1 => {SL1,SL2,SL3}
+busNetwork => {busNetwork}
+floorX => {fourteenth_floor}
+location2 => {empiricalLab}
+HVAC => {AirConditioning}
+laptopX => {Laptop1}
+HVACmalware => {SoftwareX}
+offender1 => {Visitor1}
+
+[17:36:06:392] : >>Generating asset sets..
+[17:36:06:393] : >>Asset sets (6):
+[17:36:06:393] : -Set[0]: [hallway, instructorsLab2, SL1, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+[17:36:06:393] : -Set[1]: [hallway, informaticsLab, SL1, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+[17:36:06:393] : -Set[2]: [hallway, instructorsLab2, SL2, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+[17:36:06:394] : -Set[3]: [hallway, informaticsLab, SL2, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+[17:36:06:394] : -Set[4]: [hallway, instructorsLab2, SL3, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+[17:36:06:394] : -Set[5]: [hallway, informaticsLab, SL3, busNetwork, fourteenth_floor, empiricalLab, AirConditioning, Laptop1, SoftwareX, Visitor1]
+[17:36:06:394] : >>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...
+[17:36:06:398] : BRSHandler>> Executing the Bigraphical Reactive System (BRS)...
+[17:36:06:398] : BRSHandler>> Creating Bigraph Signature...
+[17:36:06:511] : BRSHandler>> Creating Bigraph transition system...
+[17:36:06:902] : BRSHandler>> Loading states...
+[17:36:07:205] : >>Initialisation completed successfully
+[17:36:07:206] : >>Number of States= 102
+[17:36:07:206] : >>State Transitions:
+[17:36:07:206] : 
+    0 -> [Edge [state=1, probability=-1.0, label = EnterRoom], Edge [state=2, probability=-1.0, label = EnterRoom], Edge [state=3, probability=-1.0, label = EnterRoom], Edge [state=4, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=5, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=6, probability=-1.0, label = EnterRoom], Edge [state=7, probability=-1.0, label = EnterRoom], Edge [state=8, probability=-1.0, label = EnterRoom]]
+    1 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=34, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=35, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=36, probability=-1.0, label = ConnectBusDevice], Edge [state=37, probability=-1.0, label = ConnectBusDevice]]
+    2 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=25, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=31, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=32, probability=-1.0, label = ConnectBusDevice], Edge [state=33, probability=-1.0, label = ConnectBusDevice]]
+    3 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=28, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=29, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=30, probability=-1.0, label = ConnectBusDevice]]
+    4 -> [Edge [state=15, probability=-1.0, label = EnterRoom], Edge [state=19, probability=-1.0, label = EnterRoom], Edge [state=26, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=27, probability=-1.0, label = ChangeContextToWorkingHours]]
+    5 -> [Edge [state=10, probability=-1.0, label = EnterRoom], Edge [state=16, probability=-1.0, label = EnterRoom], Edge [state=20, probability=-1.0, label = EnterRoom], Edge [state=23, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=24, probability=-1.0, label = ChangeContextToWorkingHours], Edge [state=25, probability=-1.0, label = EnterRoom]]
+    6 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=19, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=20, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=21, probability=-1.0, label = ConnectBusDevice], Edge [state=22, probability=-1.0, label = ConnectBusDevice]]
+    7 -> [Edge [state=14, probability=-1.0, label = ExitRoom], Edge [state=15, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=16, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=17, probability=-1.0, label = ConnectBusDevice], Edge [state=18, probability=-1.0, label = ConnectBusDevice]]
+    8 -> [Edge [state=9, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=10, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=11, probability=-1.0, label = ConnectBusDevice], Edge [state=12, probability=-1.0, label = ConnectBusDevice], Edge [state=13, probability=-1.0, label = ConnectIPDevice], Edge [state=14, probability=-1.0, label = ExitRoom]]
+    9 -> [Edge [state=38, probability=-1.0, label = ExitRoom], Edge [state=40, probability=-1.0, label = ConnectIPDevice], Edge [state=44, probability=-1.0, label = ConnectBusDevice], Edge [state=49, probability=-1.0, label = ConnectBusDevice], Edge [state=55, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=56, probability=-1.0, label = ChangeContextToWorkingHours]]
+    10 -> [Edge [state=39, probability=-1.0, label = ExitRoom], Edge [state=41, probability=-1.0, label = ConnectIPDevice], Edge [state=45, probability=-1.0, label = ConnectBusDevice], Edge [state=50, probability=-1.0, label = ConnectBusDevice], Edge [state=53, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=54, probability=-1.0, label = ChangeContextToWorkingHours]]
+    11 -> [Edge [state=47, probability=-1.0, label = DisconnectBusDevice], Edge [state=49, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=50, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=51, probability=-1.0, label = SendData], Edge [state=52, probability=-1.0, label = ExitRoom]]
+    12 -> [Edge [state=44, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=45, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=46, probability=-1.0, label = SendData], Edge [state=47, probability=-1.0, label = DisconnectBusDevice], Edge [state=48, probability=-1.0, label = ExitRoom]]
+    13 -> [Edge [state=40, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=41, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=42, probability=-1.0, label = DisconnectIPDevice], Edge [state=43, probability=-1.0, label = ExitRoom]]
+    14 -> [Edge [state=38, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=39, probability=-1.0, label = ChangeContextToOutSideWorkingHours]]
+    15 -> [Edge [state=38, probability=-1.0, label = ExitRoom], Edge [state=57, probability=-1.0, label = ConnectBusDevice], Edge [state=62, probability=-1.0, label = ConnectBusDevice], Edge [state=68, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=69, probability=-1.0, label = ChangeContextToWorkingHours]]
+    16 -> [Edge [state=39, probability=-1.0, label = ExitRoom], Edge [state=58, probability=-1.0, label = ConnectBusDevice], Edge [state=63, probability=-1.0, label = ConnectBusDevice], Edge [state=66, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=67, probability=-1.0, label = ChangeContextToWorkingHours]]
+    17 -> [Edge [state=60, probability=-1.0, label = DisconnectBusDevice], Edge [state=62, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=63, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=64, probability=-1.0, label = SendData], Edge [state=65, probability=-1.0, label = ExitRoom]]
+    18 -> [Edge [state=57, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=58, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=59, probability=-1.0, label = SendData], Edge [state=60, probability=-1.0, label = DisconnectBusDevice], Edge [state=61, probability=-1.0, label = ExitRoom]]
+    19 -> [Edge [state=38, probability=-1.0, label = ExitRoom], Edge [state=70, probability=-1.0, label = ConnectBusDevice], Edge [state=76, probability=-1.0, label = ConnectBusDevice], Edge [state=82, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=83, probability=-1.0, label = ChangeContextToWorkingHours]]
+    20 -> [Edge [state=39, probability=-1.0, label = ExitRoom], Edge [state=71, probability=-1.0, label = ConnectBusDevice], Edge [state=77, probability=-1.0, label = ConnectBusDevice], Edge [state=80, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=81, probability=-1.0, label = ChangeContextToWorkingHours]]
+    21 -> [Edge [state=74, probability=-1.0, label = DisconnectBusDevice], Edge [state=76, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=77, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=78, probability=-1.0, label = SendData], Edge [state=79, probability=-1.0, label = ExitRoom]]
+    22 -> [Edge [state=70, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=71, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=72, probability=-1.0, label = SendData], Edge [state=73, probability=-1.0, label = SendData], Edge [state=74, probability=-1.0, label = DisconnectBusDevice], Edge [state=75, probability=-1.0, label = ExitRoom]]
+    23 -> [Edge [state=53, probability=-1.0, label = EnterRoom], Edge [state=66, probability=-1.0, label = EnterRoom], Edge [state=80, probability=-1.0, label = EnterRoom], Edge [state=84, probability=-1.0, label = EnterRoom], Edge [state=91, probability=-1.0, label = ChangeContextToWorkingHours]]
+    24 -> [Edge [state=54, probability=-1.0, label = EnterRoom], Edge [state=67, probability=-1.0, label = EnterRoom], Edge [state=81, probability=-1.0, label = EnterRoom], Edge [state=85, probability=-1.0, label = EnterRoom], Edge [state=88, probability=-1.0, label = EnterRoom], Edge [state=89, probability=-1.0, label = EnterRoom], Edge [state=90, probability=-1.0, label = ChangeAccessToCardNotRequired]]
+    25 -> [Edge [state=39, probability=-1.0, label = ExitRoom], Edge [state=84, probability=-1.0, label = ChangeAccessToCardRequired], Edge [state=85, probability=-1.0, label = ChangeContextToWorkingHours], Edge [state=86, probability=-1.0, label = ConnectBusDevice], Edge [state=87, probability=-1.0, label = ConnectBusDevice]]
+    26 -> [Edge [state=55, probability=-1.0, label = EnterRoom], Edge [state=68, probability=-1.0, label = EnterRoom], Edge [state=82, probability=-1.0, label = EnterRoom], Edge [state=95, probability=-1.0, label = EnterRoom], Edge [state=96, probability=-1.0, label = ChangeContextToWorkingHours]]
+    27 -> [Edge [state=56, probability=-1.0, label = EnterRoom], Edge [state=69, probability=-1.0, label = EnterRoom], Edge [state=83, probability=-1.0, label = EnterRoom], Edge [state=90, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=92, probability=-1.0, label = EnterRoom], Edge [state=93, probability=-1.0, label = EnterRoom], Edge [state=94, probability=-1.0, label = EnterRoom]]
+    28 -> []
+    29 -> []
+    30 -> [Edge [state=97, probability=-1.0, label = ChangeAccessToCardNotRequired], Edge [state=98, probability=-1.0, label = ChangeContextToOutSideWorkingHours], Edge [state=99, probability=-1.0, label = SendData], Edge [state=100, probability=-1.0, label = DisconnectBusDevice], Edge [state=101, probability=-1.0, label = ExitRoom]]
+    31 -> []
+    32 -> []
+    33 -> []
+    34 -> []
+    35 -> []
+    36 -> []
+    37 -> []
+    38 -> []
+    39 -> []
+    40 -> []
+    41 -> []
+    42 -> []
+    43 -> []
+    44 -> []
+    45 -> []
+    46 -> []
+    47 -> []
+    48 -> []
+    49 -> []
+    50 -> []
+    51 -> []
+    52 -> []
+    53 -> []
+    54 -> []
+    55 -> []
+    56 -> []
+    57 -> []
+    58 -> []
+    59 -> []
+    60 -> []
+    61 -> []
+    62 -> []
+    63 -> []
+    64 -> []
+    65 -> []
+    66 -> []
+    67 -> []
+    68 -> []
+    69 -> []
+    70 -> []
+    71 -> []
+    72 -> []
+    73 -> []
+    74 -> []
+    75 -> []
+    76 -> []
+    77 -> []
+    78 -> []
+    79 -> []
+    80 -> []
+    81 -> []
+    82 -> []
+    83 -> []
+    84 -> []
+    85 -> []
+    86 -> []
+    87 -> []
+    88 -> []
+    89 -> []
+    90 -> []
+    91 -> []
+    92 -> []
+    93 -> []
+    94 -> []
+    95 -> []
+    96 -> []
+    97 -> []
+    98 -> []
+    99 -> []
+    100 -> []
+    101 -> []
+[17:36:07:208] : >>Creating threads for asset sets. [1] thread(s) are running in parallel.
+[17:36:07:457] : Thread[0]>>Identifying states and their transitions...
+[17:36:07:457] : Thread[0]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 1, thread pool size: 1
+[17:36:07:457] : Thread[0]>>BigraphAnalyser>>identifying states...
+[17:36:07:457] : Thread[0]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[17:36:07:458] : Thread[0]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[17:36:12:513] : Thread[0]>>BigraphAnalyser>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+[17:36:12:513] : Thread[0]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 5054ms [0h:0m:5s:54ms]
+[17:36:12:995] : Thread[0]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[17:36:12:995] : Thread[0]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 5537ms [0h:0m:5s:537ms]
+[17:36:12:995] : Thread[0]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[17:36:12:995] : Thread[0]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[17:36:16:526] : Thread[0]>>BigraphAnalyser>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+[17:36:16:526] : Thread[0]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 3530ms [0h:0m:3s:530ms]
+[17:36:16:570] : Thread[0]>>BigraphAnalyser>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+[17:36:16:570] : Thread[0]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 3575ms [0h:0m:3s:575ms]
+[17:36:16:571] : Thread[0]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[17:36:16:571] : Thread[0]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[17:36:20:189] : Thread[0]>>BigraphAnalyser>>activity3_Postcondition-states: [46, 99]
+[17:36:20:189] : Thread[0]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 3618ms [0h:0m:3s:618ms]
+[17:36:20:248] : Thread[0]>>BigraphAnalyser>>activity3_Precondition-states: [12, 30, 33, 37, 44, 45, 87, 97, 98]
+[17:36:20:248] : Thread[0]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 3677ms [0h:0m:3s:677ms]
+[17:36:20:249] : Thread[0]>>Generating potential incident instances...
+[17:36:20:253] : Thread[0]>>Analysing generated potential incident instances...
+[17:36:20:254] : Thread[0]>>InstanceSaver>>Storing generated instances...
+[17:36:20:261] : Thread[0]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\0.json
+[17:36:20:353] : 
+-common actions:{ConnectBusDevice=2, EnterRoom=2, SendData=2}
+-top paths (based on common actions): [0, 1]
+-Shortest Paths (3 actions): [0, 1]
+-Longest Paths (3 actions): [0, 1]
+
+[17:36:20:353] : Thread[0]>>Execution time: 13144ms [0h:0m:13s:144ms]
+[17:36:20:353] : Thread[0]>>Finished Successfully
+[17:36:20:354] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[17:36:20:535] : Thread[1]>>Identifying states and their transitions...
+[17:36:20:535] : Thread[1]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 1, thread pool size: 1
+[17:36:20:535] : Thread[1]>>BigraphAnalyser>>identifying states...
+[17:36:20:535] : Thread[1]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[17:36:20:536] : Thread[1]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[17:36:24:547] : Thread[1]>>BigraphAnalyser>>activity1_Postcondition-states: [6, 19, 20, 21, 22, 70, 71, 72, 73, 74, 76, 77, 78, 80, 81, 82, 83]
+[17:36:24:547] : Thread[1]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 4010ms [0h:0m:4s:10ms]
+[17:36:25:165] : Thread[1]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[17:36:25:165] : Thread[1]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 4628ms [0h:0m:4s:628ms]
+[17:36:25:165] : Thread[1]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[17:36:25:165] : Thread[1]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[17:36:27:927] : Thread[1]>>BigraphAnalyser>>activity2_Precondition-states: [6, 19, 20, 74, 80, 81, 82, 83]
+[17:36:27:927] : Thread[1]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 2762ms [0h:0m:2s:762ms]
+[17:36:27:941] : Thread[1]>>BigraphAnalyser>>activity2_Postcondition-states: [22, 70, 71, 72, 73]
+[17:36:27:941] : Thread[1]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2776ms [0h:0m:2s:776ms]
+[17:36:27:941] : Thread[1]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[17:36:27:942] : Thread[1]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[17:36:30:829] : Thread[1]>>BigraphAnalyser>>activity3_Postcondition-states: [72]
+[17:36:30:830] : Thread[1]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 2887ms [0h:0m:2s:887ms]
+[17:36:30:904] : Thread[1]>>BigraphAnalyser>>activity3_Precondition-states: [22, 70, 71]
+[17:36:30:904] : Thread[1]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 2962ms [0h:0m:2s:962ms]
+[17:36:30:905] : Thread[1]>>Generating potential incident instances...
+[17:36:30:906] : Thread[1]>>Analysing generated potential incident instances...
+[17:36:30:906] : 
+-common actions:{ConnectBusDevice=1, EnterRoom=1, SendData=1}
+-top paths (based on common actions): [0]
+-Shortest Paths (3 actions): [0]
+-Longest Paths (3 actions): [0]
+
+[17:36:30:906] : Thread[1]>>Execution time: 10552ms [0h:0m:10s:552ms]
+[17:36:30:906] : Thread[1]>>Finished Successfully
+[17:36:30:906] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[17:36:30:906] : Thread[1]>>InstanceSaver>>Storing generated instances...
+[17:36:30:907] : Thread[1]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\1.json
+[17:36:31:037] : Thread[2]>>Identifying states and their transitions...
+[17:36:31:037] : Thread[2]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 1, thread pool size: 1
+[17:36:31:037] : Thread[2]>>BigraphAnalyser>>identifying states...
+[17:36:31:037] : Thread[2]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[17:36:31:037] : Thread[2]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[17:36:33:787] : Thread[2]>>BigraphAnalyser>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+[17:36:33:787] : Thread[2]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 2749ms [0h:0m:2s:749ms]
+[17:36:34:304] : Thread[2]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[17:36:34:305] : Thread[2]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 3266ms [0h:0m:3s:266ms]
+[17:36:34:305] : Thread[2]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[17:36:34:305] : Thread[2]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[17:36:36:812] : Thread[2]>>BigraphAnalyser>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+[17:36:36:812] : Thread[2]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2507ms [0h:0m:2s:507ms]
+[17:36:37:008] : Thread[2]>>BigraphAnalyser>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+[17:36:37:008] : Thread[2]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 2703ms [0h:0m:2s:703ms]
+[17:36:37:008] : Thread[2]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[17:36:37:008] : Thread[2]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[17:36:39:728] : Thread[2]>>BigraphAnalyser>>activity3_Postcondition-states: [46, 99]
+[17:36:39:728] : Thread[2]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 2720ms [0h:0m:2s:720ms]
+[17:36:39:736] : Thread[2]>>BigraphAnalyser>>activity3_Precondition-states: [12, 30, 33, 37, 44, 45, 87, 97, 98]
+[17:36:39:737] : Thread[2]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 2728ms [0h:0m:2s:728ms]
+[17:36:39:737] : Thread[2]>>Generating potential incident instances...
+[17:36:39:737] : Thread[2]>>Analysing generated potential incident instances...
+[17:36:39:737] : 
+-common actions:{ConnectBusDevice=2, EnterRoom=2, SendData=2}
+-top paths (based on common actions): [0, 1]
+-Shortest Paths (3 actions): [0, 1]
+-Longest Paths (3 actions): [0, 1]
+
+[17:36:39:737] : Thread[2]>>Execution time: 8831ms [0h:0m:8s:831ms]
+[17:36:39:737] : Thread[2]>>Finished Successfully
+[17:36:39:737] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[17:36:39:737] : Thread[2]>>InstanceSaver>>Storing generated instances...
+[17:36:39:743] : Thread[2]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\2.json
+[17:36:39:878] : Thread[3]>>Identifying states and their transitions...
+[17:36:39:878] : Thread[3]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 1, thread pool size: 1
+[17:36:39:878] : Thread[3]>>BigraphAnalyser>>identifying states...
+[17:36:39:878] : Thread[3]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[17:36:39:878] : Thread[3]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[17:36:42:958] : Thread[3]>>BigraphAnalyser>>activity1_Postcondition-states: [6, 19, 20, 21, 22, 70, 71, 72, 73, 74, 76, 77, 78, 80, 81, 82, 83]
+[17:36:42:958] : Thread[3]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 3079ms [0h:0m:3s:79ms]
+[17:36:43:655] : Thread[3]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[17:36:43:655] : Thread[3]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 3776ms [0h:0m:3s:776ms]
+[17:36:43:656] : Thread[3]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[17:36:43:656] : Thread[3]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[17:36:46:299] : Thread[3]>>BigraphAnalyser>>activity2_Postcondition-states: [22, 70, 71, 72, 73]
+[17:36:46:299] : Thread[3]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2643ms [0h:0m:2s:643ms]
+[17:36:46:304] : Thread[3]>>BigraphAnalyser>>activity2_Precondition-states: [6, 19, 20, 74, 80, 81, 82, 83]
+[17:36:46:305] : Thread[3]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 2648ms [0h:0m:2s:648ms]
+[17:36:46:305] : Thread[3]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[17:36:46:305] : Thread[3]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[17:36:49:196] : Thread[3]>>BigraphAnalyser>>activity3_Precondition-states: [22, 70, 71]
+[17:36:49:196] : Thread[3]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 2891ms [0h:0m:2s:891ms]
+[17:36:49:199] : Thread[3]>>BigraphAnalyser>>activity3_Postcondition-states: [72]
+[17:36:49:199] : Thread[3]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 2895ms [0h:0m:2s:895ms]
+[17:36:49:200] : Thread[3]>>Generating potential incident instances...
+[17:36:49:200] : Thread[3]>>Analysing generated potential incident instances...
+[17:36:49:200] : Thread[3]>>InstanceSaver>>Storing generated instances...
+[17:36:49:200] : 
+-common actions:{ConnectBusDevice=1, EnterRoom=1, SendData=1}
+-top paths (based on common actions): [0]
+-Shortest Paths (3 actions): [0]
+-Longest Paths (3 actions): [0]
+
+[17:36:49:200] : Thread[3]>>Execution time: 9463ms [0h:0m:9s:463ms]
+[17:36:49:200] : Thread[3]>>Finished Successfully
+[17:36:49:200] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[17:36:49:201] : Thread[3]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\3.json
+[17:36:49:323] : Thread[4]>>Identifying states and their transitions...
+[17:36:49:323] : Thread[4]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 1, thread pool size: 1
+[17:36:49:323] : Thread[4]>>BigraphAnalyser>>identifying states...
+[17:36:49:323] : Thread[4]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[17:36:49:323] : Thread[4]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[17:36:52:217] : Thread[4]>>BigraphAnalyser>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+[17:36:52:217] : Thread[4]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 2893ms [0h:0m:2s:893ms]
+[17:36:52:725] : Thread[4]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[17:36:52:725] : Thread[4]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 3401ms [0h:0m:3s:401ms]
+[17:36:52:725] : Thread[4]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[17:36:52:725] : Thread[4]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[17:36:55:297] : Thread[4]>>BigraphAnalyser>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+[17:36:55:297] : Thread[4]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2572ms [0h:0m:2s:572ms]
+[17:36:55:496] : Thread[4]>>BigraphAnalyser>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+[17:36:55:496] : Thread[4]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 2771ms [0h:0m:2s:771ms]
+[17:36:55:496] : Thread[4]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[17:36:55:496] : Thread[4]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[17:36:58:248] : Thread[4]>>BigraphAnalyser>>activity3_Postcondition-states: [46, 99]
+[17:36:58:249] : Thread[4]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 2752ms [0h:0m:2s:752ms]
+[17:36:58:281] : Thread[4]>>BigraphAnalyser>>activity3_Precondition-states: [12, 30, 33, 37, 44, 45, 87, 97, 98]
+[17:36:58:282] : Thread[4]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 2784ms [0h:0m:2s:784ms]
+[17:36:58:283] : Thread[4]>>Generating potential incident instances...
+[17:36:58:283] : Thread[4]>>Analysing generated potential incident instances...
+[17:36:58:283] : Thread[4]>>InstanceSaver>>Storing generated instances...
+[17:36:58:283] : 
+-common actions:{ConnectBusDevice=2, EnterRoom=2, SendData=2}
+-top paths (based on common actions): [0, 1]
+-Shortest Paths (3 actions): [0, 1]
+-Longest Paths (3 actions): [0, 1]
+
+[17:36:58:283] : Thread[4]>>Execution time: 9082ms [0h:0m:9s:82ms]
+[17:36:58:283] : Thread[4]>>Finished Successfully
+[17:36:58:283] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[17:36:58:289] : Thread[4]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\4.json
+[17:36:58:387] : Thread[5]>>Identifying states and their transitions...
+[17:36:58:387] : Thread[5]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 1, thread pool size: 1
+[17:36:58:387] : Thread[5]>>BigraphAnalyser>>identifying states...
+[17:36:58:387] : Thread[5]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[17:36:58:387] : Thread[5]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[17:37:01:423] : Thread[5]>>BigraphAnalyser>>activity1_Postcondition-states: [6, 19, 20, 21, 22, 70, 71, 72, 73, 74, 76, 77, 78, 80, 81, 82, 83]
+[17:37:01:423] : Thread[5]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 3036ms [0h:0m:3s:36ms]
+[17:37:02:062] : Thread[5]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[17:37:02:062] : Thread[5]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 3674ms [0h:0m:3s:674ms]
+[17:37:02:062] : Thread[5]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[17:37:02:062] : Thread[5]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[17:37:04:759] : Thread[5]>>BigraphAnalyser>>activity2_Precondition-states: [6, 19, 20, 74, 80, 81, 82, 83]
+[17:37:04:759] : Thread[5]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 2696ms [0h:0m:2s:696ms]
+[17:37:04:793] : Thread[5]>>BigraphAnalyser>>activity2_Postcondition-states: [22, 70, 71, 72, 73]
+[17:37:04:793] : Thread[5]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2730ms [0h:0m:2s:730ms]
+[17:37:04:793] : Thread[5]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[17:37:04:793] : Thread[5]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[17:37:07:814] : Thread[5]>>BigraphAnalyser>>activity3_Postcondition-states: [72]
+[17:37:07:814] : Thread[5]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 3021ms [0h:0m:3s:21ms]
+[17:37:07:869] : Thread[5]>>BigraphAnalyser>>activity3_Precondition-states: [22, 70, 71]
+[17:37:07:870] : Thread[5]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 3076ms [0h:0m:3s:76ms]
+[17:37:07:870] : Thread[5]>>Generating potential incident instances...
+[17:37:07:870] : Thread[5]>>Analysing generated potential incident instances...
+[17:37:07:870] : Thread[5]>>InstanceSaver>>Storing generated instances...
+[17:37:07:870] : 
+-common actions:{ConnectBusDevice=1, EnterRoom=1, SendData=1}
+-top paths (based on common actions): [0]
+-Shortest Paths (3 actions): [0]
+-Longest Paths (3 actions): [0]
+
+[17:37:07:871] : Thread[5]>>Execution time: 9587ms [0h:0m:9s:587ms]
+[17:37:07:871] : Thread[5]>>Finished Successfully
+[17:37:07:871] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[17:37:07:871] : Thread[5]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\5.json
+[17:37:07:872] : ////Execution finished\\\\
+[17:37:07:872] : Execution time: 62212ms [0h:1m:2s:212ms]

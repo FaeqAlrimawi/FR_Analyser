@@ -173,14 +173,13 @@ public class IncidentPatternInstantiator {
 		
 		try {
 			executor.shutdown();
-			executorSaver.shutdown();
-			
+		
 			//if it returns false then maximum waiting time is reached
 			if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
 				msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 			}
 			
-			msgQ.put(">>Instantiation is completed. Still saving generated instances...");
+			executorSaver.shutdown();
 			
 			//if it returns false then maximum waiting time is reached
 			if (!executorSaver.awaitTermination(maxWaitingTime, timeUnit)) {
@@ -326,7 +325,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -687,7 +686,7 @@ public class IncidentPatternInstantiator {
 			
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
-			//msgQ.put(pathsAnalyser.analyse());
+			msgQ.put(pathsAnalyser.analyse());
 			
 			//print(pathsAnalyser.print());
 			//another way is to combine the transitions found for each activity from the initial one to the final one
