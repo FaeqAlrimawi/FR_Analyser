@@ -3,6 +3,7 @@ package i.e.lero.spare.pattern_instantiation;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -12,8 +13,13 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.Future;
+import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
@@ -43,6 +49,10 @@ public class BigraphAnalyser {
 	private int threadID;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;
+	private LinkedList<Integer> allMatchedStates = new LinkedList<Integer>();
+	
+	//using forkjoin threading
+	private ForkJoinPool mainPool;
 	
 	//for testing
 	private boolean isLite = false;
@@ -103,6 +113,8 @@ public class BigraphAnalyser {
 			int tries = 0;
 			
 			threadPoolSize = Runtime.getRuntime().availableProcessors()+2;
+			mainPool = new ForkJoinPool();
+			
 			executor = Executors.newFixedThreadPool(threadPoolSize);
 			//probalby will be fixed to 100 (maybe more, more testing is needed)
 			partitionSize = 100;//(int)(states.size()*partitionSizePercentage);
@@ -160,19 +172,31 @@ public class BigraphAnalyser {
 		
 			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>identifying states...");
 			
-			identifyRelevantStates();
+			if(isPredicateThreading) {
+				identifyRelevantStatesWithThreading();
+				 activityExecutor.shutdown();
+					
+					if (!activityExecutor.awaitTermination(maxWaitingTime, timeUnit)) {
+						msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+					}
+			} else {
+				identifyRelevantStates();	
+				
+			}
+			
 	
+			mainPool.shutdown();
+			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
+				msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+			}
+			
 			//msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>identifying state transitions...");
 			
 			//predicateHandler =  identifyStateTransitions();
 		
 			//msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>transitions identified");
-		 executor.shutdown();
-		 activityExecutor.shutdown();
+		 //executor.shutdown();
 		
-		/*if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
-			msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
-		}*/
 		
 		} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
@@ -196,6 +220,32 @@ public class BigraphAnalyser {
 		
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
 		
+		for (int i =0;i<activitiesName.size(); i++) {
+			
+			identifyRelevantStates(activitiesName.get(i));
+			
+		}
+
+			averageTime /=numberOfConditions;
+			int avgHours = (int)(averageTime/3600000)%60;
+			int avgMins = (int)(averageTime/60000)%60;
+			int avgSecs = (int)(averageTime/1000)%60;
+			int avgMils = (int)averageTime%1000;
+			
+			try {
+				msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>Average matching time of predicates = "+ averageTime+"ms ["+ avgHours+"h:"+ avgMins+"m:"+ avgSecs+"s:"+ avgMils+"ms]");
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		return predicateHandler;
+	}
+	
+public PredicateHandler identifyRelevantStatesWithThreading() {
+		
+		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
+		
 		try {
 		
 			int cnt = 0;
@@ -206,17 +256,17 @@ public class BigraphAnalyser {
 			cnt++;
 			
 			if(i == activitiesName.size()-1) {
+			
 				for(int j = 0; j< predicateResults.size();j++) {
 					predicateResults.get(j).get();	
 				}
 				cnt = 0;
 				predicateResults.clear();
-			
+				
 				isLastActivity = true;
 			} else {
 			
-			
-			if(isPredicateThreading && (cnt%numberofActivityParallelExecution == 0)) {
+			if((cnt%numberofActivityParallelExecution == 0)) {
 				for(int j = 0; j< predicateResults.size();j++) {
 						predicateResults.get(j).get();
 					
@@ -319,8 +369,8 @@ public class BigraphAnalyser {
 		
 		//divide the states array for mult-threading
 		if(isThreading) {	
-			
-		LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
+			LinkedList<Integer> statesResults; //= new LinkedList<Integer>();
+		/*LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
 		
 		LinkedList<Integer> statesResults = new LinkedList<Integer>();
 		
@@ -344,6 +394,10 @@ public class BigraphAnalyser {
 			if(res != null && !res.isEmpty())
 			statesResults.addAll(res);
 		}
+			*/
+			//allMatchedStates.clear();
+			statesResults = mainPool.submit(new PartialBigraphMatcher(0, states.size(), redex)).get();
+			//msgQ.put("Thread["++"]>>")
 			
 		//set the predicate states
 		pred.setBigraphStates(statesResults);
@@ -414,7 +468,10 @@ public class BigraphAnalyser {
 
 		
 		
-		} catch (InterruptedException | ExecutionException e) {
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ExecutionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -490,6 +547,75 @@ public class BigraphAnalyser {
 			return matchedStates;
 		}
 		
+	}
+	
+	class PartialBigraphMatcher extends RecursiveTask<LinkedList<Integer>> {
+
+		private int indexStart;
+		private int indexEnd;
+		//private LinkedList<Bigraph> states;
+		private Bigraph redex;
+		private LinkedList<Integer> matchedStates;
+		private final int THRESHOLD = 100; //threshold for the number of states on which task is further subdivided into halfs
+		
+		
+		public PartialBigraphMatcher(int indexStart, int indexEnd, Bigraph redex){
+			this.indexStart = indexStart;
+			this.indexEnd = indexEnd;
+			//this.states = states;
+			this.redex = redex;
+			matchedStates = new LinkedList<Integer>();
+		}
+
+		@Override
+		protected LinkedList<Integer> compute() {
+			// TODO Auto-generated method stub
+			
+			if((indexEnd-indexStart) > THRESHOLD) {
+				return ForkJoinTask.invokeAll(createSubTasks())
+						.stream()
+						.map(new Function<PartialBigraphMatcher, LinkedList<Integer>>() {
+
+							@Override
+							public LinkedList<Integer> apply(PartialBigraphMatcher arg0) {
+								// TODO Auto-generated method stub
+								return arg0.matchedStates;
+							}
+							
+						}).reduce(matchedStates, new BinaryOperator<LinkedList<Integer>>() {
+
+							@Override
+							public LinkedList<Integer> apply(LinkedList<Integer> arg0, LinkedList<Integer> arg1) {
+								// TODO Auto-generated method stub
+								arg0.addAll(arg1);
+								return arg0;
+							}
+							
+						});
+						
+			} else {
+				for(int i =indexStart; i<indexEnd;i++) {
+					if(matcher.match(states.get(i), redex).iterator().hasNext()){
+						matchedStates.add(i);	
+					}
+				}
+				
+				return matchedStates;
+			}
+			
+		}
+		
+		private Collection<PartialBigraphMatcher> createSubTasks() {
+			List<PartialBigraphMatcher> dividedTasks = new LinkedList<PartialBigraphMatcher>();
+			
+			int mid = (indexStart+indexEnd)/2;
+			//int startInd = indexEnd - endInd1;
+			
+			dividedTasks.add(new PartialBigraphMatcher(indexStart, mid, redex));
+			dividedTasks.add(new PartialBigraphMatcher(mid, indexEnd, redex));
+			
+			return dividedTasks;
+		}
 	}
 	
 	/*class ActivityMatcher implements Callable<Integer>{
@@ -612,6 +738,8 @@ public class BigraphAnalyser {
 				
 			LinkedList<Future<LinkedList<Integer>>> results = new LinkedList<Future<LinkedList<Integer>>>();
 			
+			LinkedList<LinkedList<Integer>> forkJojnResults = new LinkedList<LinkedList<Integer>>();
+			
 			LinkedList<Integer> statesResults = new LinkedList<Integer>();
 			
 			//run tasks
@@ -619,6 +747,7 @@ public class BigraphAnalyser {
 			
 			for(index=0;index<numberOfPartitions;index++) {
 				results.add(executor.submit(new BigraphMatcher(partitionSize*index, partitionSize*(index+1), redex.clone())));
+				forkJojnResults.add(mainPool.invoke(new PartialBigraphMatcher(partitionSize*index, partitionSize*(index+1), redex.clone())));
 			}
 			
 			//last partition takes the residue as well

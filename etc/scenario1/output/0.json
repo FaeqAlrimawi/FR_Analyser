@@ -1,0 +1,48 @@
+{
+    "potential_incident_instances": {
+        "instances": [],
+        "num": 0
+    },
+    "map": [
+        {
+            "system_asset_name": "hallway",
+            "incident_entity_name": "hallway"
+        },
+        {
+            "system_asset_name": "instructorsLab2",
+            "incident_entity_name": "location_SD1"
+        },
+        {
+            "system_asset_name": "SL1",
+            "incident_entity_name": "smartDevice1"
+        },
+        {
+            "system_asset_name": "busNetwork",
+            "incident_entity_name": "busNetwork"
+        },
+        {
+            "system_asset_name": "fourteenth_floor",
+            "incident_entity_name": "floorX"
+        },
+        {
+            "system_asset_name": "empiricalLab",
+            "incident_entity_name": "location2"
+        },
+        {
+            "system_asset_name": "AirConditioning",
+            "incident_entity_name": "HVAC"
+        },
+        {
+            "system_asset_name": "Laptop1",
+            "incident_entity_name": "laptopX"
+        },
+        {
+            "system_asset_name": "SoftwareX",
+            "incident_entity_name": "HVACmalware"
+        },
+        {
+            "system_asset_name": "Visitor1",
+            "incident_entity_name": "offender1"
+        }
+    ]
+}
