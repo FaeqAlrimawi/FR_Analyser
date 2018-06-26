@@ -459,7 +459,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		//private LinkedList<Bigraph> states;
 		private Bigraph redex;
 		private LinkedList<Integer> matchedStates;
-		private final static int THRESHOLD = 50; //threshold for the number of states on which task is further subdivided into halfs
+		private final static int THRESHOLD = 100; //threshold for the number of states on which task is further subdivided into halfs
 		
 		//for testing
 		//protected int numOfParts = 0;

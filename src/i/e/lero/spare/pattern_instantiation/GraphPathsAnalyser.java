@@ -228,7 +228,7 @@ public class GraphPathsAnalyser {
 		if(shortestPaths != null && shortestPaths.size() >0) {
 			actionsNum = shortestPaths.getLast();
 			shortestPaths.removeLast();
-			str.append("-Shortest Paths (").append(actionsNum).append(" actions): ").append(shortestPaths).append(newLine);
+			str.append("-Shortest Paths [").append(shortestPaths.size()).append("] (").append(actionsNum).append(" actions): ").append(shortestPaths).append(newLine);
 			shortestPaths.add(actionsNum);
 		} else {
 			str.append("-Shortest Paths: [NONE]");
@@ -238,7 +238,7 @@ public class GraphPathsAnalyser {
 		if(longestPaths != null && longestPaths.size() >0) {
 			actionsNum = longestPaths.getLast();
 			longestPaths.removeLast();
-			str.append("-Longest Paths (").append(actionsNum).append(" actions): ").append(longestPaths).append(newLine);	
+			str.append("-Longest Paths [").append(longestPaths.size()).append("] (").append(actionsNum).append(" actions): ").append(longestPaths).append(newLine);	
 			longestPaths.add(actionsNum);
 		} else {
 			str.append("-Longest Paths: [NONE]");
