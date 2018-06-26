@@ -226,7 +226,6 @@ public class IncidentPatternInstantiator {
 			
 	}
 	
-	
 	/**
 	 * This method intialises the BRS system by executing the BRS file, then loading states as Bigraph objects 
 	 * @param BRSFileName The BRS file describing the system components and its evolution
@@ -325,7 +324,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -408,8 +407,8 @@ public class IncidentPatternInstantiator {
 		}
 	
 		msgQ.put(">>Number of States= "+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
-		msgQ.put(">>State Transitions:");
-		msgQ.put(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
+		//msgQ.put(">>State Transitions:");
+		//msgQ.put(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 		
 		//create threads that handle each sequence generated from asset matching
 		executor = Executors.newFixedThreadPool(threadPoolSize);
@@ -672,7 +671,7 @@ public class IncidentPatternInstantiator {
 			
 			//one way to find all possible paths between activities is to find all transitions from the precondition of the initial activity to the postconditions of the final activity
 			 msgQ.put("Thread["+threadID+"]>>Generating potential incident instances...");
-			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
+			LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivitiesRevised(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 						
 			//create and run an instance saver to store instances to a file
 			InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames, systemAssetNames, paths);

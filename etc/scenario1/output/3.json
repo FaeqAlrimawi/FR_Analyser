@@ -4,19 +4,19 @@
             "instance_id": 0,
             "transitions": [
                 {
-                    "action": "EnterRoom",
-                    "source": 0,
-                    "target": 6
+                    "a": "EnterRoom",
+                    "s": 0,
+                    "t": 6
                 },
                 {
-                    "action": "ConnectBusDevice",
-                    "source": 6,
-                    "target": 22
+                    "a": "ConnectBusDevice",
+                    "s": 6,
+                    "t": 22
                 },
                 {
-                    "action": "SendData",
-                    "source": 22,
-                    "target": 72
+                    "a": "SendData",
+                    "s": 22,
+                    "t": 72
                 }
             ]
         }],

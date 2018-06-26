@@ -238,6 +238,7 @@ public class TransitionSystem {
 		GraphPath tmpG;
 		LinkedList<Integer> tmp;
 		
+		//adds the state itself if both the source and the destination states are the same
 		if(srcState.equals(desState)) {
 			tmpG = new GraphPath();
 			tmpG.setPredicateSrc(null);

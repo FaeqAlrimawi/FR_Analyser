@@ -5,19 +5,19 @@
                 "instance_id": 0,
                 "transitions": [
                     {
-                        "action": "EnterRoom",
-                        "source": 0,
-                        "target": 8
+                        "a": "EnterRoom",
+                        "s": 0,
+                        "t": 8
                     },
                     {
-                        "action": "ConnectBusDevice",
-                        "source": 8,
-                        "target": 12
+                        "a": "ConnectBusDevice",
+                        "s": 8,
+                        "t": 12
                     },
                     {
-                        "action": "SendData",
-                        "source": 12,
-                        "target": 46
+                        "a": "SendData",
+                        "s": 12,
+                        "t": 46
                     }
                 ]
             },
@@ -25,19 +25,19 @@
                 "instance_id": 1,
                 "transitions": [
                     {
-                        "action": "EnterRoom",
-                        "source": 0,
-                        "target": 3
+                        "a": "EnterRoom",
+                        "s": 0,
+                        "t": 3
                     },
                     {
-                        "action": "ConnectBusDevice",
-                        "source": 3,
-                        "target": 30
+                        "a": "ConnectBusDevice",
+                        "s": 3,
+                        "t": 30
                     },
                     {
-                        "action": "SendData",
-                        "source": 30,
-                        "target": 99
+                        "a": "SendData",
+                        "s": 30,
+                        "t": 99
                     }
                 ]
             }

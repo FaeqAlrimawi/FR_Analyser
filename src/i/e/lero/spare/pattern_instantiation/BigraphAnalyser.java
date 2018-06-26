@@ -334,7 +334,8 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		if(isThreading) {	
 			 
 			//use the ForkJoin to multi-thread the matching. The states are divided in half as long as its size above THRESHOLD set in the ForkJoin class extended here
-			statesResults = mainPool.submit(new BigraphMatcher(0, states.size(), redex)).get();
+			statesResults = mainPool.invoke(new BigraphMatcher(0, states.size(), redex));
+			
 		}
 		//this else can be removed as the fork class can decide to create only 1 task if size is less than threshold
 		else {
@@ -375,10 +376,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 		
 		return areStatesIdentified;
 		
@@ -461,7 +459,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		//private LinkedList<Bigraph> states;
 		private Bigraph redex;
 		private LinkedList<Integer> matchedStates;
-		private final static int THRESHOLD = 100; //threshold for the number of states on which task is further subdivided into halfs
+		private final static int THRESHOLD = 50; //threshold for the number of states on which task is further subdivided into halfs
 		
 		//for testing
 		//protected int numOfParts = 0;
@@ -643,7 +641,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 			if(isThreading) {	
 
 			BigraphMatcher bigraphMatcher = new BigraphMatcher(0, states.size(), redex);
-			statesResults = mainPool.submit(bigraphMatcher).get();	
+			statesResults = mainPool.invoke(bigraphMatcher);
 			
 			} 
 			//this else can be removed as the fork class can decide to create only 1 task if size is less than threshold
@@ -678,7 +676,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 				
 			}
 
-			} catch (InterruptedException | ExecutionException e) {
+			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
