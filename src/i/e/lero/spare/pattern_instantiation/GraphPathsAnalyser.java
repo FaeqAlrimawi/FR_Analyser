@@ -43,10 +43,15 @@ public class GraphPathsAnalyser {
 	public String analyse() {
 		
 		mainPool = new ForkJoinPool();
-		//getCommonActions();
-		//getTopPaths();
+		
+	//	getActionsFrequencyOriginal();
+		
+		//returns the topPaths that has actions with at least frequencey percentage more than or equal to [e.g., 50%]. If true it will return only the paths that contain actions with
+		//frequency more than [e.g., 50%]
+		getTopPaths(0.5, false);
+		
 	//	getShortestPaths();
-		getLongestPaths();
+//		getLongestPaths();
 
 		mainPool.shutdown();
 		
@@ -167,9 +172,40 @@ public class GraphPathsAnalyser {
 	 * Returns all paths that contain the given actions
 	 * @param actions the list of actions that paths should have
 	 * @param isExact if true it returns all paths that have exactly the given actions in any order. If false it returns all paths that have at least the actions given 
-	 * @return List of apth IDs
+	 * @return List of path IDs
 	 */
 	public LinkedList<Integer> getTopPaths(LinkedList<String> actions, boolean isExact) {
+		
+		topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(), actions, isExact));
+		
+		return topPaths;
+	}
+	
+	/**
+	 * Returns all paths that contain actions which has a frequency percentage >= to the given frequencey percentage (percentage = action_frequency/num_of_paths)
+	 * @param actionsFrequencyPercentage the percentage that actions should have at least
+	 * @param isExact if true it returns all paths that have exactly the actions with a percentage >= given percentage. If false it returns all paths that have at least the actions with percentage >= given percentage
+	 * @return List of path IDs
+	 */
+	public LinkedList<Integer> getTopPaths(double actionsFrequencyPercentage, boolean isExact) {
+		
+		LinkedList<String> actions = new LinkedList<String>();
+		
+		//if actions frequency are not calculated then calculate them
+		if(actionsFrequency == null || actionsFrequency.isEmpty()) {
+			actionsFrequency = mainPool.invoke(new ActionsFrequencyAnalyser(0, paths.size()));
+		}
+		
+		int numOfPaths = paths.size();
+		
+		//find actions with percentage >= given percentage
+		for(Entry<String, Integer> set: actionsFrequency.entrySet()) {
+			if((double)set.getValue()/(double)numOfPaths >= actionsFrequencyPercentage) {
+				actions.add(set.getKey());
+			}
+		}
+		
+		System.out.println("actions with >= 0.5 : "+ actions);
 		
 		topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(), actions, isExact));
 		
@@ -184,12 +220,25 @@ public class GraphPathsAnalyser {
 		
 		topPaths = new LinkedList<Integer>();
 		LinkedList<String> pathActions;
+		LinkedList<String> actions = new LinkedList<String>();
+		
+		//for testing
+		double perc = 0.5;
+		int numOfPaths = paths.size();
+		
+		for(Entry<String, Integer> set : actionsFrequency.entrySet()) {
+			if((double)set.getValue()/(double)numOfPaths >= perc) {
+				actions.add(set.getKey());
+			}
+		}
+		
+		System.out.println("actions with >= 0.5 : "+ actions);
 		
 		for(int i=0;i< paths.size();i++) {
 			pathActions = paths.get(i).getPathActions();
 			
 			//if the path contains all common actions then the path is considered a top one
-			if(pathActions.containsAll(actionsFrequency.keySet())) {
+			if(pathActions.containsAll(actions)) {
 				topPaths.add(i);
 			}
 		}
@@ -302,12 +351,12 @@ public class GraphPathsAnalyser {
 		
 		//get common paths
 		if(actionsFrequency != null) {
-		str.append(newLine).append("-common actions:").append(actionsFrequency).append(newLine);
+		str.append(newLine).append("-Actions Frequency:").append(actionsFrequency).append(newLine);
 		}
 		
 		//get top paths based on the common actions i.e. paths that contain all common actions
 		if(topPaths != null) {
-		str.append("-top paths (based on common actions): ").append(topPaths).append(newLine);
+		str.append("-top paths ["+topPaths.size()+"] (based on actions Frequency): ").append(topPaths).append(newLine);
 		}
 		
 		//get shortest paths
@@ -515,12 +564,16 @@ public class GraphPathsAnalyser {
 							@Override
 							public HashMap<String, Integer> apply(HashMap<String, Integer> arg0, HashMap<String, Integer> arg1) {
 								
-								for(String key : arg1.keySet()) {
+								for(Entry<String, Integer> set: arg1.entrySet()) {
 									//if the action is already contained in the result (arg0) then add the count to the current count else add a new action with the arg1 count
-									if(arg0.containsKey(key)) {
-										arg0.put(key, arg0.get(key)+arg1.get(key));
+									String action = set.getKey();
+									int freq = set.getValue();
+									
+									if(arg0.containsKey(action)) {
+										int oldValue = arg0.get(action);
+										arg0.put(action, oldValue+freq);
 									} else {
-										arg0.put(key, arg1.get(key));	
+										arg0.put(action, freq);	
 									}
 									
 								}
@@ -568,6 +621,40 @@ public class GraphPathsAnalyser {
 			
 			return dividedTasks;
 		}
+		
+		 private   Map<String, Integer> sortByComparator(HashMap<String, Integer> unsortMap, final boolean order)
+		    {
+
+		        List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(unsortMap.entrySet());
+
+		        // Sorting the list based on values
+		        Collections.sort(list, new Comparator<Entry<String, Integer>>()
+		        {
+		            public int compare(Entry<String, Integer> o1,
+		                    Entry<String, Integer> o2)
+		            {
+		                if (order)
+		                {
+		                    return o1.getValue().compareTo(o2.getValue());
+		                }
+		                else
+		                {
+		                    return o2.getValue().compareTo(o1.getValue());
+
+		                }
+		            }
+		        });
+
+		        // Maintaining insertion order with the help of LinkedList
+		        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+		        for (Entry<String, Integer> entry : list)
+		        {
+		        	
+		            sortedMap.put(entry.getKey(), entry.getValue());
+		        }
+
+		        return sortedMap;
+		    }
 	}
 
 	//returns all paths that contain the actions given in the constructor
