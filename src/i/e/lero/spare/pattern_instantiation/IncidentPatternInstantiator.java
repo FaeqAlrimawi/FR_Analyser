@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import ie.lero.spare.franalyser.GUI.IncidentPatternInstantiationListener;
@@ -324,7 +327,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_5000";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_1559";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -725,7 +728,9 @@ public class IncidentPatternInstantiator {
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} 
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
  		}
 		
 		/*public void start() {
@@ -811,22 +816,25 @@ public class IncidentPatternInstantiator {
 		public void run() {
 			
 			File threadFile = new File(outputFileName);
-			BufferedWriter threadWriter;
-			FileWriter fw;
+			//BufferedWriter threadWriter;
+			//FileWriter fw;
 			StringBuilder jsonStr = new StringBuilder();
 			
 			try {
 				
 				msgQ.put("Thread["+threadID+"]>>InstanceSaver>>Storing generated instances...");
+				
 				if (!threadFile.exists()) {
 					threadFile.createNewFile();
 		        }
 				
-			fw = new FileWriter(threadFile.getAbsoluteFile());
+			//fw = new FileWriter(threadFile.getAbsoluteFile());
 			
-			threadWriter = new BufferedWriter(fw);
+			//threadWriter = new BufferedWriter(fw);
 			
 			//add the map between incident entities to system assets
+			JSONArray jsonAry = new JSONArray();
+				
 			jsonStr.append("{\"map\":[");
 			
 			for(int i =0;i<systemAssetNames.length;i++) {
@@ -839,6 +847,7 @@ public class IncidentPatternInstantiator {
 				
 			}
 			jsonStr.append("],");
+			
 			
 			int size = paths.size();
 			
@@ -860,9 +869,15 @@ public class IncidentPatternInstantiator {
 			
 			JSONObject obj = new JSONObject(jsonStr.toString());
 			
+			
+			
 			//write paths to a file
-			threadWriter.write(obj.toString(4));
-			threadWriter.close();
+			 try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
+			      writer.write(obj.toString(4));
+			    }
+			 
+			//threadWriter.write(obj.toString(4));
+			//threadWriter.close();
 			
 			msgQ.put("Thread["+threadID+"]>>InstanceSave>>Instances are stored in file: "+ threadFile.getAbsolutePath());
 			

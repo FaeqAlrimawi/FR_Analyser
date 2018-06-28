@@ -495,7 +495,7 @@ public class PredicateHandler {
 						Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
 						LinkedList<Integer> preStates = pre.getBigraphStates();
 						
-						//get precondition of the activity (assumption: there is only one precondition)
+						//get precondition of the activity (assumption: there is only one postcondition)
 						Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
 						LinkedList<Integer> postStates = post.getBigraphStates();
 						
@@ -606,7 +606,6 @@ public class PredicateHandler {
 		depthFirst(destinationActivity.getName(), visited);
 		
 		if(activitySequences.size()>0) {
-			System.out.println("activity seqs size = " + activitySequences.size());
 			LinkedList<String> activityNames = activitySequences.get(0);
 			HashMap<String, IncidentActivity> acts = getIncidentActivities();
 			
@@ -614,9 +613,8 @@ public class PredicateHandler {
 				
 				result.add(acts.get(name));
 			}
-		} else {
-			System.out.println("activity seqs is empty");
-		}
+		} 
+		
 		return result;
 	}
 	/*public LinkedList<HashMap<String, LinkedList<GraphPath>>> getPathsForIncident() {

@@ -248,7 +248,11 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 
 			if((cnt%numberofActivityParallelExecution == 0) || (i == activitiesName.size()-1)) {
 				for(int j = 0; j< predicateResults.size();j++) {
-						predicateResults.get(j).get();
+					Future<Integer> future = predicateResults.get(j);
+					if(!future.isDone()){ 
+						future.get();	
+					}
+					
 					
 				}
 				cnt = 0;
