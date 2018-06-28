@@ -50,7 +50,7 @@ public class GraphPathsAnalyser {
 		
 		//returns the topPaths that has actions with at least frequencey percentage more than or equal to [e.g., 50%]. If true it will return only the paths that contain actions with
 		//frequency more than [e.g., 50%]
-		getTopPaths(0.5, false);
+		getTopPaths(0.85, false);
 		
 	//	getShortestPaths();
 //		getLongestPaths();
