@@ -50,9 +50,10 @@ public class GraphPathsAnalyser {
 		
 		//returns the topPaths that has actions with at least frequencey percentage more than or equal to [e.g., 50%]. If true it will return only the paths that contain actions with
 		//frequency more than [e.g., 50%]
-		getTopPaths(0.85, false);
 		
-	//	getShortestPaths();
+		//parallelism based functionalities
+//		getTopPaths(0.9, true);
+//		getShortestPaths();
 //		getLongestPaths();
 
 		mainPool.shutdown();
@@ -225,7 +226,7 @@ public class GraphPathsAnalyser {
 		LinkedList<String> actions = new LinkedList<String>();
 		
 		//for testing
-		double perc = 0.5;
+		double perc = 0.85;
 		int numOfPaths = paths.size();
 		
 		for(Entry<String, Integer> set : actionsFrequency.entrySet()) {
@@ -234,7 +235,7 @@ public class GraphPathsAnalyser {
 			}
 		}
 		
-		System.out.println("actions with >= 0.5 : "+ actions);
+		System.out.println("actions with >= 0.8 : "+ actions);
 		
 		for(int i=0;i< paths.size();i++) {
 			pathActions = paths.get(i).getPathActions();
