@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -83,6 +84,18 @@ public class GraphPathsAnalyser {
 	 */
 	public HashMap<String, Integer> getActionsFrequency() {
 		
+		
+		actionsFrequency = mainPool.invoke(new ActionsFrequencyAnalyser(0, paths.size()));
+		
+		return actionsFrequency;
+	}
+	
+	/**
+	 * Returns all actions with their frequency i.e. how many times they appeared in the different paths
+	 * @return
+	 */
+	public HashMap<String, Integer> getActionsFrequencyOriginal() {
+		
 		actionsFrequency = new HashMap<String, Integer>();
 		LinkedList<String> actions;
 		int cnt;
@@ -151,10 +164,23 @@ public class GraphPathsAnalyser {
 	}
 
 	/**
+	 * Returns all paths that contain the given actions
+	 * @param actions the list of actions that paths should have
+	 * @param isExact if true it returns all paths that have exactly the given actions in any order. If false it returns all paths that have at least the actions given 
+	 * @return List of apth IDs
+	 */
+	public LinkedList<Integer> getTopPaths(LinkedList<String> actions, boolean isExact) {
+		
+		topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(), actions, isExact));
+		
+		return topPaths;
+	}
+	
+	/**
 	 * Returns all paths that contain all common actions
 	 * @return
 	 */
-	public LinkedList<Integer> getTopPaths() {
+	public LinkedList<Integer> getTopPathsOriginal() {
 		
 		topPaths = new LinkedList<Integer>();
 		LinkedList<String> pathActions;
@@ -411,6 +437,7 @@ public class GraphPathsAnalyser {
 				
 				sPaths.add(indexStart);
 				
+				if(operation == SHORTEST) {
 				for(int i=indexStart+1;i<indexEnd;i++) {
 					//if current path has a number of states smaller than the set one then the set one is changed
 					size = paths.get(i).getStateTransitions().size();
@@ -420,6 +447,19 @@ public class GraphPathsAnalyser {
 						sPaths.add(i);
 					} else if(size == numOfStates) {
 						sPaths.add(i);
+					}
+				}
+				} else if(operation == LONGEST) {
+					for(int i=indexStart+1;i<indexEnd;i++) {
+						//if current path has a number of states smaller than the set one then the set one is changed
+						size = paths.get(i).getStateTransitions().size();
+						if(size>numOfStates) {
+							numOfStates = size;
+							sPaths.clear();
+							sPaths.add(i);
+						} else if(size == numOfStates) {
+							sPaths.add(i);
+						}
 					}
 				}
 				return sPaths;
@@ -529,5 +569,102 @@ public class GraphPathsAnalyser {
 			return dividedTasks;
 		}
 	}
+
+	//returns all paths that contain the actions given in the constructor
+	//the actions can be set by a percentage of frequencey
+	
+	class TopPathsAnalyser extends RecursiveTask<LinkedList<Integer>> {
+
+		private static final long serialVersionUID = 1L;
+		private int indexStart;
+		private int indexEnd;
+		private LinkedList<Integer> topPaths;
+		private boolean isExact = false;
+		private LinkedList<String> actions;
+		
+		//private double frequenceyPercentage = 0.10;
+		
+		public TopPathsAnalyser(int indexStart, int indexEnd, LinkedList<String> actions, boolean isExact){
+			this.indexStart = indexStart;
+			this.indexEnd = indexEnd;
+			topPaths = new LinkedList<Integer>();
+			//this.frequenceyPercentage = frequenceyPercentage;
+			this.actions = actions;
+			this.isExact = isExact;
+		}
+
+		@Override
+		protected LinkedList<Integer> compute() {
+			// TODO Auto-generated method stub
+			
+			if((indexEnd-indexStart) > THRESHOLD) {
+				return ForkJoinTask.invokeAll(createSubTasks())
+						.stream()
+						.map(new Function<TopPathsAnalyser, LinkedList<Integer>>() {
+
+							@Override
+							public LinkedList<Integer> apply(TopPathsAnalyser arg0) {
+								return arg0.topPaths;
+							}
+							
+						}).reduce(topPaths, new BinaryOperator<LinkedList<Integer>>() {
+
+							
+							@Override
+							public LinkedList<Integer> apply(LinkedList<Integer> arg0, LinkedList<Integer> arg1) {
+								
+								arg0.addAll(arg1);
+								return arg0;
+						}});
+						
+			} else {
+							
+				LinkedList<String> pathActions;
+			
+				//has exactly the specified actions in any order
+				if(isExact) {
+					for(int i=indexStart;i< indexEnd;i++) {
+						pathActions = paths.get(i).getPathActions();
+						
+						if(pathActions.size() != actions.size()) {
+							continue;
+						}
+						
+						//compares the two list independent of order
+						if(new HashSet<>(pathActions).equals(new HashSet<>(actions))) {
+							topPaths.add(i);
+						}
+					}
+					//contains the given action (could have more actions
+				} else {
+				for(int i=indexStart;i< indexEnd;i++) {
+					pathActions = paths.get(i).getPathActions();
+					
+					//if the path contains all common actions then the path is considered a top one
+					if(pathActions.containsAll(actions)) {
+						topPaths.add(i);
+					}
+				}
+				}
+				
+				return topPaths;
+			
+			}
+			
+		}
+		
+		private Collection<TopPathsAnalyser> createSubTasks() {
+			List<TopPathsAnalyser> dividedTasks = new LinkedList<TopPathsAnalyser>();
+			
+			int mid = (indexStart+indexEnd)/2;
+			//int startInd = indexEnd - endInd1;
+			
+			dividedTasks.add(new TopPathsAnalyser(indexStart, mid, actions, isExact));
+			dividedTasks.add(new TopPathsAnalyser(mid, indexEnd, actions, isExact));
+			
+			return dividedTasks;
+		}
+	}
+
 	
 }

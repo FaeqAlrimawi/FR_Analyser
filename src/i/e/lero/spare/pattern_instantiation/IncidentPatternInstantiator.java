@@ -422,7 +422,7 @@ public class IncidentPatternInstantiator {
 		
 		msgQ.put(">>Creating threads for asset sets. ["+threadPoolSize+"] thread(s) are running in parallel.");
 		
-		for(int i=0; i<lst.size();i++) {//adjust the length
+		for(int i=0; i<2;i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			executor.submit(incidentInstances[i]);
 		}

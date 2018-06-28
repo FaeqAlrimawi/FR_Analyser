@@ -483,14 +483,16 @@ public class PredicateHandler {
 				GraphPath path = pathsIterator.next();
 				LinkedList<Integer> states = path.getStateTransitions();
 				
-				int j=0;//first state is for the src and des activities
-				//isSatisfied = true;
+				int j=0;
+				
 				isCheckingPrecondition = true;
-				//isCheckingPostcondition = false;
+				
 				activitiesIterator = activities.listIterator();
+				
 				outerLoop:
 					while(activitiesIterator.hasNext()) {
 						IncidentActivity activity = activitiesIterator.next();
+						
 						//get precondition of the activity (assumption: there is only one precondition)
 						Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
 						LinkedList<Integer> preStates = pre.getBigraphStates();
