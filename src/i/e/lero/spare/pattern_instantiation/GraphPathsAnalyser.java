@@ -44,7 +44,9 @@ public class GraphPathsAnalyser {
 		
 		mainPool = new ForkJoinPool();
 		
-	//	getActionsFrequencyOriginal();
+		
+		//getActionsFrequencyOriginal();
+		//getTopPathsOriginal();
 		
 		//returns the topPaths that has actions with at least frequencey percentage more than or equal to [e.g., 50%]. If true it will return only the paths that contain actions with
 		//frequency more than [e.g., 50%]
@@ -588,7 +590,7 @@ public class GraphPathsAnalyser {
 				
 				int cnt = 0;
 				
-				for(int i=indexStart+1;i<indexEnd;i++) {
+				for(int i=indexStart;i<indexEnd;i++) {
 					actions = paths.get(i).getPathActions();
 					for(String action : actions) {
 						//if the action exists in the hashmap, then add one to its counter
