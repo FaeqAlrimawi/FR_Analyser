@@ -53,7 +53,7 @@ public class GraphPathsAnalyser {
 		
 		//parallelism based functionalities
 //		getTopPaths(0.9, true);
-//		getShortestPaths();
+		getShortestPaths();
 //		getLongestPaths();
 
 		mainPool.shutdown();
