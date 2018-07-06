@@ -10,15 +10,26 @@ import java.sql.Time;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import bigraphspace.parser.antlr.BigraphTermParser.indexes_return;
+import i.e.lero.spare.pattern_instantiation.GraphPathsAnalyser.ActionsFrequencyAnalyser;
 import ie.lero.spare.franalyser.GUI.IncidentPatternInstantiationListener;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Logger;
@@ -44,7 +55,8 @@ public class IncidentPatternInstantiator {
 	private boolean isPrintToScreen = false;
 	private BlockingQueue<String> msgQ;
 	ExecutorService executor;
-	ExecutorService executorSaver = Executors.newFixedThreadPool(3);
+	ForkJoinPool mainPool = new ForkJoinPool();
+	
 	public void runLogger() {
 		
 		//runn a logger
@@ -182,10 +194,10 @@ public class IncidentPatternInstantiator {
 				msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 			}
 			
-			executorSaver.shutdown();
+			mainPool.shutdown();
 			
 			//if it returns false then maximum waiting time is reached
-			if (!executorSaver.awaitTermination(maxWaitingTime, timeUnit)) {
+			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
 				msgQ.put("Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 			}
 			
@@ -327,7 +339,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_10	000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -435,11 +447,11 @@ public class IncidentPatternInstantiator {
 			msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 		}
 		
-		executorSaver.shutdown();
+		mainPool.shutdown();
 		//msgQ.put(">>Instantiation is completed. Still saving generated instances...");
 		
 		//if it returns false then maximum waiting time is reached
-		if (!executorSaver.awaitTermination(maxWaitingTime, timeUnit)) {
+		if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
 			msgQ.put("Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 		}
 		
@@ -473,7 +485,7 @@ public class IncidentPatternInstantiator {
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_5000";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		//String logFileName = "etc/scenario1/log.txt";
@@ -679,7 +691,7 @@ public class IncidentPatternInstantiator {
 			 
 			//create and run an instance saver to store instances to a file
 			InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames, systemAssetNames, paths);
-			executorSaver.submit(saver);
+			mainPool.submit(saver);
 			
 			if(listener != null) {
 				listener.updateProgress(incrementValue/3);	
@@ -796,12 +808,12 @@ public class IncidentPatternInstantiator {
 	
 	class InstancesSaver implements Runnable {
 
-		String outputFileName;
-		String [] systemAssetNames;
-		String [] incidentEntityNames;
-		LinkedList<GraphPath> paths;
-		int threadID;
-		BlockingQueue<String> msgQ = Logger.getInstance().getMsgQ();
+		private String outputFileName;
+		private String [] systemAssetNames;
+		private String [] incidentEntityNames;
+		private LinkedList<GraphPath> paths;
+		private int threadID;
+		private BlockingQueue<String> msgQ = Logger.getInstance().getMsgQ();
 		
 		public InstancesSaver( int threadID, String file, String [] entityNames, String[] astNames, LinkedList<GraphPath> paths){ 
 			
@@ -824,16 +836,11 @@ public class IncidentPatternInstantiator {
 				
 				msgQ.put("Thread["+threadID+"]>>InstanceSaver>>Storing generated instances...");
 				
-				if (!threadFile.exists()) {
-					threadFile.createNewFile();
-		        }
-				
 			//fw = new FileWriter(threadFile.getAbsoluteFile());
 			
 			//threadWriter = new BufferedWriter(fw);
 			
 			//add the map between incident entities to system assets
-			JSONArray jsonAry = new JSONArray();
 				
 			jsonStr.append("{\"map\":[");
 			
@@ -856,7 +863,7 @@ public class IncidentPatternInstantiator {
 			.append("\"num\":").append(size).append(",")
 			.append("\"instances\":[");
 	
-			for(int i=0; i<size;i++) {
+			/*for(int i=0; i<size;i++) {
 				jsonStr.append("{\"instance_id\":").append(i).append(",")
 				.append(paths.get(i).toJSON())
 				.append("}");
@@ -864,12 +871,26 @@ public class IncidentPatternInstantiator {
 					jsonStr.append(",");
 				}	
 				
-			}
+			}*/
+			
+			String result = mainPool.invoke(new GraphPathsToStringConverter(0, size, paths));
+			
+			//System.out.println("result string generated");
+			msgQ.put("Thread["+threadID+"]>>InstanceSave>>JSON string is generated");
+			jsonStr.append(result);
+			
+			//remove the last comma at the end of the string
+			jsonStr.deleteCharAt(jsonStr.length()-1);
+			
 			jsonStr.append("]}}");
 			
 			JSONObject obj = new JSONObject(jsonStr.toString());
 			
-			
+			msgQ.put("Thread["+threadID+"]>>InstanceSave>>JSON Object is created");
+
+			if (!threadFile.exists()) {
+				threadFile.createNewFile();
+	        }
 			
 			//write paths to a file
 			 try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
@@ -890,5 +911,83 @@ public class IncidentPatternInstantiator {
 		
 			
 	}
+
+	}
+	
+	class GraphPathsToStringConverter extends RecursiveTask<String>{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private int indexStart;
+		private int indexEnd;
+		private static final int THRESHOLD = 100;
+		private LinkedList<GraphPath> paths;
+		private StringBuilder result;
+		
+		public GraphPathsToStringConverter(int start, int end, LinkedList<GraphPath> paths) {
+			this.paths = paths;
+			this.indexStart = start;
+			this.indexEnd = end;
+			result = new StringBuilder();
+		}
+		
+		@Override
+		protected String compute() {
+			
+			if((indexEnd-indexStart) > THRESHOLD) {
+				
+				result =  ForkJoinTask.invokeAll(createSubTasks())
+						.stream()
+						.map(new Function<GraphPathsToStringConverter, StringBuilder>() {
+
+							@Override
+							public StringBuilder apply(GraphPathsToStringConverter arg0) {
+								return arg0.result;
+							}
+							
+						}).reduce(result, new BinaryOperator<StringBuilder>() {
+
+							
+							@Override
+							public StringBuilder apply(StringBuilder arg0, StringBuilder arg1) {
+								
+								return arg0.append(arg1.toString());
+						}});
+				
+				return result.toString();
+
+			} else {
+				//StringBuilder jsonStr = new StringBuilder();
+				
+				for(int i=indexStart; i<indexEnd;i++) {
+					result.append("{\"instance_id\":").append(i).append(",")
+					.append(paths.get(i).toJSON())
+					.append("}");
+					result.append(",");
+					/*if(i < size-1) {
+						jsonStr.append(",");
+					}*/	
+					
+				}
+				
+				//result = jsonStr;
+				return result.toString();
+			}
+			
+		}
+		
+		private Collection<GraphPathsToStringConverter> createSubTasks() {
+			
+			List<GraphPathsToStringConverter> dividedTasks = new LinkedList<GraphPathsToStringConverter>();
+			
+			int mid = (indexStart+indexEnd)/2;
+			
+			dividedTasks.add(new GraphPathsToStringConverter(indexStart, mid, paths));
+			dividedTasks.add(new GraphPathsToStringConverter(mid, indexEnd, paths));
+			
+			return dividedTasks;
+		}
 	}
 }

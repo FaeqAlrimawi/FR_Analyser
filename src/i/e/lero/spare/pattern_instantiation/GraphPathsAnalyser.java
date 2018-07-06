@@ -17,9 +17,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
-import i.e.lero.spare.pattern_instantiation.BigraphAnalyser.BigraphMatcher;
-import it.uniud.mads.jlibbig.core.std.Bigraph;
-
 public class GraphPathsAnalyser {
 	
 	private LinkedList<GraphPath> paths;
@@ -33,7 +30,9 @@ public class GraphPathsAnalyser {
  	private ForkJoinPool mainPool;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;
-	private final static int THRESHOLD = 50; //threshold for the number of states on which task is further subdivided into halfs
+	private final static int THRESHOLD = 100; //threshold for the number of states on which task is further subdivided into halfs
+	private boolean isAll = true;
+	private double percentageFrequency = 0.5;
 	
 	public GraphPathsAnalyser(LinkedList<GraphPath> paths) {
 		this.paths = paths;
@@ -52,10 +51,17 @@ public class GraphPathsAnalyser {
 		//frequency more than [e.g., 50%]
 		
 		//parallelism based functionalities
-//		getTopPaths(0.9, true);
+		
 		getShortestPaths();
-//		getLongestPaths();
-
+		getLongestPaths();
+		
+		//sets the percentage of the frequency that the actio
+		percentageFrequency = 0.9;
+		//sets if all actions in the path has the sepcified frequency in percentageFrequency variable
+		isAll = true;
+		
+		getTopPaths(0.9, true);
+		
 		mainPool.shutdown();
 		
 		try {
@@ -141,7 +147,7 @@ public class GraphPathsAnalyser {
 	            {
 	                if (order)
 	                {
-	                	System.out.println(o1.getValue()+" "+o2.getValue());
+	                	//System.out.println(o1.getValue()+" "+o2.getValue());
 	                    return o1.getValue().compareTo(o2.getValue());
 	                }
 	                else
@@ -208,7 +214,7 @@ public class GraphPathsAnalyser {
 			}
 		}
 		
-		System.out.println("actions with >= 0.5 : "+ actions);
+		//System.out.println("actions with >= 0.5 : "+ actions);
 		
 		topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(), actions, isExact));
 		
@@ -352,22 +358,33 @@ public class GraphPathsAnalyser {
 		String newLine = "\n";
 		int actionsNum = 0;
 		
+		if(paths == null || paths.size() == 0) {
+			return null;
+		}
+		
 		//get common paths
 		if(actionsFrequency != null) {
-		str.append(newLine).append("-Actions Frequency:").append(actionsFrequency).append(newLine);
+		str.append(newLine).append("-Actions Frequency: [");
+		int size = paths.size();
+		for(Entry<String, Integer> freq : actionsFrequency.entrySet()) {
+			double perc = (int)(((double)freq.getValue()/(double)size)*10000)/100;
+			str.append(freq.getKey()).append("=").append(freq.getValue()).append(" (").append(perc).append("%), ");
+		}
+		
+		//removes the last comma and space
+		str.replace(str.length()-2, str.length(), "");
+		str.append("]").append(newLine);
 		}
 		
 		//get top paths based on the common actions i.e. paths that contain all common actions
 		if(topPaths != null) {
-		str.append("-top paths ["+topPaths.size()+"] (based on actions Frequency): ").append(topPaths).append(newLine);
+		str.append("-top paths ["+topPaths.size()+"] (based on actions Frequency >= ").append(percentageFrequency).append("):").append(topPaths).append(newLine);
 		}
 		
 		//get shortest paths
 		if(shortestPaths != null && shortestPaths.size() >0) {
 			actionsNum = paths.get(shortestPaths.getFirst()).getStateTransitions().size()-1;
-			//shortestPaths.removeLast();
 			str.append("-Shortest Paths [").append(shortestPaths.size()).append("] (").append(actionsNum).append(" actions): ").append(shortestPaths).append(newLine);
-			//shortestPaths.add(actionsNum);
 		} else {
 			str.append("-Shortest Paths: [NONE]");
 		}
@@ -375,9 +392,7 @@ public class GraphPathsAnalyser {
 		//get longest paths
 		if(longestPaths != null && longestPaths.size() >0) {
 			actionsNum = paths.get(longestPaths.getFirst()).getStateTransitions().size()-1;
-			//longestPaths.removeLast();
 			str.append("-Longest Paths [").append(longestPaths.size()).append("] (").append(actionsNum).append(" actions): ").append(longestPaths).append(newLine);	
-			//longestPaths.add(actionsNum);
 		} else {
 			str.append("-Longest Paths: [NONE]");
 		}
