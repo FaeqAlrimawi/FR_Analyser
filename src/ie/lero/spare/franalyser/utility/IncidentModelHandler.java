@@ -1,83 +1,74 @@
-package ie.lero.spare.pattern_extraction;
+package ie.lero.spare.franalyser.utility;
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.Map;
 
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.ResourceFactoryRegistryImpl;
+import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
+import org.eclipse.emf.ecore.util.BasicExtendedMetaData;
+import org.eclipse.emf.ecore.util.ExtendedMetaData;
 import org.eclipse.emf.ecore.xmi.XMIResource;
+import org.eclipse.emf.ecore.xmi.XMLResource;
+import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.xsd.ecore.XSDEcoreBuilder;
 
-import cyberPhysical_Incident.Activity;
-import cyberPhysical_Incident.ActivityType;
-import cyberPhysical_Incident.Actor;
-import cyberPhysical_Incident.Asset;
-import cyberPhysical_Incident.BigraphExpression;
-import cyberPhysical_Incident.CPIFactory;
-import cyberPhysical_Incident.Connection;
-import cyberPhysical_Incident.Connectivity;
-import cyberPhysical_Incident.Entity;
+import cyberPhysical_Incident.CPIPackage;
 import cyberPhysical_Incident.IncidentDiagram;
-import cyberPhysical_Incident.Postcondition;
-import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.impl.IncidentDiagramImpl;
 
-public class IncidentModelBuilder {
+public class IncidentModelHandler {
 	
-	//private CPIFactory instance;
-	private static String fileName;
-	private IncidentDiagram incidentInstance;
-	private static CPIFactory instance = CPIFactory.eINSTANCE;
-	private static final String metaModelSchemaFile = "D:/workspace-neon/CyberPhysical_Incident.v1/model/cyberPhysical_Incident.xsd";
+	private static final String EXTENSION = CPIPackage.eNS_PREFIX;
 	
-	public IncidentModelBuilder() {
-		instance = CPIFactory.eINSTANCE;
-		setIncidentInstance(instance.createIncidentDiagram());
-	}
+	/**
+	 * Load an incident model from the given file name
+	 * @param fileName the XMI file of the incident model
+	 * @return an IncidentDigram object containing the model information
+	 */
+	public static IncidentDiagram loadIncidentFromFile(String fileName) {
 	
-	public IncidentModelBuilder(String fileName) {
-		this();
-		setFileName(fileName);
-	}
-
-	public static IncidentDiagram loadIncidentFromFile() {
-	
-	fileName = "etc/example/interruption_incident-pattern.cpi";
 	IncidentDiagram incidentDiagram = null;
 	
-	//register packages and file extension (i.e. "cpi")
-	registerPackagesAndExtension();
+	// generate EPackages from schemas	
+			Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(
+				    "ecore", new EcoreResourceFactoryImpl());
+
+				ResourceSet rs = new ResourceSetImpl();
+				// enable extended metadata
+				final ExtendedMetaData extendedMetaData = new BasicExtendedMetaData(rs.getPackageRegistry());
+				rs.getLoadOptions().put(XMLResource.OPTION_EXTENDED_META_DATA,
+				    extendedMetaData);
+
+				EPackage.Registry.INSTANCE.put(CPIPackage.eNS_URI, CPIPackage.eINSTANCE);
+				
+				Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(EXTENSION, new XMIResourceFactoryImpl() {
+			    	
+			    	public Resource createResource(URI uri) {
+			    		
+			    		XMIResource xmiResource = new XMIResourceImpl(uri);
+			 
+			    		return xmiResource;			
+			    	}
+			    });
 	
 		try {
-			Resource.Factory.Registry reg = Resource.Factory.Registry.INSTANCE;
-	        Map<String, Object> m = reg.getExtensionToFactoryMap();
-	        m.put("cpi", new XMIResourceFactoryImpl());
-	        
-			XMIResource resource = new XMIResourceImpl(URI.createFileURI(fileName));
-			resource.load(Collections.EMPTY_MAP);
-	        // Obtain a new resource set
-	       /* ResourceSet resSet = new ResourceSetImpl();
-
-	        // Get the resource
-	        Resource resource = resSet.getResource(URI.createFileURI(fileName), true);
-			*/
-			EObject eObj = resource.getContents().get(0);
 			
-			for(EObject e : eObj.eContents()) {
-				System.out.println(e);
+			Resource r = rs.getResource(URI.createFileURI(fileName), true);
+				
+			EObject eObject = r.getContents().get(0);
+			
+			if (eObject instanceof EPackage) {
+				  EPackage p = (EPackage)eObject;
+				  rs.getPackageRegistry().put(p.getNsURI(), p);
 			}
-			
-			//this still creates a problem (cannot cast to incidnet diagram class)
-			incidentDiagram = (IncidentDiagramImpl) resource.getContents().get(0);
+
+			System.out.println(eObject.getClass());
+
+			incidentDiagram = (IncidentDiagramImpl) eObject;
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -85,90 +76,75 @@ public class IncidentModelBuilder {
 		}
 	
 		return incidentDiagram;
+		
 	}
 	
+	/**
+	 * Save an incident model (given by the IncidentDiagram object) to the given file name
+	 * @param incidentDiagram the object holding the incident model information
+	 * @param fileName the target file to save the model to
+	 * @return True if saving is successful. False otherwise.
+	 */
 	public static boolean SaveIncidentToFile(IncidentDiagram incidentDiagram, String fileName) {
 		
-		setFileName(fileName);
-		return SaveIncidentToFile(incidentDiagram);
-	}
-	
-	public static boolean SaveIncidentToFile(IncidentDiagram incidentDiagram) {
-		
-		boolean isSaved = false;
-		
-		//register packages and file extension (i.e. "cpi")
-		registerPackagesAndExtension();
-		
-			try {
+		Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(
+			    "ecore", new EcoreResourceFactoryImpl());
 
-				XMIResource resource = new XMIResourceImpl(URI.createFileURI(fileName));
+			ResourceSet rs = new ResourceSetImpl();
+			// enable extended metadata
+			final ExtendedMetaData extendedMetaData = new BasicExtendedMetaData(rs.getPackageRegistry());
+			rs.getLoadOptions().put(XMLResource.OPTION_EXTENDED_META_DATA,
+			    extendedMetaData);
+
+			EPackage.Registry.INSTANCE.put(CPIPackage.eNS_URI, CPIPackage.eINSTANCE);
+			
+			Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(EXTENSION, new XMIResourceFactoryImpl() {
+		    	
+		    	public Resource createResource(URI uri) {
+		    		
+		    		XMIResource xmiResource = new XMIResourceImpl(uri);
+		 
+		    		return xmiResource;			
+		    	}
+		    });
+			
+			try {
+				Resource r = rs.createResource(URI.createFileURI(fileName));
+					
+				r.getContents().add(incidentDiagram);
 				
-//				resource.getContents().add(incidentDiagram);
+				r.save(Collections.EMPTY_MAP);
 				
-				resource.save(Collections.EMPTY_MAP);
-				
-				isSaved = true;
-				
-			} catch (IOException e) {
+				return true;
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
-			return isSaved;
-		}
-	
-	public IncidentDiagram loadIncidentFromFile(String fileName) {
-		setFileName(fileName);
-		return loadIncidentFromFile();
-	}
-	
-	private static void registerPackagesAndExtension() {
-
-		// generate EPackages from schemas	
-		XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
-			Collection<EObject> generatedPackages = xsdEcoreBuilder.generate(URI.createFileURI(metaModelSchemaFile));
 			
-			// register the packages loaded from XSD
-			for (EObject generatedEObject : generatedPackages) {
-			    if (generatedEObject instanceof EPackage) {
-			        EPackage generatedPackage = (EPackage) generatedEObject;
-			        EPackage.Registry.INSTANCE.put(generatedPackage.getNsURI(),
-			            generatedPackage);
-			    }
-			}
-
-			// add file extension to registry
-			ResourceFactoryRegistryImpl.INSTANCE.getExtensionToFactoryMap()
-			    .put("cpi", new XMIResourceFactoryImpl());
+			return false;
+			
+	}
+	
+	/*public static void main(String[]args) {
 		
-	}
-	
-	public String getFileName() {
-		return fileName;
-	}
-
-	public static void setFileName(String fileName) {
-		IncidentModelBuilder.fileName = fileName;
-	}
-
-	public IncidentDiagram getIncidentInstance() {
-		return incidentInstance;
-	}
-
-	public void setIncidentInstance(IncidentDiagram incidentInstance) {
-		this.incidentInstance = incidentInstance;
-	}
-	
-	
-	public static void main(String[]args) {
+		System.out.println(EXTENSION);
+		IncidentDiagram incidentDiagram = loadIncidentFromFile("etc/example/interruption_incident-pattern.cpi");
 		
-		//test1();
-		loadIncidentFromFile();
+		if (incidentDiagram != null) {
+			System.out.println(incidentDiagram.getActivity().get(0).getName());
+			
+			
+			SaveIncidentToFile(incidentDiagram, "etc/example/inc.cpi");
+		}
+		
+		//re-reading saved model
+		IncidentDiagram inci = loadIncidentFromFile("etc/example/inc.cpi");
+		
+		System.out.println(inci.getActivity().get(0).getName());
 	}
+	*/
 	
-	
-	public static void test1() {
+/*	public static void test1() {
 		int numOfActivities = 5;
 		int numOfActors = 3;
 		int numOfAssets = 6;
@@ -229,7 +205,7 @@ public class IncidentModelBuilder {
 		Activity act = inc.mergeActivities(inc.getActivity().get(2), inc.getActivity().get(3));
 		//Activity act2 = inc.mergeActivities(inc.getActivity().get(0), inc.getActivity().get(1));
 		
-		printActivityInfo(act);
+		//printActivityInfo(act);
 		//printActivityInfo(act2);
 		
 		System.out.println("Incident activity sequence:");
@@ -347,9 +323,9 @@ public class IncidentModelBuilder {
 
 		
 		//merging activities
-		Activity act2 = inc.mergeActivities(acts); 
+		//Activity act2 = inc.mergeActivities(acts); 
 
-		printActivityInfo(act2);
+		//printActivityInfo(act2);
 		
 		System.out.println("Incident activity sequence:");
 		for(Activity ac: inc.getActivity()) {
@@ -362,7 +338,7 @@ public class IncidentModelBuilder {
 		
 		static void printActivityInfo(Activity act) {
 			if(act != null) {
-			/*	System.out.println("merged activity name: "+act.getName());
+				System.out.println("merged activity name: "+act.getName());
 				
 				for(Activity ac : act.getPreviousActivities()) {
 					System.out.println("previous activity name: "+ac.getName());
@@ -383,12 +359,12 @@ public class IncidentModelBuilder {
 				if(post != null) {
 					System.out.println("post: " + ((BigraphExpression)post.getExpression()).getEntity().get(0).getName());
 				}
-				*/
+				
 			} else {
 				System.out.println("no merge");
 			}
 			//a2.mergeActivities();
 		
-	}
+	}*/
 	
 }

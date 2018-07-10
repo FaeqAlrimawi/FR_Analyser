@@ -84,10 +84,10 @@
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.ui_2.12.0.v20160526-0356.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore_2.12.0.v20160526-0356.jar"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.uml2.uml-3.1.0.v201006071150.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/CyberPhysical_Incident.v1"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.wst.common.emf_1.2.500.v201701191735.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
 	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/jgoodies-forms-1.8.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jlibbig"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/incidentPattern"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
