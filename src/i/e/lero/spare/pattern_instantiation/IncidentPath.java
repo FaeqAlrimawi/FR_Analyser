@@ -2,7 +2,10 @@ package i.e.lero.spare.pattern_instantiation;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
+
+import cyberPhysical_Incident.Activity;
 
 public class IncidentPath {
 
@@ -24,8 +27,8 @@ public class IncidentPath {
 	}
 
 	public void generateDistinctPaths() {
-		LinkedList<IncidentActivity> activities = new LinkedList<IncidentActivity>();
-		LinkedList<IncidentActivity> visitedActivities = new LinkedList<IncidentActivity>();
+		LinkedList<Activity> activities = new LinkedList<Activity>();
+		LinkedList<Activity> visitedActivities = new LinkedList<Activity>();
 		IncidentActivity tmp;
 		// LinkedList<HashMap<String, LinkedList<GraphPath>>> paths = new
 		// LinkedList<HashMap<String,LinkedList<GraphPath>>>();
@@ -34,7 +37,7 @@ public class IncidentPath {
 		activities.add(initialActivity);
 
 		while (!activities.isEmpty()) {
-			tmp = activities.pop();
+			tmp = (IncidentActivity)activities.pop();
 
 			if (tmp != null) {
 
@@ -64,10 +67,11 @@ public class IncidentPath {
 
 		for (String actName : pathSrc.keySet()) {
 			for (GraphPath pa : pathSrc.get(actName)) {
-				for (IncidentActivity act : activitySrc.getNextActivities()) {
+				for (Activity act : activitySrc.getNextActivities()) {
+					IncidentActivity incAct = (IncidentActivity)act;
 					if (act.getName().contentEquals(actName)) {
-						pathDes = act.getPathsToNextActivities();
-						actTmp = act;
+						pathDes = incAct.getPathsToNextActivities();
+						actTmp = incAct;
 						break;
 					}
 				}
@@ -152,7 +156,7 @@ public class IncidentPath {
 	 */
 	public LinkedList<GraphPath> getAllPaths() {
 
-		LinkedList<IncidentActivity> activities = new LinkedList<IncidentActivity>();
+		LinkedList<Activity> activities = new LinkedList<Activity>();
 		LinkedList<IncidentActivity> visitedActivities = new LinkedList<IncidentActivity>();
 		IncidentActivity tmp;
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
@@ -168,7 +172,7 @@ public class IncidentPath {
 		activities.add(initialActivity.getNextActivities().get(0));
 
 		while (!activities.isEmpty()) {
-			tmp = activities.pop();
+			tmp = (IncidentActivity)activities.pop();
 
 			if (tmp != null) {
 

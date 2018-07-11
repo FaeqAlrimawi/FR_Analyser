@@ -2,19 +2,10 @@ package ie.lero.spare.franalyser.utility;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.ForkJoinTask;
-import java.util.concurrent.RecursiveTask;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -46,9 +37,9 @@ public class BigrapherHandler implements SystemExecutor {
 	private String transitionFileName = "transitions.txt";
 	private Signature bigraphSignature;
 	private static HashMap<Integer, Bigraph> states;
-	private ForkJoinPool mainPool;
+	/*private ForkJoinPool mainPool;
 	private int maxWaitingTime = 24;
-	private TimeUnit timeUnit = TimeUnit.HOURS;
+	private TimeUnit timeUnit = TimeUnit.HOURS;*/
 	
 	private boolean isTesting = true; //used to skip executing the bigrapher file
 	
@@ -93,6 +84,7 @@ public class BigrapherHandler implements SystemExecutor {
 				// check the output of the command, if it has something then
 				// there
 				// are errors otherwise its ok
+				@SuppressWarnings("resource")
 				Scanner s = new Scanner(proc.getInputStream()).useDelimiter("\\A");
 				String result = s.hasNext() ? s.next() : "";
 
@@ -128,6 +120,7 @@ public class BigrapherHandler implements SystemExecutor {
 
 			proc = r.exec(bigrapherValidateCmd + bigrapherFileName);
 			
+			@SuppressWarnings("resource")
 			Scanner s = new Scanner(proc.getInputStream()).useDelimiter("\\A");
 			String result = s.hasNext() ? s.next() : "";
 
@@ -781,7 +774,7 @@ public class BigrapherHandler implements SystemExecutor {
 
 
 		String tmp;
-		String tmpArity;
+		String tmpArity = null;
 		JSONObject tmpObj;
 		JSONObject tmpCtrl;
 		HashMap<String, BigraphNode> nodes = new HashMap<String, BigraphNode>();

@@ -1,41 +1,30 @@
 package ie.lero.spare.pattern_extraction;
 
-import org.eclipse.emf.common.util.EList;
-
 import environment.Asset;
-import environment.Building;
 import environment.BusConnection;
-import environment.BusNetwork;
 import environment.ComputingDevice;
-import environment.Connection;
-import environment.Credential;
-import environment.CredentialType;
+import environment.CyberPhysicalSystemFactory;
 import environment.DigitalAsset;
 import environment.DigitalConnection;
-import environment.EnvironmentDiagram;
 import environment.Floor;
 import environment.HVAC;
 import environment.IPConnection;
-import environment.IPNetwork;
 import environment.Kitchen;
 import environment.Lab;
 import environment.PhysicalAsset;
 import environment.PhysicalConnection;
 import environment.PhysicalStructure;
-import environment.Port;
 import environment.Room;
 import environment.Server;
 import environment.SmartLight;
 import environment.Status;
-import environment.smartbuildingFactory;
-import environment.impl.HVACImpl;
 
 public class SystemMetaModelLevels {
 	
 	public  static void main(String [] args) {
 		
 		//ExtendedMetaData modelMetaData = new BasicExtendedMetaData(myResourceSet.getPackageRegistry());
-		smartbuildingFactory instance = smartbuildingFactory.eINSTANCE;
+		CyberPhysicalSystemFactory instance = CyberPhysicalSystemFactory.eINSTANCE;
 		HVAC s = instance.createHVAC();
 		s.setStatus(Status.OFF);
 		//System.out.println(s.getStatus()+" "+s.isAbstractable());

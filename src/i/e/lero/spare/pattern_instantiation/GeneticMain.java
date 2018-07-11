@@ -10,7 +10,6 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.resource.impl.ResourceFactoryRegistryImpl;
 import org.eclipse.emf.ecore.xmi.XMIResource;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
@@ -18,8 +17,6 @@ import org.eclipse.xsd.ecore.XSDEcoreBuilder;
 
 import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.IncidentDiagram;
-import cyberPhysical_Incident.IncidentEntity;
-import cyberPhysical_Incident.impl.IncidentDiagramImpl;
 
 
 public class GeneticMain {
@@ -54,7 +51,7 @@ public class GeneticMain {
 	
 	public void loadConcreteAssets(){
 		
-		int assetsNum = 9;
+	//	int assetsNum = 9;
 		
 		//need a method to read and convert assets from xmo files to objects
 		//thenconverted objects are then added to the concreteAssets array
@@ -89,7 +86,7 @@ public class GeneticMain {
 	        // Get the resource
 	        Resource resource = resSet.getResource(URI.createFileURI(fileName), true);
 			*/
-			EObject eObj = resource.getContents().get(0);
+		//	EObject eObj = resource.getContents().get(0);
 			
 			//EList<EObject> list = eObj.eContents();
 			

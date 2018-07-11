@@ -12,6 +12,9 @@ import java.util.ListIterator;
 
 import javax.xml.xquery.XQException;
 
+import org.eclipse.emf.common.util.EList;
+
+import cyberPhysical_Incident.Activity;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.PredicateType;
@@ -598,7 +601,7 @@ public class PredicateHandler {
 		LinkedList<IncidentActivity> result = new LinkedList<IncidentActivity>();
 		
 		if(sourceActivity.equals(destinationActivity) || sourceActivity.getNextActivities().contains(destinationActivity) ) {
-			return null;
+			return result;
 		}
 		
 		activitySequences.clear();
@@ -701,10 +704,11 @@ public class PredicateHandler {
 				continue;
 			}
 
-			for (IncidentActivity act : tmp.getNextActivities()) {
-				activitiesGraph.add(tmp.getName(), act.getName(), -1);
-				if (!acts.contains(act.getName())) {
-					acts.add(act);
+			for (Activity act : tmp.getNextActivities()) {
+				IncidentActivity incAct = (IncidentActivity)act;
+				activitiesGraph.add(tmp.getName(), incAct.getName(), -1);
+				if (!acts.contains(incAct.getName())) {
+					acts.add(incAct);
 				}
 			}
 
@@ -816,19 +820,20 @@ public class PredicateHandler {
 			}
 			if (tmp.getNextActivities() != null && tmp.getNextActivities().size() > 0) {
 				
-				for (IncidentActivity act : tmp.getNextActivities()) {
+				for (Activity act : tmp.getNextActivities()) {
+					IncidentActivity incAct = (IncidentActivity)act;
 					System.out.println("**Paths from postconditions of current activity to preconditions of"
 							+ " next activity [" + act.getName() + "] are:");
-					for (GraphPath p : tmp.findPathsToNextActivity(act)) {
+					for (GraphPath p : tmp.findPathsToNextActivity(incAct)) {
 						System.out.println(p);
-						if (!acts.contains(act)) {
-							acts.add(act);
+						if (!acts.contains(incAct)) {
+							acts.add(incAct);
 						}
 					}
 					
 					System.out.println("**Paths from preconditions of current activity to preconditions of next"
 							+ "activity are:");
-					for(GraphPath p : tmp.getPathsToNextActivity(act)) {
+					for(GraphPath p : tmp.getPathsToNextActivity(incAct)) {
 						System.out.println(p);
 					}
 				}
@@ -888,11 +893,12 @@ public class PredicateHandler {
 	
 			
 			res.append(newLine).append(separator).append(newLine);
-			ArrayList<IncidentActivity> next = tmp.getNextActivities();
+			EList<Activity> next = tmp.getNextActivities();
 			if (next != null && next.size() > 0) {
-				for(IncidentActivity activity: next) {
-					if(!acts.contains(activity)) {
-						acts.add(activity);
+				for(Activity activity: next) {
+					IncidentActivity incAct = (IncidentActivity)activity;
+					if(!acts.contains(incAct)) {
+						acts.add(incAct);
 					}
 				}
 			}
@@ -919,9 +925,10 @@ public class PredicateHandler {
 			
 			tmp.findPathsToNextActivities();
 			
-			for (IncidentActivity act : tmp.getNextActivities()) {
-				if(!acts.contains(act)) {
-					acts.add(act);
+			for (Activity act : tmp.getNextActivities()) {
+				IncidentActivity incAct = (IncidentActivity)act;
+				if(!acts.contains(incAct)) {
+					acts.add(incAct);
 				}
 			}
 			

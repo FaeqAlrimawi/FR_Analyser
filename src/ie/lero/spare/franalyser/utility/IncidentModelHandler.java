@@ -16,13 +16,13 @@ import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
 import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
 
-import cyberPhysical_Incident.CPIPackage;
+import cyberPhysical_Incident.CyberPhysicalIncidentPackage;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.impl.IncidentDiagramImpl;
 
 public class IncidentModelHandler {
 	
-	private static final String EXTENSION = CPIPackage.eNS_PREFIX;
+	private static final String EXTENSION = "cpi";
 	
 	/**
 	 * Load an incident model from the given file name
@@ -43,7 +43,7 @@ public class IncidentModelHandler {
 				rs.getLoadOptions().put(XMLResource.OPTION_EXTENDED_META_DATA,
 				    extendedMetaData);
 
-				EPackage.Registry.INSTANCE.put(CPIPackage.eNS_URI, CPIPackage.eINSTANCE);
+				EPackage.Registry.INSTANCE.put(CyberPhysicalIncidentPackage.eNS_URI, CyberPhysicalIncidentPackage.eINSTANCE);
 				
 				Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(EXTENSION, new XMIResourceFactoryImpl() {
 			    	
@@ -96,7 +96,7 @@ public class IncidentModelHandler {
 			rs.getLoadOptions().put(XMLResource.OPTION_EXTENDED_META_DATA,
 			    extendedMetaData);
 
-			EPackage.Registry.INSTANCE.put(CPIPackage.eNS_URI, CPIPackage.eINSTANCE);
+			EPackage.Registry.INSTANCE.put(CyberPhysicalIncidentPackage.eNS_URI, CyberPhysicalIncidentPackage.eINSTANCE);
 			
 			Resource.Factory.Registry.INSTANCE.getExtensionToFactoryMap().put(EXTENSION, new XMIResourceFactoryImpl() {
 		    	
@@ -125,9 +125,8 @@ public class IncidentModelHandler {
 			
 	}
 	
-	/*public static void main(String[]args) {
-		
-		System.out.println(EXTENSION);
+	public static void main(String[]args) {
+	
 		IncidentDiagram incidentDiagram = loadIncidentFromFile("etc/example/interruption_incident-pattern.cpi");
 		
 		if (incidentDiagram != null) {
@@ -142,7 +141,7 @@ public class IncidentModelHandler {
 		
 		System.out.println(inci.getActivity().get(0).getName());
 	}
-	*/
+	
 	
 /*	public static void test1() {
 		int numOfActivities = 5;

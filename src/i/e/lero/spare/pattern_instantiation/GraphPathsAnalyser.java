@@ -24,7 +24,7 @@ public class GraphPathsAnalyser {
 	private HashMap<String, Integer> actionsFrequency; //string is action name, and integer is the frequency
 	private LinkedList<String> commonAssets;
  	private LinkedList<Integer> topPaths;
- 	private LinkedList<Integer> allShortestPaths;
+//	private LinkedList<Integer> allShortestPaths;
  	private LinkedList<Integer> shortestPaths;
  	private LinkedList<Integer> longestPaths;
  	private ForkJoinPool mainPool;
@@ -36,7 +36,7 @@ public class GraphPathsAnalyser {
 	
 	public GraphPathsAnalyser(LinkedList<GraphPath> paths) {
 		this.paths = paths;
-		allShortestPaths = new LinkedList<Integer>();
+	//	allShortestPaths = new LinkedList<Integer>();
 	}
 	
 	public String analyse() {
@@ -60,7 +60,7 @@ public class GraphPathsAnalyser {
 		//sets if all actions in the path has the sepcified frequency in percentageFrequency variable
 		isAll = true;
 		
-		getTopPaths(0.9, true);
+		getTopPaths(0.9, isAll);
 		
 		mainPool.shutdown();
 		

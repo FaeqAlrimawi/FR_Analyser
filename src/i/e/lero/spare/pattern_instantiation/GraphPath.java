@@ -1,11 +1,7 @@
 package i.e.lero.spare.pattern_instantiation;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
-
-import org.apache.fop.util.AbstractPaintingState.StateStack;
-import org.apache.xmlgraphics.xmp.merge.ArrayAddPropertyMerger;
 
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;

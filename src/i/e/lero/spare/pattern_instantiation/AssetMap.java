@@ -1,12 +1,8 @@
 package i.e.lero.spare.pattern_instantiation;
 
 import java.io.FileNotFoundException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -14,14 +10,13 @@ import javax.xml.xquery.XQException;
 
 import ie.lero.spare.franalyser.utility.CartesianIterator;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
-import net.sf.saxon.tree.wrapper.SpaceStrippedDocument;
 
 public class AssetMap {
 	private String[] incidentAssetNames;
 	private String[][] spaceAssetMatches;
 	private LinkedList<String[]> uniqueCombinations;
 	public int numberOfSets;
-	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+	//private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 	private int numberOfSegments = 2;
 	private int sizeofSegment = 3;
 	private LinkedList<String> systemAssets;
@@ -172,7 +167,7 @@ public class AssetMap {
 		LinkedList<String> strs2 = new LinkedList<String>();
 		String [] tmp;
 		
-		int cnt = 0;
+		//int cnt = 0;
 		
 		String rest = Arrays.toString(strs);
 		tmp = rest.split("\\[|\\]|,");
@@ -472,7 +467,7 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		return uniqueCombinations;
 	}
 
-	public static void main(String [] args){
+	/*public static void main(String [] args){
 		
 		AssetMap m = new AssetMap();
 		AssetMap m2 = new AssetMap();
@@ -514,25 +509,25 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		m.setSpaceAssetMatches(tst);
 		m2.setSpaceAssetMatches(tst);
 		
-/*		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
+		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
-		LinkedList<String[]> seq = m.generateUniqueCombinationsUsingThreads();*/
+		LinkedList<String[]> seq = m.generateUniqueCombinationsUsingThreads();
 		//System.out.println(seq.size());
 		
 		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
 		LinkedList<String[]> seq2 = m2.generateUniqueCombinations();
 		System.out.println(seq2.size());
-/*		for(String [] s: seq2) {
+		for(String [] s: seq2) {
 			System.out.println(Arrays.toString(s));
-		}*/
+		}
 
 		System.out.println("Finished [" + dtf.format(LocalDateTime.now())+"]");
 		
 		//size (if all unique) = columns^rows
 		//System.out.println(seq.size());
 		
-	}	 
+	}	 */
 }
 
 class SetsGeneratorThread implements Runnable {

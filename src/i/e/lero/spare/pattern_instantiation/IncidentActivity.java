@@ -3,22 +3,28 @@ package i.e.lero.spare.pattern_instantiation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
+import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.common.util.EList;
+
+import cyberPhysical_Incident.Activity;
+import cyberPhysical_Incident.impl.ActivityImpl;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
-public class IncidentActivity {
+public class IncidentActivity extends ActivityImpl {
 
-	private String name;
-	private ArrayList<IncidentActivity> previousActivities;
-	private ArrayList<IncidentActivity> nextActivities;
+	//private String name;
+//	private ArrayList<IncidentActivity> previousActivities;
+//	private ArrayList<IncidentActivity> nextActivities;
 	private ArrayList<Predicate> predicates;
 	private HashMap<String, LinkedList<GraphPath>> pathsToNextActivities;
 	// other attributes (e.g., initiator) can be added later
 
 	public IncidentActivity() {
-		previousActivities = new ArrayList<IncidentActivity>();
-		nextActivities = new ArrayList<IncidentActivity>();
+//		previousActivities = new ArrayList<IncidentActivity>();
+//		nextActivities = new ArrayList<IncidentActivity>();
 		predicates = new ArrayList<Predicate>();
 		pathsToNextActivities = new HashMap<String, LinkedList<GraphPath>>();
 	}
@@ -54,28 +60,32 @@ public class IncidentActivity {
 		predicates.add(pred);
 	}
 
-	public ArrayList<IncidentActivity> getPreviousActivities() {
+	/*public EList<IncidentActivity> getPreviousActivities() {
+		
 		return previousActivities;
-	}
+
+	}*/
 
 	public void setPreviousActivities(ArrayList<IncidentActivity> previousActivities) {
-		this.previousActivities = previousActivities;
+		getPreviousActivities().clear();
+		getPreviousActivities().addAll(previousActivities);
 	}
 
-	public ArrayList<IncidentActivity> getNextActivities() {
+	/*public ArrayList<IncidentActivity> getNxtActivities() {
 		return nextActivities;
-	}
+	}*/
 
 	public void setNextActivities(ArrayList<IncidentActivity> nextActivities) {
-		this.nextActivities = nextActivities;
+		getNextActivities().clear();
+		getNextActivities().addAll(nextActivities);
 	}
 
 	public void addNextActivity(IncidentActivity activity) {
-		nextActivities.add(activity);
+		getNextActivities().add(activity);
 	}
 
 	public void addPreviousActivity(IncidentActivity activity) {
-		previousActivities.add(activity);
+		getPreviousActivities().add(activity);
 	}
 
 	
@@ -211,8 +221,9 @@ public class IncidentActivity {
 		
 		//for all postconditions of current activity find all paths to preconditions of next activity
 		for (Predicate predCurrent : getPredicates(PredicateType.Postcondition)) {
-			for (IncidentActivity act : getNextActivities()) {
-				for (Predicate predNext : act.getPredicates(PredicateType.Precondition)) {
+			for (Activity act : getNextActivities()) {
+				IncidentActivity incAct = (IncidentActivity)act;
+				for (Predicate predNext : incAct.getPredicates(PredicateType.Precondition)) {
 					tmp = TransitionSystem.getTransitionSystemInstance().getPaths(predCurrent, predNext, true);
 					paths.addAll(tmp);
 				}
@@ -254,8 +265,9 @@ public class IncidentActivity {
 	public LinkedList<GraphPath> findPathsFromPreviousActivities() {
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 		
-		for(IncidentActivity act : previousActivities) {
-			paths.addAll(findPathsFromPreviousActivity(act));
+		for(Activity act : getPreviousActivities()) {
+			IncidentActivity incAct = (IncidentActivity)act;
+			paths.addAll(findPathsFromPreviousActivity(incAct));
 		}
 		
 		return paths;
@@ -295,8 +307,9 @@ public class IncidentActivity {
 		
 		//for all postconditions of current activity find all paths to preconditions of next activity
 		for (Predicate predCurrent : getPredicates(PredicateType.Postcondition)) {
-			for (IncidentActivity act : getNextActivities()) {
-				for (Predicate predNext : act.getPredicates(PredicateType.Precondition)) {
+			for (Activity act : getNextActivities()) {
+				IncidentActivity incAct = (IncidentActivity)act;
+				for (Predicate predNext : incAct.getPredicates(PredicateType.Precondition)) {
 					tmp = TransitionSystem.getTransitionSystemInstance().getPaths(predCurrent, predNext);
 					if (tmp.isEmpty()) {
 						return false;
@@ -342,9 +355,10 @@ public class IncidentActivity {
 	public HashMap<String, LinkedList<GraphPath>> getFullPathsToNextActivities() {
 		HashMap<String, LinkedList<GraphPath>> paths = new HashMap<String, LinkedList<GraphPath>>();
 		
-		for(IncidentActivity act : nextActivities) {
-			if(act != null) {
-				paths.put(act.getName(), getFullPathsToNextActivities(act));
+		for(Activity act : getNextActivities()) {
+			IncidentActivity incAct = (IncidentActivity)act;
+			if(incAct != null) {
+				paths.put(act.getName(), getFullPathsToNextActivities(incAct));
 			}
 			
 		}
