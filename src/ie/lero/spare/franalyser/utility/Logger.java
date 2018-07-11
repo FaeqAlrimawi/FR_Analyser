@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import ie.lero.spare.franalyser.GUI.IncidentPatternInstantiationListener;
+import i.e.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener;
 
 public class Logger implements Runnable{
 

@@ -2,21 +2,8 @@ package i.e.lero.spare.pattern_instantiation;
 
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
-import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.xmi.XMIResource;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceFactoryImpl;
-import org.eclipse.emf.ecore.xmi.impl.XMIResourceImpl;
-import org.eclipse.xsd.ecore.XSDEcoreBuilder;
 
 import cyberPhysical_Incident.Activity;
-import cyberPhysical_Incident.IncidentDiagram;
 
 
 public class GeneticMain {
@@ -65,67 +52,6 @@ public class GeneticMain {
 		
 	}
 	
-	public static IncidentDiagram loadIncidentFromFile() {
-		
-	String fileName = "etc/example/interruption_incident-pattern.cpi";
-	IncidentDiagram incidentDiagram = null;
-	
-	//register packages and file extension (i.e. "cpi")
-	registerPackagesAndExtension();
-	
-		try {
-			Resource.Factory.Registry reg = Resource.Factory.Registry.INSTANCE;
-	        Map<String, Object> m = reg.getExtensionToFactoryMap();
-	        m.put("cpi", new XMIResourceFactoryImpl());
-	        
-			XMIResource resource = new XMIResourceImpl(URI.createFileURI(fileName));
-			resource.load(Collections.EMPTY_MAP);
-	        // Obtain a new resource set
-	       /* ResourceSet resSet = new ResourceSetImpl();
-
-	        // Get the resource
-	        Resource resource = resSet.getResource(URI.createFileURI(fileName), true);
-			*/
-		//	EObject eObj = resource.getContents().get(0);
-			
-			//EList<EObject> list = eObj.eContents();
-			
-			//IncidentEntity incidentEntity = (IncidentEntity) list.get(0);
-			
-			//this still creates a problem (cannot cast to incidnet diagram class)
-			incidentDiagram = (IncidentDiagram) resource.getContents().get(0);
-			
-			incidentDiagram.getActivity();
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-		return incidentDiagram;
-	}
-
-	private static void registerPackagesAndExtension() {
-		
-		 String metaModelSchemaFile = "D:/workspace-neon/CyberPhysical_Incident.v1/model/cyberPhysical_Incident.xsd";
-		// generate EPackages from schemas	
-		XSDEcoreBuilder xsdEcoreBuilder = new XSDEcoreBuilder();
-			Collection<EObject> generatedPackages = xsdEcoreBuilder.generate(URI.createFileURI(metaModelSchemaFile));
-			
-			// register the packages loaded from XSD
-			for (EObject generatedEObject : generatedPackages) {
-			    if (generatedEObject instanceof EPackage) {
-			        EPackage generatedPackage = (EPackage) generatedEObject;
-			        EPackage.Registry.INSTANCE.put(generatedPackage.getNsURI(),
-			            generatedPackage);
-			    }
-			}
-
-			// add file extension to registry
-//			ResourceFactoryRegistryImpl.INSTANCE.getExtensionToFactoryMap()
-//			    .put("cpi", new XMIResourceFactoryImpl());
-		
-	}
 
 	public void loadGeneralAssets(){
 		
@@ -214,6 +140,6 @@ public class GeneticMain {
 	
 	public static void main(String [] args) {
 		
-		loadIncidentFromFile();
+		//loadIncidentFromFile();
 	}
 }

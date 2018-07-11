@@ -3,90 +3,13 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/Saxon9/saxon9-test.jar"/>
 	<classpathentry kind="lib" path="lib/Saxon9/saxon9-xqj.jar"/>
 	<classpathentry kind="lib" path="lib/Saxon9/saxon9he.jar"/>
-	<classpathentry kind="lib" path="lib/batik-1.9/batik-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/batik-1.9/batik-rasterizer-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/batik-1.9/batik-slideshow-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/batik-1.9/batik-squiggle-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/batik-1.9/batik-svgpp-1.9.jar"/>
-	<classpathentry kind="lib" path="lib/batik-1.9/batik-ttf2svg-1.9.jar"/>
 	<classpathentry kind="lib" path="lib/json-20140107.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/bigraphspace.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.common_2.12.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.emf.mapping.xsd2ecore.editor_2.6.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.emf.mapping.xsd2ecore_2.5.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd.ecore.converter_2.6.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd.ecore.exporter_2.5.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd.ecore.importer_2.7.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd.edit_2.6.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd.editor_2.6.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd.mapping.editor_2.7.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd.mapping_2.6.0.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.xsd_2.9.1.v20140203-1126.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore_2.6.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2ecore_2.9.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2xml.ui_2.8.0.v20160526-0356.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xmi_2.12.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.xtext_1.2.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.ui.source_1.4.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.ui_1.4.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.source_1.4.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore_1.4.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.lib.source_1.1.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.lib_1.1.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.importer.source_1.2.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.importer_1.2.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.exporter_1.4.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.exporter.source_1.4.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.edit.source_1.1.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xcore.edit_1.1.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.xtext.ui.source_1.0.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.xtext.source_1.2.0.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.xtext.ui_1.0.100.v20160526-0606.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emfforms.editor.ecore.source_1.12.0.20170227-1527.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emfforms.editor.ecore_1.12.0.20170227-1527.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.importer.ecore.source_2.8.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore.editor_2.6.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2ecore.editor.source_2.7.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2ecore.editor_2.7.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2ecore.source_2.9.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2xml.source_2.9.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2xml.ui.source_2.8.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.mapping.ecore2xml_2.9.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.emfstore.ecore.source_1.8.1.v20161125-1451.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.emfstore.ecore_1.8.1.v20161125-1451.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.importer.ecore_2.8.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.change.source_2.11.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.edit.source_2.9.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.edit_2.9.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.editor.source_2.12.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.editor_2.12.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.source_2.12.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.xmi.source_2.12.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.design.properties_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.design.ui_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.design_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.doc_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.explorer.contextual_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.properties_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.tabbedproperties_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools.ui_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecoretools_3.2.1.201703011420.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.change.edit.source_2.6.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.change.edit_2.6.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore.change_2.11.0.v20160420-0247.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.ecore_2.12.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.cdo.ecore.retrofit_4.2.300.v20160301-1326.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.source_2.12.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.ui.source_2.12.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore.ui_2.12.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.emf.codegen.ecore_2.12.0.v20160526-0356.jar"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/eclipse/plugins/org.eclipse.uml2.uml-3.1.0.v201006071150.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-neon3/plugins/org.eclipse.wst.common.emf_1.2.500.v201701191735.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
-	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/jgoodies-forms-1.8.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jlibbig"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/incidentPattern"/>
 	<classpathentry kind="output" path="bin"/>
