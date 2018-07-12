@@ -18,10 +18,10 @@ public class IncidentPatternExtractor {
 		
 		//the process for extracting/abstracting a model
 		//incidentModel.mer
+		incidentModel.mergeAccordingToContainment(null);
+		
 		IncidentDiagram abstractedModel = null;
-		
-		
-		
+
 		return abstractedModel;
 	}
 	
@@ -32,4 +32,14 @@ public class IncidentPatternExtractor {
 		return extract(model);
 	}
 
+
+	public static void main(String[] args){
+		
+		IncidentPatternExtractor extractor = new IncidentPatternExtractor();	
+		String fileName = "";
+		
+		
+		extractor.extract(fileName);
+		
+	}
 }
