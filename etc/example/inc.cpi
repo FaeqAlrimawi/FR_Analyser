@@ -5,25 +5,25 @@
   <goal name="goal1" description="Gain access to internal network"/>
   <goal name="goal2" description="collect information"/>
   <motive name="Competitive_advantage" description="competitive advantage"/>
-  <asset connections="location_SD1-Hallway location2-Hallway" parentEntity="floorX" name="hallway" status="">
+  <asset connections="location_SD1-Hallway location2-Hallway location_SD1-Hallway location2-Hallway" parentEntity="floorX" containedEntities="offender1" name="hallway" status="">
     <type name="Hallway"/>
   </asset>
-  <asset connections="location_SD1-Hallway" parentEntity="floorX" containedEntities="smartDevice1" name="location_SD1">
+  <asset connections="location_SD1-Hallway location_SD1-Hallway" parentEntity="floorX" containedEntities="smartDevice1" name="location_SD1">
     <type name="Room"/>
   </asset>
-  <asset connections="cyber1" parentEntity="location_SD1" name="smartDevice1" status="">
+  <asset connections="cyber1 cyber1" parentEntity="location_SD1" name="smartDevice1" status="">
     <type name="SmartLight"/>
   </asset>
-  <asset connections="cyber1 HVAC-IB" name="busNetwork" status="">
+  <asset connections="cyber1 HVAC-IB cyber1 HVAC-IB" name="busNetwork" status="">
     <type name="DigitalAsset"/>
   </asset>
   <asset containedEntities="hallway location_SD1 location2" name="floorX">
     <type name="Floor"/>
   </asset>
-  <asset connections="location2-Hallway" parentEntity="floorX" containedEntities="HVAC" name="location2">
+  <asset connections="location2-Hallway location2-Hallway" parentEntity="floorX" containedEntities="HVAC" name="location2">
     <type name="Room"/>
   </asset>
-  <asset connections="HVAC-IB" parentEntity="location2" name="HVAC">
+  <asset connections="HVAC-IB HVAC-IB" parentEntity="location2" name="HVAC">
     <type name="HVAC"/>
   </asset>
   <resource parentEntity="offender1" containedEntities="HVACmalware" name="laptopX">

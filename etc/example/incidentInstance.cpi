@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cyberPhysical_Incident:IncidentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
+  <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE"/>
+  <asset connections="hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom hallway-recepRoom" parentEntity="floor4" name="receptionOffice">
+    <type name="Room"/>
+  </asset>
+  <asset parentEntity="executiveRoom" name="executiveLaptop" description="">
+    <type name="Laptop"/>
+  </asset>
+  <asset connections="hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom hallway-execRoom" parentEntity="floor4" containedEntities="executiveLaptop" name="executiveRoom" status="">
+    <type name="Asset"/>
+  </asset>
+  <asset containedEntities="floor4" name="researchBuilding">
+    <type name="Building"/>
+  </asset>
+  <asset connections="hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance hallway-execRoom hallway-recepRoom hallway-entrance" parentEntity="floor4" name="hallway">
+    <type name="Hallway"/>
+  </asset>
+  <asset connections="hallway-entrance hallway-entrance hallway-entrance hallway-entrance hallway-entrance hallway-entrance hallway-entrance hallway-entrance hallway-entrance hallway-entrance hallway-entrance" parentEntity="floor4" containedEntities="offender" name="entrance">
+    <type name="Room"/>
+  </asset>
+  <asset parentEntity="researchBuilding" containedEntities="entrance receptionOffice executiveRoom hallway" name="floor4">
+    <type name="Floor"/>
+  </asset>
+  <actor parentEntity="entrance" name="offender">
+    <type name="Visitor"/>
+  </actor>
+  <connection name="hallway-execRoom" entity1="executiveRoom" entity2="hallway"/>
+  <connection name="hallway-recepRoom" entity1="receptionOffice" entity2="hallway"/>
+  <connection name="hallway-entrance" entity1="entrance" entity2="hallway"/>
+  <activity name="activity2" nextActivities="activity3" previousActivities="activity1" initiator="offender" targetedAssets="receptionOffice" description="offender enters reception office" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway">
+          <entity name="offender"/>
+        </entity>
+        <entity name="receptionOffice"/>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway"/>
+        <entity name="receptionOffice">
+          <entity name="offender"/>
+        </entity>
+      </expression>
+    </postcondition>
+  </activity>
+  <activity name="activity3" previousActivities="activity2" initiator="offender" targetedAssets="executiveRoom" description="offender enters executive's room" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway">
+          <entity name="offender"/>
+        </entity>
+        <entity name="executiveRoom"/>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway"/>
+        <entity name="executiveRoom">
+          <entity name="offender"/>
+        </entity>
+      </expression>
+    </postcondition>
+  </activity>
+  <activity name="activity1" nextActivities="activity2" initiator="offender" targetedAssets="hallway" description="offender enters hallway" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="entrance">
+          <entity name="offender"/>
+        </entity>
+        <entity name="hallway"/>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="entrance">
+          <entity name="offender"/>
+        </entity>
+        <entity name="hallway"/>
+      </expression>
+    </postcondition>
+  </activity>
+</cyberPhysical_Incident:IncidentDiagram>

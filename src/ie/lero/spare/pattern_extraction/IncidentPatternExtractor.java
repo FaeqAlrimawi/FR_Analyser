@@ -18,7 +18,10 @@ public class IncidentPatternExtractor {
 		
 		//the process for extracting/abstracting a model
 		//incidentModel.mer
-		incidentModel.mergeAccordingToContainment(null);
+		System.out.println("num of acts= "+ incidentModel.getActivity().size());
+		incidentModel.abstractActivities();
+		
+		System.out.println("num of acts= "+ incidentModel.getActivity().size());
 		
 		IncidentDiagram abstractedModel = null;
 
@@ -36,7 +39,7 @@ public class IncidentPatternExtractor {
 	public static void main(String[] args){
 		
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();	
-		String fileName = "";
+		String fileName = "D:/runtime-EclipseApplication/Scenarios/Scenario1/incidentInstance.cpi";
 		
 		
 		extractor.extract(fileName);

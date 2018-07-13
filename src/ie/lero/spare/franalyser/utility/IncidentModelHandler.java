@@ -66,8 +66,6 @@ public class IncidentModelHandler {
 				  rs.getPackageRegistry().put(p.getNsURI(), p);
 			}
 
-			System.out.println(eObject.getClass());
-
 			incidentDiagram = (IncidentDiagramImpl) eObject;
 			
 		} catch (Exception e) {
