@@ -1,5 +1,7 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.io.File;
+
 import cyberPhysical_Incident.IncidentDiagram;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
 
@@ -16,14 +18,29 @@ public class IncidentPatternExtractor {
 			return null;
 		}
 		
+		IncidentDiagram abstractedModel = null;
+		
+		//create a copy
+		String tmpFileName = "tmpModel.cpi";
+		IncidentModelHandler.SaveIncidentToFile(incidentModel, tmpFileName);
+		abstractedModel = IncidentModelHandler.loadIncidentFromFile(tmpFileName);
+		
+		//remove tmp file
+		File tmpFile = new File(tmpFileName);
+		
+		if(tmpFile.exists()) {
+			tmpFile.delete();
+		}
+		
+		
 		//the process for extracting/abstracting a model
 		//incidentModel.mer
-		System.out.println("num of acts= "+ incidentModel.getActivity().size());
-		incidentModel.abstractActivities();
+		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
+		abstractedModel.abstractActivities();
 		
-		System.out.println("num of acts= "+ incidentModel.getActivity().size());
+		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
 		
-		IncidentDiagram abstractedModel = null;
+		
 
 		return abstractedModel;
 	}
