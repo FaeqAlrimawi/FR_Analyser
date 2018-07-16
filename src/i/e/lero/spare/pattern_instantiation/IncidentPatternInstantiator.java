@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -31,9 +30,12 @@ import it.uniud.mads.jlibbig.core.util.StopWatch;
 public class IncidentPatternInstantiator {
 	
 	private String xqueryFile = "etc/match_query.xq";
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
+//	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	//BufferedWriter bufferWriter;
-	int threadPoolSize = 1;
+	private int threadPoolSize = 1;
+	private int parallelActivities = 1;
+	private int matchingThreshold = 100;
+	
 	int maxWaitingTime = 48;
 	TimeUnit timeUnit = TimeUnit.HOURS;
 	IncidentPatternInstantiationListener listener;
@@ -42,7 +44,7 @@ public class IncidentPatternInstantiator {
 	LinkedList<Integer> assetSetsSelected;
 	private String logFileName;
 	private String logFolder;	
-	private boolean isSaveLog = false;
+//	private boolean isSaveLog = false;
 	private boolean isPrintToScreen = false;
 	private BlockingQueue<String> msgQ;
 	ExecutorService executor;
@@ -51,6 +53,8 @@ public class IncidentPatternInstantiator {
 	public void runLogger() {
 		
 		//runn a logger
+		Logger.getInstance().setListener(listener);
+		
 		new Thread(Logger.getInstance()).start();
 		
 		msgQ = Logger.getInstance().getMsgQ();
@@ -58,7 +62,7 @@ public class IncidentPatternInstantiator {
 	
 	public void execute(String incidentPatternFile, String systemModelFile, int threadPoolSiz, IncidentPatternInstantiationListener listen) {
 		
-		this.threadPoolSize = threadPoolSiz;
+		
 		listener = listen;
 		
 		String xQueryMatcherFile = xqueryFile;
@@ -150,11 +154,9 @@ public class IncidentPatternInstantiator {
 		}
 	
 		msgQ.put(">>Number of States= "+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
-		msgQ.put(">>State Transitions:");
-		msgQ.put(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
+//		msgQ.put(">>State Transitions:");
+//		msgQ.put(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 	
-		//create threads that handle each sequence generated from asset matching
-		executor = Executors.newFixedThreadPool(threadPoolSize);
 		
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		
@@ -163,14 +165,17 @@ public class IncidentPatternInstantiator {
 		
 		while(!isSetsSelected) {
 			//wait user input
-			Thread.sleep(500);
+			Thread.sleep(100);
 		}
 		
 		if(assetSetsSelected.size()>0) {
 			incrementValue = (int)Math.ceil(90.0/assetSetsSelected.size());	
 		}
 		
-		msgQ.put(">>Creating threads for asset sets. ["+threadPoolSize+"] thread(s) are running in parallel.");
+		//create threads that handle each sequence generated from asset matching
+		executor = Executors.newFixedThreadPool(threadPoolSize);
+				
+		msgQ.put(">>Creating ["+assetSetsSelected.size()+"] threads for asset sets. ["+threadPoolSize+"] thread(s) are running in parallel.");
 		
 		for(int i=0; i<assetSetsSelected.size();i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(assetSetsSelected.get(i)), incidentAssetNames, i);
@@ -646,6 +651,8 @@ public class IncidentPatternInstantiator {
 			//this object identifies states and state transitions that satisfy the conditions of activities
 		 	//state transitions are updated in the predicates, which can be accessed through predicateHandler
 			BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID);
+			analyser.setNumberofActivityParallelExecution(parallelActivities);
+			analyser.setThreshold(matchingThreshold);
 			
 			msgQ.put("Thread["+threadID+"]>>Identifying states and their transitions...");
 
@@ -693,7 +700,10 @@ public class IncidentPatternInstantiator {
 			//create an analysis object for the identified paths
 			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
 			String result = pathsAnalyser.analyse();
-			msgQ.put(result);
+			
+			if(result != null) {
+				msgQ.put(result);	
+			}
 			
 			//print(pathsAnalyser.print());
 			//another way is to combine the transitions found for each activity from the initial one to the final one
@@ -797,6 +807,33 @@ public class IncidentPatternInstantiator {
 		this.assetSetsSelected = assetSetsSelected;
 	}
 	
+	
+	public int getThreadPoolSize() {
+		return threadPoolSize;
+	}
+
+	public void setThreadPoolSize(int threadPoolSize) {
+		this.threadPoolSize = threadPoolSize;
+	}
+	
+	
+
+	public int getParallelActivities() {
+		return parallelActivities;
+	}
+
+	public void setParallelActivities(int parallelActivities) {
+		this.parallelActivities = parallelActivities;
+	}
+
+	public int getMatchingThreshold() {
+		return matchingThreshold;
+	}
+
+	public void setMatchingThreshold(int matchingThreshold) {
+		this.matchingThreshold = matchingThreshold;
+	}
+
 	class InstancesSaver implements Runnable {
 
 		private String outputFileName;

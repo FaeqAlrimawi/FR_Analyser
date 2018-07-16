@@ -3,10 +3,6 @@ package i.e.lero.spare.pattern_instantiation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-
-import org.eclipse.emf.common.util.BasicEList;
-import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.impl.ActivityImpl;
@@ -410,7 +406,7 @@ public class IncidentActivity extends ActivityImpl {
 		return paths;
 	}
 	
-	@Override
+	/*@Override
 	public boolean equals(Object obj) {
 	    if (obj == null) {
 	        return false;
@@ -425,7 +421,7 @@ public class IncidentActivity extends ActivityImpl {
 	    }
 	    
 	    return false;
-	}
+	}*/
 	
 	public String toString() {
 		

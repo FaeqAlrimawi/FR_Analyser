@@ -45,6 +45,8 @@ public class BigraphAnalyser {
 	private int threadID;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;
+	private int threshold = 100; //threshold for the number of states on which task is further subdivided into halfs
+	
 //	private LinkedList<Integer> allMatchedStates = new LinkedList<Integer>();
 	
 	//using forkjoin threading
@@ -85,6 +87,7 @@ public class BigraphAnalyser {
 		mainPool = new ForkJoinPool();
 	//	setParitionSize();
 	}
+	
 	
 	/*private void setParitionSize() {
 		
@@ -131,6 +134,24 @@ public class BigraphAnalyser {
 	}
 */
 	
+	
+	
+	public int getNumberofActivityParallelExecution() {
+		return numberofActivityParallelExecution;
+	}
+
+	public int getThreshold() {
+		return threshold;
+	}
+
+	public void setThreshold(int threshold) {
+		this.threshold = threshold;
+	}
+
+	public void setNumberofActivityParallelExecution(int numberofActivityParallelExecution) {
+		this.numberofActivityParallelExecution = numberofActivityParallelExecution;
+	}
+
 	public PredicateHandler analyse() {
 		
 		try {
@@ -142,14 +163,14 @@ public class BigraphAnalyser {
 				
 				if(isThreading) {
 				
-					if(states.size() > BigraphMatcher.THRESHOLD) {
-					numberOfPartitions = (int)Math.pow(2, Math.ceil(32 - Integer.numberOfLeadingZeros( states.size()/BigraphMatcher.THRESHOLD )));
+					if(states.size() > threshold) {
+					numberOfPartitions = (int)Math.pow(2, Math.ceil(32 - Integer.numberOfLeadingZeros( states.size()/threshold )));
 					} else {
 						numberOfPartitions = 1;
 					}
 					
-						msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", partition size <= "+BigraphMatcher.THRESHOLD + " ("+ 
-						(int)((BigraphMatcher.THRESHOLD*1.0/states.size())*10000)/100.0+ "%)"+
+						msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", partition size <= "+threshold + " ("+ 
+						(int)((threshold*1.0/states.size())*10000)/100.0+ "%)"+
 								", number of partitions: "+ numberOfPartitions+", Number of parallel activities = "+numberofActivityParallelExecution+", Parallelism for matching (= num of processors): " + mainPool.getParallelism());
 					
 				} else {
@@ -463,7 +484,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		//private LinkedList<Bigraph> states;
 		private Bigraph redex;
 		private LinkedList<Integer> matchedStates;
-		private final static int THRESHOLD = 100; //threshold for the number of states on which task is further subdivided into halfs
+		
 		
 		//for testing
 		//protected int numOfParts = 0;
@@ -479,7 +500,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		protected LinkedList<Integer> compute() {
 			// TODO Auto-generated method stub
 			
-			if((indexEnd-indexStart) > THRESHOLD) {
+			if((indexEnd-indexStart) > threshold) {
 				return ForkJoinTask.invokeAll(createSubTasks())
 						.stream()
 						.map(new Function<BigraphMatcher, LinkedList<Integer>>() {
