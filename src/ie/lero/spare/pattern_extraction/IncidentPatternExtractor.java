@@ -35,12 +35,12 @@ public class IncidentPatternExtractor {
 	
 		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
 	
-		System.out.println("test: "+abstractedModel.getInitialActivity().getConnectionChangesBetweenEntities("offender", "hallway"));
+	//	System.out.println("test: "+abstractedModel.getInitialActivity().getConnectionChangesBetweenEntities("offender", "hallway"));
 		abstractedModel.abstractActivities();
 		
 		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
 		
-		
+		System.out.println("exploited: " + abstractedModel.getInitialActivity().getExploitedAssets().get(0).getName());
 
 		return abstractedModel;
 	}
