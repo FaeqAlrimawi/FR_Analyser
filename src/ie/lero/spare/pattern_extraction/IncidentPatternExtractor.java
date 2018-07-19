@@ -32,10 +32,10 @@ public class IncidentPatternExtractor {
 			tmpFile.delete();
 		}
 		
-		
-		//the process for extracting/abstracting a model
-		//incidentModel.mer
+	
 		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
+	
+		System.out.println("test: "+abstractedModel.getInitialActivity().getConnectionChangesBetweenEntities("offender", "hallway"));
 		abstractedModel.abstractActivities();
 		
 		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
