@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="ASCII"?>
 <environment:EnvironmentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:environment="http://www.example.org/environment">
   <asset xsi:type="environment:Building" name="Research_Centre" description="" control="Building" containedAssets="fourteenth_floor">
     <type name="building"/>
   </asset>
-  <asset xsi:type="environment:Floor" name="fourteenth_floor" description="" control="Floor" containedAssets="airConditioningRoom hallway stairsA instructorsLab5 mensToilet instructorsLab3 visitingLab1 researchLab2 empiricalLab instructorsLab6 instructorsLab2 openLab instructorsLab8 instructorsLab4 researchLab1 meetingRoom stairsB informaticsLab kitchen instructorsLab7 instructorsLab1 elevatorsArea women'sToilet lounge1 disabledToilet roomA" parentAsset="Research_Centre"/>
+  <asset xsi:type="environment:Floor" name="fourteenth_floor" description="" control="Floor" containedAssets="women'sToilet visitingLab1 researchLab1 instructorsLab7 instructorsLab3 researchLab2 instructorsLab4 instructorsLab8 informaticsLab lounge1 instructorsLab2 airConditioningRoom openLab kitchen instructorsLab5 instructorsLab1 instructorsLab6 disabledToilet empiricalLab stairsA meetingRoom stairsB mensToilet hallway elevatorsArea roomA" parentAsset="Research_Centre"/>
   <asset xsi:type="environment:SmartLight" connections="SL1-DN" name="SL1" control="SmartLight" parentAsset="empiricalLab"/>
   <asset xsi:type="environment:SmartLight" connections="SL2-DN" name="SL2" control="SmartLight" parentAsset="informaticsLab"/>
   <asset xsi:type="environment:SmartLight" connections="SL3-DN" name="SL3" control="SmartLight" parentAsset="instructorsLab2"/>
@@ -11,11 +11,11 @@
   <asset xsi:type="environment:FireAlarm" connections="FA-DN" name="FireAlarm1" control="FireAlarm" parentAsset="hallway"/>
   <asset xsi:type="environment:Server" connections="Server-DN" name="Server1" control="Server" parentAsset="empiricalLab"/>
   <asset xsi:type="environment:Workstation" connections="Workstation-DN" name="Workstation1" control="Workstation" parentAsset="informaticsLab"/>
-  <asset xsi:type="environment:DigitalAsset" connections="Server-DN SL2-DN Workstation-DN FA-DN SL1-DN HVAC-DN SL3-DN" name="busNetwork" description="" control="BusNetwork"/>
+  <asset xsi:type="environment:DigitalAsset" connections="SL2-DN HVAC-DN Workstation-DN Server-DN FA-DN SL3-DN SL1-DN" name="busNetwork" description="" control="BusNetwork"/>
   <asset xsi:type="environment:Actor" name="Visitor1" control="Visitor" containedAssets="Laptop1" parentAsset="hallway" role="Offender"/>
   <asset xsi:type="environment:Laptop" name="Laptop1" control="Laptop" containedAssets="SoftwareX" parentAsset="Visitor1"/>
   <asset xsi:type="environment:Application" name="SoftwareX" control="Malware" parentAsset="Laptop1"/>
-  <asset xsi:type="environment:Lab" connections="instructorsLab1_hallway" name="instructorsLab1" control="Lab" containedAssets="desktop1_2 desktop1_1 desktop1_3" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="instructorsLab1_hallway" name="instructorsLab1" control="Lab" containedAssets="desktop1_2 desktop1_3 desktop1_1" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Desktop" connections="d1_1" name="desktop1_1" description="" control="Desktop" parentAsset="instructorsLab1"/>
   <asset xsi:type="environment:Desktop" connections="d1_2" name="desktop1_2" control="Desktop" parentAsset="instructorsLab1"/>
   <asset xsi:type="environment:Desktop" name="desktop1_3" control="Desktop" parentAsset="instructorsLab1"/>
@@ -31,18 +31,18 @@
   <asset xsi:type="environment:Desktop" connections="d6_2" name="desktop6_2" control="Desktop" parentAsset="instructorsLab6"/>
   <asset xsi:type="environment:Desktop" connections="d7_1" name="desktop7_1" control="Desktop" parentAsset="instructorsLab7"/>
   <asset xsi:type="environment:Desktop" name="desktop7_2" control="Desktop" parentAsset="instructorsLab7"/>
-  <asset xsi:type="environment:IPNetwork" connections="d5_2 d6_1 d1_1 d5_1 d2_1 d1_2 d7_1 d8_2 d6_2 d3_1 d4_1" name="IPnetwork1" control="IPNetwork" Protocol="TCP/IP" encryption="MACsec">
+  <asset xsi:type="environment:IPNetwork" connections="d6_1 d8_2 d7_1 d5_2 d4_1 d3_1 d5_1 d2_1 d6_2 d1_2 d1_1" name="IPnetwork1" control="IPNetwork" Protocol="TCP/IP" encryption="MACsec">
     <type name="Ethernet"/>
   </asset>
-  <asset xsi:type="environment:Lab" connections="instructorsLab2_hallway" name="instructorsLab2" control="Room" containedAssets="SL3 desktop2_1 desktop2_2" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="instructorsLab3_hallway" name="instructorsLab3" description="" control="Room" containedAssets="desktop3_1 desktop3_2" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="instructorsLab4_hallway" name="instructorsLab4" control="Room" containedAssets="desktop4_2 desktop4_1" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="instructorsLab2_hallway" name="instructorsLab2" control="Room" containedAssets="SL3 desktop2_2 desktop2_1" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="instructorsLab3_hallway" name="instructorsLab3" description="" control="Room" containedAssets="desktop3_2 desktop3_1" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="instructorsLab4_hallway" name="instructorsLab4" control="Room" containedAssets="desktop4_1 desktop4_2" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Lab" connections="instructorsLab5_hallway" name="instructorsLab5" control="Room" containedAssets="desktop5_2 desktop5_1" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="instructorsLab6_hallway" name="instructorsLab6" control="Room" containedAssets="desktop6_1 desktop6_2" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="instructorsLab7_hallway" name="instructorsLab7" control="Room" containedAssets="desktop7_2 desktop7_1" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="openLab_hallway2 openLab_hallway1" name="openLab" control="Room_2" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="empiricalLab_hallway2 empiricalLab_hallway3 empiricalLab_hallway4 empiricalLab_hallway1" name="empiricalLab" control="Room_4" containedAssets="AirConditioning SL1 server1" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="informaticsLab_hallway2 informaticsLab_hallway1 informaticsLab_hallway3 informaticsLab_hallway4" name="informaticsLab" control="Room_4" containedAssets="Workstation1 server2 SL2" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="instructorsLab6_hallway" name="instructorsLab6" control="Room" containedAssets="desktop6_2 desktop6_1" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="instructorsLab7_hallway" name="instructorsLab7" control="Room" containedAssets="desktop7_1 desktop7_2" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="openLab_hallway1 openLab_hallway2" name="openLab" control="Room_2" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="empiricalLab_hallway4 empiricalLab_hallway2 empiricalLab_hallway3 empiricalLab_hallway1" name="empiricalLab" control="Room_4" containedAssets="server1 SL1 AirConditioning" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="informaticsLab_hallway4 informaticsLab_hallway1 informaticsLab_hallway3 informaticsLab_hallway2" name="informaticsLab" control="Room_4" containedAssets="Workstation1 SL2 server2" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Toilet" connections="mensToilet_hallway" name="mensToilet" description="" control="Room" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Toilet" connections="womensToilet_hallway" name="women'sToilet" control="Room" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Toilet" connections="disabledToilet_hallway" name="disabledToilet" control="Room" parentAsset="fourteenth_floor"/>
@@ -54,8 +54,8 @@
   <asset xsi:type="environment:Lab" connections="visitingLab2_hallway" name="meetingRoom" control="Room" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Stairs" connections="roomA_stairsA" name="stairsA" description="" control="Stairs" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Stairs" connections="stairsB_hallway" name="stairsB" description="" control="Stairs" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lounge" connections="lounge_hallway1 lounge_hallway2" name="lounge1" control="Room" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:ElevatorsArea" connections="elevatorsArea_hallway" name="elevatorsArea" control="Room" containedAssets="elevator2 elevator3 elevator6 elevator1 elevator5 elevator4" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lounge" connections="lounge_hallway2 lounge_hallway1" name="lounge1" control="Room" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:ElevatorsArea" connections="elevatorsArea_hallway" name="elevatorsArea" control="Room" containedAssets="elevator5 elevator6 elevator2 elevator1 elevator4 elevator3" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Elevator" name="elevator1" control="Elevator" parentAsset="elevatorsArea"/>
   <asset xsi:type="environment:Elevator" name="elevator2" control="Elevator" parentAsset="elevatorsArea" model=""/>
   <asset xsi:type="environment:Elevator" name="elevator3" control="Elevator" parentAsset="elevatorsArea"/>
@@ -63,9 +63,9 @@
   <asset xsi:type="environment:Elevator" name="elevator5" control="Elevator" parentAsset="elevatorsArea"/>
   <asset xsi:type="environment:Elevator" name="elevator6" control="Elevator" parentAsset="elevatorsArea"/>
   <asset xsi:type="environment:Elevator" connections="roomA_emrgElv" name="emergencyElevator" control="Elevator"/>
-  <asset xsi:type="environment:Room" connections="roomA_emrgElv roomA_stairsA roomA_hallway" name="roomA" control="Room" containedAssets="cardReader1" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Room" connections="roomA_emrgElv roomA_hallway roomA_stairsA" name="roomA" control="Room" containedAssets="cardReader1" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:CardReader" name="cardReader1" control="CardReader" parentAsset="roomA"/>
-  <asset xsi:type="environment:Hallway" connections="researchLab2_hallway informaticsLab_hallway2 visitingLab2_hallway elevatorsArea_hallway kitchen_hallway instructorsLab3_hallway stairsB_hallway lounge_hallway1 informaticsLab_hallway4 instructorsLab7_hallway instructorsLab2_hallway instructorsLab5_hallway empiricalLab_hallway3 kitchen_hallway informaticsLab_hallway1 empiricalLab_hallway1 instructorsLab4_hallway instructorsLab6_hallway roomA_hallway mensToilet_hallway empiricalLab_hallway4 openLab_hallway2 disabledToilet_hallway informaticsLab_hallway3 instructorsLab1_hallway lounge_hallway2 openLab_hallway1 empiricalLab_hallway2 visitingLab1_hallway researchLab1_hallway womensToilet_hallway" name="hallway" control="Hallway" containedAssets="FireAlarm1 Visitor1" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Hallway" connections="openLab_hallway1 informaticsLab_hallway4 researchLab1_hallway instructorsLab3_hallway instructorsLab7_hallway visitingLab1_hallway womensToilet_hallway empiricalLab_hallway4 disabledToilet_hallway mensToilet_hallway instructorsLab5_hallway informaticsLab_hallway1 stairsB_hallway kitchen_hallway informaticsLab_hallway2 instructorsLab4_hallway instructorsLab1_hallway instructorsLab6_hallway lounge_hallway2 instructorsLab2_hallway roomA_hallway empiricalLab_hallway1 empiricalLab_hallway2 researchLab2_hallway elevatorsArea_hallway kitchen_hallway informaticsLab_hallway3 visitingLab2_hallway empiricalLab_hallway3 openLab_hallway2 lounge_hallway1" name="hallway" control="Hallway" containedAssets="Visitor1 FireAlarm1" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Lab" name="instructorsLab8" control="Lab" containedAssets="desktop8_1 desktop8_2" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Desktop" connections="d7_1" name="desktop8_1" control="Desktop" parentAsset="instructorsLab8"/>
   <asset xsi:type="environment:Desktop" connections="d8_2" name="desktop8_2" control="Desktop" parentAsset="instructorsLab8"/>
