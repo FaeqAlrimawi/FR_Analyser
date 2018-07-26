@@ -69,9 +69,13 @@ public class IncidentPatternExtractor {
 		Asset original  = systemModel.getAsset().get(rand.nextInt(systemModel.getAsset().size()));
 		Asset abstracted = original.abstractAsset();
 		
-		System.out.println("Original Asset: "+original + "\nContainedAssets ["+original.getContainedAssets().size()+"]: "+original.getContainedAssets());
+		System.out.println("Original Asset: "+original + 
+				"\nContainedAssets ["+original.getContainedAssets().size()+"]: "+original.getContainedAssets() +
+				"\nConnections ["+original.getConnections().size()+"]: "+original.getConnections() );
 		
-		System.out.println("Abstracted Asset: "+abstracted+ "\nContainedAssets ["+abstracted.getContainedAssets().size()+"]: "+abstracted.getContainedAssets());
+		System.out.println("Abstracted Asset: "+abstracted+ 
+				"\nContainedAssets ["+abstracted.getContainedAssets().size()+"]: "+abstracted.getContainedAssets() +
+				"\nConnections ["+abstracted.getConnections().size()+"]: "+abstracted.getConnections());
 		System.out.println();
 		}
 		
