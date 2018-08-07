@@ -3,6 +3,7 @@ package ie.lero.spare.pattern_extraction;
 import java.io.File;
 import java.util.Random;
 
+import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.Asset;
 import environment.EnvironmentDiagram;
@@ -27,29 +28,22 @@ public class IncidentPatternExtractor {
 		IncidentDiagram abstractedModel = null;
 		
 		//create a copy
-		String tmpFileName = "tmpModel.cpi";
+		/*String tmpFileName = "tmpModel.cpi";
 		IncidentModelHandler.SaveIncidentToFile(incidentModel, tmpFileName);
 		abstractedModel = IncidentModelHandler.loadIncidentFromFile(tmpFileName);
-		
-		//remove tmp (i.e. the copy) file
+		*/
+		/*//remove tmp (i.e. the copy) file
 		File tmpFile = new File(tmpFileName);
 		
 		if(tmpFile.exists()) {
 			tmpFile.delete();
-		}
+		}*/
 		
-	
-		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
 	
 	//	System.out.println("test: "+abstractedModel.getInitialActivity().getConnectionChangesBetweenEntities("offender", "hallway"));
 		//abstractedModel.abstractActivities();
 		
 		//abstract entities
-		EnvironmentDiagram systemModel = SystemModelHandler.loadSystemFromFile(systemFileName);
-		
-		if(systemModel == null) {
-			System.out.println("system model is NULL");
-		}
 		
 		/*for(Asset ast : systemModel.getAsset()) {
 			Asset tmp = ast.abstractType();
@@ -61,11 +55,11 @@ public class IncidentPatternExtractor {
 			}
 			
 		}*/
-		Random rand = new Random();
+//		Random rand = new Random();
+//		
+//		int tries = 50;
 		
-		int tries = 50;
-		
-		for(int i = 0;i<tries;i++) {
+		/*for(int i = 0;i<tries;i++) {
 		Asset original  = systemModel.getAsset().get(rand.nextInt(systemModel.getAsset().size()));
 		Asset abstracted = original.abstractAsset();
 		
@@ -77,15 +71,33 @@ public class IncidentPatternExtractor {
 				"\nContainedAssets ["+abstracted.getContainedAssets().size()+"]: "+abstracted.getContainedAssets() +
 				"\nConnections ["+abstracted.getConnections().size()+"]: "+abstracted.getConnections());
 		System.out.println();
-		}
+		}*/
 		
 		//status: abstraction is done for the basic attributes (type, control, properties) and contained assets
 		//next is to implement connections abstraction in assets
 		
-		//current implementation just finds matched assets
-		abstractedModel.abstractAssets(systemModel);
+	
+//		abstractedModel.abstractActivities();
+//		abstractedModel.abstractEntities(systemModel);
 		
-		System.out.println("num of acts= "+ abstractedModel.getActivity().size());
+		
+		//or
+//		incidentModel.setSystemModel(systemModel);
+//		abstractedModel = incidentModel.createAbstractIncident();
+		
+
+		EnvironmentDiagram systemModel = SystemModelHandler.loadSystemFromFile(systemFileName);
+		
+		if(systemModel == null) {
+			System.out.println("system model is NULL");
+		}
+		
+		abstractedModel = incidentModel.createAbstractIncident(systemModel);
+		
+		IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication/Scenarios/Scenario1/inc_abs.cpi");
+		
+		System.out.println("num of activities in original = "+ incidentModel.getActivity().size());
+		System.out.println("num of activities in abstract = "+ abstractedModel.getActivity().size());
 
 		return abstractedModel;
 	}
