@@ -17,6 +17,8 @@ import javax.xml.xquery.XQException;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Knowledge;
+import cyberPhysical_Incident.Location;
+import environment.Asset;
 import environment.EnvironmentDiagram;
 import i.e.lero.spare.pattern_instantiation.BigraphAnalyser.BigraphMatcher;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
@@ -264,12 +266,16 @@ public class Mapper {
 			
 			/**
 			 * matching criteria
-			 * 1- type of entity which is taken from the tag type in the model. This compared to the type 
+			 * 1-Type of entity which is taken from the tag type in the model. This compared to the type 
 			 * of an asset as a class (e.g., entity has type "Room" returns all assets that are instances of
 			 * Room class or its subclasses 
-			 * 2- Number & type of connections. All incident entity connections should be subset of the
+			 * 2-Type of parent (container of asset/entity)
+			 * 3-Number & type of contained assets.
+			 * 4-Number & type of connections. All incident entity connections should be subset of the
 			 * connections of an asset if knowledge is partial or exact if knowledge is exact. Type can be 
-			 * of the same class or subclass
+			 * of the same class or subclass.
+			 * 5-Status if found in the entity and entity is an Asset (not implemented as not all assets hold status)
+			 * 6-Properities if found in the entity
 			 */
 			
 			/** matching Type **/
@@ -300,7 +306,127 @@ public class Mapper {
 			
 			}
 			
-			/** matching connections **/
+			
+			/** matching Parent type**/
+			IncidentEntity parent = (IncidentEntity)entity.getParentEntity();
+			
+			if(parent != null) {
+				if(parent.getType() != null ) {
+					String typeName = parent.getType().getName();
+					try {
+						String potentialClassName = "environment.impl."+typeName;
+						
+						if(!typeName.endsWith("Impl")) {
+							potentialClassName +="Impl";
+						}
+						
+						potentialClass = Class.forName(potentialClassName);
+						
+					} catch (ClassNotFoundException e) {
+						//type mismatch i.e. there is no type available in the system model 
+						//currently return false (maybe loosened a little like ignore)
+						return false;
+					}
+					
+					//if the current asset object is not of the same class or subclass of the potential class
+					//then return false (type mismatch)
+					environment.Asset parentAsset = null;
+					
+					if(environment.DigitalAsset.class.isInstance(asset)) {
+						parentAsset = ((environment.DigitalAsset)asset).getParentAsset();
+					} else if(environment.PhysicalAsset.class.isInstance(asset)) {
+						parentAsset = ((environment.PhysicalAsset)asset).getParentAsset();
+					}
+					
+					//if the asset has no parent but the incident entity has then return false (no match)
+					if(parentAsset == null) {
+						return false;
+					}
+					
+					if(!potentialClass.isInstance(parentAsset)) {
+						return false;
+					}
+					
+				}
+			}
+			
+			/** matching contained assets (number & type) **/
+			//if knowledge is exact then both should have the same number of connections
+			//otherwise there's no match
+			if(entity.getContainedAssetsKnowledge().compareTo(Knowledge.EXACT) == 0) {
+				if(entity.getContainedEntities().size() != entity.getContainedEntities().size()) {
+				
+					return false;
+				}
+			}
+			
+			//if the incident entity has more connections then it cannot be subset of the asset connections
+			//thus there's no match
+			if(entity.getContainedEntities().size() > entity.getContainedEntities().size()) {
+				return false;
+			}
+			
+			//compare connection type (simialr to asset type)
+			LinkedList<Integer> matchedcontainedAssets = new LinkedList<Integer>();
+			
+			for(Location ent : entity.getContainedEntities()) {
+				
+				IncidentEntity containedEntity = (IncidentEntity)ent;
+				
+				if(containedEntity.getType() == null) {
+					continue;//ignored
+				}
+				
+				String typeName = containedEntity.getType().getName();
+				
+				try {
+				String potentialClassName = "environment.impl."+typeName;
+				
+				if(!typeName.endsWith("Impl")) {
+					potentialClassName +="Impl";
+				}
+				
+				potentialClass = Class.forName(potentialClassName);
+				
+				} catch (ClassNotFoundException e) {
+					//type mismatch i.e. there is no type available in the system model 
+					//currently returns false
+					return false;
+				}
+				
+				//if the current asset connection object is not of the same class or subclass of the potential class
+				//then return false (connection type mismatch)
+				boolean iscontainedEntityMatched = false;
+				
+				List<environment.Asset> containedAssets = (List<Asset>)asset.getContainedAssets();
+				
+				environment.Asset containedAsset = null;
+				
+				for(int i=0;i<containedAssets.size();i++) {
+					
+					if(matchedcontainedAssets.contains(i)) {
+						continue;
+					}
+					
+					containedAsset = containedAssets.get(i);
+					
+					if(potentialClass.isInstance(containedAsset)) {
+						matchedcontainedAssets.add(i);
+						iscontainedEntityMatched = true;
+						break;
+					} 
+				}
+				
+				//if none of the asset connections match the incident connection then it is a mismatch
+				if(!iscontainedEntityMatched) {
+					return false;
+				}
+				
+				iscontainedEntityMatched = false;
+				
+			}
+			
+			/** matching connections (number & type) **/
 			//if knowledge is exact then both should have the same number of connections
 			//otherwise there's no match
 			if(entity.getConnectionsKnowledge().compareTo(Knowledge.EXACT) == 0) {
@@ -312,7 +438,6 @@ public class Mapper {
 			
 			//if the incident entity has more connections then it cannot be subset of the asset connections
 			//thus there's no match
-			System.out.println("entity: "+entity.getName()+" cons: "+entity.getConnections().size());
 			if(entity.getConnections().size() > asset.getConnections().size()) {
 				return false;
 			}
@@ -372,6 +497,46 @@ public class Mapper {
 				
 				isConnectionMatched = false;
 				
+			}
+			
+			/** matching status **/
+		/*	if(cyberPhysical_Incident.Asset.class.isInstance(entity)) {
+				String entityStatus = ((cyberPhysical_Incident.Asset)entity).getStatus();
+				
+				if(entityStatus != null || !entityStatus.isEmpty()) {
+					String assetStatus = asset.gets
+				}
+			}*/
+			
+			/** matching properities**/
+			LinkedList<Integer> properitiesMatched = new LinkedList<Integer>();
+			List<environment.Property> assetProperities = asset.getProperty();
+			boolean isPropertyMatched = false;
+			environment.Property assetProp = null;
+			
+			for(cyberPhysical_Incident.Property entityProp : entity.getProperties()) {
+				for(int i=0;i<assetProperities.size();i++) {
+					
+					if(properitiesMatched.contains(i)) {
+						continue;
+					}
+					
+				assetProp = assetProperities.get(i);
+				
+				if(entityProp.getName() != null &&
+						entityProp.getName().equalsIgnoreCase(assetProp.getName()) &&
+							entityProp.getValue() != null &&
+							entityProp.getValue().equalsIgnoreCase(assetProp.getValue())) {
+					properitiesMatched.add(i);
+					isPropertyMatched=  true;
+				}
+				}
+				
+				if(!isPropertyMatched) {
+					return false;
+				}
+				
+				isPropertyMatched = false;
 			}
 			
 			return true;
