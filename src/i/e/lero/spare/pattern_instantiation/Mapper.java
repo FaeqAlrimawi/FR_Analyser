@@ -16,6 +16,7 @@ import javax.xml.xquery.XQException;
 
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
+import cyberPhysical_Incident.Knowledge;
 import environment.EnvironmentDiagram;
 import i.e.lero.spare.pattern_instantiation.BigraphAnalyser.BigraphMatcher;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
@@ -266,12 +267,15 @@ public class Mapper {
 			 * 1- type of entity which is taken from the tag type in the model. This compared to the type 
 			 * of an asset as a class (e.g., entity has type "Room" returns all assets that are instances of
 			 * Room class or its subclasses 
-			 * 
+			 * 2- Number & type of connections. All incident entity connections should be subset of the
+			 * connections of an asset if knowledge is partial or exact if knowledge is exact. Type can be 
+			 * of the same class or subclass
 			 */
 			
-			//try to create an instance using the entity type name
+			/** matching Type **/
 			Class<?> potentialClass = null;
 			
+			if(entity.getType() != null ) {
 			String typeName = entity.getType().getName();
 			try {
 				String potentialClassName = "environment.impl."+typeName;
@@ -294,8 +298,80 @@ public class Mapper {
 				return false;
 			}
 			
-			////till this point type is matched
-
+			}
+			
+			/** matching connections **/
+			//if knowledge is exact then both should have the same number of connections
+			//otherwise there's no match
+			if(entity.getConnectionsKnowledge().compareTo(Knowledge.EXACT) == 0) {
+				if(entity.getConnections().size() != asset.getConnections().size()) {
+					return false;
+				}
+			}
+			
+			//if the incident entity has more connections then it cannot be subset of the asset connections
+			//thus there's no match
+			if(entity.getConnections().size() > asset.getConnections().size()) {
+				return false;
+			}
+			
+			//compare connection type (simialr to asset type)
+			LinkedList<Integer> matchedAssetCons = new LinkedList<Integer>();
+			
+			for(cyberPhysical_Incident.Connection entityCon : entity.getConnections()) {
+				
+				if(entityCon.getType() == null) {
+					continue;//ignored
+				}
+				
+				String typeName = entityCon.getType().getName();
+				
+				try {
+				String potentialClassName = "environment.impl."+typeName;
+				
+				if(!typeName.endsWith("Impl")) {
+					potentialClassName +="Impl";
+				}
+				
+				potentialClass = Class.forName(potentialClassName);
+				
+				} catch (ClassNotFoundException e) {
+					//type mismatch i.e. there is no type available in the system model 
+					//currently returns false
+					return false;
+				}
+				
+				//if the current asset connection object is not of the same class or subclass of the potential class
+				//then return false (connection type mismatch)
+				boolean isConnectionMatched = false;
+				
+				List<environment.Connection> assetCons = asset.getConnections();
+				environment.Connection assetCon = null;
+				
+				for(int i=0;i<assetCons.size();i++) {
+					
+					if(matchedAssetCons.contains(i)) {
+						continue;
+					}
+					
+					assetCon = assetCons.get(i);
+					
+					if(potentialClass.isInstance(assetCon)) {
+						matchedAssetCons.add(i);
+						isConnectionMatched = true;
+						break;
+					} 
+				}
+				
+				//if none of the asset connections match the incident connection then it is a mismatch
+				if(!isConnectionMatched) {
+					return false;
+				}
+				
+				isConnectionMatched = false;
+				
+			}
+			
 			return true;
 		}
 	}
