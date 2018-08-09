@@ -1,11 +1,6 @@
 package ie.lero.spare.pattern_extraction;
 
-import java.io.File;
-import java.util.Random;
-
-import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.IncidentDiagram;
-import environment.Asset;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
 import ie.lero.spare.franalyser.utility.SystemModelHandler;
@@ -79,12 +74,6 @@ public class IncidentPatternExtractor {
 	
 //		abstractedModel.abstractActivities();
 //		abstractedModel.abstractEntities(systemModel);
-		
-		
-		//or
-//		incidentModel.setSystemModel(systemModel);
-//		abstractedModel = incidentModel.createAbstractIncident();
-		
 
 		EnvironmentDiagram systemModel = SystemModelHandler.loadSystemFromFile(systemFileName);
 		
@@ -92,7 +81,13 @@ public class IncidentPatternExtractor {
 			System.out.println("system model is NULL");
 		}
 		
+		////Create an abstract model\\\\
 		abstractedModel = incidentModel.createAbstractIncident(systemModel);
+		
+		//or
+//		incidentModel.setSystemModel(systemModel);
+//		abstractedModel = incidentModel.createAbstractIncident();
+		
 		
 		IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication/Scenarios/Scenario1/inc_abs.cpi");
 		
