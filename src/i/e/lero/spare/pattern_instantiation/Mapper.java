@@ -305,12 +305,14 @@ public class Mapper {
 			//otherwise there's no match
 			if(entity.getConnectionsKnowledge().compareTo(Knowledge.EXACT) == 0) {
 				if(entity.getConnections().size() != asset.getConnections().size()) {
+				
 					return false;
 				}
 			}
 			
 			//if the incident entity has more connections then it cannot be subset of the asset connections
 			//thus there's no match
+			System.out.println("entity: "+entity.getName()+" cons: "+entity.getConnections().size());
 			if(entity.getConnections().size() > asset.getConnections().size()) {
 				return false;
 			}
