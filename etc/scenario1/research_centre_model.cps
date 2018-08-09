@@ -35,7 +35,7 @@
     <type name="Ethernet"/>
   </asset>
   <asset xsi:type="environment:Lab" connections="instructorsLab2_hallway" name="instructorsLab2" control="Room" containedAssets="SL3 desktop2_1 desktop2_2" parentAsset="fourteenth_floor"/>
-  <asset xsi:type="environment:Lab" connections="instructorsLab3_hallway" name="instructorsLab3" description="" control="Room" containedAssets="smartLight635 desktop3_1 desktop3_2" parentAsset="fourteenth_floor"/>
+  <asset xsi:type="environment:Lab" connections="instructorsLab3_hallway" name="instructorsLab3" description="" control="Room" containedAssets="desktop3_1 desktop3_2" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Lab" connections="instructorsLab4_hallway" name="instructorsLab4" control="Room" containedAssets="desktop4_2 desktop4_1" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Lab" connections="instructorsLab5_hallway" name="instructorsLab5" control="Room" containedAssets="desktop5_2 desktop5_1" parentAsset="fourteenth_floor"/>
   <asset xsi:type="environment:Lab" connections="instructorsLab6_hallway" name="instructorsLab6" control="Room" containedAssets="desktop6_1 desktop6_2" parentAsset="fourteenth_floor"/>

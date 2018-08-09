@@ -34,7 +34,7 @@ public class PredicateGenerator {
 	public PredicateGenerator(AssetMap map) {
 		this();
 		assetMap = map;
-		incidentAssetNames = map.getIncidentAssetNames();
+		incidentAssetNames = map.getIncidentEntityNames();
 	}
 	
 	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName) {

@@ -89,7 +89,7 @@ public class IncidentPatternExtractor {
 //		abstractedModel = incidentModel.createAbstractIncident();
 		
 		
-		IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication/Scenarios/Scenario1/inc_abs.cpi");
+		IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication/Scenarios/Scenario1/abstractIncident_steal.cpi");
 		
 		System.out.println("num of activities in original = "+ incidentModel.getActivity().size());
 		System.out.println("num of activities in abstract = "+ abstractedModel.getActivity().size());
@@ -107,7 +107,7 @@ public class IncidentPatternExtractor {
 	public static void main(String[] args){
 		
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();	
-		String fileName = "D:/runtime-EclipseApplication/Scenarios/Scenario1/incidentInstance.cpi";
+		String fileName = "D:/runtime-EclipseApplication/Scenarios/Scenario1/incidentInstance_steal.cpi";
 		
 		extractor.extract(fileName);
 		

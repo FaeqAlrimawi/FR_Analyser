@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="ASCII"?>
+<cyberPhysical_Incident:IncidentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
+  <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" higherLevelScriptName=""/>
+  <asset connections="hallway-kitchen" parentEntity="floor4" name="room69">
+    <type name="Room"/>
+  </asset>
+  <asset parentEntity="room110" name="computer111" description="">
+    <type name="Computer"/>
+  </asset>
+  <asset connections="hallway-meetingRoom" parentEntity="floor4" containedEntities="computer111" name="room110" status="">
+    <type name="Room"/>
+  </asset>
+  <asset containedEntities="floor4" name="building133">
+    <type name="Building"/>
+  </asset>
+  <asset connections="hallway-kitchen hallway-meetingRoom hallway-elevatorsArea" parentEntity="floor4" name="hallway70">
+    <type name="Hallway"/>
+  </asset>
+  <asset connections="hallway-elevatorsArea" parentEntity="floor4" containedEntities="actor79" name="room120">
+    <type name="Room"/>
+  </asset>
+  <asset parentEntity="building133" containedEntities="hallway70 room69 room110 room120" name="floor4">
+    <type name="Floor"/>
+  </asset>
+  <actor parentEntity="room120" name="actor79">
+    <type name="Actor"/>
+  </actor>
+  <connection name="hallway-meetingRoom" entity1="room110" entity2="hallway70"/>
+  <connection name="hallway-kitchen" entity1="room69" entity2="hallway70"/>
+  <connection name="hallway-elevatorsArea" entity1="room120" entity2="hallway70"/>
+  <activity name="activity3" previousActivities="abstracted-Activity1" initiator="actor79" targetedAssets="room110" description="offender enters executive's room" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway70">
+          <entity name="actor79"/>
+        </entity>
+        <entity name="room110"/>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway70"/>
+        <entity name="room110">
+          <entity name="actor79"/>
+        </entity>
+      </expression>
+    </postcondition>
+  </activity>
+  <activity name="abstracted-Activity1" nextActivities="activity3" initiator="actor79" targetedAssets="room69" exploitedAssets="hallway70" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="room120">
+          <entity name="actor79">
+            <entity name="e1"/>
+          </entity>
+        </entity>
+        <entity name="hallway70">
+          <connectivity name="hallway-kitchen"/>
+        </entity>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway70"/>
+        <entity name="room69">
+          <entity name="actor79">
+            <entity name="e1">
+              <connectivity name="e1-recepRoom"/>
+            </entity>
+          </entity>
+          <connectivity name="hallway-kitchen"/>
+        </entity>
+      </expression>
+    </postcondition>
+  </activity>
+</cyberPhysical_Incident:IncidentDiagram>

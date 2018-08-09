@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -105,8 +107,8 @@ public class IncidentPatternInstantiator {
 		}
 		
 		//print matched assets
-		msgQ.put(">>Number of Assets (also entities) =  " + am.getIncidentAssetNames().length);
-		msgQ.put(">>Incident entities order: " + Arrays.toString(am.getIncidentAssetNames()));
+		msgQ.put(">>Number of Assets (also entities) =  " + am.getIncidentEntityNames().length);
+		msgQ.put(">>Incident entities order: " + Arrays.toString(am.getIncidentEntityNames()));
 		msgQ.put(">>Entity-Asset map:");
 		msgQ.put(am.toString());
 		msgQ.put(">>Generating asset sets..");
@@ -160,7 +162,7 @@ public class IncidentPatternInstantiator {
 		
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		
-		String [] incidentAssetNames = am.getIncidentAssetNames();
+		String [] incidentAssetNames = am.getIncidentEntityNames();
 		
 		
 		while(!isSetsSelected) {
@@ -321,7 +323,7 @@ public class IncidentPatternInstantiator {
 		
 		//create threads that handle each sequence generated from asset matching
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
-		String [] incidentAssetNames = am.getIncidentAssetNames();
+		String [] incidentAssetNames = am.getIncidentEntityNames();
 		
 		
 		for(int i=0; i<lst.size();i++) {//adjust the length
@@ -331,14 +333,33 @@ public class IncidentPatternInstantiator {
 		}	
 	}
 	
-	private void executeScenario1(){
+	private void executeStealScenario() {
 		
-		String xQueryMatcherFile = xqueryFile;
+		String BRS_file = "etc/steal_scenario/research_centre_system.big";
+		String BRS_outputFolder = "etc/steal_scenario/research_centre_output_100";
+		String systemModelFile = "etc/steal_scenario/research_centre_model.cps";
+		String incidentPatternFile = "etc/steal_scenario/incidentInstance_steal.cpi";
+		
+		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
+	}
+	
+	private void executeScenario1() {
+		
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-		//String logFileName = "etc/scenario1/log.txt";
+		
+		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
+	}
+	
+	private void executeScenario(
+			String incidentPatternFile, 
+			String systemModelFile,
+			String BRS_file,
+			String BRS_outputFolder){
+		
+		String xQueryMatcherFile = xqueryFile;
 
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
@@ -362,7 +383,25 @@ public class IncidentPatternInstantiator {
 		
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		msgQ.put(">>Matching incident pattern entities to system assets");
-		AssetMap am = m.findMatches(); 
+		
+		
+		//////TESTING\\\\\\\\\\\\\
+		AssetMap am = m.findMatches();
+		
+		AssetMap am2 = m.findMatches2(incidentPatternFile, systemModelFile);
+		
+		System.out.println("\n\n/////Testing new match");
+		if(am2 != null) {
+			for(Entry<String,List<String>> entry : am2.getMatchedSystemAssets().entrySet()) {
+				System.out.println(entry.getKey()+ ": " + entry.getValue());
+			}
+		} else {
+			System.out.println("map is null");
+		}
+		
+		System.out.println("/////Testing new match\n\n");
+		///////////////////////////////////////////////
+		
 		
 		// if there are incident assets with no matches from space model then exit
 		if (am.hasAssetsWithNoMatch()) {
@@ -375,8 +414,8 @@ public class IncidentPatternInstantiator {
 		}
 		
 		//print matched assets
-		msgQ.put(">>Number of Assets (also entities) =  "+am.getIncidentAssetNames().length);
-		msgQ.put(">>Incident entities order: " + Arrays.toString(am.getIncidentAssetNames()));
+		msgQ.put(">>Number of Assets (also entities) =  "+am.getIncidentEntityNames().length);
+		msgQ.put(">>Incident entities order: " + Arrays.toString(am.getIncidentEntityNames()));
 		msgQ.put(">>Entity-Asset map:");
 		msgQ.put(am.toString());
 		msgQ.put(">>Generating asset sets..");
@@ -426,7 +465,7 @@ public class IncidentPatternInstantiator {
 		
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		
-		String [] incidentAssetNames = am.getIncidentAssetNames();
+		String [] incidentAssetNames = am.getIncidentEntityNames();
 		
 		msgQ.put(">>Creating threads for asset sets. ["+threadPoolSize+"] thread(s) are running in parallel.");
 		
@@ -477,7 +516,7 @@ public class IncidentPatternInstantiator {
 		
 	}
 	
-	private void test1(){
+	/*private void test1(){
 		
 		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
@@ -550,7 +589,7 @@ public class IncidentPatternInstantiator {
 		
 		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
 		
-		String [] incidentAssetNames = am.getIncidentAssetNames();
+		String [] incidentAssetNames = am.getIncidentEntityNames();
 		
 
 		
@@ -591,7 +630,7 @@ public class IncidentPatternInstantiator {
 			e.printStackTrace();
 		} 
 		
-	}
+	}*/
 	
 	public static void main(String[] args) {
 		
@@ -600,6 +639,7 @@ public class IncidentPatternInstantiator {
 		//ins.executeExample();
 		
 		ins.executeScenario1();
+//		ins.executeStealScenario();
 		//ins.test1();
 	}
 

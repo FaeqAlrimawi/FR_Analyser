@@ -2,7 +2,9 @@ package i.e.lero.spare.pattern_instantiation;
 
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -12,8 +14,9 @@ import ie.lero.spare.franalyser.utility.CartesianIterator;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class AssetMap {
-	private String[] incidentAssetNames;
+	private String[] incidentEntityNames;
 	private String[][] spaceAssetMatches;
+	private HashMap<String, List<String>> matchedSystemAssets;
 	private LinkedList<String[]> uniqueCombinations;
 	public int numberOfSets;
 	//private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
@@ -23,22 +26,31 @@ public class AssetMap {
 	
 	public AssetMap(){
 		numberOfSets=0;
-		incidentAssetNames = null;
+		incidentEntityNames = null;
 		spaceAssetMatches = null;
+		matchedSystemAssets = new HashMap<String, List<String>>();
 	}
 	
-	public AssetMap(String [] incidentAssetNames, String[][] spaceAssetMatches) {
+	public AssetMap(String [] incidentEntityNames, String[][] spaceAssetMatches) {
 		this();
-		this.incidentAssetNames = incidentAssetNames;
+		this.incidentEntityNames = incidentEntityNames;
 		this.spaceAssetMatches = spaceAssetMatches;
 	}
-
-	public String[] getIncidentAssetNames() {
-		return incidentAssetNames;
+	
+	public HashMap<String, List<String>> getMatchedSystemAssets() {
+		return matchedSystemAssets;
 	}
 
-	public void setIncidentAssetNames(String[] incidentAssetNames) {
-		this.incidentAssetNames = incidentAssetNames;
+	public void setMatchedSystemAssets(HashMap<String, List<String>> matchedSystemAssets) {
+		this.matchedSystemAssets = matchedSystemAssets;
+	}
+
+	public String[] getIncidentEntityNames() {
+		return incidentEntityNames;
+	}
+
+	public void setIncidentEntityNames(String[] incidentEntityNames) {
+		this.incidentEntityNames = incidentEntityNames;
 	}
 
 	public String[][] getSpaceAssetMatches() {
@@ -60,7 +72,7 @@ public class AssetMap {
 	public String[] getSpaceAssetMatches(int incidentAssetIndex) {
 		String [] matches=null;
 
-		if(incidentAssetIndex > 0 && incidentAssetIndex<incidentAssetNames.length) {
+		if(incidentAssetIndex > 0 && incidentAssetIndex<incidentEntityNames.length) {
 			matches = spaceAssetMatches[incidentAssetIndex];
 		} 
 		
@@ -90,7 +102,7 @@ public class AssetMap {
 		int index=-1;
 		incidentAssetName = incidentAssetName.toLowerCase();
 		for(int i=0;i<incidentAssetName.length();i++) {
-			if(incidentAssetNames[i].toLowerCase().contentEquals(incidentAssetName)){
+			if(incidentEntityNames[i].toLowerCase().contentEquals(incidentAssetName)){
 				index = i;
 				break;
 			}
@@ -114,8 +126,8 @@ public class AssetMap {
 	public String toString() { 
 		StringBuilder result = new StringBuilder("");
 		
-		for(int i=0;i<incidentAssetNames.length;i++) {
-			result.append(incidentAssetNames[i]).append(" => {");
+		for(int i=0;i<incidentEntityNames.length;i++) {
+			result.append(incidentEntityNames[i]).append(" => {");
 			for(int j=0;j<spaceAssetMatches[i].length;j++) {
 				result.append(spaceAssetMatches[i][j]).append(",");
 			}
@@ -130,8 +142,8 @@ public class AssetMap {
 	public String toStringCompact() { 
 		StringBuilder result = new StringBuilder("");
 		
-		for(int i=0;i<incidentAssetNames.length;i++) {
-			result.append(incidentAssetNames[i]).append(":");
+		for(int i=0;i<incidentEntityNames.length;i++) {
+			result.append(incidentEntityNames[i]).append(":");
 			for(int j=0;j<spaceAssetMatches[i].length;j++) {
 				result.append(spaceAssetMatches[i][j]).append(",");
 			}
@@ -235,7 +247,7 @@ private  boolean containsDuplicate(Integer [] strs) {
 		
 		for(int i=0;i<spaceAssetMatches.length;i++) {
 			if(spaceAssetMatches[i][0] == null || spaceAssetMatches[i][0].equals("") ) {
-				names.append(incidentAssetNames[i]).append(",");
+				names.append(incidentEntityNames[i]).append(",");
 			}
 		}
 		names.deleteCharAt(names.length()-1);

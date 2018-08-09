@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cyberPhysical_Incident:IncidentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
+  <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE" higherLevelScriptName=""/>
+  <asset connections="hallway-kitchen" parentEntity="floor4" name="kitchen">
+    <type name="Kitchen"/>
+  </asset>
+  <asset parentEntity="meetingRoom" name="executiveLaptop" description="">
+    <type name="Laptop"/>
+  </asset>
+  <asset connections="hallway-meetingRoom" parentEntity="floor4" containedEntities="executiveLaptop" name="meetingRoom" status="">
+    <type name="Lab"/>
+  </asset>
+  <asset containedEntities="floor4" name="Research_Centre">
+    <type name="Building"/>
+  </asset>
+  <asset connections="hallway-kitchen hallway-meetingRoom hallway-elevatorsArea" parentEntity="floor4" name="hallway">
+    <type name="Hallway"/>
+  </asset>
+  <asset connections="hallway-elevatorsArea" parentEntity="floor4" containedEntities="Visitor1" name="elevatorsArea">
+    <type name="ElevatorsArea"/>
+  </asset>
+  <asset parentEntity="Research_Centre" containedEntities="hallway meetingRoom kitchen elevatorsArea" name="floor4">
+    <type name="Floor"/>
+  </asset>
+  <actor parentEntity="elevatorsArea" name="Visitor1">
+    <type name="Actor"/>
+  </actor>
+  <connection name="hallway-meetingRoom" entity1="meetingRoom" entity2="hallway"/>
+  <connection name="hallway-kitchen" entity1="kitchen" entity2="hallway"/>
+  <connection name="hallway-elevatorsArea" entity1="elevatorsArea" entity2="hallway"/>
+  <activity name="activity2" nextActivities="activity3" previousActivities="activity1" initiator="Visitor1" targetedAssets="kitchen" description="offender enters kitchen" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway">
+          <entity name="Visitor1">
+            <entity name="e1"/>
+          </entity>
+        </entity>
+        <entity name="kitchen">
+          <connectivity name="hallway-kitchen"/>
+        </entity>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway"/>
+        <entity name="kitchen">
+          <entity name="Visitor1">
+            <entity name="e1">
+              <connectivity name="e1-recepRoom"/>
+            </entity>
+          </entity>
+          <connectivity name="hallway-kitchen"/>
+        </entity>
+      </expression>
+    </postcondition>
+  </activity>
+  <activity name="activity3" previousActivities="activity2" initiator="Visitor1" targetedAssets="meetingRoom" description="offender enters executive's room" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway">
+          <entity name="Visitor1"/>
+        </entity>
+        <entity name="meetingRoom"/>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="hallway"/>
+        <entity name="meetingRoom">
+          <entity name="Visitor1"/>
+        </entity>
+      </expression>
+    </postcondition>
+  </activity>
+  <activity name="activity1" nextActivities="activity2" initiator="Visitor1" targetedAssets="hallway" description="offender enters hallway" systemAction="enter">
+    <precondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="elevatorsArea">
+          <entity name="Visitor1">
+            <entity name="e1"/>
+          </entity>
+        </entity>
+        <entity name="hallway">
+          <connectivity name="hallway-kitchen"/>
+        </entity>
+      </expression>
+    </precondition>
+    <postcondition>
+      <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+        <entity name="elevatorsArea"/>
+        <entity name="hallway">
+          <entity name="Visitor1">
+            <entity name="e1">
+              <connectivity name="hallway-recepRoom"/>
+            </entity>
+          </entity>
+          <connectivity name="hallway-kitchen"/>
+        </entity>
+      </expression>
+    </postcondition>
+  </activity>
+</cyberPhysical_Incident:IncidentDiagram>
