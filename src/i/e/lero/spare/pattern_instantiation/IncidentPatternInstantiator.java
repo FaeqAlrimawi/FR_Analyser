@@ -442,29 +442,35 @@ public class IncidentPatternInstantiator {
 		
 		msgQ.put(">>Asset sets ("+lst.size()+"):");
 		
-		boolean oldIsPrintToScreen = isPrintToScreen;
+		//boolean oldIsPrintToScreen = isPrintToScreen;
 		
 		//print the sets only if there are less than 200. Else, print a 100 but save the rest to a file
 		int maxNum = 200;
 		
 		if(isSaveLog && lst.size() > maxNum) {
-			for(int i=0; i<maxNum;i++) {//adjust the length				
-				msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			if(isPrintToScreen) {
+				System.out.println("*See log file ("+Logger.getInstance().getLogFolder()+"/"+Logger.getInstance().getLogFileName()+") for All generated sets]");	
+			}
+
+			int index = 0;
+			
+			for(; index<20;index++) {
+				msgQ.put("-Set["+index+"]: "+ Arrays.toString(lst.get(index)));
 			}
 			
-			if(isPrintToScreen) {
-				System.out.println("... [See log file ("+Logger.getInstance().getLogFolder()+"/"+Logger.getInstance().getLogFileName()+") for the rest]");	
+			logger.setPrintToScreen(false);
+			for(; index<lst.size();index++) {				
+				msgQ.put("-Set["+index+"]: "+ Arrays.toString(lst.get(index)));
 			}
-					
+			logger.setPrintToScreen(true);
+			
 		} else {
-			for(int i=0; i<lst.size();i++) {//adjust the length				
+			for(int i=0; i<lst.size();i++) {				
 				msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			}
 		}
 		
-		
-		
-		isPrintToScreen = oldIsPrintToScreen;
+		//isPrintToScreen = oldIsPrintToScreen;
 		
 		msgQ.put(">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
 		

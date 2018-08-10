@@ -19,7 +19,7 @@ public class Logger implements Runnable{
 	private IncidentPatternInstantiationListener listener;
 	private String logFolder = ".";
 	private String logFileName;
-	private BlockingQueue<String> msgQ = new ArrayBlockingQueue<String>(2000);
+	private BlockingQueue<String> msgQ = new ArrayBlockingQueue<String>(4000);
 	private BufferedWriter bufferWriter;
 	private LocalDateTime timeNow;
 //	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"); 
