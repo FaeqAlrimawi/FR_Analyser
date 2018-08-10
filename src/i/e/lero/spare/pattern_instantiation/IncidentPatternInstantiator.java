@@ -4,13 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -31,12 +28,12 @@ import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternInstantiator {
 	
-	private String xqueryFile = "etc/match_query.xq";
+//	private String xqueryFile = "etc/match_query.xq";
 //	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	//BufferedWriter bufferWriter;
-	private int threadPoolSize = 1;
-	private int parallelActivities = 1;
-	private int matchingThreshold = 100;
+	private int threadPoolSize = 2; //sets how many asset sets can run in parallel
+	private int parallelActivities = 2; //sets how many activities can be analysed in parallel
+	private int matchingThreshold = 100; //set how many bigraph matching can be done in parallel
 	
 	int maxWaitingTime = 48;
 	TimeUnit timeUnit = TimeUnit.HOURS;
@@ -44,8 +41,8 @@ public class IncidentPatternInstantiator {
 	int incrementValue = 10;
 	boolean isSetsSelected = false;
 	LinkedList<Integer> assetSetsSelected;
-	private String logFileName;
-	private String logFolder;	
+//	private String logFileName;
+//	private String logFolder;	
 //	private boolean isSaveLog = false;
 	private boolean isPrintToScreen = false;
 	private BlockingQueue<String> msgQ;
@@ -67,7 +64,7 @@ public class IncidentPatternInstantiator {
 		
 		listener = listen;
 		
-		String xQueryMatcherFile = xqueryFile;
+//		String xQueryMatcherFile = xqueryFile;
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output_500";
 		
@@ -90,18 +87,18 @@ public class IncidentPatternInstantiator {
 		timer.start();
 		
 		////start executing the scenario \\\\
-		Mapper m = new Mapper(xQueryMatcherFile);
+		Mapper m = new Mapper();
 		
 		msgQ.put(">>Matching incident pattern entities to system assets");
 		
-		AssetMap am = m.findMatches(); 
+		AssetMap am = m.findMatches(incidentPatternFile, systemModelFile); 
 		
 		// if there are incident assets with no matches from space model then exit
-		if (am.hasAssetsWithNoMatch()) {
+		if (am.hasEntitiesWithNoMatch()) {
 			msgQ.put(">>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
-			String[] asts = am.getIncidentAssetsWithNoMatch();
-			msgQ.put(Arrays.toString(asts));
+			List<String> asts = am.getIncidentAssetsWithNoMatch();
+			msgQ.put(asts.toString());
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
@@ -137,7 +134,7 @@ public class IncidentPatternInstantiator {
 		for(int i=0; i<lst.size();i++) {//adjust the length
 			if(isPrintToScreen && i>=100) {
 				isPrintToScreen = false;
-				System.out.println("-... [See log file ("+logFolder+"/"+logFileName+") for the rest]");
+				System.out.println("-... [See log file ("+Logger.getInstance().getLogFolder()+"/"+Logger.getInstance().getLogFileName()+") for the rest]");
 			}
 			msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
 		}
@@ -264,7 +261,7 @@ public class IncidentPatternInstantiator {
 	 */
 	private void executeExample(){
 		
-		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
+//		String xQueryMatcherFile = xqueryFile;//in the xquery file the incident and system model paths should be adjusted if changed from current location
 		String BRS_file = "etc/example/research_centre_system.big";
 		String BRS_outputFolder = "etc/example/research_centre_output";
 		String systemModelFile = "etc/example/research_centre_model.cps";
@@ -273,17 +270,17 @@ public class IncidentPatternInstantiator {
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
 		
-		Mapper m = new Mapper(xQueryMatcherFile);
+		Mapper m = new Mapper();
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		System.out.println(">>Matching incident pattern entities to system assets");
-		AssetMap am = m.findMatches(); 
+		AssetMap am = m.findMatches(incidentPatternFile, systemModelFile); 
 		
 		// if there are incident assets with no matches from space model then exit
-		if (am.hasAssetsWithNoMatch()) {
+		if (am.hasEntitiesWithNoMatch()) {
 			System.out.println(">>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
-			String[] asts = am.getIncidentAssetsWithNoMatch();
-				System.out.println(Arrays.toString(asts));
+			List<String> asts = am.getIncidentAssetsWithNoMatch();
+			System.out.println(asts.toString());
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
@@ -346,7 +343,7 @@ public class IncidentPatternInstantiator {
 	private void executeScenario1() {
 		
 		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
+		String BRS_outputFolder = "etc/scenario1/research_centre_output_100";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
 		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 		
@@ -359,7 +356,7 @@ public class IncidentPatternInstantiator {
 			String BRS_file,
 			String BRS_outputFolder){
 		
-		String xQueryMatcherFile = xqueryFile;
+		//String xQueryMatcherFile = xqueryFile;
 
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
@@ -379,15 +376,15 @@ public class IncidentPatternInstantiator {
 		timer.start();
 		
 		////start executing the scenario \\\\
-		Mapper m = new Mapper(xQueryMatcherFile);
+		Mapper m = new Mapper();
 		
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		msgQ.put(">>Matching incident pattern entities to system assets");
 		
 		
-		//////TESTING\\\\\\\\\\\\\
-		AssetMap am = m.findMatches();
+		AssetMap am = m.findMatches(incidentPatternFile, systemModelFile);
 		
+		/*//////TESTING\\\\\\\\\\\\\
 		AssetMap am2 = m.findMatches2(incidentPatternFile, systemModelFile);
 		
 		System.out.println("\n\n/////Testing new match");
@@ -401,14 +398,14 @@ public class IncidentPatternInstantiator {
 		
 		System.out.println("/////Testing new match\n\n");
 		///////////////////////////////////////////////
-		
+*/		
 		
 		// if there are incident assets with no matches from space model then exit
-		if (am.hasAssetsWithNoMatch()) {
+		if (am.hasEntitiesWithNoMatch()) {
 			msgQ.put(">>Some incident entities have no matches in the system assets. These are:");
 			//getIncidetnAssetWithNoMatch method has some issues
-			String[] asts = am.getIncidentAssetsWithNoMatch();
-			msgQ.put(Arrays.toString(asts));
+			List<String> asts = am.getIncidentAssetsWithNoMatch();
+			msgQ.put(asts.toString());
 			return; // execution stops if there are incident entities with
 					// no matching
 		}
@@ -438,7 +435,7 @@ public class IncidentPatternInstantiator {
 		for(int i=0; i<lst.size();i++) {//adjust the length
 			if(isPrintToScreen && i>=100) {
 				isPrintToScreen = false;
-				System.out.println("-... [See log file ("+logFolder+"/"+logFileName+") for the rest]");
+				System.out.println("-... [See log file ("+Logger.getInstance().getLogFolder()+"/"+Logger.getInstance().getLogFileName()+") for the rest]");
 			}
 			msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
 		}
@@ -469,7 +466,7 @@ public class IncidentPatternInstantiator {
 		
 		msgQ.put(">>Creating threads for asset sets. ["+threadPoolSize+"] thread(s) are running in parallel.");
 		
-		for(int i=0; i<2;i++) {//adjust the length
+		for(int i=0; i<lst.size();i++) {//adjust the length
 			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 			executor.submit(incidentInstances[i]);
 		}

@@ -1,7 +1,6 @@
 package i.e.lero.spare.pattern_instantiation;
 
 
-import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,24 +11,19 @@ import java.util.concurrent.RecursiveTask;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
-import javax.xml.xquery.XQException;
-
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Knowledge;
 import cyberPhysical_Incident.Location;
 import environment.Asset;
 import environment.EnvironmentDiagram;
-import i.e.lero.spare.pattern_instantiation.BigraphAnalyser.BigraphMatcher;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
 import ie.lero.spare.franalyser.utility.SystemModelHandler;
-import ie.lero.spare.franalyser.utility.XqueryExecuter;
-import it.uniud.mads.jlibbig.core.std.Bigraph;
 
 public class Mapper {
 
 	private ForkJoinPool mainPool;
-	private String xqueryFilePath;
+//	private String xqueryFilePath;
 	private List<environment.Asset> systemAssets;
 	private LinkedList<IncidentEntity> incidentEntities;
 	private int incidentEntitiesThreshold = 10;
@@ -40,12 +34,12 @@ public class Mapper {
 		mainPool = new ForkJoinPool();
 	}
 
-	public Mapper(String xqueryFilePath) {
+	/*public Mapper(String xqueryFilePath) {
 		this();
 		this.xqueryFilePath = xqueryFilePath;
 	}
-
-	public AssetMap findMatches() {
+*/
+	/*public AssetMap findMatchesOriginal() {
 		String res = null;
 		
 		try {
@@ -84,14 +78,28 @@ public class Mapper {
 
 		}
 
-		map.setIncidentEntityNames(incidentAssetNames);
-		map.setSpaceAssetMatches(matches);
+//		map.setIncidentEntityNames(incidentAssetNames);
+//		map.setSystemAssetMatches(matches);
 
 		return map;
-	}
+	}*/
 
-
-	public AssetMap findMatches2(String incidentPatternFile, String systemModelFile) {
+/**
+ * Finds All system assets that match each incident entity. The matching is done based on the criteria:
+ *1-Type of entity which is taken from the tag type in the model. This compared to the type 
+ * of an asset as a class (e.g., entity has type "Room" returns all assets that are instances of
+ * Room class or its subclasses 
+ * 2-Type of parent (container of asset/entity)
+ * 3-Number & type of contained assets.
+ * 4-Number & type of connections. All incident entity connections should be subset of the
+ * connections of an asset if knowledge is partial or exact if knowledge is exact. Type can be 
+ * of the same class or subclass.
+ * 5-Properities if found in the entity
+ * @param incidentPatternFile incident pattern model file path 
+ * @param systemModelFile system model file path
+ * @return
+ */
+	public AssetMap findMatches(String incidentPatternFile, String systemModelFile) {
 		
 		//read models
 		//incident pattern
@@ -113,14 +121,14 @@ public class Mapper {
 		return map;
 	}
 	
-	public String getXquery() {
+	/*public String getXquery() {
 		return xqueryFilePath;
 	}
 
 	public void setXquery(String xquery) {
 		this.xqueryFilePath = xquery;
 	}
-
+*/
 	class EntityMatcher extends RecursiveTask<HashMap<String, List<String>>> {
 
 		private static final long serialVersionUID = 1L;

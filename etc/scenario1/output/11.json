@@ -1,0 +1,67 @@
+{
+    "potential_incident_instances": {
+        "instances": [{
+            "instance_id": 0,
+            "transitions": [
+                {
+                    "a": "EnterRoom",
+                    "s": 0,
+                    "t": 6
+                },
+                {
+                    "a": "ConnectBusDevice",
+                    "s": 6,
+                    "t": 22
+                },
+                {
+                    "a": "SendData",
+                    "s": 22,
+                    "t": 72
+                }
+            ]
+        }],
+        "num": 1
+    },
+    "map": [
+        {
+            "system_asset_name": "SoftwareX",
+            "incident_entity_name": "HVACmalware"
+        },
+        {
+            "system_asset_name": "AirConditioning",
+            "incident_entity_name": "HVAC"
+        },
+        {
+            "system_asset_name": "hallway",
+            "incident_entity_name": "hallway"
+        },
+        {
+            "system_asset_name": "SL3",
+            "incident_entity_name": "smartDevice1"
+        },
+        {
+            "system_asset_name": "fourteenth_floor",
+            "incident_entity_name": "floorX"
+        },
+        {
+            "system_asset_name": "empiricalLab",
+            "incident_entity_name": "location2"
+        },
+        {
+            "system_asset_name": "Laptop1",
+            "incident_entity_name": "laptopX"
+        },
+        {
+            "system_asset_name": "IPnetwork1",
+            "incident_entity_name": "busNetwork"
+        },
+        {
+            "system_asset_name": "informaticsLab",
+            "incident_entity_name": "location_SD1"
+        },
+        {
+            "system_asset_name": "Visitor1",
+            "incident_entity_name": "offender1"
+        }
+    ]
+}

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
@@ -15,71 +16,82 @@ import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class AssetMap {
 	private String[] incidentEntityNames;
-	private String[][] spaceAssetMatches;
+//	private String[][] systemAssetMatches;
 	private HashMap<String, List<String>> matchedSystemAssets;
 	private LinkedList<String[]> uniqueCombinations;
 	public int numberOfSets;
 	//private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 	private int numberOfSegments = 2;
 	private int sizeofSegment = 3;
-	private LinkedList<String> systemAssets;
+	//private LinkedList<String> systemAssets;
 	
 	public AssetMap(){
 		numberOfSets=0;
 		incidentEntityNames = null;
-		spaceAssetMatches = null;
+//		systemAssetMatches = null;
 		matchedSystemAssets = new HashMap<String, List<String>>();
 	}
 	
-	public AssetMap(String [] incidentEntityNames, String[][] spaceAssetMatches) {
+	/*public AssetMap(String [] incidentEntityNames, String[][] systemAssetMatches) {
 		this();
 		this.incidentEntityNames = incidentEntityNames;
-		this.spaceAssetMatches = spaceAssetMatches;
+//		this.systemAssetMatches = systemAssetMatches;
 	}
-	
+	*/
 	public HashMap<String, List<String>> getMatchedSystemAssets() {
 		return matchedSystemAssets;
 	}
 
 	public void setMatchedSystemAssets(HashMap<String, List<String>> matchedSystemAssets) {
+		
 		this.matchedSystemAssets = matchedSystemAssets;
+		
+		if(matchedSystemAssets != null) {
+			Object[] tmp =  matchedSystemAssets.keySet().toArray();
+			incidentEntityNames = Arrays.copyOf(tmp, tmp.length, String[].class);
+			tmp = null;
+		}
+		
 	}
 
-	public String[] getIncidentEntityNames() {
+	public String[] getIncidentEntityNames() {		
 		return incidentEntityNames;
 	}
 
-	public void setIncidentEntityNames(String[] incidentEntityNames) {
+	/*public void setIncidentEntityNames(String[] incidentEntityNames) {
 		this.incidentEntityNames = incidentEntityNames;
-	}
+	}*/
 
-	public String[][] getSpaceAssetMatches() {
-		return spaceAssetMatches;  
-	}
+	/*public String[][] getSystemAssetMatches() {
+		return systemAssetMatches;  
+	}*/
  
-	public void setSpaceAssetMatches(String[][] spaceAssetMatches) {
-		this.spaceAssetMatches = spaceAssetMatches;
-	}
+	/*public void setSystemAssetMatches(String[][] systemAssetMatches) {
+		this.systemAssetMatches = systemAssetMatches;
+	}*/
 	
 	public LinkedList<String[]> getUniqueCombinations() {
+		
+		if(uniqueCombinations == null) {
+			uniqueCombinations = generateUniqueCombinations();
+		}
+		
 		return uniqueCombinations;
 	}
 
-	public void setUniqueCombinations(LinkedList<String[]> uniqueCombinations) {
+	/*public void setUniqueCombinations(LinkedList<String[]> uniqueCombinations) {
 		this.uniqueCombinations = uniqueCombinations;
-	}
+	}*/
 	
-	public String[] getSpaceAssetMatches(int incidentAssetIndex) {
+	/*public String[] getSystemAssetMatches(int incidentAssetIndex) {
 		String [] matches=null;
 
 		if(incidentAssetIndex > 0 && incidentAssetIndex<incidentEntityNames.length) {
-			matches = spaceAssetMatches[incidentAssetIndex];
+			matches = systemAssetMatches[incidentAssetIndex];
 		} 
 		
 		return matches;
-	}
-	
-	
+	}*/
 	
 	public int getNumberOfSegments() {
 		return numberOfSegments;
@@ -97,9 +109,10 @@ public class AssetMap {
 		this.sizeofSegment = sizeofSegment;
 	}
 
-	public String[] getSpaceAssetMatched(String incidentAssetName) {
+	public String[] getSystemAssetsMatched(String incidentEntityName) {
+		
 		String [] matches=null;
-		int index=-1;
+		/*int index=-1;
 		incidentAssetName = incidentAssetName.toLowerCase();
 		for(int i=0;i<incidentAssetName.length();i++) {
 			if(incidentEntityNames[i].toLowerCase().contentEquals(incidentAssetName)){
@@ -108,8 +121,11 @@ public class AssetMap {
 			}
 		}
 		if(index != -1) {
-			matches = spaceAssetMatches[index];
-		}
+			matches = systemAssetMatches[index];
+		}*/
+		
+		matches = (String[])matchedSystemAssets.get(incidentEntityName).toArray();
+		
 		return matches;
 	}
 	
@@ -117,38 +133,31 @@ public class AssetMap {
 		String[][] result = new String[incidentAssets.length][];
 		
 		for(int i=0; i<incidentAssets.length; i++) {
-			result[i] = getSpaceAssetMatched(incidentAssets[i]);
+			result[i] = getSystemAssetsMatched(incidentAssets[i]);
 		}
 		
 		return result;
 	}
 	
 	public String toString() { 
-		StringBuilder result = new StringBuilder("");
+		StringBuilder result = new StringBuilder();
 		
-		for(int i=0;i<incidentEntityNames.length;i++) {
-			result.append(incidentEntityNames[i]).append(" => {");
-			for(int j=0;j<spaceAssetMatches[i].length;j++) {
-				result.append(spaceAssetMatches[i][j]).append(",");
-			}
-			result.deleteCharAt(result.length()-1);
-			result.append("}");
-			result.append("\n");
+		for(Entry<String, List<String>> entity : matchedSystemAssets.entrySet()) {
+			result.append(entity.getKey()).append(" => ")
+			.append(entity.getValue())
+			.append("\n");
 		}
 		
 		return result.toString();
 	}
 	
 	public String toStringCompact() { 
-		StringBuilder result = new StringBuilder("");
+		StringBuilder result = new StringBuilder();
 		
-		for(int i=0;i<incidentEntityNames.length;i++) {
-			result.append(incidentEntityNames[i]).append(":");
-			for(int j=0;j<spaceAssetMatches[i].length;j++) {
-				result.append(spaceAssetMatches[i][j]).append(",");
-			}
-			result.deleteCharAt(result.length()-1);
-			result.append(";");
+		for(Entry<String, List<String>> entity : matchedSystemAssets.entrySet()) {
+			result.append(entity.getKey()).append(":")
+			.append(entity.getValue())
+			.append(";");
 		}
 		
 		return result.toString();
@@ -207,7 +216,7 @@ public class AssetMap {
 	
 	
 	
-private  boolean containsDuplicate(Integer [] strs) {
+/*private  boolean containsDuplicate(Integer [] strs) {
 		
 		LinkedList<Integer> list = new LinkedList<Integer>();
 
@@ -220,40 +229,54 @@ private  boolean containsDuplicate(Integer [] strs) {
 		}
 		return false;
 	}
-	
-	public boolean hasAssetsWithNoMatch(){
-		boolean isNotMatched = false;
+	*/
+	public boolean hasEntitiesWithNoMatch(){
 		
-		for(int i=0;i<spaceAssetMatches.length;i++) {
-			if(spaceAssetMatches[i][0] == null) {
+		/*for(int i=0;i<systemAssetMatches.length;i++) {
+			if(systemAssetMatches[i][0] == null) {
+				return true;
+			}
+		}*/
+		
+		for(List<String> matches: matchedSystemAssets.values()) {
+			
+			if(matches.isEmpty()) {
 				return true;
 			}
 		}
 		
-		return isNotMatched;
+		return false;
 	}
 	
 	/**
 	 * Returns all incident entities that have no matches
 	 * @return array of strings that hold the names of the incident entities
 	 */
-	public String[] getIncidentAssetsWithNoMatch() {
-		String [] assetNames;
-		StringBuilder names = new StringBuilder("");
+	public List<String> getIncidentAssetsWithNoMatch() {
 		
-		if(!hasAssetsWithNoMatch()) {
+//		String [] assetNames;
+		LinkedList<String> names = new LinkedList<String>();
+		
+		if(!hasEntitiesWithNoMatch()) {
 			return null;
 		}
 		
-		for(int i=0;i<spaceAssetMatches.length;i++) {
-			if(spaceAssetMatches[i][0] == null || spaceAssetMatches[i][0].equals("") ) {
+		/*for(int i=0;i<systemAssetMatches.length;i++) {
+			if(systemAssetMatches[i][0] == null || systemAssetMatches[i][0].equals("") ) {
 				names.append(incidentEntityNames[i]).append(",");
 			}
 		}
 		names.deleteCharAt(names.length()-1);
-		assetNames = names.toString().split(",");
+		assetNames = names.toString().split(",");*/
 		
-		return assetNames;
+		for(Entry<String, List<String>> entity: matchedSystemAssets.entrySet()) {
+			
+			if(entity.getValue().isEmpty()) {
+				names.add(entity.getKey());
+			}
+		}
+		
+		return names;
 	}
 	
 	public String getIncidentAssetInfo(String assetName) {
@@ -297,7 +320,7 @@ private  boolean containsDuplicate(Integer [] strs) {
 	 * Returns a random unique sequence of system assets
 	 * @return array of strings holding the names of the system assets
 	 */
-	public String[] getRandomSpaceAssetMatches() {
+	public String[] getRandomSystemAssetMatches() {
 
 		if(uniqueCombinations == null) {
 			generateUniqueCombinations();
@@ -312,28 +335,28 @@ private  boolean containsDuplicate(Integer [] strs) {
 	 * Generates all unique combinations of system assets that correspond to the set of incident assets
 	 *@return LinkedList<String[]> containing all unique combinations
 	 */
-	public LinkedList<Integer[]> generateUniqueCombinationsUsingIntegers() {
+	/*public LinkedList<Integer[]> generateUniqueCombinationsUsingIntegers() {
 		
-		Integer [][] matches = new Integer [spaceAssetMatches.length][];
+		Integer [][] matches = new Integer [systemAssetMatches.length][];
 		systemAssets = new LinkedList<String>();
 		
 		//convert strings to integers to generate combinations
 		for(int i=0;i<matches.length;i++) {
-			matches[i] = new Integer [spaceAssetMatches[i].length];
+			matches[i] = new Integer [systemAssetMatches[i].length];
 			for(int j=0;j<matches[i].length;j++) {
-				if(!systemAssets.contains(spaceAssetMatches[i][j])) {
-					systemAssets.add(spaceAssetMatches[i][j]);
+				if(!systemAssets.contains(systemAssetMatches[i][j])) {
+					systemAssets.add(systemAssetMatches[i][j]);
 				}
-				matches[i][j] = systemAssets.indexOf(spaceAssetMatches[i][j]);
+				matches[i][j] = systemAssets.indexOf(systemAssetMatches[i][j]);
 			}
 		}
 		
-/*		
+		
 		for(int i=0;i<matches.length;i++) {
 			for(int j=0;j<matches[i].length;j++) {
-			System.out.println(matches[i][j]+"==="+ spaceAssetMatches[i][j]);	
+			System.out.println(matches[i][j]+"==="+ systemAssetMatches[i][j]);	
 			}
-		}*/
+		}
 			
 		Iterable<Integer[]> it = () -> new CartesianIterator<>(matches, Integer[]::new);
 		LinkedList<Integer[]> tmp = new LinkedList<Integer[]>();
@@ -346,11 +369,13 @@ private  boolean containsDuplicate(Integer [] strs) {
 		
 		System.out.println("size "+tmp.size());
 		return tmp;
-	}
+	}*/
 	
 public LinkedList<String[]> generateUniqueCombinations() {
 
-	CartesianIterator<String> it =  new CartesianIterator<String>(spaceAssetMatches, String[]::new);
+	String [][] systemAssetMatches = getDoubleArrayOfMatches();
+	
+	CartesianIterator<String> it =  new CartesianIterator<String>(systemAssetMatches, String[]::new);
 		uniqueCombinations = new LinkedList<String[]>();
 		
 		LinkedList<LinkedList<String>> res = it.iterateElements();
@@ -364,6 +389,23 @@ public LinkedList<String[]> generateUniqueCombinations() {
 		return uniqueCombinations;
 	}
 	
+	private String [][] getDoubleArrayOfMatches() {
+		
+		String [][] systemAssetMatches = new String[matchedSystemAssets.keySet().size()][];
+		
+		int index = 0;
+		
+		for(List<String> matches : matchedSystemAssets.values()){
+			Object[] tmp = matches.toArray();
+			systemAssetMatches[index] = Arrays.copyOf(tmp, tmp.length, String[].class);
+			index++;
+		}
+		
+		
+		return systemAssetMatches;
+		
+	}
+	
 public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		
 		//multi-threading is requried to speed up the process of finding all possible combinations
@@ -373,6 +415,8 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		//number of space assets each segment should take
 		//int size = 2;
 		
+		String [][] systemAssetMatches = getDoubleArrayOfMatches();
+	
 		//segments
 		String [][][] segments = new String [numberOfSegments][sizeofSegment][];
 		LinkedList<String> [] results = new LinkedList[numberOfSegments];
@@ -381,8 +425,8 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		//where each 2d aray points to a segment in system array
 		for(int i=0;i<numberOfSegments;i++) {
 			for(int j=0;j<sizeofSegment;j++) {
-				segments[i][j] = new String[spaceAssetMatches[j+(i*sizeofSegment)].length];
-				segments[i][j] = spaceAssetMatches[j+(i*sizeofSegment)];
+				segments[i][j] = new String[systemAssetMatches[j+(i*sizeofSegment)].length];
+				segments[i][j] = systemAssetMatches[j+(i*sizeofSegment)];
 			}
 			
 			//create lists to hold results from each segment
@@ -404,7 +448,7 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 		try {
 			latch.await();
 			LinkedList<String> finalResult = new LinkedList<String>();
-			if(spaceAssetMatches.length % 2 == 0) {
+			if(systemAssetMatches.length % 2 == 0) {
 			String [][] res = new String [2][];
 			res[0] = results[0].toArray(new String[0]);
 			res[1] = results[1].toArray(new String[0]);
@@ -419,7 +463,7 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 				String [][] res = new String [3][];
 				res[0] = results[0].toArray(new String[0]);
 				res[1] = results[1].toArray(new String[0]);
-				res[2] = spaceAssetMatches[spaceAssetMatches.length-1];
+				res[2] = systemAssetMatches[systemAssetMatches.length-1];
 				Iterable<String[]> it = () -> new CartesianIterator<>(res, String[]::new);
 				for (String[] s : it) {
 						if(!containsDuplicate(s)) {
@@ -518,8 +562,8 @@ public LinkedList<String[]> generateUniqueCombinationsUsingThreads() {
 //			m.setNumberOfSegments(rows/size);
 //		}
 	 
-		m.setSpaceAssetMatches(tst);
-		m2.setSpaceAssetMatches(tst);
+		m.setsystemAssetMatches(tst);
+		m2.setsystemAssetMatches(tst);
 		
 		System.out.println("Testing [The generation of unqiue sequences USING 3 threads] using a "+rows+""
 				+ "*"+columns+ "\nstatring time [" + dtf.format(LocalDateTime.now())+"]");
