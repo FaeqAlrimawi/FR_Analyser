@@ -15,14 +15,14 @@ public class Logger implements Runnable{
 
 	//private BlockingQueue msgQ;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
 	private IncidentPatternInstantiationListener listener;
-	private String logFolder = "etc/scenario1/log";
+	private String logFolder = ".";
 	private String logFileName;
 	private BlockingQueue<String> msgQ = new ArrayBlockingQueue<String>(2000);
 	private BufferedWriter bufferWriter;
 	private LocalDateTime timeNow;
-	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm"); 
+//	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"); 
 	private DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS"); 
 	private static Logger logger = new Logger();
 	public static String terminatingString = "LoggingDone";
@@ -32,7 +32,7 @@ public class Logger implements Runnable{
 		timeNow = LocalDateTime.now();
 		//set log file name
 		logFileName = "log"+timeNow.getHour()+timeNow.getMinute()+timeNow.getSecond()+"_"+timeNow.toLocalDate()+".txt";	
-		createLogFile();
+		//createLogFile();
 	}
 	
 	public static Logger getInstance() {
@@ -44,7 +44,7 @@ public class Logger implements Runnable{
 		return logger;
 	}
 	
-	private BufferedWriter createLogFile() {
+	public BufferedWriter createLogFile() {
 		
 		if(!isSaveLog) {
 			return null;
@@ -117,7 +117,8 @@ public class Logger implements Runnable{
 		
 	}
 	
-	public void print(String msg) {
+	
+	private void print(String msg) {
 		
 		String timeStamp = "["+dtfTime.format(LocalDateTime.now())+"]";
 		msg = timeStamp+" : "+msg;

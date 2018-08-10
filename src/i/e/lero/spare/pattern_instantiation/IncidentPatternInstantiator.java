@@ -29,34 +29,46 @@ import it.uniud.mads.jlibbig.core.util.StopWatch;
 public class IncidentPatternInstantiator {
 	
 //	private String xqueryFile = "etc/match_query.xq";
-//	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
-	//BufferedWriter bufferWriter;
-	private int threadPoolSize = 2; //sets how many asset sets can run in parallel
-	private int parallelActivities = 2; //sets how many activities can be analysed in parallel
-	private int matchingThreshold = 100; //set how many bigraph matching can be done in parallel
 	
+	//parallelism parameters
+	private int threadPoolSize = 1; //sets how many asset sets can run in parallel
+	private int parallelActivities = 1; //sets how many activities can be analysed in parallel
+	private int matchingThreshold = 100; //set how many bigraph matching can be done in parallel
+	private ExecutorService executor;
+	private ForkJoinPool mainPool = new ForkJoinPool();
+	
+	//waiting time for executor before firing an exception
 	int maxWaitingTime = 48;
 	TimeUnit timeUnit = TimeUnit.HOURS;
-	IncidentPatternInstantiationListener listener;
-	int incrementValue = 10;
-	boolean isSetsSelected = false;
-	LinkedList<Integer> assetSetsSelected;
-//	private String logFileName;
-//	private String logFolder;	
-//	private boolean isSaveLog = false;
-	private boolean isPrintToScreen = false;
-	private BlockingQueue<String> msgQ;
-	ExecutorService executor;
-	ForkJoinPool mainPool = new ForkJoinPool();
 	
-	public void runLogger() {
+	//GUI
+	IncidentPatternInstantiationListener listener; 
+	int incrementValue = 10; //for GUI progress bar
+	boolean isSetsSelected = false; 
+	LinkedList<Integer> assetSetsSelected; 
+	
+	//Logging
+	private Logger logger;
+	private String logFolder = ".";	
+	private boolean isPrintToScreen = true;
+	private boolean isSaveLog = true;
+	private BlockingQueue<String> msgQ;
+	
+	
+	private void runLogger() {
 		
-		//runn a logger
-		Logger.getInstance().setListener(listener);
+		logger = Logger.getInstance();
 		
-		new Thread(Logger.getInstance()).start();
+		logger.setListener(listener);
+		logger.setLogFolder(logFolder);
+		logger.createLogFile();
+		logger.setPrintToScreen(isPrintToScreen);
+		logger.setSaveLog(isSaveLog);
+
+		msgQ = logger.getMsgQ();
 		
-		msgQ = Logger.getInstance().getMsgQ();
+		new Thread(logger).start();
+
 	}
 	
 	public void execute(String incidentPatternFile, String systemModelFile, int threadPoolSiz, IncidentPatternInstantiationListener listen) {
@@ -363,6 +375,7 @@ public class IncidentPatternInstantiator {
 	
 		try {
 		
+		logFolder = "etc/scenario1/log";
 		runLogger();
 			
 		StopWatch timer = new StopWatch();
@@ -432,13 +445,24 @@ public class IncidentPatternInstantiator {
 		boolean oldIsPrintToScreen = isPrintToScreen;
 		
 		//print the sets only if there are less than 200. Else, print a 100 but save the rest to a file
-		for(int i=0; i<lst.size();i++) {//adjust the length
-			if(isPrintToScreen && i>=100) {
-				isPrintToScreen = false;
-				System.out.println("-... [See log file ("+Logger.getInstance().getLogFolder()+"/"+Logger.getInstance().getLogFileName()+") for the rest]");
+		int maxNum = 200;
+		
+		if(isSaveLog && lst.size() > maxNum) {
+			for(int i=0; i<maxNum;i++) {//adjust the length				
+				msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
 			}
-			msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			
+			if(isPrintToScreen) {
+				System.out.println("... [See log file ("+Logger.getInstance().getLogFolder()+"/"+Logger.getInstance().getLogFileName()+") for the rest]");	
+			}
+					
+		} else {
+			for(int i=0; i<lst.size();i++) {//adjust the length				
+				msgQ.put("-Set["+i+"]: "+ Arrays.toString(lst.get(i)));
+			}
 		}
+		
+		
 		
 		isPrintToScreen = oldIsPrintToScreen;
 		
