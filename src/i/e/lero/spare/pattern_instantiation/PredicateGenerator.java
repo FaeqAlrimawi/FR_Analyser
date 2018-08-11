@@ -138,7 +138,7 @@ public class PredicateGenerator {
 		return predHandler;
 	}
 
-	public PredicateHandler generatePredicatesUpdated() {
+	/*public PredicateHandler generatePredicatesUpdated() {
 
 		PredicateType[] types = { PredicateType.Precondition, PredicateType.Postcondition };
 
@@ -185,7 +185,7 @@ public class PredicateGenerator {
 			e.printStackTrace();
 		}
 		return predHandler;
-	}
+	}*/
 
 	
 	private boolean convertToMatchedAssets(JSONObject obj) {

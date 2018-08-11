@@ -51,7 +51,7 @@ public class IncidentPatternInstantiator {
 	private Logger logger;
 	private String logFolder = ".";	
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = true;
+	private boolean isSaveLog = false;
 	private BlockingQueue<String> msgQ;
 	
 	
