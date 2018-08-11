@@ -1,6 +1,8 @@
 package i.e.lero.spare.pattern_instantiation;
 
 
+import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,6 +13,8 @@ import java.util.concurrent.RecursiveTask;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import javax.xml.xquery.XQException;
+
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Knowledge;
@@ -19,11 +23,12 @@ import environment.Asset;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
 import ie.lero.spare.franalyser.utility.SystemModelHandler;
+import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class Mapper {
 
 	private ForkJoinPool mainPool;
-//	private String xqueryFilePath;
+	private String xqueryFilePath;
 	private List<environment.Asset> systemAssets;
 	private LinkedList<IncidentEntity> incidentEntities;
 	private int incidentEntitiesThreshold = 10;
@@ -39,8 +44,10 @@ public class Mapper {
 		this.xqueryFilePath = xqueryFilePath;
 	}
 */
-	/*public AssetMap findMatchesOriginal() {
+	public AssetMap findMatchesUsingXquery(String xqueryFilePath) {
+		
 		String res = null;
+		HashMap<String, List<String>> result = null;
 		
 		try {
 			res = XqueryExecuter.executeQueryFromFile(xqueryFilePath);
@@ -48,13 +55,15 @@ public class Mapper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		if(res == null) {
+
+		if (res == null) {
 			return null;
 		}
-		
-		//removes the tags <>
-		res = res.substring(res.indexOf('>')+1, res.lastIndexOf('<'));
+
+		// removes the tags <>
+		res = res.substring(res.indexOf('>') + 1, res.lastIndexOf('<'));
+
+		result = new HashMap<String, List<String>>();
 		
 		String[] incidentAssetsandMatches = res.split(" ");
 		String[] incidentAssetNames = new String[incidentAssetsandMatches.length];
@@ -66,23 +75,26 @@ public class Mapper {
 
 		for (i = 0; i < incidentAssetsandMatches.length; i++) {
 			tmp = incidentAssetsandMatches[i].split(":");
-			if (tmp.length > 1) //if there are matches for the incident asset
-				tmp2 = tmp[1].split("-"); //tmp[1] contains the space asset matched to an incident asset
+			if (tmp.length > 1) // if there are matches for the incident asset
+				tmp2 = tmp[1].split("-"); // tmp[1] contains the space asset
+											// matched to an incident asset
 			else {
-				tmp2 = new String[1]; //if there are no matches create one empty string [""] 
+				tmp2 = new String[1]; // if there are no matches create one
+										// empty string [""]
 				tmp2[0] = null;
 			}
 
-			incidentAssetNames[i] = tmp[0]; //tmp[0] contains the incident asset name
+			incidentAssetNames[i] = tmp[0]; // tmp[0] contains the incident
+											// asset name
 			matches[i] = tmp2;
 
+			result.put(incidentAssetNames[i], Arrays.asList(matches[i]));
 		}
 
-//		map.setIncidentEntityNames(incidentAssetNames);
-//		map.setSystemAssetMatches(matches);
-
+		map.setMatchedSystemAssets(result);
+		
 		return map;
-	}*/
+	}
 
 /**
  * Finds All system assets that match each incident entity. The matching is done based on the criteria:
@@ -99,12 +111,16 @@ public class Mapper {
  * @param systemModelFile system model file path
  * @return
  */
-	public AssetMap findMatches(String incidentPatternFile, String systemModelFile) {
+	public AssetMap findMatches() {
 		
 		//read models
 		//incident pattern
-		IncidentDiagram incidentPattern = IncidentModelHandler.loadIncidentFromFile(incidentPatternFile);
-		EnvironmentDiagram systemModel = SystemModelHandler.loadSystemFromFile(systemModelFile);
+		IncidentDiagram incidentPattern = ModelsHandler.getCurrentIncidentModel();
+		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+		
+		if(systemModel == null || incidentPattern == null) {
+			return null;
+		}
 		
 		systemAssets = systemModel.getAsset();
 		incidentEntities = new LinkedList<IncidentEntity>();
@@ -112,10 +128,13 @@ public class Mapper {
 		incidentEntities.addAll(incidentPattern.getAsset());
 		incidentEntities.addAll(incidentPattern.getActor());
 		incidentEntities.addAll(incidentPattern.getResource());
+		
 		AssetMap map = new AssetMap();
 		
 		HashMap<String, List<String>> result = mainPool.invoke(new EntityMatcher(0, incidentEntities.size(), incidentEntities));
 		
+		mainPool.shutdown();
+			
 		map.setMatchedSystemAssets(result);
 		
 		return map;

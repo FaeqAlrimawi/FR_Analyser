@@ -62,7 +62,7 @@ public class IncidentActivity extends ActivityImpl {
 
 	}*/
 
-	public void setPreviousActivities(ArrayList<IncidentActivity> previousActivities) {
+	public void setPreviousActivities(ArrayList<Activity> previousActivities) {
 		getPreviousActivities().clear();
 		getPreviousActivities().addAll(previousActivities);
 	}
@@ -71,16 +71,16 @@ public class IncidentActivity extends ActivityImpl {
 		return nextActivities;
 	}*/
 
-	public void setNextActivities(ArrayList<IncidentActivity> nextActivities) {
+	public void setNextActivities(ArrayList<Activity> nextActivities) {
 		getNextActivities().clear();
 		getNextActivities().addAll(nextActivities);
 	}
 
-	public void addNextActivity(IncidentActivity activity) {
+	public void addNextActivity(Activity activity) {
 		getNextActivities().add(activity);
 	}
 
-	public void addPreviousActivity(IncidentActivity activity) {
+	public void addPreviousActivity(Activity activity) {
 		getPreviousActivities().add(activity);
 	}
 
@@ -422,6 +422,18 @@ public class IncidentActivity extends ActivityImpl {
 	    
 	    return false;
 	}*/
+	
+	public static IncidentActivity convertActivityToIncidentActivityObject(Activity activity) {
+	
+		if(activity == null) {
+			return null;
+		}
+		
+		IncidentActivity result = new IncidentActivity();
+		
+		result.setName(activity.getName());
+		
+	}
 	
 	public String toString() {
 		

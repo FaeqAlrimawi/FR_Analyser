@@ -2,7 +2,6 @@ package i.e.lero.spare.pattern_instantiation;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Random;
 
 import cyberPhysical_Incident.Activity;
@@ -33,7 +32,7 @@ public class IncidentPath {
 		// LinkedList<HashMap<String, LinkedList<GraphPath>>> paths = new
 		// LinkedList<HashMap<String,LinkedList<GraphPath>>>();
 
-		IncidentActivity initialActivity = predicateHandler.getInitialActivity();
+		IncidentActivity initialActivity = (IncidentActivity)predicateHandler.getInitialActivity();
 		activities.add(initialActivity);
 
 		while (!activities.isEmpty()) {
@@ -162,7 +161,7 @@ public class IncidentPath {
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 		
 		LinkedList<GraphPath> paths2 = new LinkedList<GraphPath>();
-		IncidentActivity initialActivity = predicateHandler.getInitialActivity();
+		IncidentActivity initialActivity = (IncidentActivity)predicateHandler.getInitialActivity();
 
 		for (GraphPath pa : initialActivity.getPathsToNextActivities()
 				.get(initialActivity.getNextActivities().get(0).getName())) {
@@ -220,7 +219,7 @@ public class IncidentPath {
 
 		// for the last activity predicates
 		if (predicateHandler.getFinalActivity() != null) {
-			for (GraphPath pNxt : predicateHandler.getFinalActivity().getPathsBetweenPredicates()) {
+			for (GraphPath pNxt : ((IncidentActivity)predicateHandler.getFinalActivity()).getPathsBetweenPredicates()) {
 				for (GraphPath pCurrent : paths) {
 					// checks whether the end state of the current transition is
 					// the same for the next transition
@@ -353,7 +352,7 @@ public class IncidentPath {
 		 * }
 		 */
 
-		for (LinkedList<GraphPath> ls : predicateHandler.getInitialActivity().getPathsToNextActivities().values()) {
+		for (LinkedList<GraphPath> ls : ((IncidentActivity)predicateHandler.getInitialActivity()).getPathsToNextActivities().values()) {
 			initials.add(getPath(ls.get(rand.nextInt(ls.size()))));
 		}
 

@@ -103,7 +103,7 @@ public class IncidentPatternInstantiator {
 		
 		msgQ.put(">>Matching incident pattern entities to system assets");
 		
-		AssetMap am = m.findMatches(incidentPatternFile, systemModelFile); 
+		AssetMap am = m.findMatches(); 
 		
 		// if there are incident assets with no matches from space model then exit
 		if (am.hasEntitiesWithNoMatch()) {
@@ -285,7 +285,7 @@ public class IncidentPatternInstantiator {
 		Mapper m = new Mapper();
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		System.out.println(">>Matching incident pattern entities to system assets");
-		AssetMap am = m.findMatches(incidentPatternFile, systemModelFile); 
+		AssetMap am = m.findMatches(); 
 		
 		// if there are incident assets with no matches from space model then exit
 		if (am.hasEntitiesWithNoMatch()) {
@@ -394,8 +394,14 @@ public class IncidentPatternInstantiator {
 		//finds components in a system representation (space.xml) that match the entities identified in an incident (incident.xml)
 		msgQ.put(">>Matching incident pattern entities to system assets");
 		
+		//add the models to the ModelsHandler class (which can be used by other objects like the Mapper to
+		//access the models
+		ModelsHandler.addIncidentModel(incidentPatternFile);
+		ModelsHandler.addSystemModel(systemModelFile);
 		
-		AssetMap am = m.findMatches(incidentPatternFile, systemModelFile);
+		AssetMap am = m.findMatches();
+		//finding matches also can be accomplished using Xquery (but more strict criteria is applied)
+		//AssetMap am = m.findMatchesUsingXquery(xqueryFilePath);
 		
 		/*//////TESTING\\\\\\\\\\\\\
 		AssetMap am2 = m.findMatches2(incidentPatternFile, systemModelFile);

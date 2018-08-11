@@ -1,0 +1,43 @@
+[18:38:43:791] : ////Executing Scenario1\\\\
+[18:38:43:793] : *Incident pattern file "etc/scenario1/interruption_incident-pattern.cpi"
+[18:38:43:793] : *System model file "etc/scenario1/research_centre_model.cps"
+[18:38:43:793] : *BRS file "etc/scenario1/research_centre_system.big" & states floder "etc/scenario1/research_centre_output_100"
+[18:38:43:793] : >>Matching incident pattern entities to system assets
+[18:38:44:303] : >>Number of Assets (also entities) =  10
+[18:38:44:303] : >>Incident entities order: [HVACmalware, HVAC, hallway, smartDevice1, floorX, location2, laptopX, busNetwork, location_SD1, offender1]
+[18:38:44:303] : >>Entity-Asset map:
+[18:38:44:303] : HVACmalware => [SoftwareX]
+HVAC => [AirConditioning]
+hallway => [hallway]
+smartDevice1 => [SL1, SL2, SL3]
+floorX => [fourteenth_floor]
+location2 => [empiricalLab]
+laptopX => [Laptop1]
+busNetwork => [busNetwork, IPnetwork1]
+location_SD1 => [instructorsLab2, empiricalLab, informaticsLab]
+offender1 => [Visitor1]
+
+[18:38:44:303] : >>Generating asset sets..
+[18:38:44:303] : >>Asset sets (12):
+[18:38:44:303] : -Set[0]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, busNetwork, instructorsLab2, Visitor1]
+[18:38:44:303] : -Set[1]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, busNetwork, instructorsLab2, Visitor1]
+[18:38:44:303] : -Set[2]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, busNetwork, instructorsLab2, Visitor1]
+[18:38:44:303] : -Set[3]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, instructorsLab2, Visitor1]
+[18:38:44:303] : -Set[4]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, instructorsLab2, Visitor1]
+[18:38:44:303] : -Set[5]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, instructorsLab2, Visitor1]
+[18:38:44:303] : -Set[6]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, busNetwork, informaticsLab, Visitor1]
+[18:38:44:303] : -Set[7]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, busNetwork, informaticsLab, Visitor1]
+[18:38:44:303] : -Set[8]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, busNetwork, informaticsLab, Visitor1]
+[18:38:44:303] : -Set[9]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, informaticsLab, Visitor1]
+[18:38:44:303] : -Set[10]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, informaticsLab, Visitor1]
+[18:38:44:303] : -Set[11]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, informaticsLab, Visitor1]
+[18:38:44:303] : >>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...
+[18:38:44:321] : BRSHandler>> Executing the Bigraphical Reactive System (BRS)...
+[18:38:44:321] : BRSHandler>> Creating Bigraph Signature...
+[18:38:44:448] : BRSHandler>> Creating Bigraph transition system...
+[18:38:44:837] : BRSHandler>> Loading states...
+[18:38:45:185] : >>Initialisation completed successfully
+[18:38:45:185] : >>Number of States= 102
+[18:38:45:187] : >>Creating threads for asset sets. [1] thread(s) are running in parallel.
+[18:38:45:202] : ////Execution finished\\\\
+[18:38:45:202] : Execution time: 1410ms [0h:0m:1s:410ms]

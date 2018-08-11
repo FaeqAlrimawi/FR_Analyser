@@ -12,6 +12,8 @@ import javax.xml.xquery.XQException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import cyberPhysical_Incident.Activity;
+import cyberPhysical_Incident.IncidentDiagram;
 import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.PredicateType;
@@ -43,7 +45,21 @@ public class PredicateGenerator {
 		this.incidentAssetNames = incidentAssetName;
 	}
 
-	public HashMap<String, IncidentActivity> createIncidentActivities() {
+	public HashMap<String, Activity> createIncidentActivitiesUpdated() {
+		
+		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
+		
+		for(Activity act : incidentModel.getActivity()) {
+			
+			predHandler.addIncidentActivity(act);
+		}
+		
+			predHandler.createActivitiesDigraph();
+			
+		return predHandler.getIncidentActivities();
+	}
+	
+	public HashMap<String, Activity> createIncidentActivities() {
 		String[] tmp;
 		String [] nextPreviousActivities;
 		IncidentActivity activity;
@@ -78,7 +94,7 @@ public class PredicateGenerator {
 		try {
 
 			// create activties of the incident
-			HashMap<String, IncidentActivity> activities = createIncidentActivities();
+			HashMap<String, Activity> activities = createIncidentActivitiesUpdated();
 
 			// get controls for the asset set from the system file
 			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);

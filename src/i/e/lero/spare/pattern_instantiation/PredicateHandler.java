@@ -4,7 +4,6 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,13 +22,13 @@ import ie.lero.spare.franalyser.utility.XqueryExecuter;
 public class PredicateHandler {
 
 	private HashMap<String, Predicate> predicates;
-	private HashMap<String, IncidentActivity> incidentActivities;
+	private HashMap<String, Activity> incidentActivities;
 	private Digraph<String> activitiesGraph;
 	private LinkedList<LinkedList<String>> activitySequences;
 	
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
-		incidentActivities = new HashMap<String, IncidentActivity>();
+		incidentActivities = new HashMap<String, Activity>();
 		activitySequences = new LinkedList<LinkedList<String>>();
 
 	}
@@ -226,7 +225,7 @@ public class PredicateHandler {
 		 * }
 		 */
 
-		return incidentActivities.get(activityName).getPredicates();
+		return ((IncidentActivity)incidentActivities.get(activityName)).getPredicates();
 	}
 
 	/*
@@ -257,11 +256,11 @@ public class PredicateHandler {
 		return names;
 	}
 
-	public HashMap<String, IncidentActivity> getIncidentActivities() {
+	public HashMap<String, Activity> getIncidentActivities() {
 		return incidentActivities;
 	}
 
-	public void setIncidentActivities(HashMap<String, IncidentActivity> incidentActivities) {
+	public void setIncidentActivities(HashMap<String, Activity> incidentActivities) {
 		this.incidentActivities = incidentActivities;
 	}
 
@@ -275,7 +274,7 @@ public class PredicateHandler {
 
 			for (String res : result) {
 				tmp = res.split("##|!!");
-				act = incidentActivities.get(tmp[0]);
+				act = (IncidentActivity)incidentActivities.get(tmp[0]);
 				/*
 				 * act.setNextActivities(new ArrayList<IncidentActivity>());
 				 * act.setPreviousActivities(new ArrayList<IncidentActivity>());
@@ -305,14 +304,15 @@ public class PredicateHandler {
 	}
 
 	public void addActivityPredicate(String activityName, Predicate pred) {
-		incidentActivities.get(activityName).addPredicate(pred);
+		((IncidentActivity)incidentActivities.get(activityName)).addPredicate(pred);
 		addPredicate(pred);
 	}
 
-	public void addIncidentActivity(IncidentActivity activity) {
-		if (!incidentActivities.containsValue(activity)) {
-			incidentActivities.put(activity.getName(), activity);
-		}
+	public void addIncidentActivity(Activity activity) {
+		
+		//convert Activity object to IncidentActivity object
+		
+		incidentActivities.put(activity.getName(), activity);
 	}
 
 	/**
@@ -322,9 +322,9 @@ public class PredicateHandler {
 	 * @return IncidentActivity object representing the initial activity, null
 	 *         if there is not one
 	 */
-	public IncidentActivity getInitialActivity() {
+	public Activity getInitialActivity() {
 
-		for (IncidentActivity act : incidentActivities.values()) {
+		for (Activity act : incidentActivities.values()) {
 			if (act.getPreviousActivities() == null || act.getPreviousActivities().isEmpty()) {
 				return act;
 			}
@@ -333,9 +333,9 @@ public class PredicateHandler {
 		return null;
 	}
 
-	public IncidentActivity getFinalActivity() {
+	public Activity getFinalActivity() {
 
-		for (IncidentActivity act : incidentActivities.values()) {
+		for (Activity act : incidentActivities.values()) {
 			if (act.getNextActivities() == null || act.getNextActivities().isEmpty()) {
 				return act;
 			}
@@ -365,7 +365,7 @@ public class PredicateHandler {
 			}
 		}
 		
-		LinkedList<IncidentActivity> activities = getMiddleActivities(sourceActivity, destinationActivity);
+		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
 		
 		//add the first and the last activities
 		activities.addFirst(sourceActivity);
@@ -377,7 +377,7 @@ public class PredicateHandler {
 		//check if each path contains at least one of the satisfied states for each activity
 		//can be parallelised
 		ListIterator<GraphPath> pathsIterator = paths.listIterator();
-		ListIterator<IncidentActivity> activitiesIterator = activities.listIterator();
+		ListIterator<Activity> activitiesIterator = activities.listIterator();
 		
 		if(activities != null) {
 			while(pathsIterator.hasNext()) {
@@ -392,7 +392,7 @@ public class PredicateHandler {
 				activitiesIterator = activities.listIterator();
 				outerLoop:
 					while(activitiesIterator.hasNext()) {
-						IncidentActivity activity = activitiesIterator.next();
+						IncidentActivity activity = (IncidentActivity)activitiesIterator.next();
 						//get precondition of the activity (assumption: there is only one precondition)
 						Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
 						LinkedList<Integer> preStates = pre.getBigraphStates();
@@ -445,8 +445,8 @@ public class PredicateHandler {
 	 */
 	public LinkedList<GraphPath> getPaths() {
 		
-		IncidentActivity sourceActivity = getInitialActivity();
-		IncidentActivity destinationActivity = getFinalActivity();
+		IncidentActivity sourceActivity = (IncidentActivity)getInitialActivity();
+		IncidentActivity destinationActivity = (IncidentActivity)getFinalActivity();
 		
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 		
@@ -466,7 +466,7 @@ public class PredicateHandler {
 			}
 		}
 		
-		LinkedList<IncidentActivity> activities = getMiddleActivities(sourceActivity, destinationActivity);
+		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
 		
 		//add the first and the last activities
 		activities.addFirst(sourceActivity);
@@ -478,7 +478,7 @@ public class PredicateHandler {
 		//check if each path contains at least one of the satisfied states for each activity
 		//can be parallelised
 		ListIterator<GraphPath> pathsIterator = paths.listIterator();
-		ListIterator<IncidentActivity> activitiesIterator = activities.listIterator();
+		ListIterator<Activity> activitiesIterator = activities.listIterator();
 		
 		if(activities != null) {
 			while(pathsIterator.hasNext()) {
@@ -494,7 +494,7 @@ public class PredicateHandler {
 				
 				outerLoop:
 					while(activitiesIterator.hasNext()) {
-						IncidentActivity activity = activitiesIterator.next();
+						IncidentActivity activity = (IncidentActivity)activitiesIterator.next();
 						
 						//get precondition of the activity (assumption: there is only one precondition)
 						Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
@@ -597,8 +597,8 @@ public class PredicateHandler {
 		return paths;
 	}*/
 	
-	public LinkedList<IncidentActivity> getMiddleActivities(IncidentActivity sourceActivity, IncidentActivity destinationActivity) {
-		LinkedList<IncidentActivity> result = new LinkedList<IncidentActivity>();
+	public LinkedList<Activity> getMiddleActivities(IncidentActivity sourceActivity, IncidentActivity destinationActivity) {
+		LinkedList<Activity> result = new LinkedList<Activity>();
 		
 		if(sourceActivity.equals(destinationActivity) || sourceActivity.getNextActivities().contains(destinationActivity) ) {
 			return result;
@@ -612,7 +612,7 @@ public class PredicateHandler {
 		
 		if(activitySequences.size()>0) {
 			LinkedList<String> activityNames = activitySequences.get(0);
-			HashMap<String, IncidentActivity> acts = getIncidentActivities();
+			HashMap<String, Activity> acts = getIncidentActivities();
 			
 			for(String name: activityNames) {
 				
@@ -690,9 +690,9 @@ public class PredicateHandler {
 	public Digraph<String> createActivitiesDigraph() {
 		activitiesGraph = new Digraph<String>();
 
-		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
-		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
-		IncidentActivity tmp;
+		LinkedList<Activity> acts = new LinkedList<Activity>();
+		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
+		Activity tmp;
 
 		//assuming there is only one initial activity. can be extended to multi-initials
 		acts.add(getInitialActivity());
@@ -773,7 +773,10 @@ public class PredicateHandler {
 	
 	public boolean areAllSatisfied() {
 		
-		for(IncidentActivity act : incidentActivities.values()) {
+		IncidentActivity act = null;
+		
+		for(Activity activity : incidentActivities.values()) {
+			act = (IncidentActivity)activity;
 			if(!act.isActivitySatisfied()) {
 				return false;
 			}
@@ -783,9 +786,12 @@ public class PredicateHandler {
 	}
 	
 	public LinkedList<String> getActivitiesNotSatisfied() {
-		LinkedList<String> names = new LinkedList<String>();
 		
-		for(IncidentActivity act : incidentActivities.values()) {
+		LinkedList<String> names = new LinkedList<String>();
+		IncidentActivity act = null;
+		
+		for(Activity activity : incidentActivities.values()) {
+			act = (IncidentActivity)activity;
 			if(!act.isActivitySatisfied()) {
 				names.add(act.getName());
 			}
@@ -794,14 +800,14 @@ public class PredicateHandler {
 		return names;
 	}
 	public void printAll() {
-		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
-		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
+		LinkedList<Activity> acts = new LinkedList<Activity>();
+		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
 		IncidentActivity tmp;
 
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
-			tmp = acts.pop();
+			tmp = (IncidentActivity)acts.pop();
 
 			if (tmp == null || actsVisited.contains(tmp)) {
 				continue;
@@ -847,8 +853,8 @@ public class PredicateHandler {
 	
 	public String getSummary() {
 		
-		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
-		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
+		LinkedList<Activity> acts = new LinkedList<Activity>();
+		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
 		IncidentActivity tmp;
 		StringBuilder res = new StringBuilder();
 		String newLine = "\n";
@@ -859,7 +865,7 @@ public class PredicateHandler {
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
-			tmp = acts.pop();
+			tmp = (IncidentActivity)acts.pop();
 			
 			if (tmp == null || actsVisited.contains(tmp)) {
 				continue;
@@ -910,14 +916,14 @@ public class PredicateHandler {
 	
 	public void updateInterStatesSatisfied() {
 		
-		LinkedList<IncidentActivity> acts = new LinkedList<IncidentActivity>();
-		LinkedList<IncidentActivity> actsVisited = new LinkedList<IncidentActivity>();
+		LinkedList<Activity> acts = new LinkedList<Activity>();
+		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
 		IncidentActivity tmp;
 		
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
-			tmp = acts.pop();
+			tmp = (IncidentActivity)acts.pop();
 			
 			if (tmp == null || actsVisited.contains(tmp)) {
 				continue;

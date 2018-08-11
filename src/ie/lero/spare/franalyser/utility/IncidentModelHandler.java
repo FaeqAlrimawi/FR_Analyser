@@ -23,6 +23,8 @@ import cyberPhysical_Incident.impl.IncidentDiagramImpl;
 public class IncidentModelHandler {
 	
 	private static final String EXTENSION = "cpi";
+	private static IncidentDiagram incidentModel;
+	private static String filePath;
 	
 	/**
 	 * Load an incident model from the given file name
@@ -139,6 +141,35 @@ public class IncidentModelHandler {
 		
 		System.out.println(inci.getActivity().get(0).getName());
 	}
+
+	public static IncidentDiagram getIncidentModel() {
+		
+		if(incidentModel == null) {
+		loadIncidentFromFile(filePath);	
+		}
+		
+		return incidentModel;
+	}
+
+	public static IncidentDiagram getIncidentModel(String filePath) {
+		
+		setFilePath(filePath);
+		
+		return getIncidentModel();
+	}
+
+	public static void setIncidentModel(IncidentDiagram incidentModel) {
+		IncidentModelHandler.incidentModel = incidentModel;
+	}
+
+	public static String getFilePath() {
+		return filePath;
+	}
+
+	public static void setFilePath(String filePath) {
+		IncidentModelHandler.filePath = filePath;
+	}
+	
 	
 	
 /*	public static void test1() {

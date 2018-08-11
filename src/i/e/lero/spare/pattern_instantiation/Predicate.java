@@ -1,8 +1,6 @@
 package i.e.lero.spare.pattern_instantiation;
 
-import java.awt.print.Printable;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -11,6 +9,7 @@ import javax.xml.xquery.XQException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import cyberPhysical_Incident.Activity;
 import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.PredicateType;
@@ -19,7 +18,6 @@ import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
 import it.uniud.mads.jlibbig.core.std.InnerName;
-import it.uniud.mads.jlibbig.core.std.Matcher;
 import it.uniud.mads.jlibbig.core.std.Node;
 import it.uniud.mads.jlibbig.core.std.OuterName;
 import it.uniud.mads.jlibbig.core.std.Root;
@@ -33,7 +31,7 @@ public class Predicate {
 	private LinkedList<Integer> bigraphStates; //what states from the execution of a bigrapher the pred satisfies
 	private Predicate[] associatedPredicates; //to be implemented, those are linked predicates
 	private LinkedList<GraphPath> paths;
-	private IncidentActivity incidentActivity;
+	private Activity incidentActivity;
 	private LinkedList<Integer> statesIntraSatisfied;
 	private LinkedList<Integer> statesInterSatisfied;
 	private boolean isDebugging = true;
@@ -64,11 +62,11 @@ public class Predicate {
 		this.name = name;
 	}
 	
-	public IncidentActivity getIncidentActivity() {
+	public Activity getIncidentActivity() {
 		return incidentActivity;
 	}
 
-	public void setIncidentActivity(IncidentActivity incidentActivity) {
+	public void setIncidentActivity(Activity incidentActivity) {
 		this.incidentActivity = incidentActivity;
 	}
 
