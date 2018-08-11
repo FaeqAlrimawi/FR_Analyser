@@ -29,6 +29,13 @@ public class IncidentActivity extends ActivityImpl {
 		this();
 		this.name = name;
 	}
+	
+	public IncidentActivity(Activity activity) {
+		super(activity);
+		predicates = new ArrayList<Predicate>();
+		pathsToNextActivities = new HashMap<String, LinkedList<GraphPath>>();
+		
+	}
 
 	public IncidentActivity(String name, ArrayList<Predicate> preds) {
 		this();
@@ -423,17 +430,17 @@ public class IncidentActivity extends ActivityImpl {
 	    return false;
 	}*/
 	
-	public static IncidentActivity convertActivityToIncidentActivityObject(Activity activity) {
+/*	public static IncidentActivity convertActivityToIncidentActivityObject(Activity activity) {
 	
 		if(activity == null) {
 			return null;
 		}
 		
-		IncidentActivity result = new IncidentActivity();
+		return new IncidentActivity(activity);
 		
-		result.setName(activity.getName());
 		
-	}
+		
+	}*/
 	
 	public String toString() {
 		

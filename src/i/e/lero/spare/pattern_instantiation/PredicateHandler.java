@@ -264,7 +264,7 @@ public class PredicateHandler {
 		this.incidentActivities = incidentActivities;
 	}
 
-	public void updateNextPreviousActivities() {
+	public void updateNextPreviousActivitiesUsingXquery() {
 		String[] tmp;
 		String[] result;
 		IncidentActivity act;
@@ -300,6 +300,34 @@ public class PredicateHandler {
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	public void updateNextPreviousActivities() {
+	
+		List<IncidentActivity> nxtActs = new LinkedList<IncidentActivity>();
+		List<IncidentActivity> preActs = new LinkedList<IncidentActivity>();
+		
+		for(Activity act : incidentActivities.values()) {
+			
+			//update next activities
+			for(Activity nxtAct : act.getNextActivities()) {
+				nxtActs.add((IncidentActivity)incidentActivities.get(nxtAct.getName()));
+			}
+			
+			act.getNextActivities().clear();
+			act.getNextActivities().addAll(nxtActs);
+			nxtActs.clear();
+			
+			//update previous activities
+			for(Activity preAct : act.getPreviousActivities()) {
+				preActs.add((IncidentActivity)incidentActivities.get(preAct.getName()));
+			}
+			
+			act.getPreviousActivities().clear();
+			act.getPreviousActivities().addAll(preActs);
+			preActs.clear();
+			
 		}
 	}
 

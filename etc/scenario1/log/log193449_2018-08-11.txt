@@ -1,0 +1,176 @@
+[19:34:49:087] : ////Executing Scenario1\\\\
+[19:34:49:087] : *Incident pattern file "etc/scenario1/interruption_incident-pattern.cpi"
+[19:34:49:087] : *System model file "etc/scenario1/research_centre_model.cps"
+[19:34:49:087] : *BRS file "etc/scenario1/research_centre_system.big" & states floder "etc/scenario1/research_centre_output_100"
+[19:34:49:087] : >>Matching incident pattern entities to system assets
+[19:34:49:642] : >>Number of Assets (also entities) =  10
+[19:34:49:642] : >>Incident entities order: [HVACmalware, HVAC, hallway, smartDevice1, floorX, location2, laptopX, busNetwork, location_SD1, offender1]
+[19:34:49:642] : >>Entity-Asset map:
+[19:34:49:642] : HVACmalware => [SoftwareX]
+HVAC => [AirConditioning]
+hallway => [hallway]
+smartDevice1 => [SL1, SL2, SL3]
+floorX => [fourteenth_floor]
+location2 => [empiricalLab]
+laptopX => [Laptop1]
+busNetwork => [busNetwork, IPnetwork1]
+location_SD1 => [instructorsLab2, empiricalLab, informaticsLab]
+offender1 => [Visitor1]
+
+[19:34:49:642] : >>Generating asset sets..
+[19:34:49:642] : >>Asset sets (12):
+[19:34:49:642] : -Set[0]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, busNetwork, instructorsLab2, Visitor1]
+[19:34:49:642] : -Set[1]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, busNetwork, instructorsLab2, Visitor1]
+[19:34:49:642] : -Set[2]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, busNetwork, instructorsLab2, Visitor1]
+[19:34:49:642] : -Set[3]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, instructorsLab2, Visitor1]
+[19:34:49:642] : -Set[4]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, instructorsLab2, Visitor1]
+[19:34:49:642] : -Set[5]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, instructorsLab2, Visitor1]
+[19:34:49:642] : -Set[6]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, busNetwork, informaticsLab, Visitor1]
+[19:34:49:642] : -Set[7]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, busNetwork, informaticsLab, Visitor1]
+[19:34:49:642] : -Set[8]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, busNetwork, informaticsLab, Visitor1]
+[19:34:49:642] : -Set[9]: [SoftwareX, AirConditioning, hallway, SL1, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, informaticsLab, Visitor1]
+[19:34:49:642] : -Set[10]: [SoftwareX, AirConditioning, hallway, SL2, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, informaticsLab, Visitor1]
+[19:34:49:642] : -Set[11]: [SoftwareX, AirConditioning, hallway, SL3, fourteenth_floor, empiricalLab, Laptop1, IPnetwork1, informaticsLab, Visitor1]
+[19:34:49:642] : >>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...
+[19:34:49:642] : BRSHandler>> Executing the Bigraphical Reactive System (BRS)...
+[19:34:49:642] : BRSHandler>> Creating Bigraph Signature...
+[19:34:49:786] : BRSHandler>> Creating Bigraph transition system...
+[19:34:50:194] : BRSHandler>> Loading states...
+[19:34:50:516] : >>Initialisation completed successfully
+[19:34:50:517] : >>Number of States= 102
+[19:34:50:518] : >>Creating threads for asset sets. [1] thread(s) are running in parallel.
+[19:34:51:128] : Thread[0]>>Identifying states and their transitions...
+[19:34:51:129] : Thread[0]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 2, Number of parallel activities = 1, Parallelism for matching (= num of processors): 8
+[19:34:51:129] : Thread[0]>>BigraphAnalyser>>identifying states...
+[19:34:51:129] : Thread[0]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[19:34:51:130] : Thread[0]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[19:34:56:605] : Thread[0]>>BigraphAnalyser>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+[19:34:56:605] : Thread[0]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 5475ms [0h:0m:5s:475ms]
+[19:34:57:213] : Thread[0]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[19:34:57:213] : Thread[0]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 6083ms [0h:0m:6s:83ms]
+[19:34:57:214] : Thread[0]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[19:34:57:214] : Thread[0]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[19:35:00:826] : Thread[0]>>BigraphAnalyser>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+[19:35:00:826] : Thread[0]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 3612ms [0h:0m:3s:612ms]
+[19:35:00:906] : Thread[0]>>BigraphAnalyser>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+[19:35:00:906] : Thread[0]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 3692ms [0h:0m:3s:692ms]
+[19:35:00:906] : Thread[0]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[19:35:00:906] : Thread[0]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[19:35:04:484] : Thread[0]>>BigraphAnalyser>>activity3_Postcondition-states: [46, 99]
+[19:35:04:484] : Thread[0]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 3577ms [0h:0m:3s:577ms]
+[19:35:04:507] : Thread[0]>>BigraphAnalyser>>activity3_Precondition-states: [12, 30, 33, 37, 44, 45, 87, 97, 98]
+[19:35:04:507] : Thread[0]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 3600ms [0h:0m:3s:600ms]
+[19:35:04:507] : Thread[0]>>BigraphAnalyser>>Total matching time of conditions = 13378ms [0h:0m:13s:378ms]
+[19:35:04:508] : Thread[0]>>BigraphAnalyser>>Average matching time of conditions = 2229ms [0h:0m:2s:229ms]
+[19:35:04:508] : Thread[0]>>Generating potential incident instances...
+[19:35:04:511] : Thread[0]>>Analysing [2] of generated potential incident instances...
+[19:35:04:512] : Thread[0]>>InstanceSaver>>Storing generated instances...
+[19:35:04:512] : Thread[0]>>InstanceSave>>JSON string is generated
+[19:35:04:512] : Thread[0]>>InstanceSave>>JSON Object is created
+[19:35:04:516] : 
+-Actions Frequency: [ConnectBusDevice=2 (100.0%), EnterRoom=2 (100.0%), SendData=2 (100.0%)]
+-top paths [2] (based on actions Frequency >= 0.9):[0, 1]
+-Shortest Paths [2] (3 actions): [0, 1]
+-Longest Paths [2] (3 actions): [0, 1]
+
+[19:35:04:516] : Thread[0]>>Execution time: 13996ms [0h:0m:13s:996ms]
+[19:35:04:516] : Thread[0]>>Finished Successfully
+[19:35:04:516] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[19:35:04:639] : Thread[0]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\0.json
+[19:35:04:682] : Thread[1]>>Identifying states and their transitions...
+[19:35:04:682] : Thread[1]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 2, Number of parallel activities = 1, Parallelism for matching (= num of processors): 8
+[19:35:04:682] : Thread[1]>>BigraphAnalyser>>identifying states...
+[19:35:04:682] : Thread[1]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[19:35:04:682] : Thread[1]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[19:35:07:934] : Thread[1]>>BigraphAnalyser>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+[19:35:07:934] : Thread[1]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 3252ms [0h:0m:3s:252ms]
+[19:35:08:388] : Thread[1]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[19:35:08:388] : Thread[1]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 3705ms [0h:0m:3s:705ms]
+[19:35:08:388] : Thread[1]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[19:35:08:388] : Thread[1]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[19:35:11:063] : Thread[1]>>BigraphAnalyser>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+[19:35:11:063] : Thread[1]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 2674ms [0h:0m:2s:674ms]
+[19:35:11:088] : Thread[1]>>BigraphAnalyser>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+[19:35:11:088] : Thread[1]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2700ms [0h:0m:2s:700ms]
+[19:35:11:088] : Thread[1]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[19:35:11:088] : Thread[1]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[19:35:13:773] : Thread[1]>>BigraphAnalyser>>activity3_Postcondition-states: [46, 99]
+[19:35:13:773] : Thread[1]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 2685ms [0h:0m:2s:685ms]
+[19:35:13:841] : Thread[1]>>BigraphAnalyser>>activity3_Precondition-states: [12, 30, 33, 37, 44, 45, 87, 97, 98]
+[19:35:13:841] : Thread[1]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 2767ms [0h:0m:2s:767ms]
+[19:35:13:856] : Thread[1]>>BigraphAnalyser>>Total matching time of conditions = 9174ms [0h:0m:9s:174ms]
+[19:35:13:856] : Thread[1]>>BigraphAnalyser>>Average matching time of conditions = 1529ms [0h:0m:1s:529ms]
+[19:35:13:856] : Thread[1]>>Generating potential incident instances...
+[19:35:13:856] : Thread[1]>>Analysing [2] of generated potential incident instances...
+[19:35:13:856] : Thread[1]>>InstanceSaver>>Storing generated instances...
+[19:35:13:856] : Thread[1]>>InstanceSave>>JSON string is generated
+[19:35:13:856] : Thread[1]>>InstanceSave>>JSON Object is created
+[19:35:13:856] : 
+-Actions Frequency: [ConnectBusDevice=2 (100.0%), EnterRoom=2 (100.0%), SendData=2 (100.0%)]
+-top paths [2] (based on actions Frequency >= 0.9):[0, 1]
+-Shortest Paths [2] (3 actions): [0, 1]
+-Longest Paths [2] (3 actions): [0, 1]
+
+[19:35:13:856] : Thread[1]>>Execution time: 9341ms [0h:0m:9s:341ms]
+[19:35:13:856] : Thread[1]>>Finished Successfully
+[19:35:13:856] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[19:35:13:856] : Thread[1]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\1.json
+[19:35:13:983] : Thread[2]>>Identifying states and their transitions...
+[19:35:13:983] : Thread[2]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 2, Number of parallel activities = 1, Parallelism for matching (= num of processors): 8
+[19:35:13:983] : Thread[2]>>BigraphAnalyser>>identifying states...
+[19:35:13:983] : Thread[2]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[19:35:13:983] : Thread[2]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[19:35:16:961] : Thread[2]>>BigraphAnalyser>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+[19:35:16:961] : Thread[2]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 2978ms [0h:0m:2s:978ms]
+[19:35:17:428] : Thread[2]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[19:35:17:428] : Thread[2]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 3444ms [0h:0m:3s:444ms]
+[19:35:17:428] : Thread[2]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[19:35:17:428] : Thread[2]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[19:35:20:054] : Thread[2]>>BigraphAnalyser>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+[19:35:20:054] : Thread[2]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2626ms [0h:0m:2s:626ms]
+[19:35:20:214] : Thread[2]>>BigraphAnalyser>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+[19:35:20:214] : Thread[2]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 2786ms [0h:0m:2s:786ms]
+[19:35:20:215] : Thread[2]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[19:35:20:215] : Thread[2]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[19:35:22:914] : Thread[2]>>BigraphAnalyser>>activity3_Postcondition-states: [46, 99]
+[19:35:22:914] : Thread[2]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 2699ms [0h:0m:2s:699ms]
+[19:35:22:945] : Thread[2]>>BigraphAnalyser>>activity3_Precondition-states: [12, 30, 33, 37, 44, 45, 87, 97, 98]
+[19:35:22:946] : Thread[2]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 2731ms [0h:0m:2s:731ms]
+[19:35:22:947] : Thread[2]>>BigraphAnalyser>>Total matching time of conditions = 8963ms [0h:0m:8s:963ms]
+[19:35:22:947] : Thread[2]>>BigraphAnalyser>>Average matching time of conditions = 1493ms [0h:0m:1s:493ms]
+[19:35:22:947] : Thread[2]>>Generating potential incident instances...
+[19:35:22:947] : Thread[2]>>Analysing [2] of generated potential incident instances...
+[19:35:22:947] : Thread[2]>>InstanceSaver>>Storing generated instances...
+[19:35:22:947] : Thread[2]>>InstanceSave>>JSON string is generated
+[19:35:22:947] : Thread[2]>>InstanceSave>>JSON Object is created
+[19:35:22:948] : 
+-Actions Frequency: [ConnectBusDevice=2 (100.0%), EnterRoom=2 (100.0%), SendData=2 (100.0%)]
+-top paths [2] (based on actions Frequency >= 0.9):[0, 1]
+-Shortest Paths [2] (3 actions): [0, 1]
+-Longest Paths [2] (3 actions): [0, 1]
+
+[19:35:22:948] : Thread[2]>>Execution time: 9090ms [0h:0m:9s:90ms]
+[19:35:22:948] : Thread[2]>>Finished Successfully
+[19:35:22:948] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[19:35:22:955] : Thread[2]>>InstanceSave>>Instances are stored in file: D:\workspace-neon\FR_Analyser\etc\scenario1\output\2.json
+[19:35:23:038] : Thread[3]>>Identifying states and their transitions...
+[19:35:23:038] : Thread[3]>>BigraphAnalyser>>number of states: 102, partition size <= 100 (98.03%), number of partitions: 2, Number of parallel activities = 1, Parallelism for matching (= num of processors): 8
+[19:35:23:038] : Thread[3]>>BigraphAnalyser>>identifying states...
+[19:35:23:038] : Thread[3]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[19:35:23:038] : Thread[3]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[19:35:26:097] : Thread[3]>>BigraphAnalyser>>activity1_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100]
+[19:35:26:097] : Thread[3]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 3044ms [0h:0m:3s:44ms]
+[19:35:26:446] : Thread[3]>>BigraphAnalyser>>activity1_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101]
+[19:35:26:446] : Thread[3]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 3393ms [0h:0m:3s:393ms]
+[19:35:26:446] : Thread[3]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[19:35:26:446] : Thread[3]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[19:35:29:020] : Thread[3]>>BigraphAnalyser>>activity2_Postcondition-states: [12, 30, 33, 37, 44, 45, 46, 87, 97, 98, 99]
+[19:35:29:020] : Thread[3]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 2574ms [0h:0m:2s:574ms]
+[19:35:29:159] : Thread[3]>>BigraphAnalyser>>activity2_Precondition-states: [1, 2, 3, 8, 9, 10, 25, 28, 29, 31, 34, 35, 42, 47, 53, 54, 55, 56, 84, 85, 88, 89, 92, 93, 94, 95, 100]
+[19:35:29:159] : Thread[3]>>BigraphAnalyser>>Condition [acti

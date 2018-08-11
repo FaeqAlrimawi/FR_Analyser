@@ -45,21 +45,23 @@ public class PredicateGenerator {
 		this.incidentAssetNames = incidentAssetName;
 	}
 
-	public HashMap<String, Activity> createIncidentActivitiesUpdated() {
+	public HashMap<String, Activity> createIncidentActivities() {
 		
 		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
 		
 		for(Activity act : incidentModel.getActivity()) {
 			
-			predHandler.addIncidentActivity(act);
+			predHandler.addIncidentActivity(new IncidentActivity(act));
 		}
 		
-			predHandler.createActivitiesDigraph();
+		predHandler.updateNextPreviousActivities();
+		
+		System.out.println(predHandler.createActivitiesDigraph());
 			
 		return predHandler.getIncidentActivities();
 	}
 	
-	public HashMap<String, Activity> createIncidentActivities() {
+	public HashMap<String, Activity> createIncidentActivitiesUsingXquery() {
 		String[] tmp;
 		String [] nextPreviousActivities;
 		IncidentActivity activity;
@@ -75,8 +77,8 @@ public class PredicateGenerator {
 				}
 			}
 			
-			predHandler.updateNextPreviousActivities();
-			predHandler.createActivitiesDigraph();
+			predHandler.updateNextPreviousActivitiesUsingXquery();
+			System.out.println("orig: "+predHandler.createActivitiesDigraph());
 			
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
@@ -94,7 +96,7 @@ public class PredicateGenerator {
 		try {
 
 			// create activties of the incident
-			HashMap<String, Activity> activities = createIncidentActivitiesUpdated();
+			HashMap<String, Activity> activities = createIncidentActivities();
 
 			// get controls for the asset set from the system file
 			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
@@ -136,6 +138,56 @@ public class PredicateGenerator {
 		return predHandler;
 	}
 
+	public PredicateHandler generatePredicatesUpdated() {
+
+		PredicateType[] types = { PredicateType.Precondition, PredicateType.Postcondition };
+
+		try {
+
+			// create activties of the incident
+			HashMap<String, Activity> activities = createIncidentActivities();
+
+			// get controls for the asset set from the system file
+			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
+
+			// create the Bigraph representation (from LibBig library) for the
+			// pre/postconditions of the activities
+			// assumption: esach activity has ONE precondition and ONE
+			// postcondition
+			for (String activity : activities.keySet()) {
+				for (PredicateType type : types) {
+					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
+					
+					// if there is no condition returend then skip creating a
+					// predicate for it
+					if (condition == null || condition.isNull(JSONTerms.ENTITY)) {
+						continue;
+					}
+
+					Predicate p = new Predicate();
+					p.setIncidentActivity(activities.get(activity));
+					p.setPredicateType(type);
+					p.setName(activity + "_" + type.toString()); // e.g., name =
+																	// activity1_pre1
+					// updates entity names and controls from incident pattern
+					// to that from the system model
+					if (convertToMatchedAssets(condition)) {
+						p.setBigraphPredicate(condition);
+						if (p.getBigraphPredicate() != null)
+							predHandler.addActivityPredicate(activity, p);
+					}
+				}
+
+			}
+
+		} catch (FileNotFoundException | XQException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return predHandler;
+	}
+
+	
 	private boolean convertToMatchedAssets(JSONObject obj) {
 
 		JSONArray tmpAry;
