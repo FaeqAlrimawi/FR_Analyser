@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 import javax.xml.namespace.QName;
 import javax.xml.xquery.XQConnection;
@@ -24,8 +23,8 @@ public class XqueryExecuter {
 
 	public static final String NS_DECELERATION = "declare namespace cyberPhysical_Incident = \"http://www.example.org/cyberPhysical_Incident\"; "
 			+ "declare namespace environment = \"http://www.example.org/environment\";";
-	public static String INCIDENT_DOC = "etc/example/eavesdropping_incident-pattern.cpi";
-	public static String SPACE_DOC = "etc/example/research_centre_model.environment";
+	public static String INCIDENT_DOC;
+	public static String SPACE_DOC;
 	public static final String INCIDENT_ROOT_ELEMENT = "cyberPhysical_Incident:IncidentDiagram";
 	public static final String SPACE_ROOT_ELEMENT = "";
 	

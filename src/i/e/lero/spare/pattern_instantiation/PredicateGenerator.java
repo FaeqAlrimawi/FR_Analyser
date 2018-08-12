@@ -1,11 +1,8 @@
 package i.e.lero.spare.pattern_instantiation;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import javax.xml.xquery.XQException;
 
@@ -14,18 +11,17 @@ import org.json.JSONObject;
 
 import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.IncidentDiagram;
-import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class PredicateGenerator {
 
-	private AssetMap assetMap;
+	//private AssetMap assetMap;
 	private PredicateHandler predHandler;
 	private String [] spaceAssetSet;
 	private String [] incidentAssetNames;
-	private boolean isDebugging = true;
+//	private boolean isDebugging = true;
 	private String [] systemAssetControls;
 	
 	public PredicateGenerator() {
@@ -33,11 +29,11 @@ public class PredicateGenerator {
 
 	}
 
-	public PredicateGenerator(AssetMap map) {
+/*	public PredicateGenerator(AssetMap map) {
 		this();
-		assetMap = map;
+	//	assetMap = map;
 		incidentAssetNames = map.getIncidentEntityNames();
-	}
+	}*/
 	
 	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName) {
 		this();
@@ -45,7 +41,7 @@ public class PredicateGenerator {
 		this.incidentAssetNames = incidentAssetName;
 	}
 
-	public HashMap<String, Activity> createIncidentActivities() {
+	private HashMap<String, Activity> createIncidentActivities() {
 		
 		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
 		
@@ -56,12 +52,12 @@ public class PredicateGenerator {
 		
 		predHandler.updateNextPreviousActivities();
 		
-		System.out.println(predHandler.createActivitiesDigraph());
+		predHandler.createActivitiesDigraph();
 			
 		return predHandler.getIncidentActivities();
 	}
 	
-	public HashMap<String, Activity> createIncidentActivitiesUsingXquery() {
+	private HashMap<String, Activity> createIncidentActivitiesUsingXquery() {
 		String[] tmp;
 		String [] nextPreviousActivities;
 		IncidentActivity activity;
@@ -78,7 +74,7 @@ public class PredicateGenerator {
 			}
 			
 			predHandler.updateNextPreviousActivitiesUsingXquery();
-			System.out.println("orig: "+predHandler.createActivitiesDigraph());
+			predHandler.createActivitiesDigraph();
 			
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
@@ -265,22 +261,11 @@ public class PredicateGenerator {
 		this.predHandler = predHandler;
 	}
 	
-	private void print(String msg) {
+/*	private void print(String msg) {
 		if(isDebugging) {
 			System.out.println("PredicateGenerator"+msg);
 		}
-	}
+	}*/
 	
-	
-	public static void main(String [] args) {
-		PredicateGenerator pred = new PredicateGenerator();
-		
-		try {
-			pred.convertToMatchedAssets(XqueryExecuter.getBigraphConditions("activity1", PredicateType.Precondition));
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 }

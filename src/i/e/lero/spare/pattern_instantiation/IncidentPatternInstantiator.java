@@ -370,6 +370,7 @@ public class IncidentPatternInstantiator {
 		
 		//String xQueryMatcherFile = xqueryFile;
 
+		//set the model file paths for the xquery as it is used by other objects (e.g., predicate generator) to retrieve some data such as controls of system assets
 		XqueryExecuter.SPACE_DOC = systemModelFile;
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
 	
