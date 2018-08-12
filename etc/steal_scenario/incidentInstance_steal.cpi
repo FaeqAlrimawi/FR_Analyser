@@ -19,7 +19,7 @@
   <asset connections="hallway-elevatorsArea" parentEntity="floor4" containedEntities="Visitor1" name="elevatorsArea">
     <type name="ElevatorsArea"/>
   </asset>
-  <asset parentEntity="Research_Centre" containedEntities="hallway meetingRoom kitchen elevatorsArea" name="floor4">
+  <asset parentEntity="Research_Centre" containedEntities="meetingRoom hallway kitchen elevatorsArea" name="floor4">
     <type name="Floor"/>
   </asset>
   <actor parentEntity="elevatorsArea" name="Visitor1">
@@ -33,24 +33,25 @@
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="hallway">
           <entity name="Visitor1">
-            <entity name="e1"/>
+            <site/>
           </entity>
+          <site/>
         </entity>
         <entity name="kitchen">
           <connectivity name="hallway-kitchen"/>
+          <site/>
         </entity>
       </expression>
     </precondition>
     <postcondition>
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <entity name="hallway"/>
+        <entity name="hallway">
+          <site/>
+        </entity>
         <entity name="kitchen">
-          <entity name="Visitor1">
-            <entity name="e1">
-              <connectivity name="e1-recepRoom"/>
-            </entity>
-          </entity>
+          <entity name="Visitor1"/>
           <connectivity name="hallway-kitchen"/>
+          <site/>
         </entity>
       </expression>
     </postcondition>
@@ -59,16 +60,26 @@
     <precondition>
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="hallway">
-          <entity name="Visitor1"/>
+          <entity name="Visitor1">
+            <site/>
+          </entity>
+          <site/>
         </entity>
-        <entity name="meetingRoom"/>
+        <entity name="meetingRoom">
+          <site/>
+        </entity>
       </expression>
     </precondition>
     <postcondition>
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <entity name="hallway"/>
+        <entity name="hallway">
+          <site/>
+        </entity>
         <entity name="meetingRoom">
-          <entity name="Visitor1"/>
+          <entity name="Visitor1">
+            <site/>
+          </entity>
+          <site/>
         </entity>
       </expression>
     </postcondition>
@@ -78,24 +89,27 @@
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
         <entity name="elevatorsArea">
           <entity name="Visitor1">
-            <entity name="e1"/>
+            <site/>
           </entity>
+          <site/>
         </entity>
         <entity name="hallway">
           <connectivity name="hallway-kitchen"/>
+          <site/>
         </entity>
       </expression>
     </precondition>
     <postcondition>
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-        <entity name="elevatorsArea"/>
+        <entity name="elevatorsArea">
+          <site/>
+        </entity>
         <entity name="hallway">
           <entity name="Visitor1">
-            <entity name="e1">
-              <connectivity name="hallway-recepRoom"/>
-            </entity>
+            <site/>
           </entity>
           <connectivity name="hallway-kitchen"/>
+          <site/>
         </entity>
       </expression>
     </postcondition>

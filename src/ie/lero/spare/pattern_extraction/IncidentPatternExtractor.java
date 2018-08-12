@@ -3,6 +3,7 @@ package ie.lero.spare.pattern_extraction;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
+import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.SystemModelHandler;
 
 public class IncidentPatternExtractor {
@@ -75,7 +76,7 @@ public class IncidentPatternExtractor {
 //		abstractedModel.abstractActivities();
 //		abstractedModel.abstractEntities(systemModel);
 
-		EnvironmentDiagram systemModel = SystemModelHandler.loadSystemFromFile(systemFileName);
+		EnvironmentDiagram systemModel = ModelsHandler.getSystemModel(systemFileName);
 		
 		if(systemModel == null) {
 			System.out.println("system model is NULL");
@@ -99,7 +100,7 @@ public class IncidentPatternExtractor {
 	
 	public IncidentDiagram extract(String fileName) {
 		
-		IncidentDiagram model = IncidentModelHandler.loadIncidentFromFile(fileName);
+		IncidentDiagram model = ModelsHandler.getIncidentModel(fileName);
 		
 		return extract(model);
 	}

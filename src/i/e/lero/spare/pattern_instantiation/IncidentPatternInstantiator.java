@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Logger;
+import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.util.StopWatch;
@@ -345,7 +346,7 @@ public class IncidentPatternInstantiator {
 	private void executeStealScenario() {
 		
 		String BRS_file = "etc/steal_scenario/research_centre_system.big";
-		String BRS_outputFolder = "etc/steal_scenario/research_centre_output_100";
+		String BRS_outputFolder = "etc/steal_scenario/research_centre_output_500";
 		String systemModelFile = "etc/steal_scenario/research_centre_model.cps";
 		String incidentPatternFile = "etc/steal_scenario/incidentInstance_steal.cpi";
 		
@@ -376,7 +377,8 @@ public class IncidentPatternInstantiator {
 	
 		try {
 		
-		logFolder = "etc/scenario1/log";
+		//currently creates a folder named "log" where the states folder is
+		logFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"))+"/log";
 		runLogger();
 			
 		StopWatch timer = new StopWatch();
@@ -666,16 +668,6 @@ public class IncidentPatternInstantiator {
 		
 	}*/
 	
-	public static void main(String[] args) {
-		
-		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
-		
-		//ins.executeExample();
-		
-		ins.executeScenario1();
-//		ins.executeStealScenario();
-		//ins.test1();
-	}
 
 	class PotentialIncidentInstance implements Runnable {
 
@@ -761,23 +753,30 @@ public class IncidentPatternInstantiator {
 			//LinkedList<GraphPath> paths = predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(), predicateHandler.getFinalActivity());
 			 LinkedList<GraphPath> paths = predicateHandler.getPaths();		
 			 
-			//create and run an instance saver to store instances to a file
-			InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames, systemAssetNames, paths);
-			mainPool.submit(saver);
+			 //updated gui
+			 if(listener != null) {
+					listener.updateProgress(incrementValue/3);	
+				}
+			 
+			 //save and analyse generated paths there are any
+			 if(paths.size() > 0)  {
+				 
+				//create and run an instance saver to store instances to a file
+				InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames, systemAssetNames, paths);
+				mainPool.submit(saver);
 			
-			if(listener != null) {
-				listener.updateProgress(incrementValue/3);	
-			}
-			
-			msgQ.put("Thread["+threadID+"]>>Analysing ["+paths.size()+"] of generated potential incident instances...");
-			
-			//create an analysis object for the identified paths
-			GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
-			String result = pathsAnalyser.analyse();
-			
-			if(result != null) {
-				msgQ.put(result);	
-			}
+				msgQ.put("Thread["+threadID+"]>>Analysing ["+paths.size()+"] of generated potential incident instances...");
+				
+				//create an analysis object for the identified paths
+				GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
+				String result = pathsAnalyser.analyse();
+				
+				if(result != null) {
+					msgQ.put(result);	
+				}
+			 } else {
+				 msgQ.put("Thread["+threadID+"]>>NO potential incident instances generated");
+			 }
 			
 			//print(pathsAnalyser.print());
 			//another way is to combine the transitions found for each activity from the initial one to the final one
@@ -1092,4 +1091,18 @@ public class IncidentPatternInstantiator {
 			return dividedTasks;
 		}
 	}
+
+
+	public static void main(String[] args) {
+		
+		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+		
+		//ins.executeExample();
+		
+//		ins.executeScenario1();
+		ins.executeStealScenario();
+		//ins.test1();
+	}
+
+	
 }
