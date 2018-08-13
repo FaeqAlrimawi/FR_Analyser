@@ -26,6 +26,7 @@ public class Logger implements Runnable{
 	private DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS"); 
 	private static Logger logger = new Logger();
 	private static String terminatingString = "LoggingDone";
+	private Thread thread;
 	
 	private Logger() {
 		
@@ -204,5 +205,9 @@ public class Logger implements Runnable{
 		
 	}
 	
-	
+	public void start() {
+		
+		thread = new Thread(this);
+		thread.start();
+	}
 }

@@ -41,7 +41,7 @@ public class IncidentPatternInstantiator {
 	int maxWaitingTime = 48;
 	TimeUnit timeUnit = TimeUnit.HOURS;
 	
-	//GUI
+	//GUI	
 	IncidentPatternInstantiationListener listener; 
 	int incrementValue = 10; //for GUI progress bar
 	boolean isSetsSelected = false; 
@@ -49,25 +49,22 @@ public class IncidentPatternInstantiator {
 	
 	//Logging
 	private Logger logger;
-	private String logFolder = ".";	
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = true;
-//	private BlockingQueue<String> msgQ;
+	private boolean isSaveLog = true;	
 	
+	private String outputFolder = ".";	
 	
 	private void runLogger() {
 		
 		logger = Logger.getInstance();
 		
 		logger.setListener(listener);
-		logger.setLogFolder(logFolder);
-		logger.createLogFile();
+		logger.setLogFolder(outputFolder+"/log");
+		logger.createLogFile(); //file name is created internally by the logger (name: log[time_date].txt)
 		logger.setPrintToScreen(isPrintToScreen);
 		logger.setSaveLog(isSaveLog);
 
-//		msgQ = logger.getMsgQ();
-		
-		new Thread(logger).start();
+		logger.start();
 
 	}
 	
@@ -378,7 +375,8 @@ public class IncidentPatternInstantiator {
 		try {
 		
 		//currently creates a folder named "log" where the states folder is
-		logFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"))+"/log";
+		outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
+		
 		runLogger();
 			
 		StopWatch timer = new StopWatch();
@@ -544,12 +542,8 @@ public class IncidentPatternInstantiator {
 
 		private String[] systemAssetNames;
 		private String[] incidentEntityNames;
-		//private Thread t;
 		private int threadID;
-		//private String BRSFileName;
-		//private String outputFolder;
 		private String outputFileName;
-//		private BlockingQueue<String> msgQ;
 		
 		public PotentialIncidentInstance(String[] sa, String[] ie, int id) {
 			
@@ -558,7 +552,7 @@ public class IncidentPatternInstantiator {
 			threadID = id;
 			
 			//default output
-			setOutputFileName("etc/scenario1/output/"+threadID+".json");
+			setOutputFileName(outputFolder+"/output/"+threadID+".json");
 		}
 
 		
@@ -959,7 +953,6 @@ public class IncidentPatternInstantiator {
 			return dividedTasks;
 		}
 	}
-
 
 	public static void main(String[] args) {
 		

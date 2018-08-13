@@ -1,0 +1,60 @@
+[14:39:11:759] : ////Executing Scenario1\\\\
+[14:39:11:759] : *Incident pattern file "etc/steal_scenario/incidentInstance_steal.cpi"
+[14:39:11:759] : *System model file "etc/steal_scenario/research_centre_model.cps"
+[14:39:11:759] : *BRS file "etc/steal_scenario/research_centre_system.big" & states folder "etc/steal_scenario/research_centre_output_500"
+[14:39:11:759] : >>Matching incident pattern entities to system assets
+[14:39:12:260] : >>Number of Assets (also entities) =  8
+[14:39:12:260] : >>Incident entities order: [Research_Centre, meetingRoom, executiveLaptop, hallway, kitchen, elevatorsArea, floor4, Visitor1]
+[14:39:12:260] : >>Entity-Asset map:
+[14:39:12:260] : Research_Centre => [Research_Centre]
+meetingRoom => [meetingRoom]
+executiveLaptop => [executiveLaptop]
+hallway => [hallway]
+kitchen => [kitchen]
+elevatorsArea => [elevatorsArea]
+floor4 => [fourteenth_floor]
+Visitor1 => [Visitor1]
+
+[14:39:12:260] : >>Generating asset sets..
+[14:39:12:275] : >>Asset sets (1):
+[14:39:12:275] : -Set[0]: [Research_Centre, meetingRoom, executiveLaptop, hallway, kitchen, elevatorsArea, fourteenth_floor, Visitor1]
+[14:39:12:275] : >>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...
+[14:39:12:275] : BRSHandler>> Executing the Bigraphical Reactive System (BRS)...
+[14:39:12:275] : BRSHandler>> Creating Bigraph Signature...
+[14:39:12:407] : BRSHandler>> Creating Bigraph transition system...
+[14:39:14:232] : BRSHandler>> Loading states...
+[14:39:15:321] : >>Initialisation completed successfully
+[14:39:15:321] : >>Number of States= 502
+[14:39:15:322] : >>Creating threads for asset sets. [1] thread(s) are running in parallel.
+[14:39:15:831] : Thread[0]>>Identifying states and their transitions...
+[14:39:15:831] : Thread[0]>>BigraphAnalyser>>number of states: 502, partition size <= 100 (19.92%), number of partitions: 8, Number of parallel activities = 1, Parallelism for matching (= num of processors): 8
+[14:39:15:831] : Thread[0]>>BigraphAnalyser>>identifying states...
+[14:39:15:831] : Thread[0]>>BigraphAnalyser>>Executing condition: activity1_Precondition
+[14:39:15:832] : Thread[0]>>BigraphAnalyser>>Executing condition: activity1_Postcondition
+[14:39:26:927] : Thread[0]>>BigraphAnalyser>>activity1_Precondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100, 102, 103, 104, 105, 106, 108, 109, 111, 112, 113, 114, 116, 117, 118, 120, 121, 128, 129, 130, 131, 133, 134, 135, 136, 140, 141, 142, 144, 145, 146, 147, 148, 149, 150, 151, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 222, 223, 224, 225, 227, 228, 229, 231, 232, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 252, 253, 254, 255, 256, 257, 258, 259, 260, 263, 264, 265, 266, 269, 270, 274, 275, 276, 277, 278, 279, 280, 281, 285, 286, 287, 288, 289, 290, 300, 301, 302, 303, 305, 306, 307, 309, 310, 311, 312, 313, 314, 315, 325, 326, 328, 329, 330, 331, 332, 333, 334, 335, 337, 338, 339, 340, 341, 342, 343, 344, 345, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 458, 459, 460, 461, 462, 463, 464, 465, 469, 470, 471, 472, 473, 474, 475, 476, 477, 479, 480, 482, 483, 484, 485, 487, 488, 489, 491, 493, 494, 496, 497, 499, 501]
+[14:39:26:928] : Thread[0]>>BigraphAnalyser>>Condition [activity1_Precondition] matching time: 11095ms [0h:0m:11s:95ms]
+[14:39:28:199] : Thread[0]>>BigraphAnalyser>>activity1_Postcondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101, 107, 110, 115, 119, 122, 123, 124, 125, 126, 127, 132, 137, 138, 139, 143, 152, 153, 154, 165, 166, 167, 178, 179, 180, 191, 192, 193, 194, 209, 210, 211, 226, 230, 233, 249, 250, 251, 261, 262, 267, 268, 271, 272, 273, 282, 283, 284, 291, 292, 293, 294, 295, 296, 297, 298, 299, 304, 308, 316, 317, 318, 319, 320, 321, 322, 323, 324, 327, 336, 346, 347, 348, 349, 350, 351, 352, 363, 364, 365, 366, 367, 368, 369, 386, 387, 388, 389, 390, 391, 392, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 438, 439, 440, 441, 442, 443, 444, 455, 456, 457, 466, 467, 468, 478, 481, 486, 490, 492, 495, 498, 500]
+[14:39:28:199] : Thread[0]>>BigraphAnalyser>>Condition [activity1_Postcondition] matching time: 12371ms [0h:0m:12s:371ms]
+[14:39:28:199] : Thread[0]>>BigraphAnalyser>>Executing condition: activity2_Precondition
+[14:39:28:199] : Thread[0]>>BigraphAnalyser>>Executing condition: activity2_Postcondition
+[14:39:34:137] : Thread[0]>>BigraphAnalyser>>activity2_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101, 107, 110, 115, 119, 122, 123, 124, 125, 126, 127, 132, 137, 138, 139, 143, 152, 153, 154, 165, 166, 167, 178, 179, 180, 191, 192, 193, 194, 209, 210, 211, 226, 230, 233, 249, 250, 251, 261, 262, 267, 268, 271, 272, 273, 282, 283, 284, 291, 292, 293, 294, 295, 296, 297, 298, 299, 304, 308, 316, 317, 318, 319, 320, 321, 322, 323, 324, 327, 336, 346, 347, 348, 349, 350, 351, 352, 363, 364, 365, 366, 367, 368, 369, 386, 387, 388, 389, 390, 391, 392, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 438, 439, 440, 441, 442, 443, 444, 455, 456, 457, 466, 467, 468, 478, 481, 486, 490, 492, 495, 498, 500]
+[14:39:34:138] : Thread[0]>>BigraphAnalyser>>Condition [activity2_Precondition] matching time: 5933ms [0h:0m:5s:933ms]
+[14:39:35:509] : Thread[0]>>BigraphAnalyser>>activity2_Postcondition-states: []
+[14:39:35:509] : Thread[0]>>BigraphAnalyser>>Condition [activity2_Postcondition] matching time: 7305ms [0h:0m:7s:305ms]
+[14:39:35:510] : Thread[0]>>BigraphAnalyser>>Executing condition: activity3_Precondition
+[14:39:35:510] : Thread[0]>>BigraphAnalyser>>Executing condition: activity3_Postcondition
+[14:39:41:660] : Thread[0]>>BigraphAnalyser>>activity3_Precondition-states: [0, 4, 5, 14, 23, 24, 26, 27, 38, 39, 43, 48, 52, 61, 65, 75, 79, 90, 91, 96, 101, 107, 110, 115, 119, 122, 123, 124, 125, 126, 127, 132, 137, 138, 139, 143, 152, 153, 154, 165, 166, 167, 178, 179, 180, 191, 192, 193, 194, 209, 210, 211, 226, 230, 233, 249, 250, 251, 261, 262, 267, 268, 271, 272, 273, 282, 283, 284, 291, 292, 293, 294, 295, 296, 297, 298, 299, 304, 308, 316, 317, 318, 319, 320, 321, 322, 323, 324, 327, 336, 346, 347, 348, 349, 350, 351, 352, 363, 364, 365, 366, 367, 368, 369, 386, 387, 388, 389, 390, 391, 392, 403, 404, 405, 406, 407, 408, 409, 410, 411, 412, 438, 439, 440, 441, 442, 443, 444, 455, 456, 457, 466, 467, 468, 478, 481, 486, 490, 492, 495, 498, 500]
+[14:39:41:660] : Thread[0]>>BigraphAnalyser>>Condition [activity3_Precondition] matching time: 6150ms [0h:0m:6s:150ms]
+[14:39:44:002] : Thread[0]>>BigraphAnalyser>>activity3_Postcondition-states: [1, 2, 3, 8, 9, 10, 11, 12, 13, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 40, 41, 42, 44, 45, 46, 47, 49, 50, 51, 53, 54, 55, 56, 84, 85, 86, 87, 88, 89, 92, 93, 94, 95, 97, 98, 99, 100, 102, 103, 104, 105, 106, 108, 109, 111, 112, 113, 114, 116, 117, 118, 120, 121, 128, 129, 130, 131, 133, 134, 135, 136, 140, 141, 142, 144, 145, 146, 147, 148, 149, 150, 151, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 222, 223, 224, 225, 227, 228, 229, 231, 232, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 252, 253, 254, 255, 256, 257, 258, 259, 260, 263, 264, 265, 266, 269, 270, 274, 275, 276, 277, 278, 279, 280, 281, 285, 286, 287, 288, 289, 290, 300, 301, 302, 303, 305, 306, 307, 309, 310, 311, 312, 313, 314, 315, 325, 326, 328, 329, 330, 331, 332, 333, 334, 335, 337, 338, 339, 340, 341, 342, 343, 344, 345, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 458, 459, 460, 461, 462, 463, 464, 465, 469, 470, 471, 472, 473, 474, 475, 476, 477, 479, 480, 482, 483, 484, 485, 487, 488, 489, 491, 493, 494, 496, 497, 499, 501]
+[14:39:44:003] : Thread[0]>>BigraphAnalyser>>Condition [activity3_Postcondition] matching time: 8492ms [0h:0m:8s:492ms]
+[14:39:44:004] : Thread[0]>>BigraphAnalyser>>Total matching time of conditions = 28172ms [0h:0m:28s:172ms]
+[14:39:44:004] : Thread[0]>>BigraphAnalyser>>Average matching time of conditions = 4695ms [0h:0m:4s:695ms]
+[14:39:44:004] : Thread[0]>>Generating potential incident instances...
+[14:39:44:132] : Thread[0]>>NO potential incident instances generated
+[14:39:44:132] : Thread[0]>>Execution time: 28809ms [0h:0m:28s:809ms]
+[14:39:44:132] : Thread[0]>>Finished Successfully
+[14:39:44:133] : $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+[14:39:44:133] : ////Execution finished\\\\
+[14:39:44:133] : Execution time: 32372ms [0h:0m:32s:372ms]

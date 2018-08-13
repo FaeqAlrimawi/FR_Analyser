@@ -1,0 +1,7 @@
+[14:38:29:007] : ////Executing Scenario1\\\\
+[14:38:29:007] : *Incident pattern file "etc/scenario1/interruption_incident-pattern.cpi"
+[14:38:29:007] : *System model file "etc/scenario1/research_centre_model.cps"
+[14:38:29:007] : *BRS file "etc/scenario1/research_centre_system.big" & states folder "etc/scenario1/research_centre_output_100"
+[14:38:29:007] : >>Matching incident pattern entities to system assets
+[14:38:29:580] : >>Some incident entities have no matches in the system assets. These are:
+[14:38:29:580] : [hallway, offender1]
