@@ -41,7 +41,7 @@ public class BigraphAnalyser {
 	private int numberofActivityParallelExecution = 1; //determines how many activities should be threaded
 	private ExecutorService predicateExecutor = Executors.newFixedThreadPool(numberofActivityParallelExecution*2); //pool size for parallel running
 //	private int minimumPartitionSize = 1;
-	private BlockingQueue<String> msgQ;
+//	private BlockingQueue<String> msgQ;
 	private int threadID;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;
@@ -65,6 +65,7 @@ public class BigraphAnalyser {
 	private StopWatch timer = new StopWatch();
 //	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"); 
 	private LinkedList<Future<Integer>> predicateResults = new LinkedList<Future<Integer>>();
+	private Logger logger;
 	
 	public BigraphAnalyser() {
 		
@@ -81,7 +82,8 @@ public class BigraphAnalyser {
 		states = SystemInstanceHandler.getStates();
 		matcher = new Matcher();
 		//bigraphMatcher = new it.uniud.mads.jlibbig.core.std.BigraphMatcher();
-		msgQ = Logger.getInstance().getMsgQ();
+//		msgQ = Logger.getInstance().getMsgQ();
+		logger = Logger.getInstance();
 		predicateHandler = predHandler;
 		this.threadID=  threadID;
 		mainPool = new ForkJoinPool();
@@ -118,11 +120,11 @@ public class BigraphAnalyser {
 			
 			if(isThreading) {
 			
-					msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", partition size: "+partitionSize + " ("+ (int)((partitionSize*1.0/states.size())*10000)/100.0+ "%)"+
+					logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", partition size: "+partitionSize + " ("+ (int)((partitionSize*1.0/states.size())*10000)/100.0+ "%)"+
 							", number of partitions: "+ numberOfPartitions+", thread pool size: " + threadPoolSize);
 				
 			} else {
-				msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", No threads");
+				logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", No threads");
 			}
 					
 		}
@@ -169,17 +171,17 @@ public class BigraphAnalyser {
 						numberOfPartitions = 1;
 					}
 					
-						msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", partition size <= "+threshold + " ("+ 
+						logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", partition size <= "+threshold + " ("+ 
 						(int)((threshold*1.0/states.size())*10000)/100.0+ "%)"+
 								", number of partitions: "+ numberOfPartitions+", Number of parallel activities = "+numberofActivityParallelExecution+", Parallelism for matching (= num of processors): " + mainPool.getParallelism());
 					
 				} else {
-					msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", No threads");
+					logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>number of states: "+states.size()+", No threads");
 				}
 						
 			}
 		
-			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>identifying states...");
+			logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>identifying states...");
 			
 			timer.start();
 			if(isPredicateThreading) {
@@ -187,7 +189,7 @@ public class BigraphAnalyser {
 				predicateExecutor.shutdown();	
 				
 				if (!predicateExecutor.awaitTermination(maxWaitingTime, timeUnit)) {
-					msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+					logger.putMessage("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 				}
 			} else {
 				identifyRelevantStates();	
@@ -196,7 +198,7 @@ public class BigraphAnalyser {
 	
 			mainPool.shutdown();
 			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
-				msgQ.put("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
+				logger.putMessage("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " " + timeUnit + "]");
 			}
 		
 
@@ -218,8 +220,8 @@ public class BigraphAnalyser {
 				int avgSecs = (int)(avgTime/1000)%60;
 				int avgMils = (int)avgTime%1000;
 				
-				msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>Total matching time of conditions = "+ totalTime+"ms ["+ maxHours+"h:"+ maxMins+"m:"+ maxSecs+"s:"+ maxMils+"ms]");
-				msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>Average matching time of conditions = "+ avgTime +"ms ["+ avgHours+"h:"+ avgMins+"m:"+ avgSecs+"s:"+ avgMils+"ms]");
+				logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>Total matching time of conditions = "+ totalTime+"ms ["+ maxHours+"h:"+ maxMins+"m:"+ maxSecs+"s:"+ maxMils+"ms]");
+				logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>Average matching time of conditions = "+ avgTime +"ms ["+ avgHours+"h:"+ avgMins+"m:"+ avgSecs+"s:"+ avgMils+"ms]");
 				
 			}
 		} catch (InterruptedException e) {
@@ -300,15 +302,13 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		ArrayList<Predicate> preds = predicateHandler.getActivityPredicates(activityName);
 		
 		//LinkedList<Future<Integer>> futurePreds = new LinkedList<Future<Integer>>();
-		try {
-			
 		for (int i = 0;i< preds.size();i++) {
 			//futurePreds.clear();
 			/*if(isLastActivity && i == preds.size()-1) {
 				isLastCondition = true;
 			}*/
 			
-			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>Executing condition: "+ preds.get(i).getName());
+			logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>Executing condition: "+ preds.get(i).getName());
 			
 			if(isPredicateThreading) {
 				predicateResults.add(predicateExecutor.submit(new PredicateMatcher(preds.get(i))));
@@ -318,13 +318,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 			
 		}
 
-		
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		//return preds;
+
 	}
 	
 	/**
@@ -340,8 +334,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 			timer.reset();
 			timer.start();
 		}
-		
-		try {
+
 			
 		if(pred == null) {
 			return false;
@@ -378,7 +371,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 		//set bigraph states in the conditions
 		pred.setBigraphStates(statesResults);
 		
-		msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>"+pred.getName()+"-states: "+pred.getBigraphStates());
+		logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>"+pred.getName()+"-states: "+pred.getBigraphStates());
 		
 		if(isTestingTime) {
 			timer.stop();
@@ -391,18 +384,11 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 			int secMils = (int)timePassed%1000;
 			
 			//execution time
-			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>Condition ["+pred.getName()+"] matching time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+			logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>Condition ["+pred.getName()+"] matching time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
 			//averageTime += timePassed;
 			numberOfConditions++;
 		}
 
-		
-		
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} 
-		
 		return areStatesIdentified;
 		
 	}
@@ -647,8 +633,6 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 				//timer.reset();
 				timer.start();
 			}
-			
-			try {
 				
 			if(pred == null) {
 				return -1;
@@ -682,7 +666,7 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 			//set result
 			pred.setBigraphStates(statesResults);
 			
-			msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>"+pred.getName()+"-states: "+pred.getBigraphStates());
+			logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>"+pred.getName()+"-states: "+pred.getBigraphStates());
 			
 			if(isTestingTime) {
 				timer.stop();
@@ -695,16 +679,12 @@ public PredicateHandler identifyRelevantStatesWithThreading() {
 				int secMils = (int)timePassed%1000;
 				
 				//execution time
-				msgQ.put("Thread["+threadID+"]>>BigraphAnalyser>>Condition ["+pred.getName()+"] matching time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
+				logger.putMessage("Thread["+threadID+"]>>BigraphAnalyser>>Condition ["+pred.getName()+"] matching time: " +  timePassed+"ms ["+ hours+"h:"+mins+"m:"+secs+"s:"+secMils+"ms]");
 				//averageTime += timePassed;
 				numberOfConditions++;
 				
 			}
 
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			
 			return 1;
 		}

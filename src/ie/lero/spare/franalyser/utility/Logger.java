@@ -25,7 +25,7 @@ public class Logger implements Runnable{
 //	private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"); 
 	private DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS"); 
 	private static Logger logger = new Logger();
-	public static String terminatingString = "LoggingDone";
+	private static String terminatingString = "LoggingDone";
 	
 	private Logger() {
 		
@@ -94,7 +94,7 @@ public class Logger implements Runnable{
 			String msg = (String) logger.msgQ.take();
 			
 			//message "done" ends wirting and closes the file
-			while(!msg.equalsIgnoreCase(Logger.terminatingString)) {
+			while(!msg.equals(Logger.terminatingString)) {
 				
 				if(isSaveLog || isPrintToScreen) {
 					print(msg);
@@ -184,8 +184,24 @@ public class Logger implements Runnable{
 	}
 
 
-	public  BlockingQueue<String> getMsgQ() {
+	/*public  BlockingQueue<String> getMsgQ() {
 		return msgQ;
+	}*/
+	
+	public void putMessage(String msg) {
+		try {
+			msgQ.put(msg);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void terminateLogging() {
+		
+		putMessage(Logger.terminatingString);
+	
+		
 	}
 	
 	
