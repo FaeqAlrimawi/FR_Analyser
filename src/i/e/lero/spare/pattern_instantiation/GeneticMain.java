@@ -16,7 +16,7 @@ public class GeneticMain {
 	/*for now the assets pool is created and maintained in an arraylist of assets
 	the assumptions: there are 4 assets in general incidents, and 10 assets in an environment
 	*/
-	protected static List<environment.Asset> concreteAssets;
+	protected static List<environment.Asset> systemAssets;
 	protected static List<cyberPhysical_Incident.IncidentEntity> generalEntities;
 	protected static List<Activity> activities;
 	
@@ -40,7 +40,7 @@ public class GeneticMain {
 	
 	/*public GeneticMain(){
 		
-		concreteAssets = new ArrayList<environment.Asset>();
+		systemAssets = new ArrayList<environment.Asset>();
 		generalEntities = new ArrayList<cyberPhysical_Incident.IncidentEntity>();	
 		activities = new ArrayList<Activity>();
 		
@@ -51,7 +51,7 @@ public class GeneticMain {
 	*/
 	
 	public static void initialise() {
-		concreteAssets = new ArrayList<environment.Asset>();
+		systemAssets = new ArrayList<environment.Asset>();
 		generalEntities = new ArrayList<cyberPhysical_Incident.IncidentEntity>();	
 		activities = new ArrayList<Activity>();
 		
@@ -64,9 +64,9 @@ public class GeneticMain {
 	
 		environment.EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
 		
-		concreteAssets.addAll(systemModel.getAsset());
+		systemAssets.addAll(systemModel.getAsset());
 		
-		cAssetsNum = concreteAssets.size();
+		cAssetsNum = systemAssets.size();
 		
 	}
 	
@@ -172,7 +172,47 @@ public class GeneticMain {
 	
 	public static void main(String [] args) {
 		
+		ModelsHandler.addIncidentModel("etc/steal_scenario/incidentInstance_steal.cpi");
+		ModelsHandler.addSystemModel("etc/steal_scenario/research_centre_model.cps");
+		GeneticMain.initialise();
+	
+		Population pop = new Population();
+		
+		int numOfGenerations = 400;
+		
+		for(int i=0;i<numOfGenerations;i++) {
+			pop.newGeneration();
+		}
+		
+		
+		for(cyberPhysical_Incident.IncidentEntity ent : generalEntities) {
+			System.out.print(ent.getName()+"-");
+		}
+		System.out.println();
+		
+		printFits(pop);
 		
 		//loadIncidentFromFile();
+	}
+	
+	public static void printFits(Population pop){
+		System.out.println("________________________");
+		System.out.println("Best Fits ("+pop.bestFitsValues.length+")");
+		for (int i=0;i<pop.bestFitsValues.length;i++){
+			System.out.print(pop.bestFits.get(i).toString());
+			System.out.println(" --fitness:"+pop.bestFitsValues[i]);
+		}
+		System.out.println("________________________");
+	}
+	
+	public static void printPop(Population pop){
+		System.out.println("________________________");
+		System.out.println("Population");
+		for (int i=0;i<pop.popSize;i++){
+			System.out.print(pop.pop.get(i).toString());
+			System.out.println(" --fitness:"+pop.fitness[i]);
+		}
+	//	System.out.print("best: ");System.out.print(pop.best.toString()); System.out.println(" best fitness:"+pop.bestfitness);
+		System.out.println("________________________");
 	}
 }

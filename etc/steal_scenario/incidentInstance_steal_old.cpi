@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cyberPhysical_Incident:IncidentDiagram xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
+<cyberPhysical_Incident:IncidentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
   <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE" higherLevelScriptName=""/>
   <asset connections="hallway-kitchen" parentEntity="floor4" name="kitchen">
     <type name="Kitchen"/>
@@ -28,7 +28,6 @@
   <connection name="hallway-meetingRoom" entity1="meetingRoom" entity2="hallway"/>
   <connection name="hallway-kitchen" entity1="kitchen" entity2="hallway"/>
   <connection name="hallway-elevatorsArea" entity1="elevatorsArea" entity2="hallway"/>
-   <scene name="execution">
   <activity name="activity2" nextActivities="activity3" previousActivities="activity1" initiator="Visitor1" targetedAssets="kitchen" description="offender enters kitchen" systemAction="enter">
     <precondition>
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
@@ -115,5 +114,4 @@
       </expression>
     </postcondition>
   </activity>
-  </scene>
 </cyberPhysical_Incident:IncidentDiagram>

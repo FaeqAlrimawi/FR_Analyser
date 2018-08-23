@@ -25,6 +25,7 @@ public class Individual {
 	protected static int connectionsMatchScore = 15;
 	protected static int containedAssetsMatchScore = 25;
 	protected static int propertyMatchScore = 15;
+	protected static double featureMisMatchScore = 0.001;
 	
 	//scores related to relations between entities
 	protected static double matchRelationScoreAddedPercentage = 0.05;
@@ -113,7 +114,7 @@ public class Individual {
 		
 		//load assets
 		entity = GeneticMain.generalEntities.get(indexGen);
-		asset = GeneticMain.concreteAssets.get(indexCon);
+		asset = GeneticMain.systemAssets.get(indexCon);
 		
 		/**
 		 * matching criteria
@@ -149,12 +150,15 @@ public class Individual {
 			//currently return false
 			//return false;
 //			score += 3; 
+			return featureMisMatchScore;
 		}
 		
 		//if the current asset object is not of the same class or subclass of the potential class
 		//then return false (type mismatch)
 		if(potentialClass.isInstance(asset)) {
 			score += typeMatchScore; 
+		} else {
+			return featureMisMatchScore;
 		}
 		
 		}
@@ -179,6 +183,7 @@ public class Individual {
 					//type mismatch i.e. there is no type available in the system model 
 					//currently return false (maybe loosened a little like ignore)
 					//return false;
+					return featureMisMatchScore;
 				}
 				
 				//if the current asset object is not of the same class or subclass of the potential class
@@ -194,10 +199,13 @@ public class Individual {
 				//if the asset has no parent but the incident entity has then return false (no match)
 				if(parentAsset == null) {
 //					return false;
+					return featureMisMatchScore;
 				}
 				
 				if(potentialClass.isInstance(parentAsset)) {
 					score += parentTypeMatchScore;
+				} else {
+					return featureMisMatchScore;
 				}
 				
 			}
@@ -206,16 +214,17 @@ public class Individual {
 		/** matching contained assets (number & type) **/
 		//if knowledge is exact then both should have the same number of connections
 		//otherwise there's no match
-/*		if(entity.getContainedAssetsKnowledge().compareTo(Knowledge.EXACT) == 0) {
+		if(entity.getContainedAssetsKnowledge().compareTo(Knowledge.EXACT) == 0) {
 			if(entity.getContainedEntities().size() != entity.getContainedEntities().size()) {
 			
 //				return false;
+				return featureMisMatchScore;
 			}
 		}
-		*/
+		
 		//if the incident entity has more connections then it cannot be subset of the asset connections
 		//thus there's no match
-		if(entity.getContainedEntities().size() < entity.getContainedEntities().size()) {
+		if(entity.getContainedEntities().size() <= entity.getContainedEntities().size()) {
 		
 		//compare connection type (simialr to asset type)
 		LinkedList<Integer> matchedcontainedAssets = new LinkedList<Integer>();
@@ -283,6 +292,8 @@ public class Individual {
 			score += containedAssetsMatchScore;
 		}
 		
+		} else {
+			return featureMisMatchScore;
 		}
 		
 		/** matching connections (number & type) **/
@@ -292,12 +303,13 @@ public class Individual {
 			if(entity.getConnections().size() != asset.getConnections().size()) {
 			
 //				return false;
+				return featureMisMatchScore;
 			}
 		}
 		
 		//if the incident entity has more connections then it cannot be subset of the asset connections
 		//thus there's no match
-		if(entity.getConnections().size() < asset.getConnections().size()) {
+		if(entity.getConnections().size() <= asset.getConnections().size()) {
 	
 		//compare connection type (simialr to asset type)
 		LinkedList<Integer> matchedAssetCons = new LinkedList<Integer>();
@@ -361,6 +373,8 @@ public class Individual {
 			score += connectionsMatchScore;
 		}
 		
+		} else {
+			return featureMisMatchScore;
 		}
 		
 		
@@ -398,7 +412,8 @@ public class Individual {
 			}
 			
 			if(!isPropertyMatched) {
-				break;
+//				break;
+				return featureMisMatchScore;
 			}
 			
 			isPropertyMatched = false;
@@ -426,8 +441,8 @@ public class Individual {
 		for (int i=0;i<arraySize;i++){
 			for(int j=1;j<=GeneticMain.neighbourhood;j++){
 				if (i+j < arraySize){//make sure that it does not go out of index
-					src = GeneticMain.concreteAssets.get(assets[i]);
-					des = GeneticMain.concreteAssets.get(assets[i+j]);
+					src = GeneticMain.systemAssets.get(assets[i]);
+					des = GeneticMain.systemAssets.get(assets[i+j]);
 					
 					//isSame
 					if(src.getName().equals(des.getName())){
@@ -579,14 +594,17 @@ public class Individual {
 	}
 	
 	public String toString() {
-		String value="";
+		StringBuilder res = new StringBuilder();
+		
 		int i = 0;
-		value +=assets[i];
+		
+		res.append(GeneticMain.systemAssets.get(assets[i]).getName());
+		
 		i++;
 		for(;i<assets.length;i++){
-			value += "-"+assets[i];
+			res.append("-").append(GeneticMain.systemAssets.get(assets[i]).getName());
 		}
-		return value;
+		return res.toString();
 	}
 	
 	//returns 1 if match 0 if not
