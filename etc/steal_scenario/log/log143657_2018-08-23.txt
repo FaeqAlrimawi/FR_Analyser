@@ -1,0 +1,5 @@
+[14:36:57:445] : ////Executing Scenario1\\\\
+[14:36:57:451] : *Incident pattern file "etc/steal_scenario/incidentInstance_steal.cpi"
+[14:36:57:452] : *System model file "etc/steal_scenario/research_centre_model.cps"
+[14:36:57:452] : *BRS file "etc/steal_scenario/research_centre_system.big" & states folder "etc/steal_scenario/research_centre_output_500"
+[14:36:57:484] : >>Matching incident pattern entities to system assets

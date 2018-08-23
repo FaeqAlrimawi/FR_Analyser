@@ -2,6 +2,7 @@ package i.e.lero.spare.pattern_instantiation;
 
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Population {
@@ -15,17 +16,17 @@ public class Population {
 	double mutationRate = 0.20; //can be changed where it starts high and gradually decrease (can be bw 0.05 - 0.25)
 	
 	//population
-	ArrayList<Individual> pop;
+	List<Individual> pop;
 	
 	//new population after crossover and mutation
-	ArrayList<Individual> newPop;
+	List<Individual> newPop;
 	
 	//fitness corresponding to population array
 	double [] fitness;
 	
 	//best fit
 //	Individual best;
-	ArrayList<Individual> bestFits; // we can check if the bestfits repeat in number of generations as a termination criterion
+	List<Individual> bestFits; // we can check if the bestfits repeat in number of generations as a termination criterion
 	double [] bestFitsValues;       //also we can let the best fits go to the next generation without having to do selection and others  
 	double fitnessSum=0;
 	
@@ -278,7 +279,7 @@ public class Population {
 	}
 	
 	//highest to lowest
-	  void quickSort(double [] array, ArrayList<Individual> inds, int lowerIndex, int higherIndex) {
+	 void quickSort(double [] array, List<Individual> inds, int lowerIndex, int higherIndex) {
          
 	        int i = lowerIndex;
 	        int j = higherIndex;
@@ -312,7 +313,7 @@ public class Population {
 	            quickSort(array, inds, i, higherIndex);
 	    }
 	 
-	    private void exchangeNumbers(double [] array, ArrayList<Individual> inds, int i, int j) {
+	    private void exchangeNumbers(double [] array, List<Individual> inds, int i, int j) {
 	        double temp = array[i];
 	        Individual ind = pop.get(i);
 	        
@@ -330,6 +331,7 @@ public class Population {
 		
 		Random r = new Random();
 		double ran;
+		
 		//create new population
 		for (int i=0;i<popSize;i++){
 			select();

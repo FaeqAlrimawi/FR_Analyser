@@ -89,11 +89,16 @@ public class IncidentPatternExtractor {
 //		abstractedModel = incidentModel.createAbstractIncident();
 		
 		
-		IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/abstractIncident_steal.cpi");
-		
-		System.out.println("num of activities in original = "+ incidentModel.getActivity().size());
-		System.out.println("num of activities in abstract = "+ abstractedModel.getActivity().size());
+		if(abstractedModel != null) {
+			IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/abstractIncident_steal.cpi");
+			
+			System.out.println("num of activities in original = "+ incidentModel.getActivity().size());
+			System.out.println("num of activities in abstract = "+ abstractedModel.getActivity().size());
 
+		} else {
+			System.out.println("Abstract model = null");
+		}
+		
 		return abstractedModel;
 	}
 	
