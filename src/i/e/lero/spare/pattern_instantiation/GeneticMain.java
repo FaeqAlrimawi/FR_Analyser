@@ -6,7 +6,6 @@ import java.util.List;
 
 import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.IncidentDiagram;
-import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 
 
@@ -26,8 +25,8 @@ public class GeneticMain {
 	protected static int  gNumofAssets = 3;
 	protected int numofActivities=4;
 	
-	protected IncidentDiagram incidentModel;
-	protected EnvironmentDiagram systemModel;
+//	protected IncidentDiagram incidentModel;
+//	protected EnvironmentDiagram systemModel;
 	
 	//number of rules
 	//rules for each asset are 4 currently: isSame? 0 or 1, hasConnectivity? 0 or Type, isParent? 0 or 1, isChild? 0 or 1
@@ -37,14 +36,34 @@ public class GeneticMain {
 	//how far a general asset looks in the array
 	static int neighbourhood; //max = number of general assets - 1, min = 1
 	
-	public GeneticMain(){
+	//public static final GeneticMain instance = new GeneticMain();
+	
+	/*public GeneticMain(){
+		
 		concreteAssets = new ArrayList<environment.Asset>();
 		generalEntities = new ArrayList<cyberPhysical_Incident.IncidentEntity>();	
 		activities = new ArrayList<Activity>();
+		
+		loadIncidentEntities();
+		loadSystemAssets();
+		createIncidentEntitiesRules();
+	}
+	*/
+	
+	public static void initialise() {
+		concreteAssets = new ArrayList<environment.Asset>();
+		generalEntities = new ArrayList<cyberPhysical_Incident.IncidentEntity>();	
+		activities = new ArrayList<Activity>();
+		
+		loadIncidentEntities();
+		loadSystemAssets();
+		createIncidentEntitiesRules();
 	}
 	
-	public void loadSystemAssets(){
+	private static void loadSystemAssets(){
 	
+		environment.EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+		
 		concreteAssets.addAll(systemModel.getAsset());
 		
 		cAssetsNum = concreteAssets.size();
@@ -52,8 +71,10 @@ public class GeneticMain {
 	}
 	
 
-	public void loadIncidentEntities(){
+	private static void loadIncidentEntities(){
 	
+		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
+		
 		generalEntities.addAll(incidentModel.getAsset());
 		generalEntities.addAll(incidentModel.getActor());
 		generalEntities.addAll(incidentModel.getResource());
@@ -64,12 +85,7 @@ public class GeneticMain {
 		
 	}
 	
-	protected void setModels() {
-		incidentModel = ModelsHandler.getCurrentIncidentModel();
-		systemModel = ModelsHandler.getCurrentSystemModel();
-	}
-	
-	public void createGeneralAssetsRules() {
+	private static void createIncidentEntitiesRules() {
 		//rules for each asset are 4 currently: isSame? 0 or 1, hasConnectivity? 0 or 1, isParent? 0 or 1, isChild? 0 or 1
 		//the size of the rules array = rulesNum*neighbourhood*size of generalAsset array (i.e. number of general assets)  
 		int arraySize = generalEntities.size();
@@ -114,12 +130,16 @@ public class GeneticMain {
 					} else {
 						rules[ind] = 0;
 					}
+					
 					//[2] isConnected
 					for(cyberPhysical_Incident.Connection con: src.getConnections()) {
 						
-						cyberPhysical_Incident.IncidentEntity ent1 = con.getEntity1();
+						cyberPhysical_Incident.IncidentEntity ent1 = (cyberPhysical_Incident.IncidentEntity)con.getEntity1();
+						cyberPhysical_Incident.IncidentEntity ent2 = (cyberPhysical_Incident.IncidentEntity)con.getEntity2();
 						
-						if (ent1.getName().equals(des.getName())){
+						
+						if ((ent1 != null && ent1.getName().equals(des.getName()))
+								|| (ent2 != null && ent2.getName().equals(des.getName()))){
 							rules[ind+1] = 1;//con.getType().ordinal();
 							break;
 						} 
@@ -128,14 +148,17 @@ public class GeneticMain {
 					if(rules[ind+1] != 1) {
 						rules[ind+1] = 0;
 					}
+					
 					//[3] is the destination parent of source
-					if(src.getParent() == des) {
+					if(src.getParentEntity() != null && 
+							((cyberPhysical_Incident.IncidentEntity)src.getParentEntity()).getName().equals(des.getName())) {
 						rules[ind+2] = 1;
 					} else {
 						rules[ind+2] = 0;
 					}
+					
 					//[4] is destination a child in source
-					if(src.getContainedAssets().contains(des)){
+					if(src.getContainedEntities().contains(des)){
 						rules[ind+3] = 1;
 					} else {
 						rules[ind+3] = 0;
@@ -148,6 +171,7 @@ public class GeneticMain {
 
 	
 	public static void main(String [] args) {
+		
 		
 		//loadIncidentFromFile();
 	}
