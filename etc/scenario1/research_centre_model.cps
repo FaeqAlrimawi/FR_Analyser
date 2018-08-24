@@ -12,7 +12,7 @@
   <asset xsi:type="environment:Server" connections="Server-DN" name="Server1" control="Server" parentAsset="empiricalLab"/>
   <asset xsi:type="environment:Workstation" connections="Workstation-DN" name="Workstation1" control="Workstation" parentAsset="informaticsLab"/>
   <asset xsi:type="environment:DigitalAsset" connections="FA-DN Workstation-DN SL2-DN SL1-DN HVAC-DN SL3-DN Server-DN" name="busNetwork" description="" control="BusNetwork"/>
-  <asset xsi:type="environment:Actor" name="Visitor1" control="Visitor" containedAssets="Laptop1" parentAsset="elevatorsArea" role="Offender"/>
+  <asset xsi:type="environment:Actor" name="Visitor1" control="Visitor" containedAssets="Laptop1" parentAsset="hallway" role="Offender"/>
   <asset xsi:type="environment:Laptop" name="Laptop1" control="Laptop" containedAssets="SoftwareX" parentAsset="Visitor1"/>
   <asset xsi:type="environment:Application" name="SoftwareX" control="Malware" parentAsset="Laptop1"/>
   <asset xsi:type="environment:Lab" connections="instructorsLab1_hallway" name="instructorsLab1" control="Room" containedAssets="desktop1_3 desktop1_2 desktop1_1" parentAsset="fourteenth_floor"/>

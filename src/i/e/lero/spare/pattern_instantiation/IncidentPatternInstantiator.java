@@ -960,8 +960,8 @@ public class IncidentPatternInstantiator {
 		
 		//ins.executeExample();
 		
-//		ins.executeScenario1();
-		ins.executeStealScenario();
+		ins.executeScenario1();
+//		ins.executeStealScenario();
 		//ins.test1();
 	}
 

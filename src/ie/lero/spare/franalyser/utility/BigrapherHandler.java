@@ -549,6 +549,51 @@ public class BigrapherHandler implements SystemExecutor {
 		
 		return states;
 	}
+	
+/*	//for testing if states match each other
+	public  void loadStatesTest() {
+
+		states = new HashMap<Integer, Bigraph>();
+		// should rethink how to know how many states are there/ Currently
+		// depends on the transition file
+		String outputFolder1 = "etc/scenario1/research_centre_output_100";
+		String outputFolder2 = "etc/scenario1/research_centre_output_500";
+		
+		JSONObject state1;
+		JSONObject state2;
+		JSONParser parser1 = new JSONParser();
+		JSONParser parser2 = new JSONParser();
+		Matcher matcher = new Matcher();
+		BigraphMatcher mat = new BigraphMatcher();
+		int numOfStates = 100;
+		
+		
+		getBigraphSignature();
+		
+		if (bigraphSignature != null) {
+			System.out.println("matching states...");
+		for (int i = 0; i < numOfStates; i++) {
+			try {
+				// read state from file
+				
+				state1 = (JSONObject) parser1.parse(new FileReader(outputFolder1 + "/" + i + ".json"));
+				state2 = (JSONObject) parser2.parse(new FileReader(outputFolder2 + "/" + i + ".json"));
+				Bigraph bigraph1 = convertJSONtoBigraph(state1);
+				Bigraph bigraph2 = convertJSONtoBigraph(state2);
+//				states.put(i, bigraph);
+				System.out.println("matching " + i);
+				if(!mat.matchBigraph(bigraph1, bigraph2)) {
+					System.out.println("state " + i );
+				}
+				
+			} catch (IOException | ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+		}
+
+	}*/
 
 	/**
 	 * converts a given bigraph in JSON format to a Bigraph object from the
@@ -1366,5 +1411,11 @@ public class BigrapherHandler implements SystemExecutor {
 			return n;
 
 		}
+	}*/
+
+	/*public static void main(String[] args) {
+		
+		BigrapherHandler h = new BigrapherHandler("etc/scenario1/research_centre_system.big");
+		h.loadStatesTest();
 	}*/
 }
