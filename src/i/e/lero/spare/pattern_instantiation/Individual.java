@@ -20,10 +20,10 @@ public class Individual {
 	int maxConcreteAssetNum;
 	
 	//scores related to comparing properties of an entity
-	protected static int typeMatchScore = 30;
-	protected static int parentTypeMatchScore = 20;
-	protected static int connectionsMatchScore = 15;
-	protected static int containedAssetsMatchScore = 25;
+	protected static int typeMatchScore = 50;
+	protected static int containedAssetsMatchScore = 40;
+	protected static int parentTypeMatchScore = 30;
+	protected static int connectionsMatchScore = 20;
 	protected static int propertyMatchScore = 15;
 	protected static double featureMisMatchScore = 0.001;
 	
@@ -517,7 +517,7 @@ public class Individual {
 	
 	//returns 1 if this individual has better qualities compared to the general than the other individual (ind)
 		//returns 2 if it is the other way around, and returns 0 if they are equal
-		int compareAssetsProperties(int index, Individual ind) {
+		/*int compareAssetsProperties(int index, Individual ind) {
 			
 			double score1= 0,score2=0;
 			int in =index*GeneticMain.rulesNum*GeneticMain.neighbourhood;
@@ -555,7 +555,7 @@ public class Individual {
 			
 			return 0;
 			
-		}
+		}*/
 		
 	//crossover done through swapping better genes from this ind to the new child or the other ind in case the first is not suitable
 	public Individual crossOver(Individual ind){

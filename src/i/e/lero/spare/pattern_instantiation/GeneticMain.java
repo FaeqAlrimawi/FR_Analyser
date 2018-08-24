@@ -170,30 +170,38 @@ public class GeneticMain {
 	}
 
 	
-	public static void main(String [] args) {
+/*	public static void main(String [] args) {
 		
 		ModelsHandler.addIncidentModel("etc/steal_scenario/incidentInstance_steal.cpi");
 		ModelsHandler.addSystemModel("etc/steal_scenario/research_centre_model.cps");
 		GeneticMain.initialise();
-	
-		Population pop = new Population();
-		
-		int numOfGenerations = 400;
-		
-		for(int i=0;i<numOfGenerations;i++) {
-			pop.newGeneration();
-		}
-		
-		
+
 		for(cyberPhysical_Incident.IncidentEntity ent : generalEntities) {
 			System.out.print(ent.getName()+"-");
 		}
 		System.out.println();
 		
-		printFits(pop);
+		int numOfIterations = 10;
+		
+		int numOfGenerations = 200;
+		
+		Population pop = new Population();
+		
+		for(int j=0;j<numOfIterations;j++) {
+		for(int i=0;i<numOfGenerations;i++) {
+			pop.newGeneration();
+		}
+		
+		System.out.println(pop.bestFits.get(0) + " value:"+ pop.bestFitsValues[0]);
+		pop = new Population();
+		}
+		
+		
+		
+//		printPop(pop);
 		
 		//loadIncidentFromFile();
-	}
+	}*/
 	
 	public static void printFits(Population pop){
 		System.out.println("________________________");

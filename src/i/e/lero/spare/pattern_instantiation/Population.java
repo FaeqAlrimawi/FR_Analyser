@@ -9,7 +9,7 @@ public class Population {
 
 	//--important parameters
 	//population Size
-	int popSize = 200;
+	int popSize = 600;
 	//crossover rate
 	double crossoverRate = 0.75; //can be changed where it starts high and gradually decrease (can be bw 0.45 - 0.95)
 	//mutation rate

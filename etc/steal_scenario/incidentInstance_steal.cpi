@@ -2,7 +2,7 @@
 <cyberPhysical_Incident:IncidentDiagram xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
   <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE" higherLevelScriptName=""/>
   <asset connections="hallway-kitchen" parentEntity="floor4" name="kitchen">
-    <type name="Kitchen"/>
+    <type name="Room"/>
   </asset>
   <asset parentEntity="meetingRoom" name="executiveLaptop" description="">
     <type name="Laptop"/>
