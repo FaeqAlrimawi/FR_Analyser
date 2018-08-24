@@ -169,7 +169,6 @@ public class GeneticMain {
 		}
 	}
 
-	
 /*	public static void main(String [] args) {
 		
 		ModelsHandler.addIncidentModel("etc/steal_scenario/incidentInstance_steal.cpi");

@@ -1,5 +1,9 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.util.List;
+import java.util.Map.Entry;
+
+import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
@@ -94,12 +98,38 @@ public class IncidentPatternExtractor {
 			
 			System.out.println("num of activities in original = "+ incidentModel.getActivity().size());
 			System.out.println("num of activities in abstract = "+ abstractedModel.getActivity().size());
+			
+			System.out.println();
+			
+			int index = 0;
+			 for(Entry<Activity, List<Activity>> entry : incidentModel.getMergedActivities().entrySet()) {
+			 System.out.println("new-Activity: "+entry.getKey().getName() + 
+					 "\nmerged-activities: "+entry.getValue().get(0).getName() + 
+					 " & " +entry.getValue().get(1).getName() +
+					 "\nRule: [" + getMergeRuleName(incidentModel.getMergedRules().get(index)) + "]");
+			 index++;
+			 }
+		
 
 		} else {
 			System.out.println("Abstract model = null");
 		}
 		
 		return abstractedModel;
+	}
+	
+	protected String getMergeRuleName(int rule) {
+	
+		switch(rule) {
+		 case IncidentDiagram.COLLECTDATA_MERGE_RULE:
+			 return "Collect Data";
+		 case IncidentDiagram.CONTAINMENT_MERGE_RULE:
+			 return "Containment";
+		 case IncidentDiagram.CONNECTIVITY_MERGE_RULE:
+			 return "Connectivity";
+			 default:
+				 return "";
+		 }
 	}
 	
 	public IncidentDiagram extract(String fileName) {
