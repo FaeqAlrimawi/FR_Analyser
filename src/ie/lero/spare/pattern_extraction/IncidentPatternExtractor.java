@@ -87,14 +87,26 @@ public class IncidentPatternExtractor {
 			System.out.println("system model is NULL");
 		}
 		
-		String patternFileName = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/collectDataPattern.cpi";
+		String patternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectData.cpi";
 		
-		ActivityPattern ptr = ModelsHandler.addActivityPattern(patternFileName);
+		ActivityPattern ptrCollectData = ModelsHandler.addActivityPattern(patternFileName);
 		
-		ptr.applyTo(null);
+		Activity actInit = incidentModel.getInitialScene().getNextScenes().get(0).getInitialActivity();
+		Activity activity1 = actInit.getNextActivities().get(0);
+//		Activity activity2 = actInit.getNextActivities().get(0).getNextActivities().get(0);
+		System.out.println(actInit.getName()+" "+activity1.getName() );
+		
+		Activity result = ptrCollectData.applyTo(actInit, activity1);
+		
+		if(result != null) {
+			System.out.println(result.getName());
+		} else {
+			System.out.println("result is null");
+		}
+		
 		
 		////Create an abstract model\\\\
-		abstractedModel = incidentModel.createAbstractIncident(systemModel);
+/*		abstractedModel = incidentModel.createAbstractIncident(systemModel);
 		
 		
 		//or
@@ -122,7 +134,7 @@ public class IncidentPatternExtractor {
 
 		} else {
 			System.out.println("Abstract model = null");
-		}
+		}*/
 		
 		
 		return abstractedModel;

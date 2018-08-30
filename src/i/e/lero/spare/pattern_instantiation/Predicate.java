@@ -302,7 +302,7 @@ public class Predicate {
 		
 		return ps;
 	}
-	
+/*	
 	private Bigraph convertPredicateToBigraph() {
 		
 		
@@ -311,7 +311,7 @@ public class Predicate {
 		BigraphBuilder bigraphBuilder = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
 		
 		return bigraphBuilder.makeBigraph();
-	}
+	}*/
 	
 	public 	Bigraph convertJSONtoBigraph(JSONObject redex){
 
