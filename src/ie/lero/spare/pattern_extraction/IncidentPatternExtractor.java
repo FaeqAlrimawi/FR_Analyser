@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import cyberPhysical_Incident.Activity;
+import cyberPhysical_Incident.ActivityPattern;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.EnvironmentDiagram;
+import ie.lero.spare.franalyser.utility.ActivityPatternModelHandler;
 import ie.lero.spare.franalyser.utility.IncidentModelHandler;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 
@@ -85,14 +87,21 @@ public class IncidentPatternExtractor {
 			System.out.println("system model is NULL");
 		}
 		
+		String patternFileName = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/collectDataPattern.cpi";
+		
+		ActivityPattern ptr = ModelsHandler.addActivityPattern(patternFileName);
+		
+		ptr.applyTo(null);
+		
 		////Create an abstract model\\\\
 		abstractedModel = incidentModel.createAbstractIncident(systemModel);
+		
 		
 		//or
 //		incidentModel.setSystemModel(systemModel);
 //		abstractedModel = incidentModel.createAbstractIncident();
 		
-		
+			
 		if(abstractedModel != null) {
 			IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/abstractIncident_steal.cpi");
 			
@@ -114,6 +123,7 @@ public class IncidentPatternExtractor {
 		} else {
 			System.out.println("Abstract model = null");
 		}
+		
 		
 		return abstractedModel;
 	}
