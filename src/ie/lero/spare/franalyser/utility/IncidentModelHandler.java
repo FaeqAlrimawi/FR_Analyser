@@ -68,7 +68,10 @@ public class IncidentModelHandler {
 				  rs.getPackageRegistry().put(p.getNsURI(), p);
 			}
 
-			incidentDiagram = (IncidentDiagramImpl) eObject;
+			if(IncidentDiagram.class.isInstance(eObject)) {
+				incidentDiagram = (IncidentDiagramImpl) eObject;	
+			}
+			
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
