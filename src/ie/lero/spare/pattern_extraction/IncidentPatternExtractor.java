@@ -87,16 +87,18 @@ public class IncidentPatternExtractor {
 			System.out.println("system model is NULL");
 		}
 		
-		String patternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
+		String collectDataPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
+		String movePhysicallyPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
+		String connectToNetworkPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern.cpi";
 		
-		ActivityPattern ptrCollectData = ModelsHandler.addActivityPattern(patternFileName);
+		ActivityPattern ptrCollectData = ModelsHandler.addActivityPattern(connectToNetworkPatternFileName);
 		
-		Activity actInit = incidentModel.getInitialScene().getNextScenes().get(0).getInitialActivity();
-		Activity activity1 = actInit.getNextActivities().get(0);
+		Activity activity1 = incidentModel.getScene("connect").getInitialActivity();
+		Activity activity2 = activity1.getNextActivities().get(0);
 //		Activity activity2 = actInit.getNextActivities().get(0).getNextActivities().get(0);
-		System.out.println(actInit.getName()+" "+activity1.getName() );
+		System.out.println(activity1.getName()+" "+activity2.getName());
 		
-		Activity result = ptrCollectData.applyTo(actInit, activity1);
+		Activity result = ptrCollectData.applyTo(activity1, activity2);
 		
 		if(result != null) {
 			System.out.println(result.getName());
