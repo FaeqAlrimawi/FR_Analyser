@@ -87,7 +87,7 @@ public class IncidentPatternExtractor {
 			System.out.println("system model is NULL");
 		}
 		
-		String patternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectData.cpi";
+		String patternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
 		
 		ActivityPattern ptrCollectData = ModelsHandler.addActivityPattern(patternFileName);
 		
