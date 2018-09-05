@@ -227,7 +227,7 @@ public class IncidentPatternExtractor {
 		}
 		
 		for(Scene scene : incidentModel.getScene()) {
-			System.out.println("In Scene: " + scene.getName());
+			System.out.println("Scene: " + scene.getName());
 			finalActivity = scene.getFinalActivity();
 			initialActivity = scene.getInitialActivity();
 			currentActivity = initialActivity;
@@ -250,7 +250,7 @@ public class IncidentPatternExtractor {
 				
 			//else if the activity pattern precondition matches the current activity precondition 	
 			} else {
-				System.out.println("Pattern precondition matched to activity: " + currentActivity.getName());
+				System.out.println("-Pattern precondition matched to activity: " + currentActivity.getName());
 				preMatchedActivitiy = currentActivity;
 				
 				//compare pattern postcondition to the postcondition of the current activity
@@ -293,16 +293,20 @@ public class IncidentPatternExtractor {
 						continue;
 					}
 				} else { //pattern matches the same activity
-					System.out.println("Pattern postcondition matched to activity: " + currentActivity.getName());
+					System.out.println("-Pattern postcondition matched to activity: " + currentActivity.getName());
 					postMatchedActivity = currentActivity;
 				}
 				
 			}
 				
 			if(isptrPreMatched && isptrPostMatched) {
-				System.out.println("pattern matched to the activities: " + preMatchedActivitiy.getName()
+				System.out.println("*Pattern is matched to activities: " + preMatchedActivitiy.getName()
 				+ " " + postMatchedActivity.getName());
+			} else {
+				System.out.println("*Pattern has NO map");
 			}
+			
+			System.out.println("#######################################################################################");
 		}
 		
 		
