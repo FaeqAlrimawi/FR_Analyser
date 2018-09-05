@@ -276,7 +276,7 @@ public class IncidentPatternExtractor {
 						
 						currentActivity = next;
 						
-						System.out.println("trying activity [" + currentActivity.getName() + "]");
+						System.out.println("-trying activity [" + currentActivity.getName() + "]");
 						isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 						
 						//if there is a match from one of the activities
@@ -950,6 +950,7 @@ public class IncidentPatternExtractor {
 		Bigraph incBigraph = incidentCondition.createBigraph(isGround);
 		Matcher matcher = new Matcher();
 		
+		System.out.println("cheeeck");
 		if (incBigraph != null) {
 			// update entities names in the pattern precondition by mapping names to the incident conditiosn
 			boolean isAllMapped = updateEntityNames(patternCondition);
@@ -988,7 +989,7 @@ public class IncidentPatternExtractor {
 		// if some entities cannot be mapped then try to find a [similar] entity
 		// in the incident activity
 		// condition that has not yet been mapped, otherwise the conditions do
-		// NOT match
+		// NOT match 
 		// currently if there are unmapped entities in the pattern condition
 		// then it is a NO match
 		if (notFoundNames.size() != 0) {
