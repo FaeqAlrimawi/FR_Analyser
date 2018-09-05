@@ -117,22 +117,24 @@ public class IncidentPatternExtractor {
 		
 		String collectDataPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
 		String movePhysicallyPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
+		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 		String connectToNetworkPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern.cpi";
 		
-		ActivityPattern ptrCollectData = ModelsHandler.addActivityPattern(connectToNetworkPatternFileName);
+		ActivityPattern activityPattern = ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		
-		Activity activity1 = incidentModel.getScene("connect").getInitialActivity();
+		matchActivityPattern(activityPattern);
+		/*Activity activity1 = incidentModel.getScene("connect").getInitialActivity();
 		Activity activity2 = activity1.getNextActivities().get(0);
 //		Activity activity2 = actInit.getNextActivities().get(0).getNextActivities().get(0);
 		System.out.println(activity1.getName()+" "+activity2.getName());
 		
-		Activity result = ptrCollectData.applyTo(activity1, activity2);
+		Activity result = activityPattern.applyTo(activity1, activity2);
 		
 		if(result != null) {
 			System.out.println(result.getName());
 		} else {
 			System.out.println("result is null");
-		}
+		}*/
 		
 		
 		////Create an abstract model\\\\
@@ -225,6 +227,7 @@ public class IncidentPatternExtractor {
 		}
 		
 		for(Scene scene : incidentModel.getScene()) {
+			System.out.println("In Scene: " + scene.getName());
 			finalActivity = scene.getFinalActivity();
 			initialActivity = scene.getInitialActivity();
 			currentActivity = initialActivity;
@@ -247,7 +250,7 @@ public class IncidentPatternExtractor {
 				
 			//else if the activity pattern precondition matches the current activity precondition 	
 			} else {
-				
+				System.out.println("Pattern precondition matched to activity: " + currentActivity.getName());
 				preMatchedActivitiy = currentActivity;
 				
 				//compare pattern postcondition to the postcondition of the current activity
@@ -290,17 +293,19 @@ public class IncidentPatternExtractor {
 						continue;
 					}
 				} else { //pattern matches the same activity
+					System.out.println("Pattern postcondition matched to activity: " + currentActivity.getName());
 					postMatchedActivity = currentActivity;
 				}
 				
 			}
-					
+				
+			if(isptrPreMatched && isptrPostMatched) {
+				System.out.println("pattern matched to the activities: " + preMatchedActivitiy.getName()
+				+ " " + postMatchedActivity.getName());
+			}
 		}
 		
-		if(isptrPreMatched && isptrPostMatched) {
-			System.out.println("pattern matched to the activities: " + preMatchedActivitiy.getName()
-			+ " " + postMatchedActivity.getName());
-		}
+		
 		
 	}
 	
