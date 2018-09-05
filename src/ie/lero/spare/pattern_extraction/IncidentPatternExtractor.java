@@ -289,7 +289,7 @@ public class IncidentPatternExtractor {
 					if(!isptrPostMatched) {
 						continue;
 					}
-				} else { //the pattern matches to the same activity
+				} else { //pattern matches the same activity
 					postMatchedActivity = currentActivity;
 				}
 				
@@ -298,7 +298,8 @@ public class IncidentPatternExtractor {
 		}
 		
 		if(isptrPreMatched && isptrPostMatched) {
-			System.out.println("pattern matched to the activities");
+			System.out.println("pattern matched to the activities: " + preMatchedActivitiy.getName()
+			+ " " + postMatchedActivity.getName());
 		}
 		
 	}
