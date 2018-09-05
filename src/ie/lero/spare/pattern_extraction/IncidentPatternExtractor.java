@@ -214,6 +214,8 @@ public class IncidentPatternExtractor {
 		Activity finalActivity = null;
 		Activity currentActivity = null;
 		Activity ptrActivity = !activityPattern.getAbstractActivity().isEmpty()?activityPattern.getAbstractActivity().get(0):null;
+		Activity preMatchedActivitiy = null;
+		Activity postMatchedActivity = null;
 		
 		boolean isptrPreMatched = false;
 		boolean isptrPostMatched = false;
@@ -245,6 +247,9 @@ public class IncidentPatternExtractor {
 				
 			//else if the activity pattern precondition matches the current activity precondition 	
 			} else {
+				
+				preMatchedActivitiy = currentActivity;
+				
 				//compare pattern postcondition to the postcondition of the current activity
 				isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 				
@@ -259,7 +264,7 @@ public class IncidentPatternExtractor {
 					
 					int cnt = 0;
 					
-					while (cnt<MaxNumberOfActions) {
+					while (cnt<MaxNumberOfActions && !currentActivity.equals(finalActivity)) {
 						Activity next = !currentActivity.getNextActivities().isEmpty()?currentActivity.getNextActivities().get(0):null;
 						
 						if(next == null) {
@@ -269,14 +274,31 @@ public class IncidentPatternExtractor {
 						currentActivity = next;
 						
 						isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
+						
+						//if there is a match from one of the activities
+						if(isptrPostMatched) {
+							postMatchedActivity = currentActivity;
+							break;
+						}
+						
+						cnt++;
 					}
+					
+					//if there's no activity in the sequence that matches the pattern postcondition then
+					//move to next scene
+					if(!isptrPostMatched) {
+						continue;
+					}
+				} else { //the pattern matches to the same activity
+					postMatchedActivity = currentActivity;
 				}
 				
 			}
-			
-			
-			
-			
+					
+		}
+		
+		if(isptrPreMatched && isptrPostMatched) {
+			System.out.println("pattern matched to the activities");
 		}
 		
 	}
