@@ -212,7 +212,11 @@ public class IncidentPatternExtractor {
 		
 		Activity initialActivity = null;
 		Activity finalActivity = null;
+		Activity currentActivity = null;
 		Activity ptrActivity = !activityPattern.getAbstractActivity().isEmpty()?activityPattern.getAbstractActivity().get(0):null;
+		
+		boolean isptrPreMatched = false;
+		boolean isptrPostMatched = false;
 		
 		if(ptrActivity == null) {
 			return;
@@ -221,6 +225,54 @@ public class IncidentPatternExtractor {
 		for(Scene scene : incidentModel.getScene()) {
 			finalActivity = scene.getFinalActivity();
 			initialActivity = scene.getInitialActivity();
+			currentActivity = initialActivity;
+			
+			//compare precondition of the first activity
+			isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
+			
+			//if not matched then move to the next activity within the scene
+			if(!isptrPreMatched) {
+				
+				//if there's no next activity then move to next scene
+				if(currentActivity.equals(finalActivity)) {
+					continue;
+				}
+				
+				Activity next = !currentActivity.getNextActivities().isEmpty()?currentActivity.getNextActivities().get(0):null;
+
+				//move to check next activity
+				currentActivity = next;
+				
+			//else if the activity pattern precondition matches the current activity precondition 	
+			} else {
+				//compare pattern postcondition to the postcondition of the current activity
+				isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
+				
+				//if there's no match then compare the pattern postcondition with the postcondition of next activity
+				//until the max number of activities (or actions) is reached or the final activity is reached
+				if(!isptrPostMatched) {
+					
+					//if there's no next activity then move to next scene
+					if(currentActivity.equals(finalActivity)) {
+						continue;
+					}
+					
+					int cnt = 0;
+					
+					while (cnt<MaxNumberOfActions) {
+						Activity next = !currentActivity.getNextActivities().isEmpty()?currentActivity.getNextActivities().get(0):null;
+						
+						if(next == null) {
+							break;
+						}
+						
+						currentActivity = next;
+						
+						isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
+					}
+				}
+				
+			}
 			
 			
 			
@@ -229,7 +281,7 @@ public class IncidentPatternExtractor {
 		
 	}
 	
-	protected boolean matchPatternActivity(Activity patternActivity, Activity incidentActivity) {
+	protected boolean comparePatternIncidentActivities(Activity patternActivity, Activity incidentActivity, boolean comparePrecondition, boolean comparePostCondition) {
 
 		// compare attributes and references of both activities
 
@@ -372,6 +424,7 @@ public class IncidentPatternExtractor {
 			entityMap.put(ptrVicitm.getName(), incVicitm.getName());
 		}
 
+		if(comparePrecondition) {
 		// evaluate precondition
 		Precondition ptrPre = patternActivity.getPrecondition();
 		BigraphExpression ptrBigExp = ptrPre != null ? (BigraphExpression) ptrPre.getExpression() : null;
@@ -384,7 +437,9 @@ public class IncidentPatternExtractor {
 		if (!canBeApplied) {
 			return false;
 		}
+		}
 		
+		if(comparePostCondition) {
 		// evaluate postcondition
 		Postcondition ptrPost = patternActivity.getPostcondition();
 		BigraphExpression ptrBigExpPost = ptrPost != null ? (BigraphExpression) ptrPost.getExpression() : null;
@@ -397,7 +452,8 @@ public class IncidentPatternExtractor {
 		if (!canBeApplied) {
 			return false;
 		}
-
+		}
+		
 		return true;
 	}
 	
