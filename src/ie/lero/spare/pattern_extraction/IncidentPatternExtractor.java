@@ -276,6 +276,7 @@ public class IncidentPatternExtractor {
 						
 						currentActivity = next;
 						
+						System.out.println("trying activity [" + currentActivity.getName() + "]");
 						isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 						
 						//if there is a match from one of the activities
@@ -941,7 +942,7 @@ public class IncidentPatternExtractor {
 			return true;
 		}
 
-		if (patternCondition != null && incidentCondition == null) {
+		if (patternCondition != null && (incidentCondition == null || incidentCondition.isEmpty())) {
 			return false;
 		}
 
