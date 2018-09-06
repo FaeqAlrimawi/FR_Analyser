@@ -236,13 +236,22 @@ public class IncidentPatternExtractor {
 			initialActivity = scene.getInitialActivity();
 			currentActivity = initialActivity;
 			
-			while(!isptrPreMatched && currentActivity != null) {
-				
+			//try to find a match of the pattern precondition
+			while(true) {
+				System.out.println("-Checking activity [" + currentActivity.getName() + "] for precondition matching");
 				//compare precondition of the first activity
 				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
 				
+				//if match found
+				if(isptrPreMatched) {
+					break;
+				}
+				
 				Activity next = !currentActivity.getNextActivities().isEmpty()?currentActivity.getNextActivities().get(0):null;
 
+				if(currentActivity.equals(finalActivity)) {
+					break;
+				}
 				//move to check next activity
 				currentActivity = next;	
 			}
@@ -278,7 +287,7 @@ public class IncidentPatternExtractor {
 						
 						currentActivity = next;
 						
-						System.out.println("-trying activity [" + currentActivity.getName() + "] for postcondition matching");
+						System.out.println("-Checking activity [" + currentActivity.getName() + "] for postcondition matching");
 						isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 						
 						//if there is a match from one of the activities
@@ -956,6 +965,7 @@ public class IncidentPatternExtractor {
 			if (isAllMapped) {
 				// create a bigraph of the pattern precondition
 				Bigraph ptrBigraph = patternCondition.createBigraph(!isGround);
+				System.out.println(ptrBigraph);
 				if (matcher.match(incBigraph, ptrBigraph).iterator().hasNext()) {
 					return true;
 				}
