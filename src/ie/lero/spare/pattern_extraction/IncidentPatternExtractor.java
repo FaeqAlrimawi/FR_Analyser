@@ -226,28 +226,30 @@ public class IncidentPatternExtractor {
 			return;
 		}
 		
+		//create a local signature of the incident model
+		incidentModel.createBigraphSignature();
+		
 		for(Scene scene : incidentModel.getScene()) {
+			System.out.println("#######################################################################################");
 			System.out.println("Scene: " + scene.getName());
 			finalActivity = scene.getFinalActivity();
 			initialActivity = scene.getInitialActivity();
 			currentActivity = initialActivity;
 			
-			//compare precondition of the first activity
-			isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
-			
-			//if not matched then move to the next activity within the scene
-			if(!isptrPreMatched) {
+			while(!isptrPreMatched && currentActivity != null) {
 				
-				//if there's no next activity then move to next scene
-				if(currentActivity.equals(finalActivity)) {
-					continue;
-				}
+				//compare precondition of the first activity
+				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
 				
 				Activity next = !currentActivity.getNextActivities().isEmpty()?currentActivity.getNextActivities().get(0):null;
 
 				//move to check next activity
-				currentActivity = next;
-				
+				currentActivity = next;	
+			}
+			
+			//if precondition of the pattern is not match then move to next scene
+			if(!isptrPreMatched) {
+				continue;
 			//else if the activity pattern precondition matches the current activity precondition 	
 			} else {
 				System.out.println("-Pattern precondition matched to activity: " + currentActivity.getName());
@@ -276,7 +278,7 @@ public class IncidentPatternExtractor {
 						
 						currentActivity = next;
 						
-						System.out.println("-trying activity [" + currentActivity.getName() + "]");
+						System.out.println("-trying activity [" + currentActivity.getName() + "] for postcondition matching");
 						isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 						
 						//if there is a match from one of the activities
@@ -294,7 +296,6 @@ public class IncidentPatternExtractor {
 						continue;
 					}
 				} else { //pattern matches the same activity
-					System.out.println("-Pattern postcondition matched to activity: " + currentActivity.getName());
 					postMatchedActivity = currentActivity;
 				}
 				
@@ -306,8 +307,6 @@ public class IncidentPatternExtractor {
 			} else {
 				System.out.println("*Pattern has NO map");
 			}
-			
-			System.out.println("#######################################################################################");
 		}
 		
 		
@@ -950,14 +949,13 @@ public class IncidentPatternExtractor {
 		Bigraph incBigraph = incidentCondition.createBigraph(isGround);
 		Matcher matcher = new Matcher();
 		
-		System.out.println("cheeeck");
 		if (incBigraph != null) {
 			// update entities names in the pattern precondition by mapping names to the incident conditiosn
 			boolean isAllMapped = updateEntityNames(patternCondition);
 
 			if (isAllMapped) {
 				// create a bigraph of the pattern precondition
-				Bigraph ptrBigraph = patternCondition.createBigraph(incBigraph.getSignature());
+				Bigraph ptrBigraph = patternCondition.createBigraph(!isGround);
 				if (matcher.match(incBigraph, ptrBigraph).iterator().hasNext()) {
 					return true;
 				}
