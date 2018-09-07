@@ -12,5 +12,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/jlibbig"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/incidentpatternB"/>
+	<classpathentry kind="lib" path="D:/workspace-neon/FR_Analyser/lib/choco-solver-4.0.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
