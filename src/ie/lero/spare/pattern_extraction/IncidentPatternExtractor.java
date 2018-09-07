@@ -34,295 +34,331 @@ import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
 
 public class IncidentPatternExtractor {
-	
+
 	protected IncidentDiagram incidentModel;
 	protected EnvironmentDiagram systemModel;
 	protected static int MaxNumberOfActions = 3;
 	protected Map<String, String> entityMap = new HashMap<String, String>();
-	
+
 	public IncidentPatternExtractor() {
-		
+
 	}
-	
+
 	public IncidentDiagram extract(IncidentDiagram incidentModel) {
-		
+
 		String systemFileName = "D:/runtime-EclipseApplication/Scenarios/Scenario1/Research_centre.cps";
-		
-		if(incidentModel == null) {
+
+		if (incidentModel == null) {
 			return null;
 		}
-		
-		this.incidentModel =incidentModel;
-		
+
+		this.incidentModel = incidentModel;
+
 		IncidentDiagram abstractedModel = null;
-		
-		//create a copy
-		/*String tmpFileName = "tmpModel.cpi";
-		IncidentModelHandler.SaveIncidentToFile(incidentModel, tmpFileName);
-		abstractedModel = IncidentModelHandler.loadIncidentFromFile(tmpFileName);
-		*/
-		/*//remove tmp (i.e. the copy) file
-		File tmpFile = new File(tmpFileName);
-		
-		if(tmpFile.exists()) {
-			tmpFile.delete();
-		}*/
-		
-	
-	//	System.out.println("test: "+abstractedModel.getInitialActivity().getConnectionChangesBetweenEntities("offender", "hallway"));
-		//abstractedModel.abstractActivities();
-		
-		//abstract entities
-		
-		/*for(Asset ast : systemModel.getAsset()) {
-			Asset tmp = ast.abstractType();
-			
-			if(tmp != null) {
-				System.out.println("o:"+ ast.getClass().getSimpleName() +"  a: " + tmp.getClass().getSimpleName()); 
-			}else {
-				System.out.println("o:"+ ast.getClass().getSimpleName() +"  abstracted asset is NULL");		
-			}
-			
-		}*/
-//		Random rand = new Random();
-//		
-//		int tries = 50;
-		
-		/*for(int i = 0;i<tries;i++) {
-		Asset original  = systemModel.getAsset().get(rand.nextInt(systemModel.getAsset().size()));
-		Asset abstracted = original.abstractAsset();
-		
-		System.out.println("Original Asset: "+original + 
-				"\nContainedAssets ["+original.getContainedAssets().size()+"]: "+original.getContainedAssets() +
-				"\nConnections ["+original.getConnections().size()+"]: "+original.getConnections() );
-		
-		System.out.println("Abstracted Asset: "+abstracted+ 
-				"\nContainedAssets ["+abstracted.getContainedAssets().size()+"]: "+abstracted.getContainedAssets() +
-				"\nConnections ["+abstracted.getConnections().size()+"]: "+abstracted.getConnections());
-		System.out.println();
-		}*/
-		
-		//status: abstraction is done for the basic attributes (type, control, properties) and contained assets
-		//next is to implement connections abstraction in assets
-		
-	
-//		abstractedModel.abstractActivities();
-//		abstractedModel.abstractEntities(systemModel);
+
+		// create a copy
+		/*
+		 * String tmpFileName = "tmpModel.cpi";
+		 * IncidentModelHandler.SaveIncidentToFile(incidentModel, tmpFileName);
+		 * abstractedModel =
+		 * IncidentModelHandler.loadIncidentFromFile(tmpFileName);
+		 */
+		/*
+		 * //remove tmp (i.e. the copy) file File tmpFile = new
+		 * File(tmpFileName);
+		 * 
+		 * if(tmpFile.exists()) { tmpFile.delete(); }
+		 */
+
+		// System.out.println("test:
+		// "+abstractedModel.getInitialActivity().getConnectionChangesBetweenEntities("offender",
+		// "hallway"));
+		// abstractedModel.abstractActivities();
+
+		// abstract entities
+
+		/*
+		 * for(Asset ast : systemModel.getAsset()) { Asset tmp =
+		 * ast.abstractType();
+		 * 
+		 * if(tmp != null) { System.out.println("o:"+
+		 * ast.getClass().getSimpleName() +"  a: " +
+		 * tmp.getClass().getSimpleName()); }else { System.out.println("o:"+
+		 * ast.getClass().getSimpleName() +"  abstracted asset is NULL"); }
+		 * 
+		 * }
+		 */
+		// Random rand = new Random();
+		//
+		// int tries = 50;
+
+		/*
+		 * for(int i = 0;i<tries;i++) { Asset original =
+		 * systemModel.getAsset().get(rand.nextInt(systemModel.getAsset().size()
+		 * )); Asset abstracted = original.abstractAsset();
+		 * 
+		 * System.out.println("Original Asset: "+original +
+		 * "\nContainedAssets ["+original.getContainedAssets().size()+"]: "
+		 * +original.getContainedAssets() +
+		 * "\nConnections ["+original.getConnections().size()+"]: "+original.
+		 * getConnections() );
+		 * 
+		 * System.out.println("Abstracted Asset: "+abstracted+
+		 * "\nContainedAssets ["+abstracted.getContainedAssets().size()+"]: "
+		 * +abstracted.getContainedAssets() +
+		 * "\nConnections ["+abstracted.getConnections().size()+"]: "+abstracted
+		 * .getConnections()); System.out.println(); }
+		 */
+
+		// status: abstraction is done for the basic attributes (type, control,
+		// properties) and contained assets
+		// next is to implement connections abstraction in assets
+
+		// abstractedModel.abstractActivities();
+		// abstractedModel.abstractEntities(systemModel);
 
 		systemModel = ModelsHandler.getSystemModel(systemFileName);
-		
-		if(systemModel == null) {
+
+		if (systemModel == null) {
 			System.out.println("system model is NULL");
 		}
-		
+
 		String collectDataPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
 		String movePhysicallyPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 		String connectToNetworkPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern.cpi";
-		
-		ActivityPattern activityPattern = ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-		
-		matchActivityPattern(activityPattern);
-		/*Activity activity1 = incidentModel.getScene("connect").getInitialActivity();
-		Activity activity2 = activity1.getNextActivities().get(0);
-//		Activity activity2 = actInit.getNextActivities().get(0).getNextActivities().get(0);
-		System.out.println(activity1.getName()+" "+activity2.getName());
-		
-		Activity result = activityPattern.applyTo(activity1, activity2);
-		
-		if(result != null) {
-			System.out.println(result.getName());
-		} else {
-			System.out.println("result is null");
-		}*/
-		
-		
-		////Create an abstract model\\\\
-/*		abstractedModel = incidentModel.createAbstractIncident(systemModel);
-		
-		
-		//or
-//		incidentModel.setSystemModel(systemModel);
-//		abstractedModel = incidentModel.createAbstractIncident();
-		
-			
-		if(abstractedModel != null) {
-			IncidentModelHandler.SaveIncidentToFile(abstractedModel, "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/abstractIncident_steal.cpi");
-			
-			System.out.println("num of activities in original = "+ incidentModel.getActivity().size());
-			System.out.println("num of activities in abstract = "+ abstractedModel.getActivity().size());
-			
-			System.out.println();
-			
-			int index = 0;
-			 for(Entry<Activity, List<Activity>> entry : incidentModel.getMergedActivities().entrySet()) {
-			 System.out.println("new-Activity: "+entry.getKey().getName() + 
-					 "\nmerged-activities: "+entry.getValue().get(0).getName() + 
-					 " & " +entry.getValue().get(1).getName() +
-					 "\nRule: [" + getMergeRuleName(incidentModel.getMergedRules().get(index)) + "]");
-			 index++;
-			 }
-		
 
-		} else {
-			System.out.println("Abstract model = null");
-		}*/
-		
-		
+		ActivityPattern activityPattern = ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+
+		matchActivityPattern(activityPattern);
+		/*
+		 * Activity activity1 =
+		 * incidentModel.getScene("connect").getInitialActivity(); Activity
+		 * activity2 = activity1.getNextActivities().get(0); // Activity
+		 * activity2 =
+		 * actInit.getNextActivities().get(0).getNextActivities().get(0);
+		 * System.out.println(activity1.getName()+" "+activity2.getName());
+		 * 
+		 * Activity result = activityPattern.applyTo(activity1, activity2);
+		 * 
+		 * if(result != null) { System.out.println(result.getName()); } else {
+		 * System.out.println("result is null"); }
+		 */
+
+		//// Create an abstract model\\\\
+		/*
+		 * abstractedModel = incidentModel.createAbstractIncident(systemModel);
+		 * 
+		 * 
+		 * //or // incidentModel.setSystemModel(systemModel); // abstractedModel
+		 * = incidentModel.createAbstractIncident();
+		 * 
+		 * 
+		 * if(abstractedModel != null) {
+		 * IncidentModelHandler.SaveIncidentToFile(abstractedModel,
+		 * "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/abstractIncident_steal.cpi"
+		 * );
+		 * 
+		 * System.out.println("num of activities in original = "+
+		 * incidentModel.getActivity().size());
+		 * System.out.println("num of activities in abstract = "+
+		 * abstractedModel.getActivity().size());
+		 * 
+		 * System.out.println();
+		 * 
+		 * int index = 0; for(Entry<Activity, List<Activity>> entry :
+		 * incidentModel.getMergedActivities().entrySet()) {
+		 * System.out.println("new-Activity: "+entry.getKey().getName() +
+		 * "\nmerged-activities: "+entry.getValue().get(0).getName() + " & "
+		 * +entry.getValue().get(1).getName() + "\nRule: [" +
+		 * getMergeRuleName(incidentModel.getMergedRules().get(index)) + "]");
+		 * index++; }
+		 * 
+		 * 
+		 * } else { System.out.println("Abstract model = null"); }
+		 */
+
 		return abstractedModel;
 	}
-	
+
 	protected String getMergeRuleName(int rule) {
-	
-		switch(rule) {
-		 case IncidentDiagram.COLLECTDATA_MERGE_RULE:
-			 return "Collect Data";
-		 case IncidentDiagram.CONTAINMENT_MERGE_RULE:
-			 return "Containment";
-		 case IncidentDiagram.CONNECTIVITY_MERGE_RULE:
-			 return "Connectivity";
-			 default:
-				 return "";
-		 }
+
+		switch (rule) {
+		case IncidentDiagram.COLLECTDATA_MERGE_RULE:
+			return "Collect Data";
+		case IncidentDiagram.CONTAINMENT_MERGE_RULE:
+			return "Containment";
+		case IncidentDiagram.CONNECTIVITY_MERGE_RULE:
+			return "Connectivity";
+		default:
+			return "";
+		}
 	}
-	
+
 	public IncidentDiagram extract(String fileName) {
-		
+
 		IncidentDiagram model = ModelsHandler.getIncidentModel(fileName);
-		
+
 		return extract(model);
 	}
 
-	public static void main(String[] args){
-		
-		IncidentPatternExtractor extractor = new IncidentPatternExtractor();	
+	public static void main(String[] args) {
+
+		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
 		String fileName = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
-		
+
 		extractor.extract(fileName);
-		
+
 	}
-	
+
 	public void matchActivityPattern(ActivityPattern activityPattern) {
-		
-		//find all possible matches of the given pattern in the incidentModel sequence
-		//assume activity pattern has one activity
-		//match precondition to one (initial) activity and then the post to the same or the next
-		
-		if(activityPattern == null) {
+
+		// find all possible matches of the given pattern in the incidentModel
+		// sequence
+		// assume activity pattern has one activity
+		// match precondition to one (initial) activity and then the post to the
+		// same or the next
+
+		if (activityPattern == null) {
 			return;
 		}
-		
+
+		// create a local signature of the incident model
+		incidentModel.createBigraphSignature();
+
+		// EList<Activity> ptrActivities =
+		// activityPattern.getAbstractActivity();
+
+		Activity ptrActivity = !activityPattern.getAbstractActivity().isEmpty()
+				? activityPattern.getAbstractActivity().get(0) : null;
+
+		if (ptrActivity == null) {
+			return;
+		}
+
 		Activity initialActivity = null;
 		Activity finalActivity = null;
 		Activity currentActivity = null;
-		Activity ptrActivity = !activityPattern.getAbstractActivity().isEmpty()?activityPattern.getAbstractActivity().get(0):null;
-		Activity preMatchedActivitiy = null;
+		List<Activity> preMatchedActivities = new LinkedList<Activity>();
+		List<Activity> postMatchedActivities = new LinkedList<Activity>(); 
+		Activity preMatchedActivity = null;
 		Activity postMatchedActivity = null;
 		
 		boolean isptrPreMatched = false;
 		boolean isptrPostMatched = false;
 		
-		if(ptrActivity == null) {
-			return;
-		}
-		
-		//create a local signature of the incident model
-		incidentModel.createBigraphSignature();
-		
-		for(Scene scene : incidentModel.getScene()) {
+		for (Scene scene : incidentModel.getScene()) {
+
+			isptrPreMatched = false;
+			isptrPostMatched = false;
+			preMatchedActivity = null;
+			postMatchedActivity = null;
+			
 			System.out.println("#######################################################################################");
 			System.out.println("Scene: " + scene.getName());
+			
 			finalActivity = scene.getFinalActivity();
 			initialActivity = scene.getInitialActivity();
 			currentActivity = initialActivity;
-			
-			//try to find a match of the pattern precondition
-			while(true) {
-				System.out.println("-Checking activity [" + currentActivity.getName() + "] for precondition matching");
-				//compare precondition of the first activity
-				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
-				
-				//if match found
-				if(isptrPreMatched) {
-					break;
-				}
-				
-				Activity next = !currentActivity.getNextActivities().isEmpty()?currentActivity.getNextActivities().get(0):null;
 
-				if(currentActivity.equals(finalActivity)) {
+			// try to find a match of the pattern precondition
+			while (true) {
+				System.out.println("-Checking activity [" + currentActivity.getName() + "] for precondition matching");
+				// compare precondition of the first activity
+				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
+
+				// if match found
+				if (isptrPreMatched) {
 					break;
 				}
-				//move to check next activity
-				currentActivity = next;	
+
+				Activity next = !currentActivity.getNextActivities().isEmpty()
+						? currentActivity.getNextActivities().get(0) : null;
+
+				// if reached the last activity of the scene
+				if (currentActivity.equals(finalActivity)) {
+					break;
+				}
+				// move to check next activity
+				currentActivity = next;
 			}
-			
-			//if precondition of the pattern is not match then move to next scene
-			if(!isptrPreMatched) {
+
+			// if precondition of the pattern is not match then move to next
+			// scene
+			if (!isptrPreMatched) {
 				continue;
-			//else if the activity pattern precondition matches the current activity precondition 	
+				// else if the activity pattern precondition matches the current
+				// activity precondition
 			} else {
 				System.out.println("-Pattern precondition matched to activity: " + currentActivity.getName());
-				preMatchedActivitiy = currentActivity;
-				
-				//compare pattern postcondition to the postcondition of the current activity
+				preMatchedActivity = currentActivity;
+
+				// compare pattern postcondition to the postcondition of the
+				// current activity
 				isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
-				
-				//if there's no match then compare the pattern postcondition with the postcondition of next activity
-				//until the max number of activities (or actions) is reached or the final activity is reached
-				if(!isptrPostMatched) {
-					
-					//if there's no next activity then move to next scene
-					if(currentActivity.equals(finalActivity)) {
+
+				// if there's no match then compare the pattern postcondition
+				// with the postcondition of next activity
+				// until the max number of activities (or actions) is reached or
+				// the final activity is reached
+				if (!isptrPostMatched) {
+
+					// if there's no next activity then move to next scene
+					if (currentActivity.equals(finalActivity)) {
 						continue;
 					}
-					
+
 					int cnt = 0;
-					
-					while (cnt<MaxNumberOfActions && !currentActivity.equals(finalActivity)) {
-						Activity next = !currentActivity.getNextActivities().isEmpty()?currentActivity.getNextActivities().get(0):null;
-						
-						if(next == null) {
+
+					while (cnt < MaxNumberOfActions && !currentActivity.equals(finalActivity)) {
+						Activity next = !currentActivity.getNextActivities().isEmpty()
+								? currentActivity.getNextActivities().get(0) : null;
+
+						if (next == null) {
 							break;
 						}
-						
+
 						currentActivity = next;
-						
-						System.out.println("-Checking activity [" + currentActivity.getName() + "] for postcondition matching");
+
+						System.out.println(
+								"-Checking activity [" + currentActivity.getName() + "] for postcondition matching");
 						isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
-						
-						//if there is a match from one of the activities
-						if(isptrPostMatched) {
+
+						// if there is a match from one of the activities
+						if (isptrPostMatched) {
 							postMatchedActivity = currentActivity;
 							break;
 						}
-						
+
 						cnt++;
 					}
-					
-					//if there's no activity in the sequence that matches the pattern postcondition then
-					//move to next scene
-					if(!isptrPostMatched) {
+
+					// if there's no activity in the sequence that matches the
+					// pattern postcondition then
+					// move to next scene
+					if (!isptrPostMatched) {
 						continue;
 					}
-				} else { //pattern matches the same activity
+				} else { // pattern matches the same activity
 					postMatchedActivity = currentActivity;
 				}
-				
+
 			}
-				
-			if(isptrPreMatched && isptrPostMatched) {
-				System.out.println("*Pattern is matched to activities: " + preMatchedActivitiy.getName()
-				+ " " + postMatchedActivity.getName());
+
+			if (isptrPreMatched && isptrPostMatched) {
+				System.out.println("*Pattern is matched to activities: " + preMatchedActivity.getName() + " "
+						+ postMatchedActivity.getName());
+				preMatchedActivities.add(preMatchedActivity);
+				postMatchedActivities.add(postMatchedActivity);
 			} else {
 				System.out.println("*Pattern has NO map");
 			}
 		}
-		
-		
-		
+
 	}
-	
-	protected boolean comparePatternIncidentActivities(Activity patternActivity, Activity incidentActivity, boolean comparePrecondition, boolean comparePostCondition) {
+
+	protected boolean comparePatternIncidentActivities(Activity patternActivity, Activity incidentActivity,
+			boolean comparePrecondition, boolean comparePostCondition) {
 
 		// compare attributes and references of both activities
 
@@ -387,7 +423,7 @@ public class IncidentPatternExtractor {
 		if (ptrInitiator != null) {
 			entityMap.put(((IncidentEntity) ptrInitiator).getName(), ((IncidentEntity) incInitiator).getName());
 		}
-	
+
 		// 2-Target assets
 		Asset ptrTargetAsset = !patternActivity.getTargetedAssets().isEmpty()
 				? patternActivity.getTargetedAssets().get(0) : null;
@@ -404,7 +440,6 @@ public class IncidentPatternExtractor {
 			entityMap.put(ptrTargetAsset.getName(), incTargetAsset.getName());
 		}
 
-	
 		// 3-Resources
 		Resource ptrResource = !patternActivity.getResources().isEmpty() ? patternActivity.getResources().get(0) : null;
 		Resource incResource = !incidentActivity.getResources().isEmpty() ? incidentActivity.getResources().get(0)
@@ -419,7 +454,7 @@ public class IncidentPatternExtractor {
 		if (ptrResource != null) {
 			entityMap.put(ptrResource.getName(), incResource.getName());
 		}
-		
+
 		// 4-Exploited assets
 		Asset ptrExploitedAsset = !patternActivity.getExploitedAssets().isEmpty()
 				? patternActivity.getExploitedAssets().get(0) : null;
@@ -436,7 +471,6 @@ public class IncidentPatternExtractor {
 			entityMap.put(ptrExploitedAsset.getName(), incExploitedAsset.getName());
 		}
 
-	
 		// 5-Locations
 		Location ptrLocation = patternActivity.getLocation();
 		Location incLocation = incidentActivity.getLocation();
@@ -446,7 +480,7 @@ public class IncidentPatternExtractor {
 		if (!canBeApplied) {
 			return false;
 		}
-		
+
 		if (ptrLocation != null) {
 			entityMap.put(((IncidentEntity) ptrLocation).getName(), ((IncidentEntity) incLocation).getName());
 		}
@@ -465,39 +499,39 @@ public class IncidentPatternExtractor {
 			entityMap.put(ptrVicitm.getName(), incVicitm.getName());
 		}
 
-		if(comparePrecondition) {
-		// evaluate precondition
-		Precondition ptrPre = patternActivity.getPrecondition();
-		BigraphExpression ptrBigExp = ptrPre != null ? (BigraphExpression) ptrPre.getExpression() : null;
+		if (comparePrecondition) {
+			// evaluate precondition
+			Precondition ptrPre = patternActivity.getPrecondition();
+			BigraphExpression ptrBigExp = ptrPre != null ? (BigraphExpression) ptrPre.getExpression() : null;
 
-		Precondition incPre = incidentActivity.getPrecondition();
-		BigraphExpression incBigExp = incPre != null ? (BigraphExpression) incPre.getExpression() : null;
+			Precondition incPre = incidentActivity.getPrecondition();
+			BigraphExpression incBigExp = incPre != null ? (BigraphExpression) incPre.getExpression() : null;
 
-		canBeApplied = compareConditions(ptrBigExp, incBigExp);
+			canBeApplied = compareConditions(ptrBigExp, incBigExp);
 
-		if (!canBeApplied) {
-			return false;
+			if (!canBeApplied) {
+				return false;
+			}
 		}
-		}
-		
-		if(comparePostCondition) {
-		// evaluate postcondition
-		Postcondition ptrPost = patternActivity.getPostcondition();
-		BigraphExpression ptrBigExpPost = ptrPost != null ? (BigraphExpression) ptrPost.getExpression() : null;
 
-		Postcondition incPost = incidentActivity.getPostcondition();
-		BigraphExpression incBigExpPost = incPost != null ? (BigraphExpression) incPost.getExpression() : null;
+		if (comparePostCondition) {
+			// evaluate postcondition
+			Postcondition ptrPost = patternActivity.getPostcondition();
+			BigraphExpression ptrBigExpPost = ptrPost != null ? (BigraphExpression) ptrPost.getExpression() : null;
 
-		canBeApplied = compareConditions(ptrBigExpPost, incBigExpPost);
+			Postcondition incPost = incidentActivity.getPostcondition();
+			BigraphExpression incBigExpPost = incPost != null ? (BigraphExpression) incPost.getExpression() : null;
 
-		if (!canBeApplied) {
-			return false;
+			canBeApplied = compareConditions(ptrBigExpPost, incBigExpPost);
+
+			if (!canBeApplied) {
+				return false;
+			}
 		}
-		}
-		
+
 		return true;
 	}
-	
+
 	protected boolean compareInitiators(ActivityInitiator patternActivityInitiator,
 			ActivityInitiator incidentActivityInitiator) {
 
@@ -834,7 +868,6 @@ public class IncidentPatternExtractor {
 
 			Class<?> incidentClass = Class.forName(potentialIncidentClassName);
 
-			
 			if (!patternClass.isAssignableFrom(incidentClass)) {
 				return false;
 			}
@@ -842,7 +875,7 @@ public class IncidentPatternExtractor {
 			// TODO Auto-generated catch block
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -945,7 +978,7 @@ public class IncidentPatternExtractor {
 	}
 
 	protected boolean compareConditions(BigraphExpression patternCondition, BigraphExpression incidentCondition) {
-		
+
 		if (patternCondition == null) {
 			return true;
 		}
@@ -957,15 +990,16 @@ public class IncidentPatternExtractor {
 		boolean isGround = true;
 		Bigraph incBigraph = incidentCondition.createBigraph(isGround);
 		Matcher matcher = new Matcher();
-		
+
 		if (incBigraph != null) {
-			// update entities names in the pattern precondition by mapping names to the incident conditiosn
+			// update entities names in the pattern precondition by mapping
+			// names to the incident conditiosn
 			boolean isAllMapped = updateEntityNames(patternCondition);
 
 			if (isAllMapped) {
 				// create a bigraph of the pattern precondition
 				Bigraph ptrBigraph = patternCondition.createBigraph(!isGround);
-				System.out.println(ptrBigraph);
+				
 				if (matcher.match(incBigraph, ptrBigraph).iterator().hasNext()) {
 					return true;
 				}
@@ -997,16 +1031,16 @@ public class IncidentPatternExtractor {
 		// if some entities cannot be mapped then try to find a [similar] entity
 		// in the incident activity
 		// condition that has not yet been mapped, otherwise the conditions do
-		// NOT match 
+		// NOT match
 		// currently if there are unmapped entities in the pattern condition
 		// then it is a NO match
 		if (notFoundNames.size() != 0) {
-//			System.out.println(notFoundNames);
+			// System.out.println(notFoundNames);
 			return false;
 		}
-		
-//		System.out.println("True");
+
+		// System.out.println("True");
 		return true;
 	}
-	
+
 }
