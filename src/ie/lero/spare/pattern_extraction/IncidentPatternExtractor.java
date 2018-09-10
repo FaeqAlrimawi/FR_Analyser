@@ -136,55 +136,12 @@ public class IncidentPatternExtractor {
 		// create a local signature of the incident model
 		incidentModel.createBigraphSignature();
 
-//		matchActivityPattern(activityPatternConnectNetwork);
-		matchActivityPattern(activityPatternMove);
-		/*
-		 * Activity activity1 =
-		 * incidentModel.getScene("connect").getInitialActivity(); Activity
-		 * activity2 = activity1.getNextActivities().get(0); // Activity
-		 * activity2 =
-		 * actInit.getNextActivities().get(0).getNextActivities().get(0);
-		 * System.out.println(activity1.getName()+" "+activity2.getName());
-		 * 
-		 * Activity result = activityPattern.applyTo(activity1, activity2);
-		 * 
-		 * if(result != null) { System.out.println(result.getName()); } else {
-		 * System.out.println("result is null"); }
-		 */
+		Map<String, List<String>> result1 = matchActivityPattern(activityPatternConnectNetwork);
+		Map<String, List<String>> result2 = matchActivityPattern(activityPatternMove);
 
-		//// Create an abstract model\\\\
-		/*
-		 * abstractedModel = incidentModel.createAbstractIncident(systemModel);
-		 * 
-		 * 
-		 * //or // incidentModel.setSystemModel(systemModel); // abstractedModel
-		 * = incidentModel.createAbstractIncident();
-		 * 
-		 * 
-		 * if(abstractedModel != null) {
-		 * IncidentModelHandler.SaveIncidentToFile(abstractedModel,
-		 * "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/abstractIncident_steal.cpi"
-		 * );
-		 * 
-		 * System.out.println("num of activities in original = "+
-		 * incidentModel.getActivity().size());
-		 * System.out.println("num of activities in abstract = "+
-		 * abstractedModel.getActivity().size());
-		 * 
-		 * System.out.println();
-		 * 
-		 * int index = 0; for(Entry<Activity, List<Activity>> entry :
-		 * incidentModel.getMergedActivities().entrySet()) {
-		 * System.out.println("new-Activity: "+entry.getKey().getName() +
-		 * "\nmerged-activities: "+entry.getValue().get(0).getName() + " & "
-		 * +entry.getValue().get(1).getName() + "\nRule: [" +
-		 * getMergeRuleName(incidentModel.getMergedRules().get(index)) + "]");
-		 * index++; }
-		 * 
-		 * 
-		 * } else { System.out.println("Abstract model = null"); }
-		 */
-
+		System.out.println(result1);
+		System.out.println(result2);
+		
 		return abstractedModel;
 	}
 
@@ -218,7 +175,7 @@ public class IncidentPatternExtractor {
 
 	}
 
-	public void matchActivityPattern(ActivityPattern activityPattern) {
+	public Map<String, List<String>> matchActivityPattern(ActivityPattern activityPattern) {
 
 		// find all possible matches of the given pattern in the incidentModel
 		// sequence
@@ -227,7 +184,7 @@ public class IncidentPatternExtractor {
 		// same or the next
 
 		if (activityPattern == null) {
-			return;
+			return null;
 		}
 
 		// EList<Activity> ptrActivities =
@@ -237,38 +194,29 @@ public class IncidentPatternExtractor {
 				? activityPattern.getAbstractActivity().get(0) : null;
 
 		if (ptrActivity == null) {
-			return;
+			return null;
 		}
 
 		Activity initialActivity = null;
 		Activity finalActivity = null;
 		Activity currentActivity = null;
-		List<String> preMatchedActivities = new LinkedList<String>();
 		List<String> tmpPreMatchedActivities = new LinkedList<String>();
-		List<String> postMatchedActivities = new LinkedList<String>();
 		List<HashMap<String, String>> entityMaps = new LinkedList<HashMap<String, String>>();
-		HashMap<String, List<String>> prePostMappingActivities = new HashMap<String, List<String>>();
 		
-//		Activity preMatchedActivity = null;
-//		Activity postMatchedActivity = null;
+		//final result
+		HashMap<String, List<String>> prePostMappingActivities = new HashMap<String, List<String>>();
+
+		// Activity preMatchedActivity = null;
+		// Activity postMatchedActivity = null;
 
 		boolean isptrPreMatched = false;
 		boolean isptrPostMatched = false;
 
-		SceneLoop: //for (Scene scene : incidentModel.getScene()) 
-		{
-
-			Scene scene = incidentModel.getScene("move");
+		for (Scene scene : incidentModel.getScene()) {
+			
 			isptrPreMatched = false;
 			isptrPostMatched = false;
-//			preMatchedActivity = null;
-//			postMatchedActivity = null;
 
-			/*
-			 * System.out .println(
-			 * "#######################################################################################"
-			 * ); System.out.println("Scene: " + scene.getName());
-			 */
 			initialActivity = scene.getInitialActivity();
 			finalActivity = scene.getFinalActivity();
 			currentActivity = initialActivity;
@@ -277,159 +225,107 @@ public class IncidentPatternExtractor {
 			// all matches)
 			while (true) {
 				entityMap.clear();
-				
+				isptrPreMatched = false;
 				// System.out.println("-Checking activity [" +
 				// currentActivity.getName() + "] for precondition matching");
 				// compare precondition of the first activity
-				
+
 				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
 
 				// if match found
 				if (isptrPreMatched) {
-					
+
 					// System.out.println("-Pattern precondition matched to
 					// activity: " + currentActivity.getName());
 					entityMaps.add(new HashMap<String, String>(entityMap));
-					
+
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 
 					if (isptrPostMatched) {
 						
-						preMatchedActivities.add(currentActivity.getName());
-						postMatchedActivities.add(currentActivity.getName());
-						
-						if(!prePostMappingActivities.containsKey(currentActivity.getName())) {
+						//add to the result map
+						if (!prePostMappingActivities.containsKey(currentActivity.getName())) {
 							List<String> matchedActs = new LinkedList<String>();
 							matchedActs.add(currentActivity.getName());
 							prePostMappingActivities.put(currentActivity.getName(), matchedActs);
 						} else {
 							prePostMappingActivities.get(currentActivity.getName()).add(currentActivity.getName());
 						}
-						
-						entityMaps.remove(entityMaps.size()-1);
-					} else {
-						
-						// added to the temp to search in next activities
-						tmpPreMatchedActivities.add(currentActivity.getName());	
-					}
-					// break;
-				}
 
-				isptrPreMatched = false;
+						entityMaps.remove(entityMaps.size() - 1);
+					} else {
+
+						// added to the temp to search in next activities
+						tmpPreMatchedActivities.add(currentActivity.getName());
+					}
+				}
 
 				Activity next = !currentActivity.getNextActivities().isEmpty()
 						? currentActivity.getNextActivities().get(0) : null;
 
 				// if reached the last activity of the scene
 				if (currentActivity.equals(finalActivity)) {
-					
-					/*if(!tmpPreMatchedActivities.isEmpty()) {
-						tmpPreMatchedActivities.remove(tmpPreMatchedActivities.size()-1);	
-					}*/
-					
 					break;
 				}
 				// move to check next activity
 				currentActivity = next;
 			}
 
-			// if precondition of the pattern is not match then move to next
-			// scene
-			if (tmpPreMatchedActivities.isEmpty()) {
-				//continue SceneLoop;
-				// else if the activity pattern precondition matches the current
-				// activity precondition
-			} else {
+			//try to find a match for the pattern postcondition in next activities of the scene
+			for (int i = 0; i < tmpPreMatchedActivities.size(); i++) {
 
-				for (int i = 0; i < tmpPreMatchedActivities.size(); i++) {
-					
-					entityMap = entityMaps.get(i);
-					isptrPostMatched = false;
-					Activity preActivity = scene.getActivity(tmpPreMatchedActivities.get(i));
-					
-					System.out.println(preActivity.getName());
-					
-					currentActivity = preActivity;
+				entityMap = entityMaps.get(i);
+				isptrPostMatched = false;
+				Activity preActivity = scene.getActivity(tmpPreMatchedActivities.get(i));
 
-					if (currentActivity == null || currentActivity.equals(finalActivity)) {
-						continue;
-					}
-					
-						int cnt = 0;
+				currentActivity = preActivity;
 
-						while (cnt < MaxNumberOfActions && !currentActivity.equals(finalActivity)) {
-
-							Activity next = !currentActivity.getNextActivities().isEmpty()
-									? currentActivity.getNextActivities().get(0) : null;
-
-							if (next == null) {
-								break;
-							}
-
-							currentActivity = next;
-
-							// System.out.println(
-							// "-Checking activity [" +
-							// currentActivity.getName() + "] for postcondition
-							// matching");
-							isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false,
-									true);
-
-							// if there is a match from one of the activities
-							if (isptrPostMatched) {
-//								postMatchedActivity = currentActivity;
-								preMatchedActivities.add(preActivity.getName());
-								postMatchedActivities.add(currentActivity.getName());
-								
-								if(!prePostMappingActivities.containsKey(preActivity.getName())) {
-									List<String> matchedActs = new LinkedList<String>();
-									matchedActs.add(currentActivity.getName());
-									prePostMappingActivities.put(preActivity.getName(), matchedActs);
-								} else {
-									prePostMappingActivities.get(preActivity.getName()).add(currentActivity.getName());
-								}
-								
-								break;
-							}
-
-							cnt++;
-						}
-
-						// if there's no activity in the sequence that matches
-						// the
-						// pattern postcondition then
-						// move to next scene
-						/*if (!isptrPostMatched) {
-							continue;
-						}*/
+				if (currentActivity == null || currentActivity.equals(finalActivity)) {
+					continue;
 				}
 
-				// if there's no match then compare the pattern postcondition
-				// with the postcondition of next activity
+				int cnt = 0;
+
+				// compare the pattern postcondition with the postcondition of next activity
 				// until the max number of activities (or actions) is reached or
 				// the final activity is reached
+				while (cnt < MaxNumberOfActions && !currentActivity.equals(finalActivity)) {
+
+					Activity next = !currentActivity.getNextActivities().isEmpty()
+							? currentActivity.getNextActivities().get(0) : null;
+
+					if (next == null) {
+						break;
+					}
+
+					currentActivity = next;
+					
+					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
+
+					// if there is a match from one of the activities
+					if (isptrPostMatched) {
+				
+						//add to the result map
+						if (!prePostMappingActivities.containsKey(preActivity.getName())) {
+							List<String> matchedActs = new LinkedList<String>();
+							matchedActs.add(currentActivity.getName());
+							prePostMappingActivities.put(preActivity.getName(), matchedActs);
+						} else {
+							prePostMappingActivities.get(preActivity.getName()).add(currentActivity.getName());
+						}
+						
+						//one match is only taken (i.e. first match)
+						break;
+					}
+
+					cnt++;
+				}
 
 			}
 
-			/*if (isptrPreMatched && isptrPostMatched) {
-				// if(preMatchedActivity.equals(postMatchedActivity)) {
-				// System.out.println("*Pattern pre/post are matched to same
-				// activity: " + preMatchedActivity.getName());
-				// } else {
-				// System.out.println("*Pattern is matched to activities: " +
-				// preMatchedActivity.getName() + " "
-				// + postMatchedActivity.getName());
-				// }
-				preMatchedActivities.add(preMatchedActivity);
-				postMatchedActivities.add(postMatchedActivity);
-				entityMap.clear();
-			} else {
-				// System.out.println("*Pattern has NO map");
-			}*/
 		}
 		
-		System.out.println(prePostMappingActivities);
-		//System.out.println(postMatchedActivities);
+		return prePostMappingActivities;
 
 	}
 
@@ -536,7 +432,6 @@ public class IncidentPatternExtractor {
 			}
 		}
 
-		
 		// 2-Target assets
 		Asset ptrTargetAsset = !patternActivity.getTargetedAssets().isEmpty()
 				? patternActivity.getTargetedAssets().get(0) : null;
@@ -671,7 +566,7 @@ public class IncidentPatternExtractor {
 		if (!canBeApplied) {
 			return false;
 		}
-		
+
 		return true;
 	}
 
@@ -1138,7 +1033,7 @@ public class IncidentPatternExtractor {
 			// update entities names in the pattern precondition by mapping
 			// names to the incident conditions
 			BigraphExpression ptrcondCopy = patternCondition.clone();
-			
+
 			boolean isAllMapped = updateEntityNames(ptrcondCopy);
 
 			if (isAllMapped) {
@@ -1156,7 +1051,7 @@ public class IncidentPatternExtractor {
 
 	protected boolean updateEntityNames(BigraphExpression patternCondition) {
 
-//		System.out.println(entityMap);
+		// System.out.println(entityMap);
 		List<String> notFoundNames = new LinkedList<String>();
 		LinkedList<Entity> visitedEntities = new LinkedList<Entity>();
 
