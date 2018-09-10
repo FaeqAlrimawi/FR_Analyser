@@ -54,12 +54,12 @@ public class TestChoco {
 		Model mod = new Model("Ex2 model");
 
 		IntVar num1 = mod.intVar("num1", 0, 10, false);
-		IntVar num2 = mod.intVar("num1", 5, 10, false);
-		IntVar num3 = mod.intVar("num1", -2, 20, false);
-		IntVar[] nms = mod.intVarArray(5, new int[] { 1, 2, 3, 4, 5 });
+		IntVar num2 = mod.intVar("num2", 5, 10, false);
+		IntVar num3 = mod.intVar("num3", 11, 20, false);
+//		IntVar[] nms = mod.intVarArray(5, new int[] { 1, 2, 3, 4, 5 });
 
 		// my own constraint
-		Constraint testConstraint = new Constraint("TestConstraint", new TestPropagator(nms, 5));
+//		Constraint testConstraint = new Constraint("TestConstraint", new TestPropagator(nms, 5));
 
 		mod.arithm(num1, "<", num2).post();
 		mod.arithm(num1, "=", num3).post();

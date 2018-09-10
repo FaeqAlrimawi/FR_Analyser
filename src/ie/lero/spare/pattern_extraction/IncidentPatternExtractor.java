@@ -127,8 +127,9 @@ public class IncidentPatternExtractor {
 		String movePhysicallyPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 		String connectToNetworkPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern.cpi";
+		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
 
-		ActivityPattern activityPattern = ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		ActivityPattern activityPattern = ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 
 		matchActivityPattern(activityPattern);
 		/*
@@ -257,8 +258,8 @@ public class IncidentPatternExtractor {
 			System.out.println("#######################################################################################");
 			System.out.println("Scene: " + scene.getName());
 			
-			finalActivity = scene.getFinalActivity();
 			initialActivity = scene.getInitialActivity();
+			finalActivity = scene.getFinalActivity();
 			currentActivity = initialActivity;
 
 			// try to find a match of the pattern precondition
@@ -368,7 +369,8 @@ public class IncidentPatternExtractor {
 		// 3-Type (e.g., physical, digital)
 		// 4-Duration (to be implemented)
 		// 5-Timing (to be implemented)
-
+		
+		
 		// 1- Behaviour Type (e.g., normal, malicious)
 		Behaviour incActBehaviour = incidentActivity.getBehaviourType();
 		Behaviour ptrActBehaviour = patternActivity.getBehaviourType();
@@ -399,65 +401,161 @@ public class IncidentPatternExtractor {
 		}
 
 		// activity references:
-		// 1-Initiator
-		// 2-Target assets
-		// 3-Resources
-		// 4-Exploited assets
-		// 5-Location
-		// 6-Vicitms
-		// 7-Precondition
-		// 8-Postcondition
-		// -9-Accomplices (to be implemented)
+				// 1-Initiator
+				// 2-Target assets
+				// 3-Resources
+				// 4-Exploited assets
+				// 5-Location
+				// 6-Vicitms
+				// 7-Precondition
+				// 8-Postcondition
+				// -9-Accomplices (to be implemented)
+		
 
+		//the rule by which certain aspects of an activity should be matched to a pattern is that
+		//if it exists in the pattern precondition then it should be matched to an entity of the activity
+		//that its precondition is being test otherwise it should be matched to the postcondition
+		
+		BigraphExpression bigExp = null;
+		
+		if(comparePrecondition) {
+			Precondition ptrPre = patternActivity.getPrecondition();
+			bigExp = ptrPre != null ? (BigraphExpression) ptrPre.getExpression() : null;
+	
+		} else if(comparePostCondition) {
+			Postcondition ptrPost = patternActivity.getPostcondition();
+			bigExp = ptrPost != null ? (BigraphExpression) ptrPost.getExpression() : null;
+	
+		}
+		
+		if(BigExp == null) {
+			return false;
+		}
+		
+		boolean canBeApplied = false;
+		
+		
 		// 1-Initiator: compare initiator attributes found in the pattern
 		// activity to that in the incident activity
 		ActivityInitiator ptrInitiator = patternActivity.getInitiator();
-		ActivityInitiator incInitiator = incidentActivity.getInitiator();
-
-		boolean canBeApplied = compareInitiators(ptrInitiator, incInitiator);
-
-		if (!canBeApplied) {
-			return false;
+		String ptrInitiatorName = ptrInitiator!= null?((IncidentEntity)ptrInitiator).getName():null;
+		
+		if(bigExp.hasEntity(ptrInitiatorName)) {
+				
+			ActivityInitiator incInitiator = incidentActivity.getInitiator();
+			canBeApplied = compareInitiators(ptrInitiator, incInitiator);
+				
+			if (!canBeApplied) {
+				return false;
+			}
+				
+			if (ptrInitiator != null) {
+				entityMap.put(ptrInitiatorName, ((IncidentEntity) incInitiator).getName());
+			}
 		}
-
-		if (ptrInitiator != null) {
-			entityMap.put(((IncidentEntity) ptrInitiator).getName(), ((IncidentEntity) incInitiator).getName());
-		}
-
+		
+		
+		/*} else if(comparePostCondition) {
+			if(ptrBigExpPost != null && ptrBigExpPost.hasEntity(ptrInitiatorName)) {
+				
+				ActivityInitiator incInitiator = incidentActivity.getInitiator();
+				canBeApplied = compareInitiators(ptrInitiator, incInitiator);
+				
+				if (!canBeApplied) {
+					return false;
+				}
+				
+			}
+		}*/
+			
 		// 2-Target assets
 		Asset ptrTargetAsset = !patternActivity.getTargetedAssets().isEmpty()
 				? patternActivity.getTargetedAssets().get(0) : null;
-		Asset incTargetAsset = !incidentActivity.getTargetedAssets().isEmpty()
-				? incidentActivity.getTargetedAssets().get(0) : null;
+		String ptrTargetAssetName = ptrTargetAsset!=null?ptrTargetAsset.getName():null;
+			
+		if(bigExp.hasEntity(ptrTargetAssetName)) {
+			
+			Asset incTargetAsset = !incidentActivity.getTargetedAssets().isEmpty()
+					? incidentActivity.getTargetedAssets().get(0) : null;				
+			canBeApplied = compareAssets(ptrTargetAsset, incTargetAsset);
 
-		canBeApplied = compareAssets(ptrTargetAsset, incTargetAsset);
-
-		if (!canBeApplied) {
-			return false;
+			if (!canBeApplied) {
+				return false;
+			}
+				
+			if (ptrInitiator != null) {
+				entityMap.put(ptrTargetAssetName, incTargetAsset.getName());
+			}
 		}
+		
+		/*if(comparePrecondition) {
+			if(ptrBigExpPre != null && ptrBigExpPre.hasEntity(ptrTargetAssetName)) {
+				
+				Asset incTargetAsset = !incidentActivity.getTargetedAssets().isEmpty()
+						? incidentActivity.getTargetedAssets().get(0) : null;				
+				canBeApplied = compareAssets(ptrTargetAsset, incTargetAsset);
 
-		if (ptrTargetAsset != null) {
-			entityMap.put(ptrTargetAsset.getName(), incTargetAsset.getName());
-		}
+				if (!canBeApplied) {
+					return false;
+				}
+				
+			}
+		} else if(comparePostCondition) {
+			if(ptrBigExpPost != null && ptrBigExpPost.hasEntity(ptrTargetAssetName)) {
+				
+				Asset incTargetAsset = !incidentActivity.getTargetedAssets().isEmpty()
+						? incidentActivity.getTargetedAssets().get(0) : null;				
+				canBeApplied = compareAssets(ptrTargetAsset, incTargetAsset);
 
+				if (!canBeApplied) {
+					return false;
+				}
+				
+			}
+		}*/
+		
 		// 3-Resources
 		Resource ptrResource = !patternActivity.getResources().isEmpty() ? patternActivity.getResources().get(0) : null;
-		Resource incResource = !incidentActivity.getResources().isEmpty() ? incidentActivity.getResources().get(0)
-				: null;
+		String ptrResourceName = ptrResource!=null?ptrResource.getName():null;
+		
+		if(bigExp.hasEntity(ptrResourceName)) {
+			
+			Resource incResource = !incidentActivity.getResources().isEmpty() ? incidentActivity.getResources().get(0)
+					: null;
 
-		canBeApplied = compareResources(ptrResource, incResource);
+			canBeApplied = compareResources(ptrResource, incResource);
 
-		if (!canBeApplied) {
-			return false;
-		}
-
-		if (ptrResource != null) {
-			entityMap.put(ptrResource.getName(), incResource.getName());
+			if (!canBeApplied) {
+				return false;
+			}
+				
+			if (ptrInitiator != null) {
+				entityMap.put(ptrTargetAssetName, incResource.getName());
+			}
 		}
 
 		// 4-Exploited assets
 		Asset ptrExploitedAsset = !patternActivity.getExploitedAssets().isEmpty()
 				? patternActivity.getExploitedAssets().get(0) : null;
+		
+		String ptrExploitedAssetName = ptrExploitedAsset!=null?ptrExploitedAsset.getName():null;
+		
+		if(bigExp.hasEntity(ptrResourceName)) {
+			
+			Resource incResource = !incidentActivity.getResources().isEmpty() ? incidentActivity.getResources().get(0)
+					: null;
+
+			canBeApplied = compareResources(ptrResource, incResource);
+
+			if (!canBeApplied) {
+				return false;
+			}
+				
+			if (ptrInitiator != null) {
+				entityMap.put(ptrTargetAssetName, incResource.getName());
+			}
+		}
+
 		Asset incExploitedAsset = !incidentActivity.getExploitedAssets().isEmpty()
 				? incidentActivity.getExploitedAssets().get(0) : null;
 
@@ -465,10 +563,6 @@ public class IncidentPatternExtractor {
 
 		if (!canBeApplied) {
 			return false;
-		}
-
-		if (ptrExploitedAsset != null) {
-			entityMap.put(ptrExploitedAsset.getName(), incExploitedAsset.getName());
 		}
 
 		// 5-Locations
@@ -481,10 +575,6 @@ public class IncidentPatternExtractor {
 			return false;
 		}
 
-		if (ptrLocation != null) {
-			entityMap.put(((IncidentEntity) ptrLocation).getName(), ((IncidentEntity) incLocation).getName());
-		}
-
 		// 6-Vicitms
 		Actor ptrVicitm = !patternActivity.getVictims().isEmpty() ? patternActivity.getVictims().get(0) : null;
 		Actor incVicitm = !incidentActivity.getVictims().isEmpty() ? incidentActivity.getVictims().get(0) : null;
@@ -495,10 +585,29 @@ public class IncidentPatternExtractor {
 			return false;
 		}
 
+		//add matched entities to the map
+		
+		
+		if (ptrTargetAsset != null) {
+			entityMap.put(ptrTargetAsset.getName(), incTargetAsset.getName());
+		}
+
+		if (ptrResource != null) {
+			entityMap.put(ptrResource.getName(), incResource.getName());
+		}
+
+		if (ptrExploitedAsset != null) {
+			entityMap.put(ptrExploitedAsset.getName(), incExploitedAsset.getName());
+		}
+
+		if (ptrLocation != null) {
+			entityMap.put(((IncidentEntity) ptrLocation).getName(), ((IncidentEntity) incLocation).getName());
+		}
+
 		if (ptrVicitm != null) {
 			entityMap.put(ptrVicitm.getName(), incVicitm.getName());
 		}
-
+		
 		if (comparePrecondition) {
 			// evaluate precondition
 			Precondition ptrPre = patternActivity.getPrecondition();
@@ -514,7 +623,7 @@ public class IncidentPatternExtractor {
 			}
 		}
 
-		if (comparePostCondition) {
+		 else {
 			// evaluate postcondition
 			Postcondition ptrPost = patternActivity.getPostcondition();
 			BigraphExpression ptrBigExpPost = ptrPost != null ? (BigraphExpression) ptrPost.getExpression() : null;
@@ -1011,6 +1120,8 @@ public class IncidentPatternExtractor {
 
 	protected boolean updateEntityNames(BigraphExpression patternCondition) {
 
+		System.out.println(entityMap);
+		
 		List<String> notFoundNames = new LinkedList<String>();
 		LinkedList<Entity> visitedEntities = new LinkedList<Entity>();
 
