@@ -8,13 +8,15 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 
 public class TestChoco {
 
 	public static void main(String[] args) {
 
 		// example1();
-		ex2();
+//		ex2();
+		patternBasedExample();
 
 	}
 
@@ -56,10 +58,11 @@ public class TestChoco {
 		IntVar num1 = mod.intVar("num1", 0, 10, false);
 		IntVar num2 = mod.intVar("num2", 5, 10, false);
 		IntVar num3 = mod.intVar("num3", 11, 20, false);
-//		IntVar[] nms = mod.intVarArray(5, new int[] { 1, 2, 3, 4, 5 });
+		IntVar[] nms = mod.intVarArray(5, new int[] { 1, 2, 3, 4, 5 });
 
 		// my own constraint
-//		Constraint testConstraint = new Constraint("TestConstraint", new TestPropagator(nms, 5));
+		// Constraint testConstraint = new Constraint("TestConstraint", new
+		// TestPropagator(nms, 5));
 
 		mod.arithm(num1, "<", num2).post();
 		mod.arithm(num1, "=", num3).post();
@@ -79,4 +82,41 @@ public class TestChoco {
 		System.out.println(solver.getSolutionCount());
 	}
 
+	protected static void patternBasedExample() {
+
+		int numOfpatterns = 5;
+		SetVar[] patterns = new SetVar[numOfpatterns];
+		SetVar[] patternMaps = new SetVar[3];
+		
+		Model model = new Model("Pattern model");
+
+		// define variables (patterns and their maps)
+	
+		patterns[0] = model.setVar("ptr1-1", 1, 2); // actions 1, 2, 3
+		patterns[1] = model.setVar("ptr1-2", 1, 2, 3); // actions 1, 2, 3
+		
+		patterns[2] = model.setVar("ptr2-1", 4, 5); // actions 3, 4, 5
+		patterns[3] = model.setVar("ptr2-2", 3, 4, 5); // actions 3, 4, 5
+		
+		patterns[4] = model.setVar("ptr3-1", 6, 7); // assuming it maps to actions 7, 8
+
+		// define constraints
+		//1st constraint: all patterns should be in a solution
+		//2nd constraint: no overlapping between patterns
+		
+//		model.or(model.element(model.intVar(0), patterns, patterns[0]), 
+//				model.element(model.intVar(1), patterns, patterns[1])).post();
+		
+		model.allDisjoint(patterns).post(); //no overlap constraint
+		
+
+		
+		Solver solver = model.getSolver();
+		
+		List<Solution> solutions = solver.findAllSolutions();
+
+		
+		System.out.println(solutions);
+		
+	}
 }
