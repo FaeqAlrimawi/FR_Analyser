@@ -216,9 +216,7 @@ public class TestChoco {
 	}
 	
 	private static void test2() {
-	
-		Model model = new Model("Pattern-Map model");
-		
+
 		int actualNumberOfPatterns = 2;//numer of patterns matched
 		int numOfPossiblePatterns = 5; //all found matches of patterns
 		int numOfActions = 10;
@@ -233,14 +231,30 @@ public class TestChoco {
 		
 		//represents pattern maps found from matching all patterns to an incident model
 		int [][] possiblePatternsMapsInt = new int[numOfPossiblePatterns][];
+		
 		possiblePatternsMapsInt[0] = new int[] { 1, 2 }; // pattern 0
 		possiblePatternsMapsInt[1] = new int[] { 2, 3 }; // pattern 0
 		possiblePatternsMapsInt[2] = new int[] { 5, 6 }; // pattern 1
 		possiblePatternsMapsInt[3] = new int[] { 4, 6 }; // pattern 1
 		possiblePatternsMapsInt[4] = new int[] { 9, 11 }; // pattern 1
 		
-		//============Model Variables======================//
+		//represents which possible patterns are mapped to the same pattern (i.e. same number same pattern)
+		int [] possiblePatternsAssociationInt = new int[]{0,0,1,1,1};
 		
+		
+		//============Creating model========================//
+		
+		Model model = new Model("Pattern-Map model");
+		
+		//============Defining Variables======================//
+		
+		IntVar[] possiblePatternsAssociation = new IntVar[possiblePatternsMapsInt.length];
+		
+		//variables which determines which maps belong to the same pattern
+		for(int i=0;i<possiblePatternsMapsInt.length;i++) {
+			possiblePatternsAssociation[i] = model.intVar("associ"+i,possiblePatternsAssociationInt[i]); 
+		}
+	
 		SetVar[] possiblePatternsMaps = new SetVar[possiblePatternsMapsInt.length];
 		
 		//variables which represent the sets that a generated set by a pattern should belong to
@@ -253,20 +267,20 @@ public class TestChoco {
 			patterns[i] = model.setVar("pattern-"+i, new int[]{}, actionsArray);
 		}
 		
-		//============Constraints======================//
-		//=======1-No overlapping between maps
-		//=======2-A map should be oen of the defined maps by the variable possiblePatternSets
-		//no overlapping
+		//============Defining Constraints======================//
+		//===1-No overlapping between maps
+		//===2-A map should be one of the defined maps by the variable possiblePatternMaps
+		
+		//1-no overlapping
 		model.allDisjoint(patterns).post();
 	
-		for(SetVar var : patterns) {
+		for(int i =0;i < patterns.length;i++) {
+			//2-a map should belong to the possiblePatternMaps variable
+			model.member(possiblePatternsMaps, patterns[i]).post();
 			
-			//avoid empty sets
-//			model.notEmpty(var).post();
-			model.member(possiblePatternsMaps, var).post();
-//			model.and(new Constraint("mycons", new TestPropagator(var, 3, dummy))).post();
 		}
 		
+		//============Finding solutions======================//
 		Solver solver = model.getSolver();
 		List<Solution> solutions = solver.findAllSolutions();
 		
