@@ -1,6 +1,9 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
@@ -19,8 +22,35 @@ public class TestChoco {
 		// example1();
 //		ex2();
 //		patternBasedExample();
-		test2();
+//		test2();
 
+		System.out.println();
+		System.out.println("=======================================");
+		Map<Integer, List<int[]>> maps = new HashMap<Integer, List<int[]>>();
+		
+		int[][] allPossiblePatternsMapsInt = new int[5][];
+		
+		allPossiblePatternsMapsInt[0] = new int[] { 4, 6 };
+		allPossiblePatternsMapsInt[1] = new int[] { 4, 5 }; 
+		allPossiblePatternsMapsInt[2] = new int[] { 5, 6 };
+		allPossiblePatternsMapsInt[3] = new int[] { 8, 10 }; 
+		allPossiblePatternsMapsInt[4] = new int[] { 15, 17 }; 
+		
+		int numOfPatterns = 2;
+		LinkedList<int[]> pattern_1_maps = new LinkedList<int[]>();
+		pattern_1_maps.add(allPossiblePatternsMapsInt[0]);
+		pattern_1_maps.add(allPossiblePatternsMapsInt[1]);
+		
+		LinkedList<int[]> pattern_2_maps = new LinkedList<int[]>();
+		pattern_2_maps.add(allPossiblePatternsMapsInt[2]);
+		pattern_2_maps.add(allPossiblePatternsMapsInt[3]);
+		pattern_2_maps.add(allPossiblePatternsMapsInt[4]);
+		
+		maps.put(0, pattern_1_maps);
+		maps.put(1, pattern_2_maps);
+		
+		findSolutions(maps, 20);
+		
 	}
 
 	protected static void example1() {
@@ -232,24 +262,29 @@ public class TestChoco {
 		allPossiblePatternsMapsInt[4] = new int[] { 15, 17 }; 
 			
 		//indicates how many maps for each pattern
-		int [] numOfMaps = new int[actualNumberOfPatterns];
-		numOfMaps[0] = 2;
-		numOfMaps[1] = 3;
+		int [] numOfMapsPerPattern = new int[actualNumberOfPatterns];
+		numOfMapsPerPattern[0] = 2;
+		numOfMapsPerPattern[1] = 3;
 		
 		//===Derived variables
 		//represents pattern maps found from matching all patterns to an incident model
 		int [][][] possiblePatternsMapsInt = new int[actualNumberOfPatterns][][];
 		
-		for(int i=0;i<actualNumberOfPatterns;i++) {
-			possiblePatternsMapsInt[i] = new int[numOfMaps[i]][];
+		int index = 0;
+		for(int i=0;i<possiblePatternsMapsInt.length;i++) {
+			possiblePatternsMapsInt[i] = new int[numOfMapsPerPattern[i]][];
+			for(int j=0;j<possiblePatternsMapsInt[i].length;j++) {
+				possiblePatternsMapsInt[i][j] =  allPossiblePatternsMapsInt[index];
+				index++;
+			}
 		}
-
+/*
 		possiblePatternsMapsInt[0][0] =  allPossiblePatternsMapsInt[0];
 		possiblePatternsMapsInt[0][1] = allPossiblePatternsMapsInt[1];
 		
 		possiblePatternsMapsInt[1][0] = allPossiblePatternsMapsInt[2];
 		possiblePatternsMapsInt[1][1] = allPossiblePatternsMapsInt[3];
-		possiblePatternsMapsInt[1][2] = allPossiblePatternsMapsInt[4];
+		possiblePatternsMapsInt[1][2] = allPossiblePatternsMapsInt[4];*/
 		
 		//represents which possible patterns are mapped to the same pattern (i.e. same number same pattern)
 //		int [] possiblePatternsAssociationInt = new int[]{0,0,1,1,1};///also depends on num of maps
@@ -262,7 +297,7 @@ public class TestChoco {
 		
 		//============Creating model========================//
 		
-		Model model = new Model("Pattern-Map model");
+		Model model = new Model("Pattern-Map Model");
 		
 		//============Defining Variables======================//
 		
@@ -302,7 +337,92 @@ public class TestChoco {
 			//a map in the solution
 			model.member(possiblePatternsMaps[i], patterns[i]).post();
 			
+		}
+		
+		//============Finding solutions======================//
+		Solver solver = model.getSolver();
+		List<Solution> solutions = solver.findAllSolutions();
+		
+		int cnt = 0;
+		
+		for(Solution so  : solutions) {
+			System.out.println(cnt+":"+so);
+			cnt++;
 			
+			if(cnt == 100) {
+				break;
+			}
+		}
+		
+		System.out.println(solutions.size());
+	}
+	
+	public static void findSolutions(Map<Integer, List<int[]>> patternMaps, int numberOfActions) {
+
+		int numOfActions = numberOfActions; //could be defined as the max number of the maps
+
+		//===Derived variables
+		
+		//represents pattern maps found from matching all patterns to an incident model
+//		int [][][] possiblePatternsMapsInt = new int[actualNumberOfPatterns][][];
+//		
+//		int index = 0;
+//		int numOfPattern_i_maps = 0;
+//		for(int i=0;i<possiblePatternsMapsInt.length;i++) {
+//			
+//			//determine how many maps for pattern i
+//			numOfPattern_i_maps = patternMaps.get(i).size();
+//			possiblePatternsMapsInt[i] = new int[numOfPattern_i_maps][];
+//			
+//			for(int j=0;j<possiblePatternsMapsInt[i].length;j++) {
+//				possiblePatternsMapsInt[i][j] = patternMaps.get(i).get(j);
+//			}
+//		}
+
+		int[] actionsArray = new int[numOfActions];
+		
+		//used as an upper bound for the set variables (i.e. patterns variables)
+		// 0,1,2,...N-1 where N is the number of actions
+		for(int i=0;i<actionsArray.length;i++) {
+			actionsArray[i] = i;
+		}
+		
+		//============Creating model========================//
+		
+		Model model = new Model("Pattern-Map Model");
+		
+		//============Defining Variables======================//
+		
+		SetVar[] patterns = new SetVar[patternMaps.keySet().size()];
+	
+		SetVar[][] possiblePatternsMaps = new SetVar[patterns.length][];
+		
+		//each pattern has as domain values the range from {} to {0,1,2,..,N-1}, where N is number of actions
+		for(int i=0;i<patterns.length;i++) {
+			patterns[i] = model.setVar("pattern-"+i, new int[]{}, actionsArray);
+		}
+		
+		for(int i=0;i<patterns.length;i++) {
+		
+			//variables which represent the sets that a generated set by a pattern should belong to
+			possiblePatternsMaps[i] = new SetVar[patternMaps.get(i).size()];
+			
+			for(int j=0;j<possiblePatternsMaps[i].length;j++) {
+				possiblePatternsMaps[i][j] = model.setVar("map"+i+""+j,patternMaps.get(i).get(j)); 
+			}
+		}
+		
+		//============Defining Constraints======================//
+		//===1-No overlapping between maps
+		//===2-A map should be one of the defined maps by the variable possiblePatternMaps
+		//===3-at least 1 map for each pattern
+		//1-no overlapping
+		model.allDisjoint(patterns).post();
+	
+		for(int i =0;i < patterns.length;i++) {
+			//2 & 3- a map should belong to one of the identified maps and each pattern should have 
+			//a map in the solution
+			model.member(possiblePatternsMaps[i], patterns[i]).post();
 			
 		}
 		

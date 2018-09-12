@@ -203,7 +203,8 @@ public class IncidentPatternExtractor {
 		List<String> tmpPreMatchedActivities = new LinkedList<String>();
 		List<HashMap<String, String>> entityMaps = new LinkedList<HashMap<String, String>>();
 		
-		//final result
+		//final result. Key is activity name that satisfies the pattern precondition 
+		//and List<String> are the activities that satisfy the postcondition of the pattern
 		HashMap<String, List<String>> prePostMappingActivities = new HashMap<String, List<String>>();
 
 		// Activity preMatchedActivity = null;
