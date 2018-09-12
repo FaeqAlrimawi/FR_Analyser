@@ -233,7 +233,7 @@ public class TestChoco {
 		int [][] possiblePatternsMapsInt = new int[numOfPossiblePatterns][];
 		
 		possiblePatternsMapsInt[0] = new int[] { 1, 2 }; // pattern 0
-		possiblePatternsMapsInt[1] = new int[] { 2, 3 }; // pattern 0
+		possiblePatternsMapsInt[1] = new int[] { 4, 5 }; // pattern 0
 		possiblePatternsMapsInt[2] = new int[] { 5, 6 }; // pattern 1
 		possiblePatternsMapsInt[3] = new int[] { 4, 6 }; // pattern 1
 		possiblePatternsMapsInt[4] = new int[] { 9, 11 }; // pattern 1
@@ -270,13 +270,15 @@ public class TestChoco {
 		//============Defining Constraints======================//
 		//===1-No overlapping between maps
 		//===2-A map should be one of the defined maps by the variable possiblePatternMaps
-		
+		//===3-at least 1 map for each pattern
 		//1-no overlapping
 		model.allDisjoint(patterns).post();
 	
 		for(int i =0;i < patterns.length;i++) {
 			//2-a map should belong to the possiblePatternMaps variable
 			model.member(possiblePatternsMaps, patterns[i]).post();
+			
+			
 			
 		}
 		
