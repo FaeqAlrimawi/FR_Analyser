@@ -18,7 +18,8 @@ public class TestChoco {
 
 		// example1();
 //		ex2();
-		patternBasedExample();
+//		patternBasedExample();
+		test2();
 
 	}
 
@@ -159,27 +160,27 @@ public class TestChoco {
 
 		
 		//represents which possible patterns are mapped to the same pattern (i.e. same number same pattern)
-		IntVar[] possiblePatternsAssociation = new IntVar[numOfPossiblePatterns];
+		/*IntVar[] possiblePatternsAssociation = new IntVar[numOfPossiblePatterns];
 		
 		possiblePatternsAssociation[0] = model.intVar(0); //pattern 0
 		possiblePatternsAssociation[1] = model.intVar(0); //pattern 0
 		possiblePatternsAssociation[2] = model.intVar(1); //pattern 1
 		possiblePatternsAssociation[3] = model.intVar(1); //pattern 1
 		possiblePatternsAssociation[4] = model.intVar(1); //pattern 1
-		
+*/		
 		//=========Variables=====================
 		
 		//represents the actions that map to a pattern. Actions are represented as numbers in the sequence
-		SetVar[] possiblePatternsSets = new SetVar[numOfPossiblePatterns];
+	/*	SetVar[] possiblePatternsSets = new SetVar[numOfPossiblePatterns];
 		
 		possiblePatternsSets[0] = model.setVar("ptr0",1,2); //pattern 0
 		possiblePatternsSets[1] = model.setVar("ptr1",2,3); //pattern 0
 		possiblePatternsSets[2] = model.setVar("ptr2",80,100); //pattern 1
 		possiblePatternsSets[3] = model.setVar("ptr3",4,6); //pattern 1
 		possiblePatternsSets[4] = model.setVar("ptr4",7,8); //pattern 1
-		
-		int[] tst = new int[] {1,2};
-		model.setVar(tst);
+*/		
+//		int[] tst = new int[] {1,2};
+//		model.setVar(tst);
 		//create pattern variables
 		for(int i=0;i<patterns.length;i++) {
 			patterns[i] = model.intVar("pattern-"+i, 0, numOfPossiblePatterns-1);
@@ -188,26 +189,20 @@ public class TestChoco {
 		//=========Constraints=====================
 		//each pattern should be different
 		model.allDifferent(patterns).post();
-		
+//		Constraint myCons = new Constraint("Cons1", new TestPropagator(patterns,4));
+//		
+//		model.and(myCons).post();
+	
 		//no overlapping
 		for(int i=0;i<actualNumberOfPatterns-1;i++) {
 
-			for(int j=i+1; j<actualNumberOfPatterns;j++) {
-//				int val = model.getv
-				Constraint isNotSamePattern = model.arithm(possiblePatternsAssociation[i], "!=", 
-						possiblePatternsAssociation[j]);
-	
-				model.disjoint(possiblePatternsSets[patterns[i].getValue()], 
-						possiblePatternsSets[patterns[j].getValue()]).post();
-			}
-		
-	/*		model.disjoint(possiblePatternsSets[i], 
-					possiblePatternsSets[i+1]).post();*/
-			
+//			for(int j=i+1; j<actualNumberOfPatterns;j++) {
+//				Constraint con = new Constraint("Cons1", new TestPropagator(patterns[i], patterns[j],4));
+//				model.and(con).post();
+//		}
 		}
-		
-//		model.allDisjoint(pattern1Maps).post(); //no overlap constraint
-		//model.addClauses(LogOp.or(null));
+////		model.allDisjoint(pattern1Maps).post(); //no overlap constraint
+//		//model.addClauses(LogOp.or(null));
 
 		Solver solver = model.getSolver();
 		List<Solution> solutions = solver.findAllSolutions();
@@ -216,9 +211,76 @@ public class TestChoco {
 			System.out.println(so);
 		}
 	
-
-		
 		System.out.println(solutions.size());
 		
+	}
+	
+	private static void test2() {
+	
+		Model model = new Model("Pattern-Map model");
+		
+		int actualNumberOfPatterns = 2;//numer of patterns matched
+		int numOfPossiblePatterns = 5; //all found matches of patterns
+		int numOfActions = 10;
+		SetVar[] patterns = new SetVar[actualNumberOfPatterns];
+		int[] actionsArray = new int[numOfActions];
+		
+		//used as an upper bound for the set variables (i.e. patterns variables)
+		// 0,1,2,...N-1 where N is the number of actions
+		for(int i=0;i<actionsArray.length;i++) {
+			actionsArray[i] = i;
+		}
+		
+		//represents pattern maps found from matching all patterns to an incident model
+		int [][] possiblePatternsMapsInt = new int[numOfPossiblePatterns][];
+		possiblePatternsMapsInt[0] = new int[] { 1, 2 }; // pattern 0
+		possiblePatternsMapsInt[1] = new int[] { 2, 3 }; // pattern 0
+		possiblePatternsMapsInt[2] = new int[] { 5, 6 }; // pattern 1
+		possiblePatternsMapsInt[3] = new int[] { 4, 6 }; // pattern 1
+		possiblePatternsMapsInt[4] = new int[] { 9, 11 }; // pattern 1
+		
+		//============Model Variables======================//
+		
+		SetVar[] possiblePatternsMaps = new SetVar[possiblePatternsMapsInt.length];
+		
+		//variables which represent the sets that a generated set by a pattern should belong to
+		for(int i=0;i<possiblePatternsMapsInt.length;i++) {
+			possiblePatternsMaps[i] = model.setVar("map"+i,possiblePatternsMapsInt[i]); 
+		}
+		
+		//each pattern has as domain values the range from {} to {0,1,2,..,N-1}, where N is number of actions
+		for(int i=0;i<patterns.length;i++) {
+			patterns[i] = model.setVar("pattern-"+i, new int[]{}, actionsArray);
+		}
+		
+		//============Constraints======================//
+		//=======1-No overlapping between maps
+		//=======2-A map should be oen of the defined maps by the variable possiblePatternSets
+		//no overlapping
+		model.allDisjoint(patterns).post();
+	
+		for(SetVar var : patterns) {
+			
+			//avoid empty sets
+//			model.notEmpty(var).post();
+			model.member(possiblePatternsMaps, var).post();
+//			model.and(new Constraint("mycons", new TestPropagator(var, 3, dummy))).post();
+		}
+		
+		Solver solver = model.getSolver();
+		List<Solution> solutions = solver.findAllSolutions();
+		
+		int cnt = 0;
+		
+		for(Solution so  : solutions) {
+			System.out.println(cnt+":"+so);
+			cnt++;
+			
+			if(cnt == 100) {
+				break;
+			}
+		}
+		
+		System.out.println(solutions.size());
 	}
 }
