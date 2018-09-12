@@ -218,33 +218,47 @@ public class TestChoco {
 	private static void test2() {
 
 		int actualNumberOfPatterns = 2;//numer of patterns matched
-//		int numOfMaps = 5; //all found matches of patterns
+		int numOfAllMaps = 5; //all found matches of patterns
 		int numOfActions = 20; //could be defined as the max number of the maps
 		
 		int[] actionsArray = new int[numOfActions];
+		
+		int[][] allPossiblePatternsMapsInt = new int[numOfAllMaps][];
+		
+		allPossiblePatternsMapsInt[0] = new int[] { 4, 6 };
+		allPossiblePatternsMapsInt[1] = new int[] { 4, 5 }; 
+		allPossiblePatternsMapsInt[2] = new int[] { 5, 6 };
+		allPossiblePatternsMapsInt[3] = new int[] { 8, 10 }; 
+		allPossiblePatternsMapsInt[4] = new int[] { 15, 17 }; 
+			
+		//indicates how many maps for each pattern
+		int [] numOfMaps = new int[actualNumberOfPatterns];
+		numOfMaps[0] = 2;
+		numOfMaps[1] = 3;
+		
+		//===Derived variables
+		//represents pattern maps found from matching all patterns to an incident model
+		int [][][] possiblePatternsMapsInt = new int[actualNumberOfPatterns][][];
+		
+		for(int i=0;i<actualNumberOfPatterns;i++) {
+			possiblePatternsMapsInt[i] = new int[numOfMaps[i]][];
+		}
+
+		possiblePatternsMapsInt[0][0] =  allPossiblePatternsMapsInt[0];
+		possiblePatternsMapsInt[0][1] = allPossiblePatternsMapsInt[1];
+		
+		possiblePatternsMapsInt[1][0] = allPossiblePatternsMapsInt[2];
+		possiblePatternsMapsInt[1][1] = allPossiblePatternsMapsInt[3];
+		possiblePatternsMapsInt[1][2] = allPossiblePatternsMapsInt[4];
+		
+		//represents which possible patterns are mapped to the same pattern (i.e. same number same pattern)
+//		int [] possiblePatternsAssociationInt = new int[]{0,0,1,1,1};///also depends on num of maps
 		
 		//used as an upper bound for the set variables (i.e. patterns variables)
 		// 0,1,2,...N-1 where N is the number of actions
 		for(int i=0;i<actionsArray.length;i++) {
 			actionsArray[i] = i;
 		}
-		
-		int [] numOfMaps = new int[]{2,3};
-		
-		//represents pattern maps found from matching all patterns to an incident model
-		int [][][] possiblePatternsMapsInt = new int[actualNumberOfPatterns][][];
-		possiblePatternsMapsInt[0] = new int[numOfMaps[0]][];
-		possiblePatternsMapsInt[0][0] = new int[] { 4, 6 }; // pattern 0
-		possiblePatternsMapsInt[0][1] = new int[] { 4, 5 }; // pattern 0
-		
-		possiblePatternsMapsInt[1] = new int[numOfMaps[1]][];
-		possiblePatternsMapsInt[1][0] = new int[] { 5, 6 }; // pattern 1
-		possiblePatternsMapsInt[1][1] = new int[] { 8, 10 }; // pattern 1
-		possiblePatternsMapsInt[1][2] = new int[] { 15, 17 }; // pattern 1
-		
-		//represents which possible patterns are mapped to the same pattern (i.e. same number same pattern)
-		int [] possiblePatternsAssociationInt = new int[]{0,0,1,1,1};///also depends on num of maps
-		
 		
 		//============Creating model========================//
 		
@@ -253,12 +267,12 @@ public class TestChoco {
 		//============Defining Variables======================//
 		
 		SetVar[] patterns = new SetVar[actualNumberOfPatterns];
-		IntVar[] possiblePatternsAssociation = new IntVar[possiblePatternsMapsInt.length];
+//		IntVar[] possiblePatternsAssociation = new IntVar[possiblePatternsMapsInt.length];
 		
 		//variables which determines which maps belong to the same pattern
-		for(int i=0;i<possiblePatternsMapsInt.length;i++) {
-			possiblePatternsAssociation[i] = model.intVar("associ"+i,possiblePatternsAssociationInt[i]); 
-		}
+//		for(int i=0;i<possiblePatternsMapsInt.length;i++) {
+//			possiblePatternsAssociation[i] = model.intVar("associ"+i,possiblePatternsAssociationInt[i]); 
+//		}
 	
 		SetVar[][] possiblePatternsMaps = new SetVar[possiblePatternsMapsInt.length][];
 		
