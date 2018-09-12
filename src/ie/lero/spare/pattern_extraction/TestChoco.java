@@ -24,7 +24,6 @@ public class TestChoco {
 //		patternBasedExample();
 //		test2();
 
-		System.out.println();
 		System.out.println("=======================================");
 		Map<Integer, List<int[]>> maps = new HashMap<Integer, List<int[]>>();
 		
@@ -49,7 +48,14 @@ public class TestChoco {
 		maps.put(0, pattern_1_maps);
 		maps.put(1, pattern_2_maps);
 		
-		findSolutions(maps, 20);
+		List<Solution> solutions = findSolutions(maps, 20);
+		
+		int cnt = 0;
+	
+		for(Solution sol : solutions) {
+			System.out.println(cnt+": "+sol);
+			cnt++;
+		}
 		
 	}
 
@@ -357,29 +363,11 @@ public class TestChoco {
 		System.out.println(solutions.size());
 	}
 	
-	public static void findSolutions(Map<Integer, List<int[]>> patternMaps, int numberOfActions) {
+	public static List<Solution> findSolutions(Map<Integer, List<int[]>> patternMaps, int numberOfActions) {
 
-		int numOfActions = numberOfActions; //could be defined as the max number of the maps
+		//numberOfActions could be defined as the max number of the maps
 
-		//===Derived variables
-		
-		//represents pattern maps found from matching all patterns to an incident model
-//		int [][][] possiblePatternsMapsInt = new int[actualNumberOfPatterns][][];
-//		
-//		int index = 0;
-//		int numOfPattern_i_maps = 0;
-//		for(int i=0;i<possiblePatternsMapsInt.length;i++) {
-//			
-//			//determine how many maps for pattern i
-//			numOfPattern_i_maps = patternMaps.get(i).size();
-//			possiblePatternsMapsInt[i] = new int[numOfPattern_i_maps][];
-//			
-//			for(int j=0;j<possiblePatternsMapsInt[i].length;j++) {
-//				possiblePatternsMapsInt[i][j] = patternMaps.get(i).get(j);
-//			}
-//		}
-
-		int[] actionsArray = new int[numOfActions];
+		int[] actionsArray = new int[numberOfActions];
 		
 		//used as an upper bound for the set variables (i.e. patterns variables)
 		// 0,1,2,...N-1 where N is the number of actions
@@ -416,6 +404,7 @@ public class TestChoco {
 		//===1-No overlapping between maps
 		//===2-A map should be one of the defined maps by the variable possiblePatternMaps
 		//===3-at least 1 map for each pattern
+		
 		//1-no overlapping
 		model.allDisjoint(patterns).post();
 	
@@ -430,17 +419,19 @@ public class TestChoco {
 		Solver solver = model.getSolver();
 		List<Solution> solutions = solver.findAllSolutions();
 		
-		int cnt = 0;
+//		int cnt = 0;
 		
-		for(Solution so  : solutions) {
-			System.out.println(cnt+":"+so);
-			cnt++;
-			
-			if(cnt == 100) {
-				break;
-			}
-		}
+//		for(Solution so  : solutions) {
+//			System.out.println(cnt+":"+so);
+//			cnt++;
+//			
+//			if(cnt == 100) {
+//				break;
+//			}
+//		}
+//		
+//		System.out.println(solutions.size());
 		
-		System.out.println(solutions.size());
+		return solutions;
 	}
 }
