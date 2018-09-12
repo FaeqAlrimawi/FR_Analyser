@@ -2,7 +2,6 @@ package ie.lero.spare.pattern_extraction;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
@@ -69,18 +68,7 @@ public class PatternMappingSolver {
 		Solver solver = model.getSolver();
 		List<Solution> solutions = solver.findAllSolutions();
 		
-//		int cnt = 0;
-		
-//		for(Solution so  : solutions) {
-//			System.out.println(cnt+":"+so);
-//			cnt++;
-//			
-//			if(cnt == 100) {
-//				break;
-//			}
-//		}
-//		
-//		System.out.println(solutions.size());
+		//optimisation
 		
 		return solutions;
 	}
