@@ -1,5 +1,6 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -9,8 +10,13 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
+import org.chocosolver.solver.search.strategy.selectors.variables.Smallest;
+import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelectorWithTies;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.tools.ArrayUtils;
 
 public class TestChoco {
 
@@ -26,13 +32,13 @@ public class TestChoco {
 
 		int[][] allPossiblePatternsMapsInt = new int[5][];
 
-		allPossiblePatternsMapsInt[0] = new int[] { 7,8 }; // sequence should
-															// be ordered in
+		allPossiblePatternsMapsInt[0] = new int[] { 7, 8 }; // sequence should
+															// be ordered in //
 															// ascending order
-		allPossiblePatternsMapsInt[1] = new int[] { 7,8,9 }; 
+		allPossiblePatternsMapsInt[1] = new int[] { 7, 8, 9 };
 		allPossiblePatternsMapsInt[2] = new int[] { 9, 10, 11 };
-		allPossiblePatternsMapsInt[3] = new int[] { 8,  9,10};
-		allPossiblePatternsMapsInt[4] = new int[] { 10,12,13,14 };
+		allPossiblePatternsMapsInt[3] = new int[] { 8, 9, 10 };
+		allPossiblePatternsMapsInt[4] = new int[] { 10, 12, 13, 14 };
 
 		int numOfPatterns = 2;
 		LinkedList<int[]> pattern_1_maps = new LinkedList<int[]>();
@@ -47,7 +53,7 @@ public class TestChoco {
 		maps.put(0, pattern_1_maps);
 		maps.put(1, pattern_2_maps);
 
-		List<Solution> solutions = findSolutions2(maps, 20);
+		List<Solution> solutions = findSolutions3(maps, 20);
 
 		int cnt = 0;
 
@@ -403,7 +409,7 @@ public class TestChoco {
 
 		// ============Creating model========================//
 
-		 Model model = new Model("Pattern-Map Model");
+		Model model = new Model("Pattern-Map Model");
 
 		// ============Defining Variables======================//
 
@@ -450,38 +456,35 @@ public class TestChoco {
 		// ===2-A map should be one of the defined maps by the variable
 		// possiblePatternMaps
 		// ===3-at least 1 map for each pattern
-	
-		
 
-			// 1-no overlapping
-			model.allDisjoint(patterns).post();
+		// 1-no overlapping
+		model.allDisjoint(patterns).post();
 
-			// List<Constraint> constraints = new LinkedList<Constraint>();
+		// List<Constraint> constraints = new LinkedList<Constraint>();
 
-			// essential: at least 1 map for each pattern
-			for (int i = 0; i < patterns.length; i++) {
-				model.member(possiblePatternsMaps[i], patterns[i]).post();
+		// essential: at least 1 map for each pattern
+		for (int i = 0; i < patterns.length; i++) {
+			model.member(possiblePatternsMaps[i], patterns[i]).post();
+		}
+
+		model.allDisjoint(extraPatterns).reify();
+
+		// for extras
+		for (int i = 0; i < extraPatterns.length; i++) {
+
+			// needs to belong to one of the maps
+			model.member(allMaps.toArray(new SetVar[0]), extraPatterns[i]).post();
+
+			// no overlapping with the other essential patterns
+			for (int j = 0; j < patterns.length; j++) {
+				model.disjoint(patterns[j], extraPatterns[i]).post();
 			}
 
-			model.allDisjoint(extraPatterns).reify();
+		}
 
-			// for extras
-			for (int i = 0; i < extraPatterns.length; i++) {
-
-				// needs to belong to one of the maps
-				model.member(allMaps.toArray(new SetVar[0]), extraPatterns[i]).post();
-
-				// no overlapping with the other essential patterns
-				for (int j = 0; j < patterns.length; j++) {
-					model.disjoint(patterns[j], extraPatterns[i]).post();
-				}
-
-			}
-
-			// ============Finding solutions======================//
-			Solver solver = model.getSolver();
-			List<Solution> solutions = solver.findAllSolutions();
-			
+		// ============Finding solutions======================//
+		Solver solver = model.getSolver();
+		List<Solution> solutions = solver.findAllSolutions();
 
 		return solutions;
 	}
@@ -514,9 +517,9 @@ public class TestChoco {
 		for (int i = 0; i < actionsArray.length; i++) {
 			actionsArray[i] = i;
 		}
-		
+
 		int numOfAllMaps = 0;
-		
+
 		for (List<int[]> list : patternMaps.values()) {
 			numOfAllMaps += list.size();
 		}
@@ -525,15 +528,15 @@ public class TestChoco {
 		Model model;
 		List<Solution> solutions = null;
 		Solver solver = null;
-	
+
 		while (currentNumOfPatterns > 0) {
-			
+
 			model = new Model("Pattern-Map Model");
-			
+
 			// ============Defining Variables======================//
 			SetVar[] patterns = new SetVar[currentNumOfPatterns];
 			SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
-			
+
 			// each pattern has as domain values the range from {} to
 			// {0,1,2,..,N-1}, where N is number of actions
 			for (int i = 0; i < currentNumOfPatterns; i++) {
@@ -541,14 +544,14 @@ public class TestChoco {
 			}
 
 			int index = 0;
-			
-			for(List<int[]> list : patternMaps.values()) {
-			  for(int[] ary : list) {
-				  possiblePatternsMaps[index] = model.setVar("map" + index, ary);
-				  index++;
-			  }
+
+			for (List<int[]> list : patternMaps.values()) {
+				for (int[] ary : list) {
+					possiblePatternsMaps[index] = model.setVar("map" + index, ary);
+					index++;
+				}
 			}
-			
+
 			// ============Defining Constraints======================//
 			// ===1-No overlapping between maps
 			// ===2-A map should be one of the defined maps by the variable
@@ -566,24 +569,119 @@ public class TestChoco {
 			// ============Finding solutions======================//
 			solver = model.getSolver();
 
-			//if a solution found then break
+			// if a solution found then break
+
 			if (solver.solve()) {
-				System.out.println("a solution is found for" + "\nNumber of patterns used = " 
-							+ currentNumOfPatterns);
+				System.out.println("a solution is found for" + "\nNumber of patterns used = " + currentNumOfPatterns);
 				break;
 			}
 
-			System.out.println("No solution found for patterns # = "+ currentNumOfPatterns+
-			"... decreasing the number of patterns and looking for a solution again");
+			System.out.println("No solution found for patterns # = " + currentNumOfPatterns
+					+ "... decreasing the number of patterns and looking for a solution again");
 			currentNumOfPatterns--;
 		}
 
-		if(currentNumOfPatterns > 0) {
-			solutions = solver.findAllSolutions();	
+		if (currentNumOfPatterns > 0) {
+			solutions = solver.findAllSolutions();
 		}
-		
+
 		return solutions;
 	}
 
+	public static List<Solution> findSolutions3(Map<Integer, List<int[]>> patternMaps, int numberOfActions) {
+
+		// numberOfActions could be defined as the max number of the maps
+
+		int[] actionsArray = new int[numberOfActions];
+
+		// used as an upper bound for the set variables (i.e. patterns
+		// variables)
+		// 0,1,2,...N-1 where N is the number of actions
+		for (int i = 0; i < actionsArray.length; i++) {
+			actionsArray[i] = i;
+		}
+
+		int numOfAllMaps = 0;
+
+		for (List<int[]> list : patternMaps.values()) {
+			numOfAllMaps += list.size();
+		}
+
+		int currentNumOfPatterns = numOfAllMaps;
+		Model model;
+		List<Solution> solutions = null;
+		Solver solver = null;
+
+		model = new Model("Pattern-Map Model");
+
+		// ============Defining Variables======================//
+		
+		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
+		
+		numOfAllMaps = 2;
+		
+		SetVar[] patterns = new SetVar[numOfAllMaps];
+		IntVar[] patternseverity = new IntVar[numOfAllMaps];
+		
+		//used to update severity values
+		int[] coeffs = new int[numOfAllMaps];
+		Arrays.fill(coeffs, 1); //coeff is 1
+		
+		
+
+		// defines the maximum number of patterns
+		IntVar numberOfPatterns = model.intVar("max_patterns_num", patternMaps.keySet().size(), numOfAllMaps);
+
+		// defines severity. Currently it is considered from 1 to 10
+//		IntVar severity = model.intVar("severity", 1, 10);
+		IntVar severitySum = model.intVar("max_severity",0, 9999);
+		
+		//actual severity array, assuming its embedded in the argument variable
+		
+		
+		// each pattern has as domain values the range from {} to
+		// {0,1,2,..,N-1}, where N is number of actions
+		for (int i = 0; i < numOfAllMaps; i++) {
+			patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
+			patternseverity[i] = model.intVar("pattern_"+i+"_severity", 1, 10);
+		}
+
+		int index = 0;
+
+		for (List<int[]> list : patternMaps.values()) {
+			for (int[] ary : list) {
+				possiblePatternsMaps[index] = model.setVar("map" + index, ary);
+				index++;
+			}
+		}
+
+		// ============Defining Constraints======================//
+		// ===1-No overlapping between maps
+		// ===2-A map should be one of the defined maps by the variable
+		// possiblePatternMaps
+		// ===3-at least 1 map for each pattern
+
+		// 1-no overlapping
+		model.allDisjoint(patterns).post();
+
+		// essential: at least 1 map for each pattern
+		for (int i = 0; i < patterns.length; i++) {
+			model.member(possiblePatternsMaps, patterns[i]).post();
+			
+			
+		}		
+
+		//defines the maximum severity for a solution
+		
+		model.scalar(patternseverity, coeffs, "=", severitySum).post();
+		
+//		model.setObjective(Model.MAXIMIZE, severitySum);
+		// ============Finding solutions======================//
+		solver = model.getSolver();
+		
+		solutions = solver.findAllOptimalSolutions(severitySum, Model.MAXIMIZE, null);
+
+		return solutions;
+	}
 
 }
