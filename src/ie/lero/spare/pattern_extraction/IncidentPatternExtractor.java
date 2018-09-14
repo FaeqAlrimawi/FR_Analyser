@@ -1165,14 +1165,18 @@ public class IncidentPatternExtractor {
 		// print maps
 		System.out.print("Maps:");
 		for (int j = 0; j < solution.size(); j++) {
-			System.out.print(Arrays.toString(solution.get(j)) + ",");
+			System.out.print("[");
+			for(int activityID : solution.get(j)) {
+				System.out.print(incidentModel.getActivity(activityID)+", ");	
+			}
+			System.out.print("],");
 		}
 		System.out.println();
 
 		// print patterns ids used
-		System.out.print("Pattern IDs:[");
+		System.out.print("Pattern:[");
 		for(int patternID : patternIDs) {
-			System.out.print(activityPatterns.get(patternID).getName()+",");
+			System.out.print(activityPatterns.get(patternID).getName()+", ");
 		}
 		System.out.println("]");
 
@@ -1190,7 +1194,7 @@ public class IncidentPatternExtractor {
 		// print maps
 		System.out.print("Maps:");
 		for (int j = 0; j < optimalSolution.size(); j++) {
-			System.out.print(Arrays.toString(optimalSolution.get(j)) + ",");
+			System.out.print(Arrays.toString(optimalSolution.get(j)) + ", ");
 		}
 		System.out.println();
 
@@ -1213,7 +1217,11 @@ public void printInputPatternMap(Map<Integer, List<int[]>> patternMaps) {
 		for(Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
 			System.out.print("Pattern["+activityPatterns.get(entry.getKey()).getName()+"] = ");
 			for(int [] ary : entry.getValue()) {
-				System.out.print(Arrays.toString(ary)+",");
+				System.out.print("[");
+				for(int activityID : ary) {
+					System.out.print(incidentModel.getActivity(activityID)+", ");	
+				}
+				System.out.print("], ");
 			}
 			System.out.println();
 		}
