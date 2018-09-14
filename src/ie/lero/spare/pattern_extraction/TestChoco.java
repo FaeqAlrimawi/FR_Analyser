@@ -29,13 +29,13 @@ public class TestChoco {
 
 		int[][] allPossiblePatternsMapsInt = new int[5][];
 
-		allPossiblePatternsMapsInt[0] = new int[] { 1, 2, 3 }; // sequence should
+		allPossiblePatternsMapsInt[0] = new int[] { 1, 2, 3,4,5,6 }; // sequence should
 															// be ordered in //
 															// // ascending
 															// order
 		allPossiblePatternsMapsInt[1] = new int[] { 3, 4,5,6 };
 		allPossiblePatternsMapsInt[2] = new int[] { 6, 8,9 };
-		allPossiblePatternsMapsInt[3] = new int[] { 8, 9 };
+		allPossiblePatternsMapsInt[3] = new int[] { 6,7,8, 9 };
 		allPossiblePatternsMapsInt[4] = new int[] { 9,10, 12, 13, 14 };
 
 		int numOfPatterns = 2;
@@ -727,9 +727,7 @@ public class TestChoco {
 		int minSeverity = 1;
 		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
 		SetVar[] patterns = null;
-		Solution firstSol = null;
 		boolean isSolutionfound = false;
-		List<SetVar> uniqueSolutions = new LinkedList<SetVar>();
 
 		// actual severity array, assuming its embedded in the argument
 		// variable
@@ -738,8 +736,6 @@ public class TestChoco {
 		for (int i = 0; i < numOfAllMaps; i++) {
 			severityValuesForMaps[i] = maxSeverity-minSeverity;
 		}
-
-		SetVar[][] possiblePatternsMaps2 = new SetVar[patternMaps.keySet().size()][];
 
 		// =============look for
 		// solution==========================================
@@ -821,6 +817,9 @@ public class TestChoco {
 				//add a constraint that next solution should be different from this
 				model.not(model.union(patterns, uniq)).post();
 				
+				//add a constraint that next solution should have equal or more actions
+				//could be implemented..?
+			
 				//add the current solution to the solutions list
 				solutions.add(new Solution(model).record());
 
