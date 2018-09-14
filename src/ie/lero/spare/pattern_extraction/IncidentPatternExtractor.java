@@ -1,9 +1,11 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.emf.common.util.EList;
 
@@ -145,6 +147,19 @@ public class IncidentPatternExtractor {
 		return abstractedModel;
 	}
 
+	protected List<int[]> convertPatternResult(Map<String, List<String>> patternMaps) {
+	
+		List<int[]> result = new LinkedList<int[]>();
+		
+		for(Entry<String,List<String>> entry  :patternMaps.entrySet()) {
+			int [] seq = incidentModel.getActivitySequence(entry.getKey(), entry.getValue().get(0));
+			System.out.println(Arrays.toString(seq));		
+		}
+		
+		return result;
+		
+	}
+	
 	protected String getMergeRuleName(int rule) {
 
 		switch (rule) {
