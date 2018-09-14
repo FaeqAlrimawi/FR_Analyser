@@ -41,7 +41,8 @@ public class IncidentPatternExtractor {
 	protected EnvironmentDiagram systemModel;
 	protected static int MaxNumberOfActions = 3;
 	protected Map<String, String> entityMap = new HashMap<String, String>();
-
+	protected List<ActivityPattern> activityPatterns;
+	
 	public IncidentPatternExtractor() {
 
 	}
@@ -125,6 +126,7 @@ public class IncidentPatternExtractor {
 			System.out.println("system model is NULL");
 		}
 
+		// =======Load patterns====================
 		String collectDataPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
 		String movePhysicallyPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
@@ -134,32 +136,69 @@ public class IncidentPatternExtractor {
 		ActivityPattern activityPatternConnectNetwork = ModelsHandler
 				.addActivityPattern(connectToNetworkPatternFileName2);
 		ActivityPattern activityPatternMove = ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		// ==========================================
 
-		// create a local signature of the incident model
-		incidentModel.createBigraphSignature();
-
-		Map<String, List<String>> result1 = matchActivityPattern(activityPatternConnectNetwork);
-		Map<String, List<String>> result2 = matchActivityPattern(activityPatternMove);
-
-		System.out.println(result1);
-		System.out.println(result2);
+		activityPatterns = new LinkedList<ActivityPattern>();
+		activityPatterns.add(activityPatternMove);
+		activityPatterns.add(activityPatternConnectNetwork);
+		
+		mapPatterns(activityPatterns);
 		
 		return abstractedModel;
 	}
 
-	protected List<int[]> convertPatternResult(Map<String, List<String>> patternMaps) {
-	
-		List<int[]> result = new LinkedList<int[]>();
+	/**
+	 * Generate how pattern specified as attribute can be mapped to incident model
+	 * @param activityPatterns
+	 */
+	protected void mapPatterns(List<ActivityPattern> activityPatterns) {
 		
-		for(Entry<String,List<String>> entry  :patternMaps.entrySet()) {
-			int [] seq = incidentModel.getActivitySequence(entry.getKey(), entry.getValue().get(0));
-			System.out.println(Arrays.toString(seq));		
+		// create a local signature of the incident model
+		incidentModel.createBigraphSignature();
+
+		// create map variable to hold results of mapping a pattern to the
+		// incident
+		Map<String, List<String>> patternMaps;
+
+		// create a map variable to find solutions to how differnet patterns can
+		// be applied to the incident
+		Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
+
+		// match patterns to incident to obtain possible maps
+		for (int i = 0; i < activityPatterns.size(); i++) {
+			
+			patternMaps = matchActivityPattern(activityPatterns.get(i));
+			
+			List<int[]> result = convertPatternResult(patternMaps);
+			allPatternsMaps.put(i, result);
 		}
+
+		//print generated patterns maps
+		printInputPatternMap(allPatternsMaps);
 		
-		return result;
-		
+		// find possible ways in which patterns maps can be applied to the
+		// incident
+		PatternMappingSolver solver = new PatternMappingSolver();
+		solver.findSolutions(allPatternsMaps);
+		printAllSolutions(solver.getAllSolutions(), solver.getPatternIDs()
+				, solver.getMapIDs(), solver.allSolutionsSeverity);
+
 	}
-	
+
+	protected List<int[]> convertPatternResult(Map<String, List<String>> patternMaps) {
+
+		//converts result into another format obtianed from matching a pattern to an incident
+		List<int[]> result = new LinkedList<int[]>();
+
+		for (Entry<String, List<String>> entry : patternMaps.entrySet()) {
+			for (String act : entry.getValue()) {
+				int[] seq = incidentModel.getActivitySequence(entry.getKey(), act);
+				result.add(seq);
+			}
+		}
+		return result;
+	}
+
 	protected String getMergeRuleName(int rule) {
 
 		switch (rule) {
@@ -217,9 +256,11 @@ public class IncidentPatternExtractor {
 		Activity currentActivity = null;
 		List<String> tmpPreMatchedActivities = new LinkedList<String>();
 		List<HashMap<String, String>> entityMaps = new LinkedList<HashMap<String, String>>();
-		
-		//final result. Key is activity name that satisfies the pattern precondition 
-		//and List<String> are the activities that satisfy the postcondition of the pattern
+
+		// final result. Key is activity name that satisfies the pattern
+		// precondition
+		// and List<String> are the activities that satisfy the postcondition of
+		// the pattern
 		HashMap<String, List<String>> prePostMappingActivities = new HashMap<String, List<String>>();
 
 		// Activity preMatchedActivity = null;
@@ -229,7 +270,7 @@ public class IncidentPatternExtractor {
 		boolean isptrPostMatched = false;
 
 		for (Scene scene : incidentModel.getScene()) {
-			
+
 			isptrPreMatched = false;
 			isptrPostMatched = false;
 
@@ -258,8 +299,8 @@ public class IncidentPatternExtractor {
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 
 					if (isptrPostMatched) {
-						
-						//add to the result map
+
+						// add to the result map
 						if (!prePostMappingActivities.containsKey(currentActivity.getName())) {
 							List<String> matchedActs = new LinkedList<String>();
 							matchedActs.add(currentActivity.getName());
@@ -287,7 +328,8 @@ public class IncidentPatternExtractor {
 				currentActivity = next;
 			}
 
-			//try to find a match for the pattern postcondition in next activities of the scene
+			// try to find a match for the pattern postcondition in next
+			// activities of the scene
 			for (int i = 0; i < tmpPreMatchedActivities.size(); i++) {
 
 				entityMap = entityMaps.get(i);
@@ -302,7 +344,8 @@ public class IncidentPatternExtractor {
 
 				int cnt = 0;
 
-				// compare the pattern postcondition with the postcondition of next activity
+				// compare the pattern postcondition with the postcondition of
+				// next activity
 				// until the max number of activities (or actions) is reached or
 				// the final activity is reached
 				while (cnt < MaxNumberOfActions && !currentActivity.equals(finalActivity)) {
@@ -315,13 +358,13 @@ public class IncidentPatternExtractor {
 					}
 
 					currentActivity = next;
-					
+
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 
 					// if there is a match from one of the activities
 					if (isptrPostMatched) {
-				
-						//add to the result map
+
+						// add to the result map
 						if (!prePostMappingActivities.containsKey(preActivity.getName())) {
 							List<String> matchedActs = new LinkedList<String>();
 							matchedActs.add(currentActivity.getName());
@@ -329,8 +372,8 @@ public class IncidentPatternExtractor {
 						} else {
 							prePostMappingActivities.get(preActivity.getName()).add(currentActivity.getName());
 						}
-						
-						//one match is only taken (i.e. first match)
+
+						// one match is only taken (i.e. first match)
 						break;
 					}
 
@@ -340,7 +383,7 @@ public class IncidentPatternExtractor {
 			}
 
 		}
-		
+
 		return prePostMappingActivities;
 
 	}
@@ -1100,4 +1143,81 @@ public class IncidentPatternExtractor {
 		return true;
 	}
 
+	public void printAllSolutions(Map<Integer,List<int[]>> allSolutions,
+			List<int[]> patternIDs, List<int[]>  mapIDs, List<Integer> allSolutionsSeverity) {
+
+		System.out.println("==============Solutions Summary===================");
+
+		System.out.println("Number of Solutions found:" + allSolutions.size());
+		// print solutions
+		for (int i = 0; i < allSolutions.size(); i++) {
+			System.out.println("Solution ["+i+"]:");
+			printSolution(allSolutions.get(i),  patternIDs.get(i), mapIDs.get(i), allSolutionsSeverity.get(i));
+			System.out.println();
+		}
+
+		System.out.println("==================================================");
+	}
+
+	protected void printSolution(List<int[]> solution,
+			int[] patternIDs, int[]  mapIDs, int allSolutionsSeverity) {
+		
+		// print maps
+		System.out.print("Maps:");
+		for (int j = 0; j < solution.size(); j++) {
+			System.out.print(Arrays.toString(solution.get(j)) + ",");
+		}
+		System.out.println();
+
+		// print patterns ids used
+		System.out.print("Pattern IDs:[");
+		for(int patternID : patternIDs) {
+			System.out.print(activityPatterns.get(patternID).getName()+",");
+		}
+		System.out.println("]");
+
+		// print maps ids used
+		System.out.println("Map IDs:" + Arrays.toString(mapIDs));
+
+		// print each solution severity sum
+		System.out.println("severity:" + allSolutionsSeverity);
+	}
+	
+	public void printOptimalSolution(List<int[]> optimalSolution, int[] optimalSolutionPatternsID
+			, int[] optimalSolutionMapsID, int optimalSolutionSeverity) {
+		
+		System.out.println("==============Optimal Solution===================");
+		// print maps
+		System.out.print("Maps:");
+		for (int j = 0; j < optimalSolution.size(); j++) {
+			System.out.print(Arrays.toString(optimalSolution.get(j)) + ",");
+		}
+		System.out.println();
+
+		// print patterns ids used
+		System.out.println("Pattern IDs:" + Arrays.toString(optimalSolutionPatternsID));
+
+		// print maps ids used
+		System.out.println("Map IDs:" + Arrays.toString(optimalSolutionMapsID));
+
+		// print each solution severity sum
+		System.out.println("severity:" + optimalSolutionSeverity);
+
+		System.out.println("=================================================");
+	}
+	
+public void printInputPatternMap(Map<Integer, List<int[]>> patternMaps) {
+		
+		System.out.println("==============Input Patterns Maps===================");
+		
+		for(Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+			System.out.print("Pattern["+activityPatterns.get(entry.getKey()).getName()+"] = ");
+			for(int [] ary : entry.getValue()) {
+				System.out.print(Arrays.toString(ary)+",");
+			}
+			System.out.println();
+		}
+
+		System.out.println("=================================================");
+	}
 }

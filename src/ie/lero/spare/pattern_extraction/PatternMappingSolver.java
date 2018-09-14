@@ -19,16 +19,16 @@ public class PatternMappingSolver {
 	// result containing integer which indicates solution id and list of
 	// integers that
 	// are the pattern maps
-	protected Map<Integer, List<int[]>> solutions;
+	protected Map<Integer, List<int[]>> allSolutions;
 
 	// list that contains the patterns mapped in each solution
 	// list index is a solution id and the integer array are the patterns
-	protected List<int[]> mappedPatternsID;
-	List<int[]> mapsID;
+	protected List<int[]> patternIDs;
+	List<int[]> mapIDs;
 
 	// list that contains the sum severity for each solution
 	// index is a solution id and the integer value is the severity sum
-	protected List<Integer> solutionSeverity;
+	protected List<Integer> allSolutionsSeverity;
 
 	protected List<int[]> optimalSolution;
 	protected int[] optimalSolutionPatternsID;
@@ -41,10 +41,10 @@ public class PatternMappingSolver {
 	static boolean MAXIMISE = false;
 
 	public PatternMappingSolver() {
-		solutions = new HashMap<Integer, List<int[]>>();
-		mappedPatternsID = new LinkedList<int[]>();
-		solutionSeverity = new LinkedList<Integer>();
-		mapsID = new LinkedList<int[]>();
+		allSolutions = new HashMap<Integer, List<int[]>>();
+		patternIDs = new LinkedList<int[]>();
+		allSolutionsSeverity = new LinkedList<Integer>();
+		mapIDs = new LinkedList<int[]>();
 	}
 
 	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps) {
@@ -230,7 +230,7 @@ public class PatternMappingSolver {
 
 		analyseSolutions(solutions, patterns, severitySum);
 
-		return this.solutions;
+		return this.allSolutions;
 	}
 
 	public List<int[]> findOptimalSolution(Map<Integer, List<int[]>> patternMaps) {
@@ -370,13 +370,13 @@ public class PatternMappingSolver {
 			getPatternAndMapIDs(solVals);
 
 			// add to solutions
-			this.solutions.put(j, solVals);
+			this.allSolutions.put(j, solVals);
 
 			// add severity
-			solutionSeverity.add(sol.getIntVal(severitySum));
+			allSolutionsSeverity.add(sol.getIntVal(severitySum));
 		}
 
-		return this.solutions;
+		return this.allSolutions;
 	}
 
 	protected List<int[]> analyseOptimalSolution(Solution optimalSolution, SetVar[] patterns, IntVar severitySum) {
@@ -433,19 +433,20 @@ public class PatternMappingSolver {
 			}
 		}
 
-		mappedPatternsID.add(tmpPatternIDs.stream().mapToInt(i -> i).toArray());
-		mapsID.add(tmpMapIDs.stream().mapToInt(i -> i).toArray());
+		patternIDs.add(tmpPatternIDs.stream().mapToInt(i -> i).toArray());
+		mapIDs.add(tmpMapIDs.stream().mapToInt(i -> i).toArray());
 	}
 
 	public void printAllSolutions() {
 
+		printInputPatternMap();
 		System.out.println("==============Solutions Summary===================");
 
-		System.out.println("Number of Solutions found:" + solutions.size());
+		System.out.println("Number of Solutions found:" + allSolutions.size());
 		// print solutions
-		for (int i = 0; i < solutions.size(); i++) {
+		for (int i = 0; i < allSolutions.size(); i++) {
 			System.out.println("Solution ["+i+"]:");
-			printSolution(solutions.get(i), i);
+			printSolution(allSolutions.get(i), i);
 			System.out.println();
 		}
 
@@ -456,19 +457,19 @@ public class PatternMappingSolver {
 		
 		// print maps
 		System.out.print("Maps:");
-		for (int j = 0; j < solutions.get(index).size(); j++) {
-			System.out.print(Arrays.toString(solutions.get(index).get(j)) + ",");
+		for (int j = 0; j < allSolutions.get(index).size(); j++) {
+			System.out.print(Arrays.toString(allSolutions.get(index).get(j)) + ",");
 		}
 		System.out.println();
 
 		// print patterns ids used
-		System.out.println("Pattern IDs:" + Arrays.toString(mappedPatternsID.get(index)));
+		System.out.println("Pattern IDs:" + Arrays.toString(patternIDs.get(index)));
 
 		// print maps ids used
-		System.out.println("Map IDs:" + Arrays.toString(mapsID.get(index)));
+		System.out.println("Map IDs:" + Arrays.toString(mapIDs.get(index)));
 
 		// print each solution severity sum
-		System.out.println("severity:" + solutionSeverity.get(index));
+		System.out.println("severity:" + allSolutionsSeverity.get(index));
 	}
 	
 	public void printOptimalSolution() {
@@ -489,6 +490,21 @@ public class PatternMappingSolver {
 
 		// print each solution severity sum
 		System.out.println("severity:" + optimalSolutionSeverity);
+
+		System.out.println("=================================================");
+	}
+	
+	public void printInputPatternMap() {
+		
+		System.out.println("==============Input Patterns Maps===================");
+		
+		for(Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+			System.out.print("Pattern["+entry.getKey()+"] = ");
+			for(int [] ary : entry.getValue()) {
+				System.out.print(Arrays.toString(ary)+",");
+			}
+			System.out.println();
+		}
 
 		System.out.println("=================================================");
 	}
@@ -541,22 +557,44 @@ public class PatternMappingSolver {
 		solver.findOptimalSolution(maps);
 		solver.printOptimalSolution();
 		
-		// List<Solution> solutions = solver.findSolutions(maps, 20);
-		//
-		// solver.print();
-		//
-		// int cnt = 0;
-		//
-		// for (Solution sol : solutions) {
-		// System.out.println(cnt + ": " + sol);
-		// cnt++;
-		//
-		// if (cnt == 100) {
-		// break;
-		// }
-		// }
-		//
-		// System.out.println(solutions.size());
 	}
+
+	public Map<Integer, List<int[]>> getAllSolutions() {
+		return allSolutions;
+	}
+
+	public List<int[]> getPatternIDs() {
+		return patternIDs;
+	}
+
+	public List<int[]> getMapIDs() {
+		return mapIDs;
+	}
+
+	public List<Integer> getAllSolutionsSeverity() {
+		return allSolutionsSeverity;
+	}
+
+	public List<int[]> getOptimalSolution() {
+		return optimalSolution;
+	}
+
+	public int[] getOptimalSolutionPatternsID() {
+		return optimalSolutionPatternsID;
+	}
+
+	public int[] getOptimalSolutionMapsID() {
+		return optimalSolutionMapsID;
+	}
+
+	public int getOptimalSolutionSeverity() {
+		return optimalSolutionSeverity;
+	}
+
+	public static boolean isMAXIMISE() {
+		return MAXIMISE;
+	}
+	
+	
 
 }
