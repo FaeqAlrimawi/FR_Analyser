@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.chocosolver.solver.Model;
@@ -13,15 +12,8 @@ import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
-import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
-import org.chocosolver.solver.search.strategy.selectors.variables.Smallest;
-import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelectorWithTies;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.util.tools.ArrayUtils;
-
-import net.sf.saxon.functions.Concat;
 
 public class TestChoco {
 
@@ -37,12 +29,14 @@ public class TestChoco {
 
 		int[][] allPossiblePatternsMapsInt = new int[5][];
 
-		allPossiblePatternsMapsInt[0] = new int[] { 1,3 }; // sequence should
-															// be ordered in //													// ascending order
-		allPossiblePatternsMapsInt[1] = new int[] { 3,4 };
-		allPossiblePatternsMapsInt[2] = new int[] { 6, 8};
+		allPossiblePatternsMapsInt[0] = new int[] { 1, 2, 3 }; // sequence should
+															// be ordered in //
+															// // ascending
+															// order
+		allPossiblePatternsMapsInt[1] = new int[] { 3, 4,5,6 };
+		allPossiblePatternsMapsInt[2] = new int[] { 6, 8,9 };
 		allPossiblePatternsMapsInt[3] = new int[] { 8, 9 };
-		allPossiblePatternsMapsInt[4] = new int[] { 10, 12, 13, 14 };
+		allPossiblePatternsMapsInt[4] = new int[] { 9,10, 12, 13, 14 };
 
 		int numOfPatterns = 2;
 		LinkedList<int[]> pattern_1_maps = new LinkedList<int[]>();
@@ -618,16 +612,17 @@ public class TestChoco {
 		IntVar severitySum = null;
 		int maxSeverity = 20;
 		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
-		
+
 		// actual severity array, assuming its embedded in the argument
 		// variable
 		int[] severityValuesForMaps = new int[numOfAllMaps];
 
 		for (int i = 0; i < numOfAllMaps; i++) {
-			severityValuesForMaps[i] = ((i+1) * 2) % maxSeverity;
+			severityValuesForMaps[i] = ((i + 1) * 2) % maxSeverity;
 		}
 
-		//=============look for solution==========================================
+		// =============look for
+		// solution==========================================
 		while (currentNumOfPatterns > 0) {
 
 			model = new Model("Pattern-Map Model");
@@ -653,7 +648,7 @@ public class TestChoco {
 				patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
 				patternseverity[i] = model.intVar("pattern_" + i + "_severity", 0, maxSeverity - 1);
 			}
-			
+
 			int index = 0;
 			for (List<int[]> list : patternMaps.values()) {
 				for (int[] ary : list) {
@@ -670,13 +665,14 @@ public class TestChoco {
 
 			// 1-no overlapping
 			model.allDisjoint(patterns).post();
-			
+
 			// essential: at least 1 map for each pattern
 			for (int i = 0; i < patterns.length; i++) {
 				model.member(possiblePatternsMaps, patterns[i]).post();
 			}
 
-			//create constraints over the value of severity to be one in the defined pattern severity array
+			// create constraints over the value of severity to be one in the
+			// defined pattern severity array
 			for (int i = 0; i < patterns.length; i++) {
 				for (int j = 0; j < numOfAllMaps; j++) {
 					model.ifThen(model.allEqual(patterns[i], possiblePatternsMaps[j]),
@@ -685,12 +681,12 @@ public class TestChoco {
 			}
 
 			// defines the maximum severity for a solution
-			model.scalar(patternseverity, coeffs, "=", severitySum).post();
-			model.setObjective(Model.MAXIMIZE, severitySum);
-			
+//			model.scalar(patternseverity, coeffs, "=", severitySum).post();
+//			model.setObjective(Model.MAXIMIZE, severitySum);
+
 			// ============Finding solutions======================//
 			solver = model.getSolver();
-			
+
 			if (solver.solve()) {
 				break;
 			}
@@ -702,7 +698,7 @@ public class TestChoco {
 
 		return solutions;
 	}
-	
+
 	public static List<Solution> findSolutions4(Map<Integer, List<int[]>> patternMaps, int numberOfActions) {
 
 		// numberOfActions could be defined as the max number of the maps
@@ -723,27 +719,30 @@ public class TestChoco {
 		}
 
 		int currentNumOfPatterns = numOfAllMaps;
-		Model model;
+		Model model = null;
 		List<Solution> solutions = null;
 		Solver solver = null;
 		IntVar severitySum = null;
 		int maxSeverity = 20;
+		int minSeverity = 1;
 		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
 		SetVar[] patterns = null;
-		Solution firstSol = null; 
+		Solution firstSol = null;
 		boolean isSolutionfound = false;
-		
+		List<SetVar> uniqueSolutions = new LinkedList<SetVar>();
+
 		// actual severity array, assuming its embedded in the argument
 		// variable
 		int[] severityValuesForMaps = new int[numOfAllMaps];
 
 		for (int i = 0; i < numOfAllMaps; i++) {
-			severityValuesForMaps[i] = ((i+1) * 2) % maxSeverity;
+			severityValuesForMaps[i] = maxSeverity-minSeverity;
 		}
-		
+
 		SetVar[][] possiblePatternsMaps2 = new SetVar[patternMaps.keySet().size()][];
 
-		//=============look for solution==========================================
+		// =============look for
+		// solution==========================================
 		while (currentNumOfPatterns > 0) {
 
 			model = new Model("Pattern-Map Model");
@@ -756,10 +755,6 @@ public class TestChoco {
 			int[] coeffs = new int[currentNumOfPatterns];
 			Arrays.fill(coeffs, 1); // coeff is 1
 
-			// defines the maximum number of patterns
-			// IntVar numberOfPatterns = model.intVar("max_patterns_num",
-			// patternMaps.keySet().size(), numOfAllMaps);
-
 			// defines severity. Currently it is considered from 1 to 10
 			severitySum = model.intVar("max_severity", 0, 99999);
 
@@ -767,9 +762,9 @@ public class TestChoco {
 			// {0,1,2,..,N-1}, where N is number of actions
 			for (int i = 0; i < currentNumOfPatterns; i++) {
 				patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
-				patternseverity[i] = model.intVar("pattern_" + i + "_severity", 0, maxSeverity - 1);
+				patternseverity[i] = model.intVar("pattern_" + i + "_severity", minSeverity, maxSeverity);
 			}
-			
+
 			int index = 0;
 			for (List<int[]> list : patternMaps.values()) {
 				for (int[] ary : list) {
@@ -777,23 +772,7 @@ public class TestChoco {
 					index++;
 				}
 			}
-			
-//			// All maps
-////			List<SetVar> allMaps = new LinkedList<SetVar>();
-//
-//			for (int i = 0; i < numOfAllMaps; i++) {
-//
-//				// variables which represent the sets that a generated set by a
-//				// pattern should belong to
-//				possiblePatternsMaps2[i] = new SetVar[patternMaps.get(i).size()];
-//
-//				for (int j = 0; j < possiblePatternsMaps2[i].length; j++) {
-//					possiblePatternsMaps2[i][j] = model.setVar("map" + i + "" + j, patternMaps.get(i).get(j));
-////					allMaps.add(possiblePatternsMaps2[i][j]);
-//				}
-//
-//			}
-			
+
 			// ============Defining Constraints======================//
 			// ===1-No overlapping between maps
 			// ===2-A map should be one of the defined maps by the variable
@@ -802,13 +781,14 @@ public class TestChoco {
 
 			// 1-no overlapping
 			model.allDisjoint(patterns).post();
-			
+
 			// essential: at least 1 map for each pattern
 			for (int i = 0; i < patterns.length; i++) {
 				model.member(possiblePatternsMaps, patterns[i]).post();
 			}
 
-			//create constraints over the value of severity to be one in the defined pattern severity array
+			// create constraints over the value of severity to be one in the
+			// defined pattern severity array
 			for (int i = 0; i < patterns.length; i++) {
 				for (int j = 0; j < numOfAllMaps; j++) {
 					model.ifThen(model.allEqual(patterns[i], possiblePatternsMaps[j]),
@@ -818,55 +798,43 @@ public class TestChoco {
 
 			// defines the maximum severity for a solution
 			model.scalar(patternseverity, coeffs, "=", severitySum).post();
-			model.setObjective(Model.MAXIMIZE, severitySum);
-			
+//			model.setObjective(Model.MAXIMIZE, severitySum);
+
 			// ============Finding solutions======================//
 			solver = model.getSolver();
-	
-			List<SetVar> aUniqueSolutions = new LinkedList<SetVar>();
-			SetVar aUniqueSolution;
+			SetVar uniq;
+			solutions = new LinkedList<Solution>();
 			List<Integer> vals = new LinkedList<Integer>();
-			List<Constraint> cons = new LinkedList<Constraint>();
-			
+
 			while (solver.solve()) {
 				
-				for(int i =0;i<currentNumOfPatterns;i++) {
+				vals.clear();
+				
+				// get the new solution
+				for (int i = 0; i < currentNumOfPatterns; i++) {
 					vals.addAll(Arrays.stream(patterns[i].getValue().toArray()).boxed().collect(Collectors.toList()));
 				}
+
+				//create a setVar of the new solution
+				uniq = model.setVar(vals.stream().mapToInt(i -> i).toArray());
 				
-				aUniqueSolution = model.setVar(vals.stream().mapToInt(i->i).toArray());
+				//add a constraint that next solution should be different from this
+				model.not(model.union(patterns, uniq)).post();
 				
-				aUniqueSolutions.add();
-				
-//				System.out.println(Arrays.toString(aUniqueSolution.getValue().toArray()));
-				
-				firstSol = new Solution(model);
-				firstSol.record();
-				
-				for(int i = 0; i<aUniqueSolution.size();i++) {
-					cons.add(model.not(model.union(patterns, aUniqueSolution.get(i))));	
-				}
-				
-				model.and(cons.toArray(new Constraint[0])).post();
-				
-				model.ifThen(cons, aUniqueSolution.add(model.setVar(vals.stream().mapToInt(i->i).toArray())););
-				
+				//add the current solution to the solutions list
+				solutions.add(new Solution(model).record());
+
 				isSolutionfound = true;
-				
-				//break;
+				// break;
+			}
+
+			if (isSolutionfound) {
+				break;
 			}
 
 			currentNumOfPatterns--;
 		}
 
-		if(isSolutionfound) {
-			solutions = new LinkedList<Solution>();
-			
-//			solutions.add(firstSol);
-			
-			solutions.addAll(solver.findAllOptimalSolutions(severitySum, Model.MAXIMIZE));
-			
-		}
 
 		return solutions;
 	}
