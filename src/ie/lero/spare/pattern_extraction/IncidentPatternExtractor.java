@@ -179,14 +179,15 @@ public class IncidentPatternExtractor {
 		// 2-Take best solution found and apply it (i.e. add new abstract
 		// activities to the incident model while removing the corresponding
 		// ones based on the patterns used)
-		updateAbstractActivitiesInModel();
+		updateMatchedPatternsInModel();
 
 		// 3-For the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
+		abstractUnmatchedActivities();
 
 		// print models
-		printOriginalIncidentModel(false);
-		printAbstractIncidentModel(false);
+		printOriginalIncidentModel(true);
+		printAbstractIncidentModel(true);
 
 		return abstractedModel;
 	}
@@ -196,7 +197,7 @@ public class IncidentPatternExtractor {
 	 * potential abstract activities, which correspond to the solution found, to
 	 * the incident model
 	 */
-	public void updateAbstractActivitiesInModel() {
+	public void updateMatchedPatternsInModel() {
 
 		PatternMappingSolver solver = new PatternMappingSolver();
 
@@ -238,6 +239,15 @@ public class IncidentPatternExtractor {
 		incidentModel.setActivitySequence(null);
 		incidentModel.getActivitySequence();
 
+	}
+
+	/**
+	 * For all activities in the incident instance that were not abstracted by
+	 * the matched patterns a general abstraction is performed over each
+	 */
+	public void abstractUnmatchedActivities() {
+
+		// implement
 	}
 
 	/**
@@ -1245,6 +1255,11 @@ public class IncidentPatternExtractor {
 		}
 
 		ActivityPattern activityPattern = activityPatterns.get(activityPatternIndex);
+
+		if (activityPattern == null) {
+			return null;
+		}
+
 		Activity initialActivity = activitySequence.get(0);
 		Activity finalActivity = activitySequence.get(activitySequence.size() - 1);
 		Activity patternActivity = !activityPattern.getAbstractActivity().isEmpty()
@@ -1280,7 +1295,7 @@ public class IncidentPatternExtractor {
 		abstractActivity.setSystemAction(initialActivity.getSystemAction());
 
 		// set initiator
-		if (patternActivity != null && patternActivity.getInitiator() != null) {
+		if (patternActivity.getInitiator() != null) {
 
 			String patternInitiatorName = ((IncidentEntity) patternActivity.getInitiator()).getName();
 
@@ -1303,7 +1318,7 @@ public class IncidentPatternExtractor {
 		}
 
 		// set target asset
-		if (patternActivity != null && !patternActivity.getTargetedAssets().isEmpty()) {
+		if (!patternActivity.getTargetedAssets().isEmpty()) {
 
 			String patternTargetAssetName = patternActivity.getTargetedAssets().get(0).getName();
 
@@ -1315,19 +1330,19 @@ public class IncidentPatternExtractor {
 			Asset mergedActivityTargetAsset = null;
 
 			// set target asset
-			if (firstTargetName != null && entityMap.containsKey(patternTargetAssetName)
-					&& entityMap.containsValue(firstTargetName)) {
-				mergedActivityTargetAsset = initialActivity.getTargetedAssets().get(0);
-			} else if (finalTargetName != null && entityMap.containsKey(patternTargetAssetName)
+			if (finalTargetName != null && entityMap.containsKey(patternTargetAssetName)
 					&& entityMap.containsValue(finalTargetName)) {
 				mergedActivityTargetAsset = finalActivity.getTargetedAssets().get(0);
-			}
+			} else if (firstTargetName != null && entityMap.containsKey(patternTargetAssetName)
+					&& entityMap.containsValue(firstTargetName)) {
+				mergedActivityTargetAsset = initialActivity.getTargetedAssets().get(0);
+			}  
 
 			abstractActivity.getTargetedAssets().add(mergedActivityTargetAsset);
 		}
 
 		// set resources
-		if (patternActivity != null && !patternActivity.getResources().isEmpty()) {
+		if (!patternActivity.getResources().isEmpty()) {
 			String patternResourceName = patternActivity.getResources().get(0).getName();
 
 			String firstResourceName = !initialActivity.getResources().isEmpty()
@@ -1338,21 +1353,65 @@ public class IncidentPatternExtractor {
 			Resource mergedActivityResource = null;
 
 			// set target asset
-			if (firstResourceName != null && entityMap.containsKey(patternResourceName)
-					&& entityMap.containsValue(firstResourceName)) {
-				mergedActivityResource = initialActivity.getResources().get(0);
-			} else if (finalResourceName != null && entityMap.containsKey(patternResourceName)
+			if (finalResourceName != null && entityMap.containsKey(patternResourceName)
 					&& entityMap.containsValue(finalResourceName)) {
 				mergedActivityResource = finalActivity.getResources().get(0);
+			} else if (firstResourceName != null && entityMap.containsKey(patternResourceName)
+					&& entityMap.containsValue(firstResourceName)) {
+				mergedActivityResource = initialActivity.getResources().get(0);
 			}
 
 			abstractActivity.getResources().add(mergedActivityResource);
 		}
 
 		// set location
+		if (patternActivity.getLocation() != null) {
+			String patternLocationName = ((IncidentEntity) patternActivity.getLocation()).getName();
+
+			String firstLocationName = initialActivity.getLocation() != null
+					? ((IncidentEntity) initialActivity.getLocation()).getName() : null;
+
+			String finalLocationName = finalActivity.getLocation() != null
+					? ((IncidentEntity) finalActivity.getLocation()).getName() : null;
+
+			Location mergedActivityLocation = null;
+
+			// set target asset
+			if (finalLocationName != null && entityMap.containsKey(patternLocationName)
+					&& entityMap.containsValue(finalLocationName)) {
+				mergedActivityLocation = finalActivity.getLocation();
+			} else if (firstLocationName != null && entityMap.containsKey(patternLocationName)
+					&& entityMap.containsValue(firstLocationName)) {
+				mergedActivityLocation = initialActivity.getLocation();
+			}  
+
+			abstractActivity.setLocation(mergedActivityLocation);
+		}
 
 		// set exploited asset
+		if(!patternActivity.getExploitedAssets().isEmpty()) {
+			String patternExploitedAssetName = patternActivity.getExploitedAssets().get(0).getName();
 
+			String firstExploitedAssetName = !initialActivity.getExploitedAssets().isEmpty()
+					? initialActivity.getExploitedAssets().get(0).getName() : null;
+
+			String finalExploitedAssetName = !finalActivity.getExploitedAssets().isEmpty()
+					? finalActivity.getExploitedAssets().get(0).getName() : null;
+			
+					Asset mergedActivityExploitedAsset = null;
+
+			// set target asset
+			if (firstExploitedAssetName != null && entityMap.containsKey(patternExploitedAssetName)
+					&& entityMap.containsValue(firstExploitedAssetName)) {
+				mergedActivityExploitedAsset = initialActivity.getExploitedAssets().get(0);
+			} else if (finalExploitedAssetName != null && entityMap.containsKey(patternExploitedAssetName)
+					&& entityMap.containsValue(finalExploitedAssetName)) {
+				mergedActivityExploitedAsset = finalActivity.getExploitedAssets().get(0);
+			}
+	
+			abstractActivity.getExploitedAssets().add(mergedActivityExploitedAsset);
+		}
+		
 		// set conditions (pre & post)
 		// set preconditions
 		BigraphExpression bigExpPre = ((BigraphExpression) patternActivity.getPrecondition().getExpression()).clone();
@@ -1638,7 +1697,7 @@ public class IncidentPatternExtractor {
 	public void printInputPatternMap(Map<Integer, List<int[]>> patternMaps) {
 
 		StringBuilder str = new StringBuilder();
-
+		
 		str.append("=======================Input Patterns Maps=======================\n");
 
 		for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
@@ -1655,9 +1714,10 @@ public class IncidentPatternExtractor {
 				str.deleteCharAt(str.lastIndexOf(" "));
 				str.deleteCharAt(str.lastIndexOf(","));
 				str.append("]");
-				
+
 				// print potential incident corresponding to this map
-				str.append("-->(").append(potentialAbstractActivities.get(entry.getKey()).get(i).getName()).append("), ");
+				str.append("-->(").append(potentialAbstractActivities.get(entry.getKey()).get(i).getName())
+						.append("), ");
 
 			}
 			str.deleteCharAt(str.lastIndexOf(" "));
@@ -1673,7 +1733,8 @@ public class IncidentPatternExtractor {
 	public void printActivity(Activity activity, boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
-
+		String nullValue = "-";
+		
 		if (activity == null) {
 			str.append("Activity is Null");
 		} else {
@@ -1683,19 +1744,23 @@ public class IncidentPatternExtractor {
 			}
 			str.append("Name: ").append(activity.getName()).append("\n");
 			str.append("Initiator: ").append(
-					activity.getInitiator() != null ? ((IncidentEntity) activity.getInitiator()).getName() : "Null")
+					activity.getInitiator() != null ? ((IncidentEntity) activity.getInitiator()).getName() : nullValue)
 					.append("\n");
 			str.append("Target-Asset: ").append(
-					!activity.getTargetedAssets().isEmpty() ? activity.getTargetedAssets().get(0).getName() : "Null")
+					!activity.getTargetedAssets().isEmpty() ? activity.getTargetedAssets().get(0).getName() : nullValue)
+					.append("\n");
+			str.append("Exploited-Asset: ").append(!activity.getExploitedAssets().isEmpty() ? activity.getExploitedAssets().get(0).getName() : nullValue)
 					.append("\n");
 			str.append("Resource: ")
-					.append(!activity.getResources().isEmpty() ? activity.getResources().get(0).getName() : "Null")
+					.append(!activity.getResources().isEmpty() ? activity.getResources().get(0).getName() : nullValue)
 					.append("\n");
+			str.append("Location: ").append(
+					activity.getLocation() != null ? ((IncidentEntity) activity.getLocation()).getName() : nullValue).append("\n");
 			str.append("Next-Activity: ").append(
-					!activity.getNextActivities().isEmpty() ? activity.getNextActivities().get(0).getName() : "Null")
+					!activity.getNextActivities().isEmpty() ? activity.getNextActivities().get(0).getName() : nullValue)
 					.append("\n");
 			str.append("Previous-Activity: ").append(!activity.getPreviousActivities().isEmpty()
-					? activity.getPreviousActivities().get(0).getName() : "Null").append("\n");
+					? activity.getPreviousActivities().get(0).getName() : nullValue).append("\n");
 			str.append("Type: ").append(activity.getType()).append("\n");
 			str.append("Behaviour: ").append(activity.getBehaviourType()).append("\n");
 
@@ -1729,7 +1794,8 @@ public class IncidentPatternExtractor {
 		System.out.println("=======================Original Model============================");
 		System.out.println("Activity Sequence:");
 		printIncidentModelActivitySequence(originalIncidentModel);
-
+		System.out.println();
+		
 		if (printActivitiesInfo) {
 			Activity orgAct = originalIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
@@ -1748,7 +1814,8 @@ public class IncidentPatternExtractor {
 		System.out.println("=======================Abstract Model============================");
 		System.out.println("Activity Sequence:");
 		printIncidentModelActivitySequence(incidentModel);
-
+		System.out.println();
+		
 		if (printActivitiesInfo) {
 			Activity orgAct = incidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
