@@ -1149,114 +1149,161 @@ public class IncidentPatternExtractor {
 	public void printAllSolutions(Map<Integer, List<int[]>> allSolutions, List<int[]> patternIDs, List<int[]> mapIDs,
 			List<Integer> allSolutionsSeverity) {
 
-		int numOfPatterns = 0;
-		int numOfActions = 0;
+		StringBuilder str = new StringBuilder();
+				
+		int numOfPatterns = -1;
+		int maxPatternsSolutionIndex = -1;
+		int numOfActions = -1;
+		int maxActionsSolutionIndex = -1;
 
+		List<Integer> ptrsNum = new LinkedList<Integer>();
+		
+		//count the maximum number of patterns used in any solution
 		if (patternIDs != null) {
-			for (int[] ary : patternIDs) {
-				if (numOfPatterns < ary.length) {
-					numOfPatterns = ary.length;
+			for (int j =0;j< patternIDs.size(); j++) {
+				int [] ary = patternIDs.get(j);
+				ptrsNum.clear();
+				for(int i= 1;i< ary.length;i++) {
+					if(!ptrsNum.contains(ary[i])) {
+						ptrsNum.add(ary[i]);
+					}
+				}
+				
+				if (numOfPatterns < ptrsNum.size()) {
+					numOfPatterns = ptrsNum.size();
+					maxPatternsSolutionIndex = j;
 				}
 			}
 		}
 
+		//count the maximum number of actions used in any solution
 		if (allSolutions != null) {
-			for (List<int[]> solution : allSolutions.values()) {
+			for (int i = 0;i< allSolutions.size();i++) {
 				int tmp = 0;
+				List<int[]> solution = allSolutions.get(i);
 				// get number of actions in this solution
 				for (int[] actions : solution) {
 					tmp += actions.length;
 				}
 				if(tmp > numOfActions) {
 					numOfActions = tmp;
+					maxActionsSolutionIndex = i;
 				}
 			}
 		}
 
-		System.out.println("==============Solutions Summary===================");
+		str.append("=========================Solutions Summary=========================\n");
 
 		//=======some statistics
-		System.out.println("-Number of Solutions found:" + allSolutions.size());
-		System.out.println("-Max number of Patterns used:" + numOfPatterns);
-		System.out.println("-Max number of Actions mapped:" + numOfActions);
-		System.out.println();
+		str.append("-Number of Solutions found:").append(allSolutions.size()).append("\n")
+		.append("-Max number of Patterns used:").append(numOfPatterns)
+		.append(" (Solution ["+maxPatternsSolutionIndex+"])").append("\n")
+		.append("-Max number of Actions mapped:").append(numOfActions).append(" (Solution ["+maxActionsSolutionIndex+"])")
+		.append("\n\n");
 		
 		// print solutions
 		for (int i = 0; i < allSolutions.size(); i++) {
-			System.out.println("-Solution [" + i + "]:");
-			printSolution(allSolutions.get(i), patternIDs.get(i), mapIDs.get(i), allSolutionsSeverity.get(i));
-			System.out.println();
+			str.append("-Solution [").append(i).append("]:\n");
+			str.append(solutionToString(allSolutions.get(i), patternIDs.get(i), mapIDs.get(i), allSolutionsSeverity.get(i)));
+			str.append("\n");
 		}
 
-		System.out.println("==================================================");
+		str.append("=================================================================");
+		
+		System.out.println(str.toString());
 	}
 
-	protected void printSolution(List<int[]> solution, int[] patternIDs, int[] mapIDs, int allSolutionsSeverity) {
+	protected String solutionToString(List<int[]> solution, int[] patternIDs, int[] mapIDs, int allSolutionsSeverity) {
 
+		StringBuilder str = new StringBuilder();
+		
 		// print maps
-		System.out.print("--Maps:");
+		str.append("--Maps:");
 		for (int j = 0; j < solution.size(); j++) {
-			System.out.print("[");
+			str.append("[");
 			for (int activityID : solution.get(j)) {
-				System.out.print(incidentModel.getActivity(activityID) + ", ");
+				str.append(incidentModel.getActivity(activityID)).append(", ");
 			}
-			System.out.print("],");
+			str.deleteCharAt(str.lastIndexOf(" "));
+			str.deleteCharAt(str.lastIndexOf(","));
+			str.append("],");
 		}
-		System.out.println();
-
+		str.deleteCharAt(str.lastIndexOf(","));
+		str.append("\n");
+		
 		// print patterns ids used
-		System.out.print("--Pattern:[");
+		str.append("--Pattern:[");
 		for (int patternID : patternIDs) {
-			System.out.print(activityPatterns.get(patternID).getName() + ", ");
+			str.append(activityPatterns.get(patternID).getName()).append(", ");
 		}
-		System.out.println("]");
+		str.deleteCharAt(str.lastIndexOf(" "));
+		str.deleteCharAt(str.lastIndexOf(","));
+		str.append("]\n");
 
 		// print maps ids used
-		System.out.println("--Map IDs:" + Arrays.toString(mapIDs));
+		str.append("--Map IDs:").append(Arrays.toString(mapIDs)).append("\n");
 
 		// print each solution severity sum
-		System.out.println("--Severity:" + allSolutionsSeverity);
+		str.append("--Severity:").append(allSolutionsSeverity);
+		
+		return str.toString();
 	}
 
 	public void printOptimalSolution(List<int[]> optimalSolution, int[] optimalSolutionPatternsID,
 			int[] optimalSolutionMapsID, int optimalSolutionSeverity) {
 
-		System.out.println("==============Optimal Solution===================");
+		StringBuilder str = new StringBuilder();
+		
+		str.append("==============Optimal Solution===================\n");
 		// print maps
-		System.out.print("Maps:");
+		str.append("Maps:[");
 		for (int j = 0; j < optimalSolution.size(); j++) {
-			System.out.print(Arrays.toString(optimalSolution.get(j)) + ", ");
+			str.append(Arrays.toString(optimalSolution.get(j))).append(", ");
 		}
-		System.out.println();
+		str.deleteCharAt(str.lastIndexOf(" "));
+		str.deleteCharAt(str.lastIndexOf(","));
+		str.append("]\n");
 
 		// print patterns ids used
-		System.out.println("Pattern IDs:" + Arrays.toString(optimalSolutionPatternsID));
+		str.append("Pattern IDs:").append(Arrays.toString(optimalSolutionPatternsID)).append("\n");
 
 		// print maps ids used
-		System.out.println("Map IDs:" + Arrays.toString(optimalSolutionMapsID));
+		str.append("Map IDs:").append(Arrays.toString(optimalSolutionMapsID)).append("\n");
 
 		// print each solution severity sum
-		System.out.println("severity:" + optimalSolutionSeverity);
+		str.append("severity:").append(optimalSolutionSeverity).append("\n");
 
-		System.out.println("=================================================");
+		str.append("=================================================================");
+		
+		System.out.println(str.toString());
 	}
 
 	public void printInputPatternMap(Map<Integer, List<int[]>> patternMaps) {
 
-		System.out.println("==============Input Patterns Maps===================");
+		StringBuilder str = new StringBuilder();
+		
+		str.append("==============Input Patterns Maps===================\n");
 
 		for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
-			System.out.print("Pattern[" + activityPatterns.get(entry.getKey()).getName() + "] = ");
+			
+			str.append("Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("] = ");
+			
 			for (int[] ary : entry.getValue()) {
-				System.out.print("[");
+				str.append("[");
 				for (int activityID : ary) {
-					System.out.print(incidentModel.getActivity(activityID) + ", ");
+					str.append(incidentModel.getActivity(activityID) + ", ");
 				}
-				System.out.print("], ");
+				str.deleteCharAt(str.lastIndexOf(" "));
+				str.deleteCharAt(str.lastIndexOf(","));
+				str.append("], ");
 			}
-			System.out.println();
+			str.deleteCharAt(str.lastIndexOf(" "));
+			str.deleteCharAt(str.lastIndexOf(","));
+			str.append("\n");
 		}
 
-		System.out.println("=================================================");
+		str.append("=================================================");
+		
+		System.out.println(str.toString());
 	}
 }
