@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
@@ -33,6 +34,7 @@ import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
 import cyberPhysical_Incident.Scene;
 import cyberPhysical_Incident.Vulnerability;
+import cyberPhysical_Incident.impl.MessagePrinter;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -159,7 +161,7 @@ public class IncidentPatternExtractor {
 		// ones based on the patterns used)
 		// for the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
-		abstractMatchedActivities(solver);
+//		abstractMatchedActivities(solver);
 
 		return abstractedModel;
 	}
@@ -232,7 +234,7 @@ public class IncidentPatternExtractor {
 
 		for (Entry<String, List<String>> entry : patternMaps.entrySet()) {
 			for (String act : entry.getValue()) {
-				int[] seq = incidentModel.getActivitySequence(entry.getKey(), act);
+				int[] seq = incidentModel.getActivityNumberSequence(entry.getKey(), act);
 				result.add(seq);
 			}
 		}
@@ -347,20 +349,9 @@ public class IncidentPatternExtractor {
 							prePostMappingActivities.get(currentActivity.getName()).add(currentActivity.getName());
 						}
 
-						// create a potential abstract activity
-						List<Activity> concreteActs = new LinkedList<Activity>();
-						concreteActs.add(currentActivity);
-
-						Activity abstractAct = createPotentialAbstractActivity(concreteActs, index);
-
-						if (potentialAbstractActivities.containsKey(index)) {
-							potentialAbstractActivities.get(index).add(abstractAct);
-						} else {
-							List<Activity> abstractActs = new LinkedList<Activity>();
-							abstractActs.add(abstractAct);
-							potentialAbstractActivities.put(index, abstractActs);
-						}
-
+						//=======create a potential abstract activity for the matched activities
+						createPotentialAbstractActivity(currentActivity, currentActivity, index);
+						
 						entityMaps.remove(entityMaps.size() - 1);
 					} else {
 
@@ -425,6 +416,9 @@ public class IncidentPatternExtractor {
 							prePostMappingActivities.get(preActivity.getName()).add(currentActivity.getName());
 						}
 
+						//=======create a potential abstract activity for the matched activities
+						createPotentialAbstractActivity(preActivity, currentActivity, index);
+						
 						// one match is only taken (i.e. first match)
 						break;
 					}
@@ -1207,18 +1201,19 @@ public class IncidentPatternExtractor {
 	 * @return New <em>Activity</em> that replaces the sequence in the
 	 *         <em>Incident Diagram</em>
 	 */
-	public Activity createPotentialAbstractActivity(List<Activity> activitySequence, ActivityPattern activityPattern) {
+	public Activity createPotentialAbstractActivity(List<Activity> activitySequence, int activityPatternIndex) {
 
 		if (activitySequence == null || activitySequence.size() == 0) {
 			return null;
 		}
 
+		ActivityPattern activityPattern = activityPatterns.get(activityPatternIndex);
 		Activity initialActivity = activitySequence.get(0);
 		Activity finalActivity = activitySequence.get(activitySequence.size() - 1);
 		Activity patternActivity = !activityPattern.getAbstractActivity().isEmpty()
 				? activityPattern.getAbstractActivity().get(0) : null;
 
-		Activity mergedActivity = instance.createActivity();
+		Activity abstractActivity = instance.createActivity();
 
 		// set the new activity name
 		int tries = 500;
@@ -1236,16 +1231,16 @@ public class IncidentPatternExtractor {
 		}
 
 		// set name
-		mergedActivity.setName(actName);
+		abstractActivity.setName(actName);
 
 		// set type (e.g., physical, digital)
-		mergedActivity.setType(initialActivity.getType());
+		abstractActivity.setType(initialActivity.getType());
 
 		// set behaviour (e.g., normal, malicious)
-		mergedActivity.setBehaviourType(initialActivity.getBehaviourType());
+		abstractActivity.setBehaviourType(initialActivity.getBehaviourType());
 
 		// set system action name
-		mergedActivity.setSystemAction(initialActivity.getSystemAction());
+		abstractActivity.setSystemAction(initialActivity.getSystemAction());
 
 		// set initiator
 		if (patternActivity != null && patternActivity.getInitiator() != null) {
@@ -1266,7 +1261,8 @@ public class IncidentPatternExtractor {
 					&& entityMap.containsValue(finalInitiatorName)) {
 				mergedActivityInitiator = finalActivity.getInitiator();
 			}
-			mergedActivity.setInitiator(mergedActivityInitiator);
+			
+			abstractActivity.setInitiator(mergedActivityInitiator);
 		}
 
 		//set target asset
@@ -1289,7 +1285,8 @@ public class IncidentPatternExtractor {
 					&& entityMap.containsValue(finalTargetName)) {
 				mergedActivityTargetAsset = finalActivity.getTargetedAssets().get(0);
 			}
-			mergedActivity.getTargetedAssets().add(mergedActivityTargetAsset);
+			
+			abstractActivity.getTargetedAssets().add(mergedActivityTargetAsset);
 		}
 
 		//set resources
@@ -1297,9 +1294,72 @@ public class IncidentPatternExtractor {
 		//set location
 		
 		//set conditions (pre & post)
+		//set preconditions
+		BigraphExpression bigExpPre = ((BigraphExpression)patternActivity.getPrecondition().getExpression()).clone();
+		updateEntityNames(bigExpPre);
 		
-		return mergedActivity;
+		abstractActivity.getPrecondition().setExpression(bigExpPre);
+		
+		//set postcondition
+		BigraphExpression bigExpPost = ((BigraphExpression)patternActivity.getPostcondition().getExpression()).clone();
+		updateEntityNames(bigExpPost);
+		
+		abstractActivity.getPostcondition().setExpression(bigExpPost);
+		
+		//add new activity to potential abstract activities of the given pattern
+		if (potentialAbstractActivities.containsKey(activityPatternIndex)) {
+			potentialAbstractActivities.get(activityPatternIndex).add(abstractActivity);
+		} else {
+			List<Activity> abstractActs = new LinkedList<Activity>();
+			abstractActs.add(abstractActivity);
+			potentialAbstractActivities.put(activityPatternIndex, abstractActs);
+		}
+		
+		printActivity(abstractActivity);
+		
+		return abstractActivity;
 	}
+	
+public Activity createPotentialAbstractActivity(Activity startingActivity, Activity endActivity, int activityPatternIndex) {
+		
+		if(startingActivity == null || endActivity == null) {
+			return null;
+		}
+	
+		
+		List<Activity> activitySequence = new LinkedList<Activity>();
+		
+		activitySequence.add(startingActivity);
+		
+		if(startingActivity.equals(endActivity)) {
+			return createPotentialAbstractActivity(activitySequence, activityPatternIndex);
+		}
+		
+		//assuming there's only one next activity. In future, an algorithm for finding all possible sequences between two activities can be implemented
+		Activity nextActivity = null; 
+		
+		if(startingActivity.getNextActivities().size()>0) {
+			nextActivity = startingActivity.getNextActivities().get(0);	
+		}
+		
+		while(nextActivity != null) {
+			
+			activitySequence.add(nextActivity);
+			
+			if(nextActivity.equals(endActivity)) {
+				break;
+			}
+			
+			if(nextActivity.getNextActivities().size()>0) {
+				nextActivity = nextActivity.getNextActivities().get(0);	
+			} else {
+				nextActivity = null;
+			}
+			
+		}
+		
+		return createPotentialAbstractActivity(activitySequence, activityPatternIndex);
+}
 
 	protected Activity createMergedActivity(List<Activity> activitySequence, ActivityPattern activityPattern) {
 
@@ -1626,5 +1686,21 @@ public class IncidentPatternExtractor {
 		str.append("=================================================================");
 
 		System.out.println(str.toString());
+	}
+	
+	public void printActivity(Activity activity) {
+		
+		StringBuilder str = new StringBuilder();
+		
+		str.append("=======================Activity Info=============================\n");
+		str.append("Name: ").append(activity.getName()).append("\n");
+		str.append("Initiator: ").append(((IncidentEntity)activity.getInitiator()).getName()).append("\n");
+		str.append("Target Asset: ").append(activity.getTargetedAssets().get(0).getName()).append("\n");
+		str.append("Activity Type: ").append(activity.getType()).append("\n");
+		str.append("Activity Behaviour: ").append(activity.getBehaviourType()).append("\n");
+		str.append("=================================================================");
+		System.out.println(str.toString());
+		
+		
 	}
 }
