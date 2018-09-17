@@ -102,53 +102,6 @@ public class IncidentPatternExtractor {
 			tmpFile.delete();
 		}
 
-		// System.out.println("test:
-		// "+abstractedModel.getInitialActivity().getConnectionChangesBetweenEntities("offender",
-		// "hallway"));
-		// abstractedModel.abstractActivities();
-
-		// abstract entities
-
-		/*
-		 * for(Asset ast : systemModel.getAsset()) { Asset tmp =
-		 * ast.abstractType();
-		 * 
-		 * if(tmp != null) { System.out.println("o:"+
-		 * ast.getClass().getSimpleName() +"  a: " +
-		 * tmp.getClass().getSimpleName()); }else { System.out.println("o:"+
-		 * ast.getClass().getSimpleName() +"  abstracted asset is NULL"); }
-		 * 
-		 * }
-		 */
-		// Random rand = new Random();
-		//
-		// int tries = 50;
-
-		/*
-		 * for(int i = 0;i<tries;i++) { Asset original =
-		 * systemModel.getAsset().get(rand.nextInt(systemModel.getAsset().size()
-		 * )); Asset abstracted = original.abstractAsset();
-		 * 
-		 * System.out.println("Original Asset: "+original +
-		 * "\nContainedAssets ["+original.getContainedAssets().size()+"]: "
-		 * +original.getContainedAssets() +
-		 * "\nConnections ["+original.getConnections().size()+"]: "+original.
-		 * getConnections() );
-		 * 
-		 * System.out.println("Abstracted Asset: "+abstracted+
-		 * "\nContainedAssets ["+abstracted.getContainedAssets().size()+"]: "
-		 * +abstracted.getContainedAssets() +
-		 * "\nConnections ["+abstracted.getConnections().size()+"]: "+abstracted
-		 * .getConnections()); System.out.println(); }
-		 */
-
-		// status: abstraction is done for the basic attributes (type, control,
-		// properties) and contained assets
-		// next is to implement connections abstraction in assets
-
-		// abstractedModel.abstractActivities();
-		// abstractedModel.abstractEntities(systemModel);
-
 		systemModel = ModelsHandler.addSystemModel(systemFileName);
 
 		if (systemModel == null) {
@@ -156,22 +109,28 @@ public class IncidentPatternExtractor {
 		}
 
 		// =======Load patterns====================
-		String collectDataPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
-		String movePhysicallyPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
-		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
-		String connectToNetworkPatternFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern.cpi";
+		// String collectDataPatternFileName =
+		// "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
+		// String movePhysicallyPatternFileName =
+		// "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
+		// String connectToNetworkPatternFileName =
+		// "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern.cpi";
 		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
+		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 
-		ActivityPattern activityPatternConnectNetwork = ModelsHandler
-				.addActivityPattern(connectToNetworkPatternFileName2);
-		ActivityPattern activityPatternMove = ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		//add patterns to the map (key is file path and value is pattern) of patterns in the models handler class
+		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+
+		activityPatterns = new LinkedList<ActivityPattern>();
+
+		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
+
+		for (String key : ptrs.keySet()) {
+			activityPatterns.add(ptrs.get(key));
+		}
 
 		// =======Abstract Activities====================
-
-		// get patterns
-		activityPatterns = new LinkedList<ActivityPattern>();
-		activityPatterns.add(activityPatternMove);
-		activityPatterns.add(activityPatternConnectNetwork);
 
 		// 1-Find maps/matches for all patterns in the incident model
 		mapPatterns(activityPatterns);
@@ -183,14 +142,17 @@ public class IncidentPatternExtractor {
 
 		// 3-For the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
-		abstractUnmatchedActivities(); //maybe not needed
-		
+		abstractUnmatchedActivities(); // maybe not needed, currently no effect
+
 		// =======Abstract entities====================
 		abstractEntities();
-		
-		// print models
+
+		// =======Print results====================
 		printOriginalIncidentModel(true);
 		printAbstractIncidentModel(true);
+
+		// ModelsHandler.saveIncidentModel(this.incidentModel,
+		// "abstractModel.cpi");
 
 		return abstractedModel;
 	}
@@ -292,6 +254,11 @@ public class IncidentPatternExtractor {
 
 		// converts result into another format obtianed from matching a pattern
 		// to an incident
+
+		if (patternMaps == null) {
+			return null;
+		}
+
 		List<int[]> result = new LinkedList<int[]>();
 
 		for (Entry<String, List<String>> entry : patternMaps.entrySet()) {
@@ -1340,7 +1307,10 @@ public class IncidentPatternExtractor {
 				mergedActivityTargetAsset = initialActivity.getTargetedAssets().get(0);
 			}
 
-			abstractActivity.getTargetedAssets().add(mergedActivityTargetAsset);
+			if (mergedActivityTargetAsset != null) {
+				abstractActivity.getTargetedAssets().add(mergedActivityTargetAsset);
+			}
+
 		}
 
 		// set resources
@@ -1554,98 +1524,103 @@ public class IncidentPatternExtractor {
 	}
 
 	/**
-	 * Create an abstraction of each entity in the incident model by looking for it in the system model 
-	 * then if found an abstract of that asset is returned and the incident entity is updated with information in the matched asset.
-	 * Otherwise (i.e. if no asset in the system model is found) the incident entity remains as is
+	 * Create an abstraction of each entity in the incident model by looking for
+	 * it in the system model then if found an abstract of that asset is
+	 * returned and the incident entity is updated with information in the
+	 * matched asset. Otherwise (i.e. if no asset in the system model is found)
+	 * the incident entity remains as is
 	 */
 	public void abstractEntities() {
-		
-		//1-look for assets that exist in the system model
-		//2-if one found, then use the system model to find an abstraction of this entity based on the system meta-model
-		//3-replace the original asset in the incident model with its abstraction from the system model
-		//In case an asset is not found in the system model then it remains as is
-	
+
+		// 1-look for assets that exist in the system model
+		// 2-if one found, then use the system model to find an abstraction of
+		// this entity based on the system meta-model
+		// 3-replace the original asset in the incident model with its
+		// abstraction from the system model
+		// In case an asset is not found in the system model then it remains as
+		// is
+
 		LinkedList<IncidentEntity> entities = new LinkedList<IncidentEntity>();
-		
+
 		environment.Asset systemAsset = null;
-		
+
 		entities.addAll(incidentModel.getAsset());
 		entities.addAll(incidentModel.getResource());
 		entities.addAll(incidentModel.getActor());
-		
+
 		String entityName = null;
-		
-		//look in assets
-		for(IncidentEntity entity : entities) {
-			
+
+		// look in assets
+		for (IncidentEntity entity : entities) {
+
 			entityName = entity.getName();
 			systemAsset = getSystemAsset(entityName);
-			
-			if( systemAsset != null) {
-				abstractEntity(entity, systemAsset);		
+
+			if (systemAsset != null) {
+				abstractEntity(entity, systemAsset);
 			}
 		}
-			
+
 	}
-	
+
 	protected IncidentEntity abstractEntity(IncidentEntity entity, environment.Asset systemAsset) {
-	
-		if(entity == null || systemAsset == null) {
+
+		if (entity == null || systemAsset == null) {
 			return null;
 		}
-		
+
 		environment.Asset abstractedSystemAsset = systemAsset.abstractAsset();
-		
-		if(abstractedSystemAsset == null) {
+
+		if (abstractedSystemAsset == null) {
 			return null;
 		}
-		
+
 		String oldEntityName = entity.getName();
-		
-		//for now all changed are done directly. Need to create a copy later
+
+		// for now all changed are done directly. Need to create a copy later
 		IncidentEntity abstractedEntity = entity;
-		
+
 		abstractedEntity.setName(abstractedSystemAsset.getName());
-		//abstractedEntity.get
-		
-		////update type to be of the same type as the abstracted asset
+		// abstractedEntity.get
+
+		//// update type to be of the same type as the abstracted asset
 		Type type = abstractedEntity.getType();
-		 
-		if(type == null) {
+
+		if (type == null) {
 			type = instance.createType();
 		}
-		
+
 		type.setName(abstractedSystemAsset.getClass().getSimpleName().replace("Impl", ""));
-		
+
 		abstractedEntity.setType(type);
-		
+
 		////
-		//other attributes maybe (e.g., contained assets, connections)
-		
-		////update all the entity name in all the conditions of the incident activities
-		for(Activity act : incidentModel.getActivity()) {
+		// other attributes maybe (e.g., contained assets, connections)
+
+		//// update all the entity name in all the conditions of the incident
+		//// activities
+		for (Activity act : incidentModel.getActivity()) {
 			act.replaceEntityName(oldEntityName, abstractedEntity.getName());
 		}
-		
+
 		return abstractedEntity;
 	}
-	
+
 	public environment.Asset getSystemAsset(String assetName) {
-		
-		if(systemModel == null) {
+
+		if (systemModel == null) {
 			return null;
 		}
-		
-		for(environment.Asset ast : systemModel.getAsset()) {
-			if(ast.getName().equals(assetName)) {
+
+		for (environment.Asset ast : systemModel.getAsset()) {
+			if (ast.getName().equals(assetName)) {
 				return ast;
 			}
 		}
-		
+
 		return null;
 	}
-	
-	
+
 	public void printAllSolutions(Map<Integer, List<int[]>> allSolutions, List<int[]> patternIDs, List<int[]> mapIDs,
 			List<Integer> allSolutionsSeverity) {
 
