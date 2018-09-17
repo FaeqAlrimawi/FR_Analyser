@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
@@ -34,7 +33,6 @@ import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
 import cyberPhysical_Incident.Scene;
 import cyberPhysical_Incident.Vulnerability;
-import cyberPhysical_Incident.impl.MessagePrinter;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -43,18 +41,38 @@ import it.uniud.mads.jlibbig.core.std.Matcher;
 public class IncidentPatternExtractor {
 
 	protected IncidentDiagram incidentModel;
+	protected IncidentDiagram originalIncidentModel;
 	protected EnvironmentDiagram systemModel;
-	protected static int MaxNumberOfActions = 3;
+
 	protected Map<String, String> entityMap = new HashMap<String, String>();
 	protected List<ActivityPattern> activityPatterns;
+	protected static int MaxNumberOfActions = 3;
+
 	protected CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
-	protected static int activityNum = 1;
 	protected static final int MAX_LENGTH = 10000;
 	protected static final String ACTIVITY_NAME = "abstractActivity";
-	protected Map<Integer, List<Activity>> potentialAbstractActivities = new HashMap<Integer, List<Activity>>();
+
+	// the key is an integer that represents an activity pattern id taken from
+	// the list of activity patterns
+	// and the value is a list where each entry in the list represents a map,
+	// and a map is the sequence of activities (or actions) in the incident
+	// instance
+	// e.g. entry 0,1 refers to the sequence of actions/activities in an
+	// incident model that corresponds to pattern ID [0] and Map ID [1]
 	protected Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
-	protected IncidentDiagram originalIncidentModel;
-	
+
+	// the key is an integer which represents an acctivity pattern id
+	// the value is a list where each entry refers to a Map id and the activity
+	// represents an abstraction for that entry
+	// e.g., entry 0,1 has an abstract activity that corresponds to the sequence
+	// of actions of the same entry (0,1) in the variable allPatternsMaps
+	protected Map<Integer, List<Activity>> potentialAbstractActivities = new HashMap<Integer, List<Activity>>();
+
+	// the key is an abstract activity (taken from the
+	// potentialAbstractActivities variable)
+	// the value is a list of the original activities that were abstracted
+	protected Map<Activity, List<Activity>> abstractedActivities = new HashMap<Activity, List<Activity>>();
+
 	public IncidentPatternExtractor() {
 
 	}
@@ -69,7 +87,7 @@ public class IncidentPatternExtractor {
 
 		this.incidentModel = incidentModel;
 		originalIncidentModel = incidentModel;
-		
+
 		IncidentDiagram abstractedModel = null;
 
 		// create a copy
@@ -155,58 +173,70 @@ public class IncidentPatternExtractor {
 		activityPatterns.add(activityPatternMove);
 		activityPatterns.add(activityPatternConnectNetwork);
 
-		//1-Find maps/matches for all patterns in the incident model
+		// 1-Find maps/matches for all patterns in the incident model
 		mapPatterns(activityPatterns);
 
-		//2-Take best solution found and apply it (i.e. add new abstract
+		// 2-Take best solution found and apply it (i.e. add new abstract
 		// activities to the incident model while removing the corresponding
 		// ones based on the patterns used)
-		// for the rest of the activities (i.e. not matched to a pattern) a
+		updateAbstractActivitiesInModel();
+
+		// 3-For the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
-		 abstractMatchedActivities();
+
+		// print models
+		printOriginalIncidentModel(false);
+		printAbstractIncidentModel(false);
 
 		return abstractedModel;
 	}
 
-	public void abstractMatchedActivities() {
+	/**
+	 * Find an [optimal] solution to the pattern maps generated, then add
+	 * potential abstract activities, which correspond to the solution found, to
+	 * the incident model
+	 */
+	public void updateAbstractActivitiesInModel() {
 
 		PatternMappingSolver solver = new PatternMappingSolver();
-		
+
 		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps);
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
 		int[] bestSolutionMapIDs = solver.getOptimalSolutionMapsID();
-		
-		//System.out.println(bestSolution.size());
+
+		// System.out.println(bestSolution.size());
 		for (int i = 0; i < bestSolution.size(); i++) {
 
 			// get activity sequence of the solution
 			int[] activitiesIDs = bestSolution.get(i);
-//			System.out.println(incidentModel.getActivitySequence().toString());
-			System.out.println(Arrays.toString(activitiesIDs));
+
 			List<Activity> activitySequence = incidentModel.getActivitySequence(activitiesIDs);
+
 			int patternID = bestSolutionPatternIDs[i];
 			int MapID = bestSolutionMapIDs[i];
-			
-			//get potential abstract activity generated from matching the pattern given by pattern id
+
+			// get potential abstract activity generated from matching the
+			// pattern given by pattern id
 			Activity abstractActivity = potentialAbstractActivities.get(patternID).get(MapID);
-			
-			//update next and previous activities of the potential activity
-			replaceNextActivities(activitySequence.get(activitySequence.size()-1), abstractActivity);
+
+			// update next and previous activities of the potential activity
+			replaceNextActivities(activitySequence.get(activitySequence.size() - 1), abstractActivity);
 			replacePreviousActivities(activitySequence.get(0), abstractActivity);
-			
-			//add the potential activity to the sequence
+
+			// add the potential activity to the sequence
 			addNewActivityToSequence(abstractActivity, activitySequence.get(0));
-			
-			//remove the mapped activity sequence from the incident sequence
+
+			// remove the mapped activity sequence from the incident sequence
 			removeMappedActivitiesFromSequence(activitySequence);
-			
-			//update incident model information
-//			incidentModel.getActivity();
-//			incidentModel.setActivitySequence(null);
-//			incidentModel.getActivitySequence();
-//			
-//			printActivity(abstractActivity);
+
+			// save the mapping of the abstrac to the sequence
+			abstractedActivities.put(abstractActivity, activitySequence);
+
 		}
+		// update incident model information
+		incidentModel.getActivity();
+		incidentModel.setActivitySequence(null);
+		incidentModel.getActivitySequence();
 
 	}
 
@@ -227,7 +257,8 @@ public class IncidentPatternExtractor {
 
 		// create a map variable to find solutions to how differnet patterns can
 		// be applied to the incident
-//		Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
+		// Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer,
+		// List<int[]>>();
 
 		// match patterns to incident to obtain possible maps
 		for (int i = 0; i < activityPatterns.size(); i++) {
@@ -259,19 +290,14 @@ public class IncidentPatternExtractor {
 		return result;
 	}
 
-	protected String getMergeRuleName(int rule) {
-
-		switch (rule) {
-		case IncidentDiagram.COLLECTDATA_MERGE_RULE:
-			return "Collect Data";
-		case IncidentDiagram.CONTAINMENT_MERGE_RULE:
-			return "Containment";
-		case IncidentDiagram.CONNECTIVITY_MERGE_RULE:
-			return "Connectivity";
-		default:
-			return "";
-		}
-	}
+	/*
+	 * protected String getMergeRuleName(int rule) {
+	 * 
+	 * switch (rule) { case IncidentDiagram.COLLECTDATA_MERGE_RULE: return
+	 * "Collect Data"; case IncidentDiagram.CONTAINMENT_MERGE_RULE: return
+	 * "Containment"; case IncidentDiagram.CONNECTIVITY_MERGE_RULE: return
+	 * "Connectivity"; default: return ""; } }
+	 */
 
 	public IncidentDiagram extract(String fileName) {
 
@@ -279,8 +305,6 @@ public class IncidentPatternExtractor {
 
 		return extract(model);
 	}
-
-
 
 	public Map<String, List<String>> matchActivityPattern(ActivityPattern activityPattern, int index) {
 
@@ -1324,11 +1348,11 @@ public class IncidentPatternExtractor {
 
 			abstractActivity.getResources().add(mergedActivityResource);
 		}
-		
+
 		// set location
 
 		// set exploited asset
-		
+
 		// set conditions (pre & post)
 		// set preconditions
 		BigraphExpression bigExpPre = ((BigraphExpression) patternActivity.getPrecondition().getExpression()).clone();
@@ -1351,8 +1375,6 @@ public class IncidentPatternExtractor {
 			abstractActs.add(abstractActivity);
 			potentialAbstractActivities.put(activityPatternIndex, abstractActs);
 		}
-
-//		printActivity(abstractActivity);
 
 		return abstractActivity;
 	}
@@ -1400,90 +1422,6 @@ public class IncidentPatternExtractor {
 		return createPotentialAbstractActivity(activitySequence, activityPatternIndex);
 	}
 
-	protected Activity createMergedActivity(List<Activity> activitySequence, ActivityPattern activityPattern) {
-
-		if (activitySequence == null || activitySequence.size() == 0) {
-			return null;
-		}
-
-		Activity initialActivity = activitySequence.get(0);
-		Activity finalActivity = activitySequence.get(activitySequence.size() - 1);
-
-		Activity mergedActivity = instance.createActivity();
-
-		// set the new activity name
-		int tries = 500;
-		boolean isUnique = false;
-		Random rand = new Random();
-		String actName = null;
-		int randNum = 0;
-
-		while (tries > 0 && !isUnique) {
-
-			randNum = rand.nextInt(IncidentPatternExtractor.MAX_LENGTH);
-			actName = IncidentPatternExtractor.ACTIVITY_NAME + "_" + randNum;
-			isUnique = !incidentModel.activityNameExists(actName);
-			tries--;
-		}
-
-		mergedActivity.setName(actName);
-
-		mergedActivity.setSystemAction(initialActivity.getSystemAction());
-		mergedActivity.setInitiator(initialActivity.getInitiator());
-		mergedActivity.setType(initialActivity.getType());
-		mergedActivity.getTargetedAssets().add(finalActivity.getTargetedAssets().get(0));
-
-		// all pervious activities target assets are transferred to exploited
-		// assets
-		for (int i = 0; i < activitySequence.size() - 1; i++) {
-			EList<Asset> targetAssets = activitySequence.get(i).getTargetedAssets();
-
-			if (targetAssets != null) {
-				for (Asset asset : targetAssets) {
-					if (!mergedActivity.getExploitedAssets().contains(asset)) {
-						mergedActivity.getExploitedAssets().add(asset);
-					}
-				}
-			}
-		}
-
-		// update the next activities of the new activity to the one of the
-		// final activity in the sequence
-		replaceNextActivities(finalActivity, mergedActivity);
-		// update the previous activities of the new activity to the one of the
-		// initial activity in the sequence
-		replacePreviousActivities(initialActivity, mergedActivity);
-
-		// update conditions (pre & post)
-		// get precondition of first activity. In future, check for null
-		// condition, if it is null then it can be replaced with the next
-		// precondition
-		// same goes for the postcondition
-		Precondition pre = initialActivity.getPrecondition();
-		Postcondition post = finalActivity.getPostcondition();
-
-		mergedActivity.setPrecondition(pre);
-		mergedActivity.setPostcondition(post);
-
-		// add merged activity to the sequence of activities at the position
-		// where the starting activity in the sequence is located
-		/*
-		 * for (int i = 0; i < this.getActivity().size(); i++) { if
-		 * (this.getActivity().get(i).equals(initialActivity)) {
-		 * this.getActivity().add(i, mergedActivity); break; } }
-		 */
-		addNewActivityToSequence(mergedActivity, initialActivity);
-
-		// remove the sequence of activities
-		removeMappedActivitiesFromSequence(activitySequence);
-
-		// to update activites of the model and their sequence
-		incidentModel.getActivity();
-		incidentModel.setActivitySequence(null);
-
-		return mergedActivity;
-	}
-
 	/**
 	 * Adds the new merged activity to the original sequence of activities. It
 	 * is added in place of the given second argument
@@ -1505,16 +1443,14 @@ public class IncidentPatternExtractor {
 				}
 			}
 		}
-		
+
 	}
 
 	protected void removeMappedActivitiesFromSequence(List<Activity> activitySequence) {
 
-		// List<Activity> activitiesToRemove = new LinkedList<Activity>();
 		Scene scene = null;
-		
-		Scenes_Loop:
-		for (Scene sc : incidentModel.getScene()) {
+
+		Scenes_Loop: for (Scene sc : incidentModel.getScene()) {
 			scene = sc;
 			EList<Activity> sceneActivities = scene.getActivity();
 			for (int i = 0; i < sceneActivities.size(); i++) {
@@ -1523,8 +1459,8 @@ public class IncidentPatternExtractor {
 				}
 			}
 		}
-		
-		if(scene != null) {
+
+		if (scene != null) {
 			scene.getActivity().removeAll(activitySequence);
 		}
 	}
@@ -1709,14 +1645,20 @@ public class IncidentPatternExtractor {
 
 			str.append("Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("] = ");
 
-			for (int[] ary : entry.getValue()) {
+			for (int i = 0; i < entry.getValue().size(); i++) {
+				int[] ary = entry.getValue().get(i);
 				str.append("[");
 				for (int activityID : ary) {
 					str.append(incidentModel.getActivityName(activityID) + ", ");
 				}
+
 				str.deleteCharAt(str.lastIndexOf(" "));
 				str.deleteCharAt(str.lastIndexOf(","));
-				str.append("], ");
+				str.append("]");
+				
+				// print potential incident corresponding to this map
+				str.append("-->(").append(potentialAbstractActivities.get(entry.getKey()).get(i).getName()).append("), ");
+
 			}
 			str.deleteCharAt(str.lastIndexOf(" "));
 			str.deleteCharAt(str.lastIndexOf(","));
@@ -1728,7 +1670,7 @@ public class IncidentPatternExtractor {
 		System.out.println(str.toString());
 	}
 
-	public void printActivity(Activity activity) {
+	public void printActivity(Activity activity, boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -1736,7 +1678,9 @@ public class IncidentPatternExtractor {
 			str.append("Activity is Null");
 		} else {
 
-			str.append("=======================Activity Info=============================\n");
+			if (isDecorated) {
+				str.append("=======================Activity Info=============================\n");
+			}
 			str.append("Name: ").append(activity.getName()).append("\n");
 			str.append("Initiator: ").append(
 					activity.getInitiator() != null ? ((IncidentEntity) activity.getInitiator()).getName() : "Null")
@@ -1747,17 +1691,83 @@ public class IncidentPatternExtractor {
 			str.append("Resource: ")
 					.append(!activity.getResources().isEmpty() ? activity.getResources().get(0).getName() : "Null")
 					.append("\n");
-			str.append("Next-Activity: ").append(!activity.getNextActivities().isEmpty()?activity.getNextActivities().get(0).getName():"Null").append("\n");
-			str.append("Previous-Activity: ").append(!activity.getPreviousActivities().isEmpty()?activity.getPreviousActivities().get(0).getName():"Null").append("\n");
+			str.append("Next-Activity: ").append(
+					!activity.getNextActivities().isEmpty() ? activity.getNextActivities().get(0).getName() : "Null")
+					.append("\n");
+			str.append("Previous-Activity: ").append(!activity.getPreviousActivities().isEmpty()
+					? activity.getPreviousActivities().get(0).getName() : "Null").append("\n");
 			str.append("Type: ").append(activity.getType()).append("\n");
 			str.append("Behaviour: ").append(activity.getBehaviourType()).append("\n");
-			str.append("=================================================================");
+
+			if (isDecorated) {
+				str.append("=================================================================");
+			}
 
 		}
 
 		System.out.println(str.toString());
 	}
-	
+
+	public void printIncidentModelActivitySequence(IncidentDiagram incidentModel) {
+
+		StringBuilder str = new StringBuilder();
+
+		Activity orgAct = incidentModel.getInitialActivity();
+		Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
+
+		str.append(orgAct.getName());
+		while (orgNxt != null && !orgNxt.equals(orgAct)) {
+			str.append("->").append(orgNxt.getName());
+			orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
+		}
+
+		System.out.println(str.toString());
+	}
+
+	public void printOriginalIncidentModel(boolean printActivitiesInfo) {
+
+		System.out.println("=======================Original Model============================");
+		System.out.println("Activity Sequence:");
+		printIncidentModelActivitySequence(originalIncidentModel);
+
+		if (printActivitiesInfo) {
+			Activity orgAct = originalIncidentModel.getInitialActivity();
+			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
+
+			while (orgNxt != null && !orgNxt.equals(orgAct)) {
+				printActivity(orgNxt, false);
+				orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
+			}
+		}
+
+		System.out.println("=================================================================");
+	}
+
+	public void printAbstractIncidentModel(boolean printActivitiesInfo) {
+
+		System.out.println("=======================Abstract Model============================");
+		System.out.println("Activity Sequence:");
+		printIncidentModelActivitySequence(incidentModel);
+
+		if (printActivitiesInfo) {
+			Activity orgAct = incidentModel.getInitialActivity();
+			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
+
+			while (orgNxt != null && !orgNxt.equals(orgAct)) {
+				printActivity(orgNxt, false);
+				orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
+			}
+		}
+
+		System.out.println("=================================================================");
+	}
+
+	/**
+	 * 
+	 * 
+	 * 
+	 * 
+	 */
 	public static void main(String[] args) {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
