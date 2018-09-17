@@ -32,6 +32,7 @@ import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
 import cyberPhysical_Incident.Scene;
+import cyberPhysical_Incident.Type;
 import cyberPhysical_Incident.Vulnerability;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
@@ -164,7 +165,6 @@ public class IncidentPatternExtractor {
 		ActivityPattern activityPatternConnectNetwork = ModelsHandler
 				.addActivityPattern(connectToNetworkPatternFileName2);
 		ActivityPattern activityPatternMove = ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-		// ==========================================
 
 		// =======Abstract Activities====================
 
@@ -183,8 +183,11 @@ public class IncidentPatternExtractor {
 
 		// 3-For the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
-		abstractUnmatchedActivities();
-
+		abstractUnmatchedActivities(); //maybe not needed
+		
+		// =======Abstract entities====================
+		abstractEntities();
+		
 		// print models
 		printOriginalIncidentModel(true);
 		printAbstractIncidentModel(true);
@@ -1329,14 +1332,13 @@ public class IncidentPatternExtractor {
 					? finalActivity.getTargetedAssets().get(0).getName() : null;
 			Asset mergedActivityTargetAsset = null;
 
-			// set target asset
 			if (finalTargetName != null && entityMap.containsKey(patternTargetAssetName)
 					&& entityMap.containsValue(finalTargetName)) {
 				mergedActivityTargetAsset = finalActivity.getTargetedAssets().get(0);
 			} else if (firstTargetName != null && entityMap.containsKey(patternTargetAssetName)
 					&& entityMap.containsValue(firstTargetName)) {
 				mergedActivityTargetAsset = initialActivity.getTargetedAssets().get(0);
-			}  
+			}
 
 			abstractActivity.getTargetedAssets().add(mergedActivityTargetAsset);
 		}
@@ -1352,7 +1354,6 @@ public class IncidentPatternExtractor {
 					? finalActivity.getResources().get(0).getName() : null;
 			Resource mergedActivityResource = null;
 
-			// set target asset
 			if (finalResourceName != null && entityMap.containsKey(patternResourceName)
 					&& entityMap.containsValue(finalResourceName)) {
 				mergedActivityResource = finalActivity.getResources().get(0);
@@ -1376,20 +1377,19 @@ public class IncidentPatternExtractor {
 
 			Location mergedActivityLocation = null;
 
-			// set target asset
 			if (finalLocationName != null && entityMap.containsKey(patternLocationName)
 					&& entityMap.containsValue(finalLocationName)) {
 				mergedActivityLocation = finalActivity.getLocation();
 			} else if (firstLocationName != null && entityMap.containsKey(patternLocationName)
 					&& entityMap.containsValue(firstLocationName)) {
 				mergedActivityLocation = initialActivity.getLocation();
-			}  
+			}
 
 			abstractActivity.setLocation(mergedActivityLocation);
 		}
 
 		// set exploited asset
-		if(!patternActivity.getExploitedAssets().isEmpty()) {
+		if (!patternActivity.getExploitedAssets().isEmpty()) {
 			String patternExploitedAssetName = patternActivity.getExploitedAssets().get(0).getName();
 
 			String firstExploitedAssetName = !initialActivity.getExploitedAssets().isEmpty()
@@ -1397,10 +1397,9 @@ public class IncidentPatternExtractor {
 
 			String finalExploitedAssetName = !finalActivity.getExploitedAssets().isEmpty()
 					? finalActivity.getExploitedAssets().get(0).getName() : null;
-			
-					Asset mergedActivityExploitedAsset = null;
 
-			// set target asset
+			Asset mergedActivityExploitedAsset = null;
+
 			if (firstExploitedAssetName != null && entityMap.containsKey(patternExploitedAssetName)
 					&& entityMap.containsValue(firstExploitedAssetName)) {
 				mergedActivityExploitedAsset = initialActivity.getExploitedAssets().get(0);
@@ -1408,10 +1407,10 @@ public class IncidentPatternExtractor {
 					&& entityMap.containsValue(finalExploitedAssetName)) {
 				mergedActivityExploitedAsset = finalActivity.getExploitedAssets().get(0);
 			}
-	
+
 			abstractActivity.getExploitedAssets().add(mergedActivityExploitedAsset);
 		}
-		
+
 		// set conditions (pre & post)
 		// set preconditions
 		BigraphExpression bigExpPre = ((BigraphExpression) patternActivity.getPrecondition().getExpression()).clone();
@@ -1554,6 +1553,99 @@ public class IncidentPatternExtractor {
 		}
 	}
 
+	/**
+	 * Create an abstraction of each entity in the incident model by looking for it in the system model 
+	 * then if found an abstract of that asset is returned and the incident entity is updated with information in the matched asset.
+	 * Otherwise (i.e. if no asset in the system model is found) the incident entity remains as is
+	 */
+	public void abstractEntities() {
+		
+		//1-look for assets that exist in the system model
+		//2-if one found, then use the system model to find an abstraction of this entity based on the system meta-model
+		//3-replace the original asset in the incident model with its abstraction from the system model
+		//In case an asset is not found in the system model then it remains as is
+	
+		LinkedList<IncidentEntity> entities = new LinkedList<IncidentEntity>();
+		
+		environment.Asset systemAsset = null;
+		
+		entities.addAll(incidentModel.getAsset());
+		entities.addAll(incidentModel.getResource());
+		entities.addAll(incidentModel.getActor());
+		
+		String entityName = null;
+		
+		//look in assets
+		for(IncidentEntity entity : entities) {
+			
+			entityName = entity.getName();
+			systemAsset = getSystemAsset(entityName);
+			
+			if( systemAsset != null) {
+				abstractEntity(entity, systemAsset);		
+			}
+		}
+			
+	}
+	
+	protected IncidentEntity abstractEntity(IncidentEntity entity, environment.Asset systemAsset) {
+	
+		if(entity == null || systemAsset == null) {
+			return null;
+		}
+		
+		environment.Asset abstractedSystemAsset = systemAsset.abstractAsset();
+		
+		if(abstractedSystemAsset == null) {
+			return null;
+		}
+		
+		String oldEntityName = entity.getName();
+		
+		//for now all changed are done directly. Need to create a copy later
+		IncidentEntity abstractedEntity = entity;
+		
+		abstractedEntity.setName(abstractedSystemAsset.getName());
+		//abstractedEntity.get
+		
+		////update type to be of the same type as the abstracted asset
+		Type type = abstractedEntity.getType();
+		 
+		if(type == null) {
+			type = instance.createType();
+		}
+		
+		type.setName(abstractedSystemAsset.getClass().getSimpleName().replace("Impl", ""));
+		
+		abstractedEntity.setType(type);
+		
+		////
+		//other attributes maybe (e.g., contained assets, connections)
+		
+		////update all the entity name in all the conditions of the incident activities
+		for(Activity act : incidentModel.getActivity()) {
+			act.replaceEntityName(oldEntityName, abstractedEntity.getName());
+		}
+		
+		return abstractedEntity;
+	}
+	
+	public environment.Asset getSystemAsset(String assetName) {
+		
+		if(systemModel == null) {
+			return null;
+		}
+		
+		for(environment.Asset ast : systemModel.getAsset()) {
+			if(ast.getName().equals(assetName)) {
+				return ast;
+			}
+		}
+		
+		return null;
+	}
+	
+	
 	public void printAllSolutions(Map<Integer, List<int[]>> allSolutions, List<int[]> patternIDs, List<int[]> mapIDs,
 			List<Integer> allSolutionsSeverity) {
 
@@ -1697,7 +1789,7 @@ public class IncidentPatternExtractor {
 	public void printInputPatternMap(Map<Integer, List<int[]>> patternMaps) {
 
 		StringBuilder str = new StringBuilder();
-		
+
 		str.append("=======================Input Patterns Maps=======================\n");
 
 		for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
@@ -1734,7 +1826,7 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 		String nullValue = "-";
-		
+
 		if (activity == null) {
 			str.append("Activity is Null");
 		} else {
@@ -1749,13 +1841,14 @@ public class IncidentPatternExtractor {
 			str.append("Target-Asset: ").append(
 					!activity.getTargetedAssets().isEmpty() ? activity.getTargetedAssets().get(0).getName() : nullValue)
 					.append("\n");
-			str.append("Exploited-Asset: ").append(!activity.getExploitedAssets().isEmpty() ? activity.getExploitedAssets().get(0).getName() : nullValue)
-					.append("\n");
+			str.append("Exploited-Asset: ").append(!activity.getExploitedAssets().isEmpty()
+					? activity.getExploitedAssets().get(0).getName() : nullValue).append("\n");
 			str.append("Resource: ")
 					.append(!activity.getResources().isEmpty() ? activity.getResources().get(0).getName() : nullValue)
 					.append("\n");
 			str.append("Location: ").append(
-					activity.getLocation() != null ? ((IncidentEntity) activity.getLocation()).getName() : nullValue).append("\n");
+					activity.getLocation() != null ? ((IncidentEntity) activity.getLocation()).getName() : nullValue)
+					.append("\n");
 			str.append("Next-Activity: ").append(
 					!activity.getNextActivities().isEmpty() ? activity.getNextActivities().get(0).getName() : nullValue)
 					.append("\n");
@@ -1795,7 +1888,7 @@ public class IncidentPatternExtractor {
 		System.out.println("Activity Sequence:");
 		printIncidentModelActivitySequence(originalIncidentModel);
 		System.out.println();
-		
+
 		if (printActivitiesInfo) {
 			Activity orgAct = originalIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
@@ -1815,7 +1908,7 @@ public class IncidentPatternExtractor {
 		System.out.println("Activity Sequence:");
 		printIncidentModelActivitySequence(incidentModel);
 		System.out.println();
-		
+
 		if (printActivitiesInfo) {
 			Activity orgAct = incidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
