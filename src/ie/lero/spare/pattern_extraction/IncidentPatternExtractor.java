@@ -6,10 +6,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
+import java.util.Random;
 
-import org.eclipse.emf.common.util.BasicEList;
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
@@ -50,6 +49,8 @@ public class IncidentPatternExtractor {
 	protected static int activityNum = 1;
 	protected static final int MAX_LENGTH = 10000;
 	protected static final String ACTIVITY_NAME = "abstracted-Activity";
+	protected List<HashMap<String, String>> entityMaps;
+	protected Map<Integer, List<Activity>> potentialAbstractActivities = new HashMap<Integer, List<Activity>>();
 
 	public IncidentPatternExtractor() {
 
@@ -144,39 +145,43 @@ public class IncidentPatternExtractor {
 		// ==========================================
 
 		// =======Abstract Activities====================
-		
-		//get patterns
+
+		// get patterns
 		activityPatterns = new LinkedList<ActivityPattern>();
 		activityPatterns.add(activityPatternMove);
 		activityPatterns.add(activityPatternConnectNetwork);
 
-		//find maps/matches for all patterns in the incident model
+		// find maps/matches for all patterns in the incident model
 		PatternMappingSolver solver = mapPatterns(activityPatterns);
-		
-		//take best solution found and apply it (i.e. add new abstract activities to the incident model while removing the corresponding ones based on the patterns used)
-		//for the rest of the activities (i.e. not matched to a pattern) a general abstraction is done, mainly, abstracting name and assets
+
+		// take best solution found and apply it (i.e. add new abstract
+		// activities to the incident model while removing the corresponding
+		// ones based on the patterns used)
+		// for the rest of the activities (i.e. not matched to a pattern) a
+		// general abstraction is done, mainly, abstracting name and assets
 		abstractMatchedActivities(solver);
-		
+
 		return abstractedModel;
 	}
 
 	public void abstractMatchedActivities(PatternMappingSolver solver) {
-	
-		//get best solution
+
+		// get best solution
 		List<int[]> bestSolution = solver.getOptimalSolution();
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
-		
-		for(int i =0;i<bestSolution.size();i++) {
-			int [] activitiesIDs = bestSolution.get(i);
-			EList<Activity> activitySequecne = new BasicEList<Activity>();
-			
-			for(int id : activitiesIDs) {
-				activitySequecne.add(incidentModel.getActivity(index))
-			}
+
+		for (int i = 0; i < bestSolution.size(); i++) {
+
+			// get activity sequence of the solution
+			int[] activitiesIDs = bestSolution.get(i);
+			List<Activity> activitySequence = incidentModel.getActivitySequence(activitiesIDs);
+
+			// merge the create activity into one based on the pattern used
+			createMergedActivity(activitySequence, this.activityPatterns.get(bestSolutionPatternIDs[i]));
 		}
-		
+
 	}
-	
+
 	/**
 	 * Generate how pattern specified as attribute can be mapped to incident
 	 * model
@@ -199,7 +204,7 @@ public class IncidentPatternExtractor {
 		// match patterns to incident to obtain possible maps
 		for (int i = 0; i < activityPatterns.size(); i++) {
 
-			patternMaps = matchActivityPattern(activityPatterns.get(i));
+			patternMaps = matchActivityPattern(activityPatterns.get(i), i);
 
 			List<int[]> result = convertPatternResult(patternMaps);
 			allPatternsMaps.put(i, result);
@@ -214,7 +219,7 @@ public class IncidentPatternExtractor {
 		solver.findSolutions(allPatternsMaps);
 		printAllSolutions(solver.getAllSolutions(), solver.getPatternIDs(), solver.getMapIDs(),
 				solver.allSolutionsSeverity);
-		
+
 		return solver;
 
 	}
@@ -264,7 +269,7 @@ public class IncidentPatternExtractor {
 
 	}
 
-	public Map<String, List<String>> matchActivityPattern(ActivityPattern activityPattern) {
+	public Map<String, List<String>> matchActivityPattern(ActivityPattern activityPattern, int index) {
 
 		// find all possible matches of the given pattern in the incidentModel
 		// sequence
@@ -327,8 +332,6 @@ public class IncidentPatternExtractor {
 				// if match found
 				if (isptrPreMatched) {
 
-					// System.out.println("-Pattern precondition matched to
-					// activity: " + currentActivity.getName());
 					entityMaps.add(new HashMap<String, String>(entityMap));
 
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
@@ -342,6 +345,20 @@ public class IncidentPatternExtractor {
 							prePostMappingActivities.put(currentActivity.getName(), matchedActs);
 						} else {
 							prePostMappingActivities.get(currentActivity.getName()).add(currentActivity.getName());
+						}
+
+						// create a potential abstract activity
+						List<Activity> concreteActs = new LinkedList<Activity>();
+						concreteActs.add(currentActivity);
+
+						Activity abstractAct = createPotentialAbstractActivity(concreteActs, index);
+
+						if (potentialAbstractActivities.containsKey(index)) {
+							potentialAbstractActivities.get(index).add(abstractAct);
+						} else {
+							List<Activity> abstractActs = new LinkedList<Activity>();
+							abstractActs.add(abstractAct);
+							potentialAbstractActivities.put(index, abstractActs);
 						}
 
 						entityMaps.remove(entityMaps.size() - 1);
@@ -1190,7 +1207,101 @@ public class IncidentPatternExtractor {
 	 * @return New <em>Activity</em> that replaces the sequence in the
 	 *         <em>Incident Diagram</em>
 	 */
-	protected Activity createMergedActivity(EList<Activity> activitySequence, ActivityPattern activityPattern) {
+	public Activity createPotentialAbstractActivity(List<Activity> activitySequence, ActivityPattern activityPattern) {
+
+		if (activitySequence == null || activitySequence.size() == 0) {
+			return null;
+		}
+
+		Activity initialActivity = activitySequence.get(0);
+		Activity finalActivity = activitySequence.get(activitySequence.size() - 1);
+		Activity patternActivity = !activityPattern.getAbstractActivity().isEmpty()
+				? activityPattern.getAbstractActivity().get(0) : null;
+
+		Activity mergedActivity = instance.createActivity();
+
+		// set the new activity name
+		int tries = 500;
+		boolean isUnique = false;
+		Random rand = new Random();
+		String actName = null;
+		int randNum = 0;
+
+		while (tries > 0 && !isUnique) {
+
+			randNum = rand.nextInt(IncidentPatternExtractor.MAX_LENGTH);
+			actName = IncidentPatternExtractor.ACTIVITY_NAME + "_" + randNum;
+			isUnique = !incidentModel.activityNameExists(actName);
+			tries--;
+		}
+
+		// set name
+		mergedActivity.setName(actName);
+
+		// set type (e.g., physical, digital)
+		mergedActivity.setType(initialActivity.getType());
+
+		// set behaviour (e.g., normal, malicious)
+		mergedActivity.setBehaviourType(initialActivity.getBehaviourType());
+
+		// set system action name
+		mergedActivity.setSystemAction(initialActivity.getSystemAction());
+
+		// set initiator
+		if (patternActivity != null && patternActivity.getInitiator() != null) {
+
+			String patternInitiatorName = ((IncidentEntity) patternActivity.getInitiator()).getName();
+
+			String firstInitiatorName = initialActivity.getInitiator() != null
+					? ((IncidentEntity) initialActivity.getInitiator()).getName() : null;
+
+			String finalInitiatorName = finalActivity.getInitiator() != null
+					? ((IncidentEntity) finalActivity.getInitiator()).getName() : null;
+			ActivityInitiator mergedActivityInitiator = null;
+
+			if (firstInitiatorName != null && entityMap.containsKey(patternInitiatorName)
+					&& entityMap.containsValue(firstInitiatorName)) {
+				mergedActivityInitiator = initialActivity.getInitiator();
+			} else if (finalInitiatorName != null && entityMap.containsKey(patternInitiatorName)
+					&& entityMap.containsValue(finalInitiatorName)) {
+				mergedActivityInitiator = finalActivity.getInitiator();
+			}
+			mergedActivity.setInitiator(mergedActivityInitiator);
+		}
+
+		//set target asset
+		if (patternActivity != null && !patternActivity.getTargetedAssets().isEmpty()) {
+
+			String patternTargetAssetName = patternActivity.getTargetedAssets().get(0).getName();
+
+			String firstTargetName = !initialActivity.getTargetedAssets().isEmpty()
+					? initialActivity.getTargetedAssets().get(0).getName() : null;
+
+			String finalTargetName = !finalActivity.getTargetedAssets().isEmpty()
+					? finalActivity.getTargetedAssets().get(0).getName() : null;
+			Asset mergedActivityTargetAsset = null;
+
+			// set target asset
+			if (firstTargetName != null && entityMap.containsKey(patternTargetAssetName)
+					&& entityMap.containsValue(firstTargetName)) {
+				mergedActivityTargetAsset = initialActivity.getTargetedAssets().get(0);
+			} else if (finalTargetName != null && entityMap.containsKey(patternTargetAssetName)
+					&& entityMap.containsValue(finalTargetName)) {
+				mergedActivityTargetAsset = finalActivity.getTargetedAssets().get(0);
+			}
+			mergedActivity.getTargetedAssets().add(mergedActivityTargetAsset);
+		}
+
+		//set resources
+		
+		//set location
+		
+		//set conditions (pre & post)
+		
+		return mergedActivity;
+	}
+
+	protected Activity createMergedActivity(List<Activity> activitySequence, ActivityPattern activityPattern) {
 
 		if (activitySequence == null || activitySequence.size() == 0) {
 			return null;
@@ -1297,7 +1408,7 @@ public class IncidentPatternExtractor {
 		}
 	}
 
-	protected void removeMergedActivitiesFromSequence(EList<Activity> activitySequence) {
+	protected void removeMergedActivitiesFromSequence(List<Activity> activitySequence) {
 
 		// List<Activity> activitiesToRemove = new LinkedList<Activity>();
 
@@ -1425,7 +1536,7 @@ public class IncidentPatternExtractor {
 		for (int j = 0; j < solution.size(); j++) {
 			str.append("[");
 			for (int activityID : solution.get(j)) {
-				str.append(incidentModel.getActivity(activityID)).append(", ");
+				str.append(incidentModel.getActivityName(activityID)).append(", ");
 			}
 			str.deleteCharAt(str.lastIndexOf(" "));
 			str.deleteCharAt(str.lastIndexOf(","));
@@ -1459,13 +1570,20 @@ public class IncidentPatternExtractor {
 
 		str.append("=======================Optimal Solution===========================\n");
 		// print maps
-		str.append("Maps:[");
-		for (int j = 0; j < optimalSolution.size(); j++) {
-			str.append(Arrays.toString(optimalSolution.get(j))).append(", ");
+		str.append("Maps:");
+		for (int i = 0; i < optimalSolution.size(); i++) {
+			str.append("[");
+			for (int j = 0; j < optimalSolution.get(i).length; j++) {
+				int actID = optimalSolution.get(i)[j];
+				str.append(incidentModel.getActivityName(actID)).append(", ");
+			}
+			str.deleteCharAt(str.lastIndexOf(" "));
+			str.deleteCharAt(str.lastIndexOf(","));
+			str.append("], ");
 		}
+
 		str.deleteCharAt(str.lastIndexOf(" "));
 		str.deleteCharAt(str.lastIndexOf(","));
-		str.append("]\n");
 
 		// print patterns ids used
 		str.append("Pattern IDs:").append(Arrays.toString(optimalSolutionPatternsID)).append("\n");
@@ -1494,7 +1612,7 @@ public class IncidentPatternExtractor {
 			for (int[] ary : entry.getValue()) {
 				str.append("[");
 				for (int activityID : ary) {
-					str.append(incidentModel.getActivity(activityID) + ", ");
+					str.append(incidentModel.getActivityName(activityID) + ", ");
 				}
 				str.deleteCharAt(str.lastIndexOf(" "));
 				str.deleteCharAt(str.lastIndexOf(","));
