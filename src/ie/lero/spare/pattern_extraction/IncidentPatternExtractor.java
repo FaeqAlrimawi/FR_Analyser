@@ -50,10 +50,11 @@ public class IncidentPatternExtractor {
 	protected CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
 	protected static int activityNum = 1;
 	protected static final int MAX_LENGTH = 10000;
-	protected static final String ACTIVITY_NAME = "abstracted-Activity";
-	protected List<HashMap<String, String>> entityMaps;
+	protected static final String ACTIVITY_NAME = "abstractActivity";
 	protected Map<Integer, List<Activity>> potentialAbstractActivities = new HashMap<Integer, List<Activity>>();
-
+	protected Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
+	protected IncidentDiagram originalIncidentModel;
+	
 	public IncidentPatternExtractor() {
 
 	}
@@ -67,7 +68,8 @@ public class IncidentPatternExtractor {
 		}
 
 		this.incidentModel = incidentModel;
-
+		originalIncidentModel = incidentModel;
+		
 		IncidentDiagram abstractedModel = null;
 
 		// create a copy
@@ -153,33 +155,57 @@ public class IncidentPatternExtractor {
 		activityPatterns.add(activityPatternMove);
 		activityPatterns.add(activityPatternConnectNetwork);
 
-		// find maps/matches for all patterns in the incident model
-		PatternMappingSolver solver = mapPatterns(activityPatterns);
+		//1-Find maps/matches for all patterns in the incident model
+		mapPatterns(activityPatterns);
 
-		// take best solution found and apply it (i.e. add new abstract
+		//2-Take best solution found and apply it (i.e. add new abstract
 		// activities to the incident model while removing the corresponding
 		// ones based on the patterns used)
 		// for the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
-//		abstractMatchedActivities(solver);
+		 abstractMatchedActivities();
 
 		return abstractedModel;
 	}
 
-	public void abstractMatchedActivities(PatternMappingSolver solver) {
+	public void abstractMatchedActivities() {
 
-		// get best solution
-		List<int[]> bestSolution = solver.getOptimalSolution();
+		PatternMappingSolver solver = new PatternMappingSolver();
+		
+		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps);
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
-
+		int[] bestSolutionMapIDs = solver.getOptimalSolutionMapsID();
+		
+		//System.out.println(bestSolution.size());
 		for (int i = 0; i < bestSolution.size(); i++) {
 
 			// get activity sequence of the solution
 			int[] activitiesIDs = bestSolution.get(i);
+//			System.out.println(incidentModel.getActivitySequence().toString());
+			System.out.println(Arrays.toString(activitiesIDs));
 			List<Activity> activitySequence = incidentModel.getActivitySequence(activitiesIDs);
-
-			// merge the create activity into one based on the pattern used
-			createMergedActivity(activitySequence, this.activityPatterns.get(bestSolutionPatternIDs[i]));
+			int patternID = bestSolutionPatternIDs[i];
+			int MapID = bestSolutionMapIDs[i];
+			
+			//get potential abstract activity generated from matching the pattern given by pattern id
+			Activity abstractActivity = potentialAbstractActivities.get(patternID).get(MapID);
+			
+			//update next and previous activities of the potential activity
+			replaceNextActivities(activitySequence.get(activitySequence.size()-1), abstractActivity);
+			replacePreviousActivities(activitySequence.get(0), abstractActivity);
+			
+			//add the potential activity to the sequence
+			addNewActivityToSequence(abstractActivity, activitySequence.get(0));
+			
+			//remove the mapped activity sequence from the incident sequence
+			removeMappedActivitiesFromSequence(activitySequence);
+			
+			//update incident model information
+//			incidentModel.getActivity();
+//			incidentModel.setActivitySequence(null);
+//			incidentModel.getActivitySequence();
+//			
+//			printActivity(abstractActivity);
 		}
 
 	}
@@ -190,7 +216,7 @@ public class IncidentPatternExtractor {
 	 * 
 	 * @param activityPatterns
 	 */
-	protected PatternMappingSolver mapPatterns(List<ActivityPattern> activityPatterns) {
+	protected Map<Integer, List<int[]>> mapPatterns(List<ActivityPattern> activityPatterns) {
 
 		// create a local signature of the incident model
 		incidentModel.createBigraphSignature();
@@ -201,7 +227,7 @@ public class IncidentPatternExtractor {
 
 		// create a map variable to find solutions to how differnet patterns can
 		// be applied to the incident
-		Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
+//		Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
 
 		// match patterns to incident to obtain possible maps
 		for (int i = 0; i < activityPatterns.size(); i++) {
@@ -215,15 +241,7 @@ public class IncidentPatternExtractor {
 		// print generated patterns maps
 		printInputPatternMap(allPatternsMaps);
 
-		// find possible ways in which patterns maps can be applied to the
-		// incident
-		PatternMappingSolver solver = new PatternMappingSolver();
-		solver.findSolutions(allPatternsMaps);
-		printAllSolutions(solver.getAllSolutions(), solver.getPatternIDs(), solver.getMapIDs(),
-				solver.allSolutionsSeverity);
-
-		return solver;
-
+		return allPatternsMaps;
 	}
 
 	protected List<int[]> convertPatternResult(Map<String, List<String>> patternMaps) {
@@ -262,14 +280,7 @@ public class IncidentPatternExtractor {
 		return extract(model);
 	}
 
-	public static void main(String[] args) {
 
-		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
-		String fileName = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
-
-		extractor.extract(fileName);
-
-	}
 
 	public Map<String, List<String>> matchActivityPattern(ActivityPattern activityPattern, int index) {
 
@@ -349,9 +360,10 @@ public class IncidentPatternExtractor {
 							prePostMappingActivities.get(currentActivity.getName()).add(currentActivity.getName());
 						}
 
-						//=======create a potential abstract activity for the matched activities
+						// =======create a potential abstract activity for the
+						// matched activities
 						createPotentialAbstractActivity(currentActivity, currentActivity, index);
-						
+
 						entityMaps.remove(entityMaps.size() - 1);
 					} else {
 
@@ -416,9 +428,10 @@ public class IncidentPatternExtractor {
 							prePostMappingActivities.get(preActivity.getName()).add(currentActivity.getName());
 						}
 
-						//=======create a potential abstract activity for the matched activities
+						// =======create a potential abstract activity for the
+						// matched activities
 						createPotentialAbstractActivity(preActivity, currentActivity, index);
-						
+
 						// one match is only taken (i.e. first match)
 						break;
 					}
@@ -1261,11 +1274,11 @@ public class IncidentPatternExtractor {
 					&& entityMap.containsValue(finalInitiatorName)) {
 				mergedActivityInitiator = finalActivity.getInitiator();
 			}
-			
+
 			abstractActivity.setInitiator(mergedActivityInitiator);
 		}
 
-		//set target asset
+		// set target asset
 		if (patternActivity != null && !patternActivity.getTargetedAssets().isEmpty()) {
 
 			String patternTargetAssetName = patternActivity.getTargetedAssets().get(0).getName();
@@ -1285,28 +1298,52 @@ public class IncidentPatternExtractor {
 					&& entityMap.containsValue(finalTargetName)) {
 				mergedActivityTargetAsset = finalActivity.getTargetedAssets().get(0);
 			}
-			
+
 			abstractActivity.getTargetedAssets().add(mergedActivityTargetAsset);
 		}
 
-		//set resources
+		// set resources
+		if (patternActivity != null && !patternActivity.getResources().isEmpty()) {
+			String patternResourceName = patternActivity.getResources().get(0).getName();
+
+			String firstResourceName = !initialActivity.getResources().isEmpty()
+					? initialActivity.getResources().get(0).getName() : null;
+
+			String finalResourceName = !finalActivity.getResources().isEmpty()
+					? finalActivity.getResources().get(0).getName() : null;
+			Resource mergedActivityResource = null;
+
+			// set target asset
+			if (firstResourceName != null && entityMap.containsKey(patternResourceName)
+					&& entityMap.containsValue(firstResourceName)) {
+				mergedActivityResource = initialActivity.getResources().get(0);
+			} else if (finalResourceName != null && entityMap.containsKey(patternResourceName)
+					&& entityMap.containsValue(finalResourceName)) {
+				mergedActivityResource = finalActivity.getResources().get(0);
+			}
+
+			abstractActivity.getResources().add(mergedActivityResource);
+		}
 		
-		//set location
+		// set location
+
+		// set exploited asset
 		
-		//set conditions (pre & post)
-		//set preconditions
-		BigraphExpression bigExpPre = ((BigraphExpression)patternActivity.getPrecondition().getExpression()).clone();
+		// set conditions (pre & post)
+		// set preconditions
+		BigraphExpression bigExpPre = ((BigraphExpression) patternActivity.getPrecondition().getExpression()).clone();
 		updateEntityNames(bigExpPre);
-		
+
 		abstractActivity.getPrecondition().setExpression(bigExpPre);
-		
-		//set postcondition
-		BigraphExpression bigExpPost = ((BigraphExpression)patternActivity.getPostcondition().getExpression()).clone();
+
+		// set postcondition
+		BigraphExpression bigExpPost = ((BigraphExpression) patternActivity.getPostcondition().getExpression()).clone();
 		updateEntityNames(bigExpPost);
-		
+
 		abstractActivity.getPostcondition().setExpression(bigExpPost);
-		
-		//add new activity to potential abstract activities of the given pattern
+
+		// add new activity to potential abstract activities of the given
+		// pattern
 		if (potentialAbstractActivities.containsKey(activityPatternIndex)) {
 			potentialAbstractActivities.get(activityPatternIndex).add(abstractActivity);
 		} else {
@@ -1314,52 +1351,54 @@ public class IncidentPatternExtractor {
 			abstractActs.add(abstractActivity);
 			potentialAbstractActivities.put(activityPatternIndex, abstractActs);
 		}
-		
-		printActivity(abstractActivity);
-		
+
+//		printActivity(abstractActivity);
+
 		return abstractActivity;
 	}
-	
-public Activity createPotentialAbstractActivity(Activity startingActivity, Activity endActivity, int activityPatternIndex) {
-		
-		if(startingActivity == null || endActivity == null) {
+
+	public Activity createPotentialAbstractActivity(Activity startingActivity, Activity endActivity,
+			int activityPatternIndex) {
+
+		if (startingActivity == null || endActivity == null) {
 			return null;
 		}
-	
-		
+
 		List<Activity> activitySequence = new LinkedList<Activity>();
-		
+
 		activitySequence.add(startingActivity);
-		
-		if(startingActivity.equals(endActivity)) {
+
+		if (startingActivity.equals(endActivity)) {
 			return createPotentialAbstractActivity(activitySequence, activityPatternIndex);
 		}
-		
-		//assuming there's only one next activity. In future, an algorithm for finding all possible sequences between two activities can be implemented
-		Activity nextActivity = null; 
-		
-		if(startingActivity.getNextActivities().size()>0) {
-			nextActivity = startingActivity.getNextActivities().get(0);	
+
+		// assuming there's only one next activity. In future, an algorithm for
+		// finding all possible sequences between two activities can be
+		// implemented
+		Activity nextActivity = null;
+
+		if (startingActivity.getNextActivities().size() > 0) {
+			nextActivity = startingActivity.getNextActivities().get(0);
 		}
-		
-		while(nextActivity != null) {
-			
+
+		while (nextActivity != null) {
+
 			activitySequence.add(nextActivity);
-			
-			if(nextActivity.equals(endActivity)) {
+
+			if (nextActivity.equals(endActivity)) {
 				break;
 			}
-			
-			if(nextActivity.getNextActivities().size()>0) {
-				nextActivity = nextActivity.getNextActivities().get(0);	
+
+			if (nextActivity.getNextActivities().size() > 0) {
+				nextActivity = nextActivity.getNextActivities().get(0);
 			} else {
 				nextActivity = null;
 			}
-			
+
 		}
-		
+
 		return createPotentialAbstractActivity(activitySequence, activityPatternIndex);
-}
+	}
 
 	protected Activity createMergedActivity(List<Activity> activitySequence, ActivityPattern activityPattern) {
 
@@ -1436,7 +1475,7 @@ public Activity createPotentialAbstractActivity(Activity startingActivity, Activ
 		addNewActivityToSequence(mergedActivity, initialActivity);
 
 		// remove the sequence of activities
-		removeMergedActivitiesFromSequence(activitySequence);
+		removeMappedActivitiesFromSequence(activitySequence);
 
 		// to update activites of the model and their sequence
 		incidentModel.getActivity();
@@ -1455,37 +1494,38 @@ public Activity createPotentialAbstractActivity(Activity startingActivity, Activ
 	 *            the activity in aequence where the new activity will be placed
 	 *            before
 	 */
-	protected void addNewActivityToSequence(Activity mergedActivity, Activity originalActivity) {
+	protected void addNewActivityToSequence(Activity newActivity, Activity originalActivity) {
 
 		for (Scene scene : incidentModel.getScene()) {
 			EList<Activity> sceneActivities = scene.getActivity();
 			for (int i = 0; i < sceneActivities.size(); i++) {
 				if (sceneActivities.get(i).equals(originalActivity)) {
-					sceneActivities.add(i, mergedActivity);
+					sceneActivities.add(i, newActivity);
 					break;
 				}
 			}
 		}
+		
 	}
 
-	protected void removeMergedActivitiesFromSequence(List<Activity> activitySequence) {
+	protected void removeMappedActivitiesFromSequence(List<Activity> activitySequence) {
 
 		// List<Activity> activitiesToRemove = new LinkedList<Activity>();
-
-		for (Scene scene : incidentModel.getScene()) {
+		Scene scene = null;
+		
+		Scenes_Loop:
+		for (Scene sc : incidentModel.getScene()) {
+			scene = sc;
 			EList<Activity> sceneActivities = scene.getActivity();
 			for (int i = 0; i < sceneActivities.size(); i++) {
 				if (sceneActivities.get(i).equals(activitySequence.get(0))) {
-					sceneActivities.removeAll(activitySequence);
-					/*
-					 * for(int j=i;j<sceneActivities.size();j++) {
-					 * 
-					 * }
-					 */
-					// sceneActivities.add(i, mergedActivity);
-					break;
+					break Scenes_Loop;
 				}
 			}
+		}
+		
+		if(scene != null) {
+			scene.getActivity().removeAll(activitySequence);
 		}
 	}
 
@@ -1687,20 +1727,43 @@ public Activity createPotentialAbstractActivity(Activity startingActivity, Activ
 
 		System.out.println(str.toString());
 	}
-	
+
 	public void printActivity(Activity activity) {
-		
+
 		StringBuilder str = new StringBuilder();
-		
-		str.append("=======================Activity Info=============================\n");
-		str.append("Name: ").append(activity.getName()).append("\n");
-		str.append("Initiator: ").append(((IncidentEntity)activity.getInitiator()).getName()).append("\n");
-		str.append("Target Asset: ").append(activity.getTargetedAssets().get(0).getName()).append("\n");
-		str.append("Activity Type: ").append(activity.getType()).append("\n");
-		str.append("Activity Behaviour: ").append(activity.getBehaviourType()).append("\n");
-		str.append("=================================================================");
+
+		if (activity == null) {
+			str.append("Activity is Null");
+		} else {
+
+			str.append("=======================Activity Info=============================\n");
+			str.append("Name: ").append(activity.getName()).append("\n");
+			str.append("Initiator: ").append(
+					activity.getInitiator() != null ? ((IncidentEntity) activity.getInitiator()).getName() : "Null")
+					.append("\n");
+			str.append("Target-Asset: ").append(
+					!activity.getTargetedAssets().isEmpty() ? activity.getTargetedAssets().get(0).getName() : "Null")
+					.append("\n");
+			str.append("Resource: ")
+					.append(!activity.getResources().isEmpty() ? activity.getResources().get(0).getName() : "Null")
+					.append("\n");
+			str.append("Next-Activity: ").append(!activity.getNextActivities().isEmpty()?activity.getNextActivities().get(0).getName():"Null").append("\n");
+			str.append("Previous-Activity: ").append(!activity.getPreviousActivities().isEmpty()?activity.getPreviousActivities().get(0).getName():"Null").append("\n");
+			str.append("Type: ").append(activity.getType()).append("\n");
+			str.append("Behaviour: ").append(activity.getBehaviourType()).append("\n");
+			str.append("=================================================================");
+
+		}
+
 		System.out.println(str.toString());
-		
-		
+	}
+	
+	public static void main(String[] args) {
+
+		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
+		String fileName = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
+
+		extractor.extract(fileName);
+
 	}
 }
