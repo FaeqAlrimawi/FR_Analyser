@@ -73,6 +73,26 @@ public class ModelsHandler {
 		incidentModels = newIncidentModels;
 	}
 	
+	public static boolean saveIncidentModel(IncidentDiagram incidentModel) {
+		
+		try {	
+			 return IncidentModelHandler.SaveIncidentToFile(incidentModel, ".");
+		}catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public static boolean saveIncidentModel(IncidentDiagram incidentModel, String filePath) {
+		
+		try {	
+			 return IncidentModelHandler.SaveIncidentToFile(incidentModel, filePath);
+		}catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	public static Map<String, EnvironmentDiagram> getSystemModels() {
 		return systemModels;
 	}
@@ -122,6 +142,30 @@ public class ModelsHandler {
 		
 		return systemModels.remove(filePath);
 		
+	}
+	
+	public static boolean saveSystemModel(EnvironmentDiagram systemModel) {
+	
+		try {
+			
+			return SystemModelHandler.SaveSystemToFile(systemModel, ".");
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	public static boolean saveSystemModel(EnvironmentDiagram systemModel, String filePath) {
+		
+		try {
+			
+			return SystemModelHandler.SaveSystemToFile(systemModel, filePath);
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 	
 	public static Map<String, ActivityPattern> getActivityPatterns() {
