@@ -51,6 +51,10 @@ public class IncidentPatternExtractor {
 
 	protected Map<String, String> entityMap = new HashMap<String, String>();
 	protected List<ActivityPattern> activityPatterns;
+
+	// used to restrict the # of actions/activities to search when matching a
+	// pattern postconditions
+	// Max effective value would equal to the number of actions in a scene
 	protected static int MaxNumberOfActions = 3;
 
 	protected CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
@@ -78,17 +82,18 @@ public class IncidentPatternExtractor {
 	// the value is a list of the original activities that were abstracted
 	protected Map<Activity, List<Activity>> abstractedActivities = new HashMap<Activity, List<Activity>>();
 
+	// List of incident entities that were removed from the original model
+	// when the abstract model was created
 	protected List<IncidentEntity> removedEntities = new LinkedList<IncidentEntity>();
 
 	public IncidentPatternExtractor() {
 
 	}
 
-	public IncidentPatternExtractor(String incidentFilePath, String systemFilePath) {
+	public IncidentPatternExtractor(IncidentDiagram incidentModel, EnvironmentDiagram systemModel) {
 
-		setOriginalIncidentFilePath(incidentFilePath);
-		setSystemFilePath(systemFilePath);
-
+		originalIncidentModel = incidentModel;
+		this.systemModel = systemModel;
 	}
 
 	public String getOriginalIncidentFilePath() {
@@ -196,20 +201,21 @@ public class IncidentPatternExtractor {
 		abstractUnmatchedActivities(); // *maybe not needed, currently no effect
 
 		// =======Abstract entities====================
-		//remove unused entities after abstracting activities, then use the system model
-		//to create 
+		// remove unused entities after abstracting activities, then use the
+		// system model
+		// to create
 		abstractEntities();
 
 		/** ================================================================ **/
 
 		// =======Print results========================
 
-		printOriginalIncidentModel(true); //true: prints all activities
-		printAbstractIncidentModel(true);//true: prints all activities
-		
-		printRemovedEntities(true);//true: prints decoration i.e. ====Smg==
-		printAbstractActivities(true);//true: prints decoration i.e. ====Smg==
-		
+		printOriginalIncidentModel(true); // true: prints all activities
+		printAbstractIncidentModel(true);// true: prints all activities
+
+		printRemovedEntities(true);// true: prints decoration i.e. ====Smg==
+		printAbstractActivities(true);// true: prints decoration i.e. ====Smg==
+
 		// =======Save abstract model==================
 		String abstractModelFilePath = null;
 
@@ -219,7 +225,7 @@ public class IncidentPatternExtractor {
 			Random rand = new Random();
 			abstractModelFilePath = "abstractIncident_" + rand.nextInt(1000) + ".cpi";
 		}
-		
+
 		ModelsHandler.saveIncidentModel(abstractIncidentModel, abstractModelFilePath);
 
 		return abstractIncidentModel;
@@ -2062,38 +2068,37 @@ public class IncidentPatternExtractor {
 		if (isDecorated) {
 			str.append("=======================Abstract Activities========================\n");
 		}
-		
+
 		str.append("[Action sequence removed] ==> [Abstract activity added] [Pattern used]\n");
 
-		for(Entry<Activity, List<Activity>> entry : abstractedActivities.entrySet()) {
-			
-			//add actions
-			for(Activity act : entry.getValue()) {
+		for (Entry<Activity, List<Activity>> entry : abstractedActivities.entrySet()) {
+
+			// add actions
+			for (Activity act : entry.getValue()) {
 				str.append(act.getName()).append("->");
 			}
 			str.deleteCharAt(str.lastIndexOf(">"));
 			str.deleteCharAt(str.lastIndexOf("-"));
-			
-			//add abstract activity
+
+			// add abstract activity
 			str.append(" ==> ").append(entry.getKey().getName());
-			
-			//add pattern used
-			loop1:
-			for(Entry<Integer, List<Activity>> lst : potentialAbstractActivities.entrySet()) {
-				for(Activity act : lst.getValue()) {
-					if(act.equals(entry.getKey())) {
+
+			// add pattern used
+			loop1: for (Entry<Integer, List<Activity>> lst : potentialAbstractActivities.entrySet()) {
+				for (Activity act : lst.getValue()) {
+					if (act.equals(entry.getKey())) {
 						str.append(" (").append(activityPatterns.get(lst.getKey()).getName()).append(")\n");
 						break loop1;
 					}
 				}
 			}
-			
+
 		}
-		
+
 		if (isDecorated) {
 			str.append("=================================================================");
 		}
-		
+
 		System.out.println(str.toString());
 	}
 
