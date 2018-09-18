@@ -79,6 +79,9 @@ public class IncidentPatternExtractor {
 	// the value is a list of the original activities that were abstracted
 	protected Map<Activity, List<Activity>> abstractedActivities = new HashMap<Activity, List<Activity>>();
 
+
+	protected List<IncidentEntity> removedEntities = new LinkedList<IncidentEntity>();
+	
 	public IncidentPatternExtractor() {
 
 	}
@@ -203,7 +206,7 @@ public class IncidentPatternExtractor {
 		
 		printOriginalIncidentModel(false);
 		printAbstractIncidentModel(false);
-
+		printRemovedEntities(true);
 		// =======Save abstract model==================
 		String abstractModelFilePath = null;
 		
@@ -263,8 +266,9 @@ public class IncidentPatternExtractor {
 			abstractedActivities.put(abstractActivity, activitySequence);
 
 		}
+		
 		// update incident model information
-		abstractIncidentModel.getActivity();
+		abstractIncidentModel.setActivity(null);
 		abstractIncidentModel.setActivitySequence(null);
 		abstractIncidentModel.getActivitySequence();
 
@@ -1594,17 +1598,28 @@ public class IncidentPatternExtractor {
 		// In case an asset is not found in the system model then it remains as
 		// is
 
-		LinkedList<IncidentEntity> entities = new LinkedList<IncidentEntity>();
+		List<IncidentEntity> entities = abstractIncidentModel.getEntity();
 
 		environment.Asset systemAsset = null;
-
-		entities.addAll(abstractIncidentModel.getAsset());
-		entities.addAll(abstractIncidentModel.getResource());
-		entities.addAll(abstractIncidentModel.getActor());
-
 		String entityName = null;
-
-		// look in assets
+		
+		//remove unused entities in activities. Unused means an incident entity (asset, actor, or resource) that it has not been 
+		//used in any of the activities conditions and neither its parent or any of its contained assets
+		for (IncidentEntity entity : entities) {
+			
+			if(!abstractIncidentModel.isUsedByActivity(entity)) {
+				removedEntities.add(entity);
+			}
+		}
+		
+		for(IncidentEntity entity : removedEntities) {
+			abstractIncidentModel.removeEntity(entity);
+		}
+		
+		//update entities again
+		entities = abstractIncidentModel.getEntity();
+		
+		// create an abstract entity for each instance entity using system assets
 		for (IncidentEntity entity : entities) {
 
 			entityName = entity.getName();
@@ -1631,10 +1646,13 @@ public class IncidentPatternExtractor {
 
 		String oldEntityName = entity.getName();
 
-		// for now all changed are done directly. Need to create a copy later
+		// for now all changes are done directly. Need to create a copy later
 		IncidentEntity abstractedEntity = entity;
 
 		abstractedEntity.setName(abstractedSystemAsset.getName());
+		
+		String newEntityName = abstractedEntity.getName();
+		
 		// abstractedEntity.get
 
 		//// update type to be of the same type as the abstracted asset
@@ -1648,13 +1666,12 @@ public class IncidentPatternExtractor {
 
 		abstractedEntity.setType(type);
 
-		////
 		// other attributes maybe (e.g., contained assets, connections)
 
 		//// update all the entity name in all the conditions of the incident
 		//// activities
 		for (Activity act : abstractIncidentModel.getActivity()) {
-			act.replaceEntityName(oldEntityName, abstractedEntity.getName());
+			act.replaceEntityName(oldEntityName, newEntityName);
 		}
 
 		return abstractedEntity;
@@ -2003,6 +2020,34 @@ public class IncidentPatternExtractor {
 		}
 
 		System.out.println("=================================================================");
+	}
+	
+	public void printRemovedEntities(boolean isDecorated) {
+		
+		StringBuilder str = new StringBuilder();
+		
+		if(isDecorated){
+			str.append("=======================Removed Entities==========================\n");	
+		} else {
+			str.append("Removed Entities: ");
+		}
+		
+		if(removedEntities.size()>0) {
+		for(IncidentEntity entity : removedEntities) {
+			str.append(entity.getName()).append(", ");
+		}
+		
+		str.deleteCharAt(str.lastIndexOf(" "));
+		str.deleteCharAt(str.lastIndexOf(","));
+		str.append("\n");
+		}
+		
+		if(isDecorated){
+			str.append("=================================================================");	
+		}
+		
+		System.out.println(str.toString());
+		
 	}
 
 	/**
