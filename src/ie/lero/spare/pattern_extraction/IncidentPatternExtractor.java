@@ -106,6 +106,14 @@ public class IncidentPatternExtractor {
 		this.systemFilePath = systemFilePath;
 	}
 
+	public IncidentDiagram extract(IncidentDiagram incidentModel, EnvironmentDiagram systemModel) {
+		
+		originalIncidentModel = incidentModel;
+		this.systemModel = systemModel;
+
+		return extract();
+	}
+	
 	public IncidentDiagram extract(String incidentFilepath, String systemFilePath) {
 
 		IncidentDiagram incidentModel = ModelsHandler.addIncidentModel(incidentFilepath);
@@ -138,11 +146,13 @@ public class IncidentPatternExtractor {
 		// =======Load patterns====================
 		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
+		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
 
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
 		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
 
 		activityPatterns = new LinkedList<ActivityPattern>();
 
@@ -190,13 +200,24 @@ public class IncidentPatternExtractor {
 		/** ================================================================ **/
 
 		// =======Print results========================
-		printOriginalIncidentModel(true);
-		printAbstractIncidentModel(true);
+		
+		printOriginalIncidentModel(false);
+		printAbstractIncidentModel(false);
 
 		// =======Save abstract model==================
-		// ModelsHandler.saveIncidentModel(this.abstractIncidentModel,
-		// "abstractModel.cpi");
+		String abstractModelFilePath = null;
+		
+		if(originalIncidentFilePath != null) {
+			abstractModelFilePath = originalIncidentFilePath.replace(".cpi", "_abstract.cpi");
+		} else {
+			Random rand = new Random();
+			abstractModelFilePath = "abstractIncident_"+rand.nextInt(1000)+".cpi";
+		}
+		ModelsHandler.saveIncidentModel(abstractIncidentModel,
+		 abstractModelFilePath);
 
+		System.out.println(abstractModelFilePath);
+		
 		return abstractIncidentModel;
 	}
 
@@ -1853,6 +1874,7 @@ public class IncidentPatternExtractor {
 
 			str.append("Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("] = ");
 
+			if(entry.getValue().size()>0) {
 			for (int i = 0; i < entry.getValue().size(); i++) {
 				int[] ary = entry.getValue().get(i);
 				str.append("[");
@@ -1869,8 +1891,12 @@ public class IncidentPatternExtractor {
 						.append("), ");
 
 			}
+			
 			str.deleteCharAt(str.lastIndexOf(" "));
 			str.deleteCharAt(str.lastIndexOf(","));
+			} else {
+				str.append("None");
+			}
 			str.append("\n");
 		}
 

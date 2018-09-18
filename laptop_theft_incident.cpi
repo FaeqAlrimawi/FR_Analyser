@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ASCII"?>
-<cyberPhysical_Incident:IncidentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
+<cyberPhysical_Incident:IncidentDiagram xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
   <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE" higherLevelScriptName=""/>
   <scene name="collectData" previousScenes="connect">
-    <activity name="activity2" nextActivities="activity3" previousActivities="activity1" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" description="offender enters kitchen" systemAction="connect">
+    <activity name="action8" nextActivities="action9" previousActivities="action7" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" description="offender enters kitchen" systemAction="connect">
       <precondition name="pre_66">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="hallway">
@@ -46,7 +46,7 @@
         </expression>
       </postcondition>
     </activity>
-    <activity name="activity3" previousActivities="activity2" initiator="Visitor1" targetedAssets="packetPayload" resources="visitorLaptop" exploitedAssets="trafficData" description="offender enters executive's room" systemAction="analyseData">
+    <activity name="action9" previousActivities="action8" initiator="Visitor1" targetedAssets="packetPayload" resources="visitorLaptop" exploitedAssets="trafficData" description="offender enters executive's room" systemAction="analyseData">
       <precondition name="pre_68">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="hallway">
@@ -88,7 +88,7 @@
         </expression>
       </postcondition>
     </activity>
-    <activity name="activity1" nextActivities="activity2" previousActivities="act_605" initiator="Visitor1" targetedAssets="hallway" description="offender enters hallway" systemAction="enter">
+    <activity name="action7" nextActivities="action8" previousActivities="action6" initiator="Visitor1" targetedAssets="hallway" description="offender enters hallway" systemAction="enter">
       <precondition name="pre_70">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="elevatorsArea">
@@ -120,7 +120,7 @@
     </activity>
   </scene>
   <scene name="move" nextScenes="connect">
-    <activity name="activity188" nextActivities="act_235" initiator="Visitor1" targetedAssets="kitchen" location="hallway">
+    <activity name="action1" nextActivities="action2" initiator="Visitor1" targetedAssets="kitchen" location="hallway">
       <precondition name="pre_405">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="hallway">
@@ -152,7 +152,7 @@
         </expression>
       </postcondition>
     </activity>
-    <activity name="act_235" nextActivities="act_20" previousActivities="activity188" initiator="Visitor1" targetedAssets="kitchen" location="hallway" systemAction="">
+    <activity name="action2" nextActivities="action3" previousActivities="action1" initiator="Visitor1" targetedAssets="kitchen" location="hallway" systemAction="">
       <precondition name="pre_571">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="hallway">
@@ -169,12 +169,20 @@
         </expression>
       </precondition>
       <postcondition name="postcondition_572">
-        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="dummy">
+            <site/>
+          </entity>
+        </expression>
       </postcondition>
     </activity>
-    <activity name="act_20" nextActivities="act_598" previousActivities="act_235" initiator="Visitor1" targetedAssets="kitchen" location="hallway">
+    <activity name="action3" nextActivities="action4" previousActivities="action2" initiator="Visitor1" targetedAssets="kitchen" location="hallway">
       <precondition name="pre_32">
-        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="dummy">
+            <site/>
+          </entity>
+        </expression>
       </precondition>
       <postcondition name="postcondition_33">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
@@ -194,7 +202,7 @@
     </activity>
   </scene>
   <scene name="connect" nextScenes="collectData" previousScenes="move">
-    <activity name="act_598" nextActivities="act_155" previousActivities="act_20" initiator="Visitor1" targetedAssets="accessPoint" resources="visitorLaptop" location="meetingRoom" systemAction="">
+    <activity name="action4" nextActivities="action5" previousActivities="action3" initiator="Visitor1" targetedAssets="accessPoint" resources="visitorLaptop" location="meetingRoom" systemAction="">
       <precondition name="pre_1625">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="meetingRoom">
@@ -240,7 +248,7 @@
         </expression>
       </postcondition>
     </activity>
-    <activity name="act_605" nextActivities="activity1" previousActivities="act_155" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" exploitedAssets="accessPoint" location="meetingRoom">
+    <activity name="action6" nextActivities="action7" previousActivities="action5" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" exploitedAssets="accessPoint" location="meetingRoom">
       <precondition name="pre_117">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
       </precondition>
@@ -270,7 +278,7 @@
         </expression>
       </postcondition>
     </activity>
-    <activity name="act_155" nextActivities="act_605" previousActivities="act_598">
+    <activity name="action5" nextActivities="action6" previousActivities="action4">
       <precondition name="pre_407">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
       </precondition>
@@ -312,6 +320,7 @@
   <asset connections="accessPoint-busNetwork" parentEntity="meetingRoom" name="accessPoint">
     <type name="ComputingDevice"/>
   </asset>
+  <asset name="dummy" status=""/>
   <resource parentEntity="Visitor1" name="visitorLaptop">
     <type name="ComputingDevice"/>
   </resource>
