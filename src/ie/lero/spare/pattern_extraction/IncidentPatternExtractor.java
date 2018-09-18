@@ -22,6 +22,7 @@ import cyberPhysical_Incident.Asset;
 import cyberPhysical_Incident.Behaviour;
 import cyberPhysical_Incident.BigraphExpression;
 import cyberPhysical_Incident.Connection;
+import cyberPhysical_Incident.CrimeScript;
 import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
 import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
@@ -32,6 +33,7 @@ import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
 import cyberPhysical_Incident.Scene;
+import cyberPhysical_Incident.ScriptCategory;
 import cyberPhysical_Incident.Type;
 import cyberPhysical_Incident.Vulnerability;
 import environment.EnvironmentDiagram;
@@ -41,7 +43,7 @@ import it.uniud.mads.jlibbig.core.std.Matcher;
 
 public class IncidentPatternExtractor {
 
-	protected IncidentDiagram incidentModel;
+	protected IncidentDiagram abstractIncidentModel;
 	protected IncidentDiagram originalIncidentModel;
 	protected EnvironmentDiagram systemModel;
 
@@ -80,41 +82,35 @@ public class IncidentPatternExtractor {
 
 	public IncidentDiagram extract(IncidentDiagram incidentModel) {
 
-		String systemFileName = "D:/runtime-EclipseApplication/Scenarios/Scenario1/Research_centre.cps";
-
 		if (incidentModel == null) {
 			return null;
 		}
 
-		this.incidentModel = incidentModel;
+		//=======Get incident instance=====================
+		abstractIncidentModel = incidentModel;
 		originalIncidentModel = incidentModel;
-
-		IncidentDiagram abstractedModel = null;
 
 		// create a copy
 		String tmpFileName = "tmpModel.cpi";
-		ModelsHandler.saveIncidentModel(incidentModel, tmpFileName);
-		this.incidentModel = ModelsHandler.addIncidentModel(tmpFileName);
+		ModelsHandler.saveIncidentModel(abstractIncidentModel, tmpFileName);
+		this.abstractIncidentModel = ModelsHandler.addIncidentModel(tmpFileName);
 
 		// remove tmp (i.e. the copy) file File tmpFile = new
 		File tmpFile = new File(tmpFileName);
 		if (tmpFile.exists()) {
 			tmpFile.delete();
 		}
-
+		
+		//=======Load System=====================
+		String systemFileName = "D:/runtime-EclipseApplication/Scenarios/Scenario1/Research_centre.cps";
+		
 		systemModel = ModelsHandler.addSystemModel(systemFileName);
 
 		if (systemModel == null) {
 			System.out.println("system model is NULL");
 		}
 
-		// =======Load patterns====================
-		// String collectDataPatternFileName =
-		// "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern.cpi";
-		// String movePhysicallyPatternFileName =
-		// "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern.cpi";
-		// String connectToNetworkPatternFileName =
-		// "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern.cpi";
+		//=======Load patterns====================
 		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 
@@ -130,7 +126,23 @@ public class IncidentPatternExtractor {
 			activityPatterns.add(ptrs.get(key));
 		}
 
-		// =======Abstract Activities====================
+		/**=======Create Abstract Incident Model=====================================
+		 * The process for creating an abstract incident model:
+		 * 1-Abstract data of crime script (e.g., script category)
+		 * 2-abstract activities
+		 * 	2.1-Match patterns to the incident instance
+		 * 	2.2-Find a set of matched patterns that could be mapped to the incident (using constraint solver)
+		 * 	2.3-Replace incident instance activities with pattern activities
+		 * 	2.4-Perform a [general] abstraction of instance activities that are not matched to patterns (currently not implemented)
+		 * 3-Abstract entities. For each entity in the incident instance find an asset with the same name in the system model. 
+		 * If found, then return an abstract asset of it and update the incident entity with information of the returned abstract asset
+		**/
+		
+		//=======Abstract CrimeScript===================
+		updateCrimeScriptData();
+		
+		
+		//=======Abstract Activities====================
 
 		// 1-Find maps/matches for all patterns in the incident model
 		mapPatterns(activityPatterns);
@@ -142,19 +154,22 @@ public class IncidentPatternExtractor {
 
 		// 3-For the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
-		abstractUnmatchedActivities(); // maybe not needed, currently no effect
+		abstractUnmatchedActivities(); //*maybe not needed, currently no effect
 
-		// =======Abstract entities====================
+		//=======Abstract entities====================
 		abstractEntities();
-
-		// =======Print results====================
+		
+		/**===========================================================================**/
+		
+		//=======Print results========================
 		printOriginalIncidentModel(true);
 		printAbstractIncidentModel(true);
 
-		// ModelsHandler.saveIncidentModel(this.incidentModel,
+		//=======Save abstract model==================
+		// ModelsHandler.saveIncidentModel(this.abstractIncidentModel,
 		// "abstractModel.cpi");
 
-		return abstractedModel;
+		return abstractIncidentModel;
 	}
 
 	/**
@@ -176,7 +191,7 @@ public class IncidentPatternExtractor {
 			// get activity sequence of the solution
 			int[] activitiesIDs = bestSolution.get(i);
 
-			List<Activity> activitySequence = incidentModel.getActivitySequence(activitiesIDs);
+			List<Activity> activitySequence = abstractIncidentModel.getActivitySequence(activitiesIDs);
 
 			int patternID = bestSolutionPatternIDs[i];
 			int MapID = bestSolutionMapIDs[i];
@@ -200,9 +215,9 @@ public class IncidentPatternExtractor {
 
 		}
 		// update incident model information
-		incidentModel.getActivity();
-		incidentModel.setActivitySequence(null);
-		incidentModel.getActivitySequence();
+		abstractIncidentModel.getActivity();
+		abstractIncidentModel.setActivitySequence(null);
+		abstractIncidentModel.getActivitySequence();
 
 	}
 
@@ -224,7 +239,7 @@ public class IncidentPatternExtractor {
 	protected Map<Integer, List<int[]>> mapPatterns(List<ActivityPattern> activityPatterns) {
 
 		// create a local signature of the incident model
-		incidentModel.createBigraphSignature();
+		abstractIncidentModel.createBigraphSignature();
 
 		// create map variable to hold results of mapping a pattern to the
 		// incident
@@ -263,7 +278,7 @@ public class IncidentPatternExtractor {
 
 		for (Entry<String, List<String>> entry : patternMaps.entrySet()) {
 			for (String act : entry.getValue()) {
-				int[] seq = incidentModel.getActivityNumberSequence(entry.getKey(), act);
+				int[] seq = abstractIncidentModel.getActivityNumberSequence(entry.getKey(), act);
 				result.add(seq);
 			}
 		}
@@ -288,7 +303,7 @@ public class IncidentPatternExtractor {
 
 	public Map<String, List<String>> matchActivityPattern(ActivityPattern activityPattern, int index) {
 
-		// find all possible matches of the given pattern in the incidentModel
+		// find all possible matches of the given pattern in the abstractIncidentModel
 		// sequence
 		// assume activity pattern has one activity
 		// match precondition to one (initial) activity and then the post to the
@@ -326,7 +341,7 @@ public class IncidentPatternExtractor {
 		boolean isptrPreMatched = false;
 		boolean isptrPostMatched = false;
 
-		for (Scene scene : incidentModel.getScene()) {
+		for (Scene scene : abstractIncidentModel.getScene()) {
 
 			isptrPreMatched = false;
 			isptrPostMatched = false;
@@ -1248,7 +1263,7 @@ public class IncidentPatternExtractor {
 
 			randNum = rand.nextInt(IncidentPatternExtractor.MAX_LENGTH);
 			actName = IncidentPatternExtractor.ACTIVITY_NAME + "_" + randNum;
-			isUnique = !incidentModel.activityNameExists(actName);
+			isUnique = !abstractIncidentModel.activityNameExists(actName);
 			tries--;
 		}
 
@@ -1462,7 +1477,7 @@ public class IncidentPatternExtractor {
 	 */
 	protected void addNewActivityToSequence(Activity newActivity, Activity originalActivity) {
 
-		for (Scene scene : incidentModel.getScene()) {
+		for (Scene scene : abstractIncidentModel.getScene()) {
 			EList<Activity> sceneActivities = scene.getActivity();
 			for (int i = 0; i < sceneActivities.size(); i++) {
 				if (sceneActivities.get(i).equals(originalActivity)) {
@@ -1478,7 +1493,7 @@ public class IncidentPatternExtractor {
 
 		Scene scene = null;
 
-		Scenes_Loop: for (Scene sc : incidentModel.getScene()) {
+		Scenes_Loop: for (Scene sc : abstractIncidentModel.getScene()) {
 			scene = sc;
 			EList<Activity> sceneActivities = scene.getActivity();
 			for (int i = 0; i < sceneActivities.size(); i++) {
@@ -1544,9 +1559,9 @@ public class IncidentPatternExtractor {
 
 		environment.Asset systemAsset = null;
 
-		entities.addAll(incidentModel.getAsset());
-		entities.addAll(incidentModel.getResource());
-		entities.addAll(incidentModel.getActor());
+		entities.addAll(abstractIncidentModel.getAsset());
+		entities.addAll(abstractIncidentModel.getResource());
+		entities.addAll(abstractIncidentModel.getActor());
 
 		String entityName = null;
 
@@ -1599,7 +1614,7 @@ public class IncidentPatternExtractor {
 
 		//// update all the entity name in all the conditions of the incident
 		//// activities
-		for (Activity act : incidentModel.getActivity()) {
+		for (Activity act : abstractIncidentModel.getActivity()) {
 			act.replaceEntityName(oldEntityName, abstractedEntity.getName());
 		}
 
@@ -1621,6 +1636,54 @@ public class IncidentPatternExtractor {
 		return null;
 	}
 
+	protected void updateCrimeScriptData() {
+		
+		/**
+		 * Update some metadata for the abstract
+		 * Currently includes: 
+		 * 1-Category (e.g., track, script, meta-script): For example form INSTANCE to TRACK/SCRIPT
+		 * 2- (future) Higher level script name: which links the abstract to other scripts
+		 */
+		
+		////update incident category
+		int currentCategoryValue = originalIncidentModel.getCrimeScript().getCategory().getValue();
+		CrimeScript absCrimeScript = abstractIncidentModel.getCrimeScript();
+		
+		if(absCrimeScript == null) {
+			return;
+		}
+		
+		switch(currentCategoryValue) {
+		
+		case ScriptCategory.INSTANCE_VALUE: //incident instance
+			absCrimeScript.setCategory(ScriptCategory.TRACK); //least abstract
+			break;
+		case ScriptCategory.TRACK_VALUE:
+			absCrimeScript.setCategory(ScriptCategory.SCRIPT);
+			break;
+		case ScriptCategory.SCRIPT_VALUE:
+			absCrimeScript.setCategory(ScriptCategory.PROTOSCRIPT);
+			break;
+		case ScriptCategory.PROTOSCRIPT_VALUE:
+			absCrimeScript.setCategory(ScriptCategory.METASCRIPT); //most abstract
+			break;
+		default:
+			absCrimeScript.setCategory(ScriptCategory.SCRIPT); //default state
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * @param allSolutions
+	 * @param patternIDs
+	 * @param mapIDs
+	 * @param allSolutionsSeverity
+	 */
 	public void printAllSolutions(Map<Integer, List<int[]>> allSolutions, List<int[]> patternIDs, List<int[]> mapIDs,
 			List<Integer> allSolutionsSeverity) {
 
@@ -1698,7 +1761,7 @@ public class IncidentPatternExtractor {
 		for (int j = 0; j < solution.size(); j++) {
 			str.append("[");
 			for (int activityID : solution.get(j)) {
-				str.append(incidentModel.getActivityName(activityID)).append(", ");
+				str.append(abstractIncidentModel.getActivityName(activityID)).append(", ");
 			}
 			str.deleteCharAt(str.lastIndexOf(" "));
 			str.deleteCharAt(str.lastIndexOf(","));
@@ -1737,7 +1800,7 @@ public class IncidentPatternExtractor {
 			str.append("[");
 			for (int j = 0; j < optimalSolution.get(i).length; j++) {
 				int actID = optimalSolution.get(i)[j];
-				str.append(incidentModel.getActivityName(actID)).append(", ");
+				str.append(abstractIncidentModel.getActivityName(actID)).append(", ");
 			}
 			str.deleteCharAt(str.lastIndexOf(" "));
 			str.deleteCharAt(str.lastIndexOf(","));
@@ -1775,7 +1838,7 @@ public class IncidentPatternExtractor {
 				int[] ary = entry.getValue().get(i);
 				str.append("[");
 				for (int activityID : ary) {
-					str.append(incidentModel.getActivityName(activityID) + ", ");
+					str.append(abstractIncidentModel.getActivityName(activityID) + ", ");
 				}
 
 				str.deleteCharAt(str.lastIndexOf(" "));
@@ -1841,11 +1904,11 @@ public class IncidentPatternExtractor {
 		System.out.println(str.toString());
 	}
 
-	public void printIncidentModelActivitySequence(IncidentDiagram incidentModel) {
+	public void printIncidentModelActivitySequence(IncidentDiagram abstractIncidentModel) {
 
 		StringBuilder str = new StringBuilder();
 
-		Activity orgAct = incidentModel.getInitialActivity();
+		Activity orgAct = abstractIncidentModel.getInitialActivity();
 		Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 
 		str.append(orgAct.getName());
@@ -1881,11 +1944,11 @@ public class IncidentPatternExtractor {
 
 		System.out.println("=======================Abstract Model============================");
 		System.out.println("Activity Sequence:");
-		printIncidentModelActivitySequence(incidentModel);
+		printIncidentModelActivitySequence(abstractIncidentModel);
 		System.out.println();
 
 		if (printActivitiesInfo) {
-			Activity orgAct = incidentModel.getInitialActivity();
+			Activity orgAct = abstractIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 
 			while (orgNxt != null && !orgNxt.equals(orgAct)) {
