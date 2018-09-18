@@ -169,20 +169,12 @@
         </expression>
       </precondition>
       <postcondition name="postcondition_572">
-        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-          <entity name="dummy">
-            <site/>
-          </entity>
-        </expression>
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
       </postcondition>
     </activity>
     <activity name="action3" nextActivities="action4" previousActivities="action2" initiator="Visitor1" targetedAssets="kitchen" location="hallway">
       <precondition name="pre_32">
-        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
-          <entity name="dummy">
-            <site/>
-          </entity>
-        </expression>
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
       </precondition>
       <postcondition name="postcondition_33">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
@@ -320,7 +312,6 @@
   <asset connections="accessPoint-busNetwork" parentEntity="meetingRoom" name="accessPoint">
     <type name="ComputingDevice"/>
   </asset>
-  <asset name="dummy" status=""/>
   <resource parentEntity="Visitor1" name="visitorLaptop">
     <type name="ComputingDevice"/>
   </resource>
