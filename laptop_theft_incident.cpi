@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="ASCII"?>
+<cyberPhysical_Incident:IncidentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
+  <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE" higherLevelScriptName=""/>
+  <scene name="collectData" previousScenes="connect">
+    <activity name="activity2" nextActivities="activity3" previousActivities="activity1" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" description="offender enters kitchen" systemAction="connect">
+      <precondition name="pre_66">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <entity name="Visitor1">
+              <entity name="visitorLaptop">
+                <site/>
+              </entity>
+              <site/>
+            </entity>
+            <site/>
+          </entity>
+          <entity name="kitchen">
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+          <entity name="busNetwork">
+            <site/>
+          </entity>
+        </expression>
+      </precondition>
+      <postcondition name="postcondition_67">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <site/>
+          </entity>
+          <entity name="kitchen">
+            <entity name="Visitor1">
+              <entity name="visitorLaptop">
+                <connectivity name="visitorLaptop-busNetwork"/>
+                <site/>
+              </entity>
+              <site/>
+            </entity>
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+          <entity name="busNetwork">
+            <connectivity name="visitorLaptop-busNetwork"/>
+            <site/>
+          </entity>
+        </expression>
+      </postcondition>
+    </activity>
+    <activity name="activity3" previousActivities="activity2" initiator="Visitor1" targetedAssets="packetPayload" resources="visitorLaptop" exploitedAssets="trafficData" description="offender enters executive's room" systemAction="analyseData">
+      <precondition name="pre_68">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <entity name="Visitor1">
+              <entity name="visitorLaptop">
+                <entity name="trafficData">
+                  <site/>
+                </entity>
+                <connectivity name="visitorLaptop-busNetwork"/>
+                <site/>
+              </entity>
+              <site/>
+            </entity>
+            <site/>
+          </entity>
+          <entity name="meetingRoom">
+            <site/>
+          </entity>
+        </expression>
+      </precondition>
+      <postcondition name="postcondition_69">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <site/>
+          </entity>
+          <entity name="meetingRoom">
+            <entity name="Visitor1">
+              <entity name="visitorLaptop">
+                <entity name="packetPayload">
+                  <site/>
+                </entity>
+                <connectivity name="visitorLaptop-busNetwork"/>
+                <site/>
+              </entity>
+              <site/>
+            </entity>
+            <site/>
+          </entity>
+        </expression>
+      </postcondition>
+    </activity>
+    <activity name="activity1" nextActivities="activity2" previousActivities="act_605" initiator="Visitor1" targetedAssets="hallway" description="offender enters hallway" systemAction="enter">
+      <precondition name="pre_70">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="elevatorsArea">
+            <entity name="Visitor1">
+              <site/>
+            </entity>
+            <site/>
+          </entity>
+          <entity name="hallway">
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+        </expression>
+      </precondition>
+      <postcondition name="postcondition_71">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="elevatorsArea">
+            <site/>
+          </entity>
+          <entity name="hallway">
+            <entity name="Visitor1">
+              <site/>
+            </entity>
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+        </expression>
+      </postcondition>
+    </activity>
+  </scene>
+  <scene name="move" nextScenes="connect">
+    <activity name="activity188" nextActivities="act_235" initiator="Visitor1" targetedAssets="kitchen" location="hallway">
+      <precondition name="pre_405">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <entity name="Visitor1">
+              <site/>
+            </entity>
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+          <entity name="kitchen">
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+        </expression>
+      </precondition>
+      <postcondition name="postcondition_14">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+          <entity name="kitchen">
+            <entity name="Visitor1">
+              <site/>
+            </entity>
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+        </expression>
+      </postcondition>
+    </activity>
+    <activity name="act_235" nextActivities="act_20" previousActivities="activity188" initiator="Visitor1" targetedAssets="kitchen" location="hallway" systemAction="">
+      <precondition name="pre_571">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <entity name="Visitor1">
+              <site/>
+            </entity>
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+          <entity name="kitchen">
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+        </expression>
+      </precondition>
+      <postcondition name="postcondition_572">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
+      </postcondition>
+    </activity>
+    <activity name="act_20" nextActivities="act_598" previousActivities="act_235" initiator="Visitor1" targetedAssets="kitchen" location="hallway">
+      <precondition name="pre_32">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
+      </precondition>
+      <postcondition name="postcondition_33">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="hallway">
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+          <entity name="kitchen">
+            <entity name="Visitor1">
+              <site/>
+            </entity>
+            <connectivity name="hallway-kitchen"/>
+            <site/>
+          </entity>
+        </expression>
+      </postcondition>
+    </activity>
+  </scene>
+  <scene name="connect" nextScenes="collectData" previousScenes="move">
+    <activity name="act_598" nextActivities="act_155" previousActivities="act_20" initiator="Visitor1" targetedAssets="accessPoint" resources="visitorLaptop" location="meetingRoom" systemAction="">
+      <precondition name="pre_1625">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="meetingRoom">
+            <entity name="Visitor1">
+              <entity name="visitorLaptop">
+                <site/>
+              </entity>
+              <site/>
+            </entity>
+            <entity name="accessPoint">
+              <connectivity name="accessPoint-busNetwork"/>
+              <site/>
+            </entity>
+            <site/>
+          </entity>
+          <entity name="busNetwork">
+            <connectivity name="accessPoint-busNetwork"/>
+            <site/>
+          </entity>
+        </expression>
+      </precondition>
+      <postcondition name="postcondition_1626">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="meetingRoom">
+            <entity name="Visitor1">
+              <entity name="visitorLaptop">
+                <connectivity name="visitorLaptop-accessPoint"/>
+                <site/>
+              </entity>
+              <site/>
+            </entity>
+            <entity name="accessPoint">
+              <connectivity name="accessPoint-busNetwork"/>
+              <connectivity name="visitorLaptop-accessPoint"/>
+              <site/>
+            </entity>
+            <site/>
+          </entity>
+          <entity name="busNetwork">
+            <connectivity name="accessPoint-busNetwork"/>
+            <site/>
+          </entity>
+        </expression>
+      </postcondition>
+    </activity>
+    <activity name="act_605" nextActivities="activity1" previousActivities="act_155" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" exploitedAssets="accessPoint" location="meetingRoom">
+      <precondition name="pre_117">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
+      </precondition>
+      <postcondition name="postcondition_1654">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
+          <entity name="meetingRoom">
+            <entity name="Visitor1">
+              <entity name="visitorLaptop">
+                <connectivity name="visitorLaptop-accessPoint"/>
+                <connectivity name="visitorLaptop-busNetwork"/>
+                <site/>
+              </entity>
+              <site/>
+            </entity>
+            <entity name="accessPoint">
+              <connectivity name="accessPoint-busNetwork"/>
+              <connectivity name="visitorLaptop-accessPoint"/>
+              <site/>
+            </entity>
+            <site/>
+          </entity>
+          <entity name="busNetwork">
+            <connectivity name="accessPoint-busNetwork"/>
+            <connectivity name="visitorLaptop-busNetwork"/>
+            <site/>
+          </entity>
+        </expression>
+      </postcondition>
+    </activity>
+    <activity name="act_155" nextActivities="act_605" previousActivities="act_598">
+      <precondition name="pre_407">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
+      </precondition>
+      <postcondition name="postcondition_408">
+        <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
+      </postcondition>
+    </activity>
+  </scene>
+  <asset connections="hallway-kitchen" parentEntity="floor4" name="kitchen">
+    <type name="Kitchen"/>
+  </asset>
+  <asset parentEntity="meetingRoom" name="executiveLaptop" description="">
+    <type name="Laptop"/>
+  </asset>
+  <asset connections="hallway-meetingRoom" parentEntity="floor4" containedEntities="executiveLaptop accessPoint" name="meetingRoom" status="">
+    <type name="Lab"/>
+  </asset>
+  <asset containedEntities="floor4" name="Research_Centre">
+    <type name="Building"/>
+  </asset>
+  <asset connections="hallway-elevatorsArea hallway-kitchen hallway-meetingRoom" parentEntity="floor4" name="hallway">
+    <type name="Hallway"/>
+  </asset>
+  <asset connections="hallway-elevatorsArea" parentEntity="floor4" name="elevatorsArea">
+    <type name="ElevatorsArea"/>
+  </asset>
+  <asset parentEntity="Research_Centre" containedEntities="meetingRoom hallway kitchen elevatorsArea" name="floor4">
+    <type name="Floor"/>
+  </asset>
+  <asset connections="accessPoint-busNetwork" containedEntities="trafficData" name="busNetwork">
+    <type name="BusNetwork"/>
+  </asset>
+  <asset parentEntity="busNetwork" containedEntities="packetPayload" name="trafficData">
+    <type name="DigitalAsset"/>
+  </asset>
+  <asset parentEntity="trafficData" name="packetPayload">
+    <type name="DigitalAsset"/>
+  </asset>
+  <asset connections="accessPoint-busNetwork" parentEntity="meetingRoom" name="accessPoint">
+    <type name="ComputingDevice"/>
+  </asset>
+  <resource parentEntity="Visitor1" name="visitorLaptop">
+    <type name="ComputingDevice"/>
+  </resource>
+  <actor containedEntities="visitorLaptop" name="Visitor1">
+    <type name="Actor"/>
+  </actor>
+  <connection name="hallway-meetingRoom" entity1="meetingRoom" entity2="hallway">
+    <type name="PhysicalConnection"/>
+  </connection>
+  <connection name="hallway-kitchen" entity1="kitchen" entity2="hallway">
+    <type name="PhysicalConnection"/>
+  </connection>
+  <connection name="hallway-elevatorsArea" entity1="elevatorsArea" entity2="hallway">
+    <type name="PhysicalConnection"/>
+  </connection>
+  <connection name="visitorLaptop-busNetwork" entity1="visitorLaptop" entity2="busNetwork">
+    <type name="DigitalConnection"/>
+  </connection>
+  <connection name="accessPoint-busNetwork" entity1="accessPoint" entity2="busNetwork"/>
+  <connection name="visitorLaptop-accessPoint" entity1="accessPoint" entity2="visitorLaptop"/>
+</cyberPhysical_Incident:IncidentDiagram>

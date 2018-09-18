@@ -43,6 +43,9 @@ import it.uniud.mads.jlibbig.core.std.Matcher;
 
 public class IncidentPatternExtractor {
 
+	protected String originalIncidentFilePath;
+	protected String systemFilePath;
+
 	protected IncidentDiagram abstractIncidentModel;
 	protected IncidentDiagram originalIncidentModel;
 	protected EnvironmentDiagram systemModel;
@@ -80,41 +83,64 @@ public class IncidentPatternExtractor {
 
 	}
 
-	public IncidentDiagram extract(IncidentDiagram incidentModel) {
+	public IncidentPatternExtractor(String incidentFilePath, String systemFilePath) {
 
-		if (incidentModel == null) {
+		setOriginalIncidentFilePath(incidentFilePath);
+		setSystemFilePath(systemFilePath);
+
+	}
+
+	public String getOriginalIncidentFilePath() {
+		return originalIncidentFilePath;
+	}
+
+	public void setOriginalIncidentFilePath(String incidentFilePath) {
+		this.originalIncidentFilePath = incidentFilePath;
+	}
+
+	public String getSystemFilePath() {
+		return systemFilePath;
+	}
+
+	public void setSystemFilePath(String systemFilePath) {
+		this.systemFilePath = systemFilePath;
+	}
+
+	public IncidentDiagram extract(String incidentFilepath, String systemFilePath) {
+
+		IncidentDiagram incidentModel = ModelsHandler.addIncidentModel(incidentFilepath);
+
+		EnvironmentDiagram systemModel = ModelsHandler.addSystemModel(systemFilePath);
+
+		originalIncidentFilePath = incidentFilepath;
+		this.systemFilePath = systemFilePath;
+		originalIncidentModel = incidentModel;
+		this.systemModel = systemModel;
+
+		return extract();
+	}
+
+	public IncidentDiagram extract() {
+
+		if (originalIncidentModel == null) {
+			System.out.println("Incident model is null");
 			return null;
 		}
 
-		//=======Get incident instance=====================
-		abstractIncidentModel = incidentModel;
-		originalIncidentModel = incidentModel;
+		if (systemModel == null) {
+			System.out.println("System model is null");
+			return null;
+		}
 
 		// create a copy
-		String tmpFileName = "tmpModel.cpi";
-		ModelsHandler.saveIncidentModel(abstractIncidentModel, tmpFileName);
-		this.abstractIncidentModel = ModelsHandler.addIncidentModel(tmpFileName);
-
-		// remove tmp (i.e. the copy) file File tmpFile = new
-		File tmpFile = new File(tmpFileName);
-		if (tmpFile.exists()) {
-			tmpFile.delete();
-		}
+		abstractIncidentModel = ModelsHandler.cloneIncidentModel(originalIncidentModel);
 		
-		//=======Load System=====================
-		String systemFileName = "D:/runtime-EclipseApplication/Scenarios/Scenario1/Research_centre.cps";
-		
-		systemModel = ModelsHandler.addSystemModel(systemFileName);
-
-		if (systemModel == null) {
-			System.out.println("system model is NULL");
-		}
-
-		//=======Load patterns====================
+		// =======Load patterns====================
 		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 
-		//add patterns to the map (key is file path and value is pattern) of patterns in the models handler class
+		// add patterns to the map (key is file path and value is pattern) of
+		// patterns in the models handler class
 		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 
@@ -126,27 +152,29 @@ public class IncidentPatternExtractor {
 			activityPatterns.add(ptrs.get(key));
 		}
 
-		/**=======Create Abstract Incident Model=====================================
-		 * The process for creating an abstract incident model:
-		 * 1-Abstract data of crime script (e.g., script category)
-		 * 2-abstract activities
-		 * 	2.1-Match patterns to the incident instance
-		 * 	2.2-Find a set of matched patterns that could be mapped to the incident (using constraint solver)
-		 * 	2.3-Replace incident instance activities with pattern activities
-		 * 	2.4-Perform a [general] abstraction of instance activities that are not matched to patterns (currently not implemented)
-		 * 3-Abstract entities. For each entity in the incident instance find an asset with the same name in the system model. 
-		 * If found, then return an abstract asset of it and update the incident entity with information of the returned abstract asset
-		**/
-		
-		//=======Abstract CrimeScript===================
+		/**
+		 * =======Create Abstract Incident Model=========================== The
+		 * process for creating an abstract incident model: 1-Abstract data of
+		 * crime script (e.g., script category) 2-abstract activities 2.1-Match
+		 * patterns to the incident instance 2.2-Find a set of matched patterns
+		 * that could be mapped to the incident (using constraint solver)
+		 * 2.3-Replace incident instance activities with pattern activities
+		 * 2.4-Perform a [general] abstraction of instance activities that are
+		 * not matched to patterns (currently not implemented) 3-Abstract
+		 * entities. For each entity in the incident instance find an asset with
+		 * the same name in the system model. If found, then return an abstract
+		 * asset of it and update the incident entity with information of the
+		 * returned abstract asset
+		 **/
+
+		// =======Abstract CrimeScript===================
 		updateCrimeScriptData();
-		
-		
-		//=======Abstract Activities====================
+
+		// =======Abstract Activities====================
 
 		// 1-Find maps/matches for all patterns in the incident model
-		mapPatterns(activityPatterns);
-
+		mapPatterns();
+		
 		// 2-Take best solution found and apply it (i.e. add new abstract
 		// activities to the incident model while removing the corresponding
 		// ones based on the patterns used)
@@ -154,18 +182,18 @@ public class IncidentPatternExtractor {
 
 		// 3-For the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
-		abstractUnmatchedActivities(); //*maybe not needed, currently no effect
+		abstractUnmatchedActivities(); // *maybe not needed, currently no effect
 
-		//=======Abstract entities====================
+		// =======Abstract entities====================
 		abstractEntities();
-		
-		/**===========================================================================**/
-		
-		//=======Print results========================
+
+		/** ================================================================ **/
+
+		// =======Print results========================
 		printOriginalIncidentModel(true);
 		printAbstractIncidentModel(true);
 
-		//=======Save abstract model==================
+		// =======Save abstract model==================
 		// ModelsHandler.saveIncidentModel(this.abstractIncidentModel,
 		// "abstractModel.cpi");
 
@@ -236,11 +264,11 @@ public class IncidentPatternExtractor {
 	 * 
 	 * @param activityPatterns
 	 */
-	protected Map<Integer, List<int[]>> mapPatterns(List<ActivityPattern> activityPatterns) {
+	protected Map<Integer, List<int[]>> mapPatterns() {
 
 		// create a local signature of the incident model
 		abstractIncidentModel.createBigraphSignature();
-
+		
 		// create map variable to hold results of mapping a pattern to the
 		// incident
 		Map<String, List<String>> patternMaps;
@@ -254,7 +282,7 @@ public class IncidentPatternExtractor {
 		for (int i = 0; i < activityPatterns.size(); i++) {
 
 			patternMaps = matchActivityPattern(activityPatterns.get(i), i);
-
+			
 			List<int[]> result = convertPatternResult(patternMaps);
 			allPatternsMaps.put(i, result);
 		}
@@ -285,25 +313,10 @@ public class IncidentPatternExtractor {
 		return result;
 	}
 
-	/*
-	 * protected String getMergeRuleName(int rule) {
-	 * 
-	 * switch (rule) { case IncidentDiagram.COLLECTDATA_MERGE_RULE: return
-	 * "Collect Data"; case IncidentDiagram.CONTAINMENT_MERGE_RULE: return
-	 * "Containment"; case IncidentDiagram.CONNECTIVITY_MERGE_RULE: return
-	 * "Connectivity"; default: return ""; } }
-	 */
-
-	public IncidentDiagram extract(String fileName) {
-
-		IncidentDiagram model = ModelsHandler.getIncidentModel(fileName);
-
-		return extract(model);
-	}
-
 	public Map<String, List<String>> matchActivityPattern(ActivityPattern activityPattern, int index) {
 
-		// find all possible matches of the given pattern in the abstractIncidentModel
+		// find all possible matches of the given pattern in the
+		// abstractIncidentModel
 		// sequence
 		// assume activity pattern has one activity
 		// match precondition to one (initial) activity and then the post to the
@@ -358,7 +371,7 @@ public class IncidentPatternExtractor {
 				// System.out.println("-Checking activity [" +
 				// currentActivity.getName() + "] for precondition matching");
 				// compare precondition of the first activity
-
+			
 				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
 
 				// if match found
@@ -367,7 +380,7 @@ public class IncidentPatternExtractor {
 					entityMaps.add(new HashMap<String, String>(entityMap));
 
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
-
+					
 					if (isptrPostMatched) {
 
 						// add to the result map
@@ -381,6 +394,7 @@ public class IncidentPatternExtractor {
 
 						// =======create a potential abstract activity for the
 						// matched activities
+						
 						createPotentialAbstractActivity(currentActivity, currentActivity, index);
 
 						entityMaps.remove(entityMaps.size() - 1);
@@ -423,7 +437,7 @@ public class IncidentPatternExtractor {
 				// until the max number of activities (or actions) is reached or
 				// the final activity is reached
 				while (cnt < MaxNumberOfActions && !currentActivity.equals(finalActivity)) {
-
+					
 					Activity next = !currentActivity.getNextActivities().isEmpty()
 							? currentActivity.getNextActivities().get(0) : null;
 
@@ -449,6 +463,7 @@ public class IncidentPatternExtractor {
 
 						// =======create a potential abstract activity for the
 						// matched activities
+						
 						createPotentialAbstractActivity(preActivity, currentActivity, index);
 
 						// one match is only taken (i.e. first match)
@@ -696,14 +711,15 @@ public class IncidentPatternExtractor {
 				}
 			}
 		}
-
+	
+		
 		// 7-Conditions (pre or post)
 		canBeApplied = compareConditions(ptrBigExp, incBigExp);
 
 		if (!canBeApplied) {
 			return false;
 		}
-
+		
 		return true;
 	}
 
@@ -1170,16 +1186,17 @@ public class IncidentPatternExtractor {
 			// update entities names in the pattern precondition by mapping
 			// names to the incident conditions
 			BigraphExpression ptrcondCopy = patternCondition.clone();
-
+		
 			boolean isAllMapped = updateEntityNames(ptrcondCopy);
 
 			if (isAllMapped) {
 				// create a bigraph of the pattern precondition
 				Bigraph ptrBigraph = ptrcondCopy.createBigraph(!isGround);
-
+			
 				if (matcher.match(incBigraph, ptrBigraph).iterator().hasNext()) {
 					return true;
 				}
+			
 			}
 		}
 
@@ -1195,6 +1212,7 @@ public class IncidentPatternExtractor {
 		visitedEntities.addAll(patternCondition.getEntity());
 
 		while (!visitedEntities.isEmpty()) {
+			
 			Entity entity = visitedEntities.pop();
 			if (entityMap.containsKey(entity.getName())) {
 				entity.setName(entityMap.get(entity.getName()));
@@ -1637,26 +1655,26 @@ public class IncidentPatternExtractor {
 	}
 
 	protected void updateCrimeScriptData() {
-		
+
 		/**
-		 * Update some metadata for the abstract
-		 * Currently includes: 
-		 * 1-Category (e.g., track, script, meta-script): For example form INSTANCE to TRACK/SCRIPT
-		 * 2- (future) Higher level script name: which links the abstract to other scripts
+		 * Update some metadata for the abstract Currently includes: 1-Category
+		 * (e.g., track, script, meta-script): For example form INSTANCE to
+		 * TRACK/SCRIPT 2- (future) Higher level script name: which links the
+		 * abstract to other scripts
 		 */
-		
-		////update incident category
+
+		//// update incident category
 		int currentCategoryValue = originalIncidentModel.getCrimeScript().getCategory().getValue();
 		CrimeScript absCrimeScript = abstractIncidentModel.getCrimeScript();
-		
-		if(absCrimeScript == null) {
+
+		if (absCrimeScript == null) {
 			return;
 		}
-		
-		switch(currentCategoryValue) {
-		
-		case ScriptCategory.INSTANCE_VALUE: //incident instance
-			absCrimeScript.setCategory(ScriptCategory.TRACK); //least abstract
+
+		switch (currentCategoryValue) {
+
+		case ScriptCategory.INSTANCE_VALUE: // incident instance
+			absCrimeScript.setCategory(ScriptCategory.TRACK); // least abstract
 			break;
 		case ScriptCategory.TRACK_VALUE:
 			absCrimeScript.setCategory(ScriptCategory.SCRIPT);
@@ -1665,14 +1683,15 @@ public class IncidentPatternExtractor {
 			absCrimeScript.setCategory(ScriptCategory.PROTOSCRIPT);
 			break;
 		case ScriptCategory.PROTOSCRIPT_VALUE:
-			absCrimeScript.setCategory(ScriptCategory.METASCRIPT); //most abstract
+			absCrimeScript.setCategory(ScriptCategory.METASCRIPT); // most
+																	// abstract
 			break;
 		default:
-			absCrimeScript.setCategory(ScriptCategory.SCRIPT); //default state
+			absCrimeScript.setCategory(ScriptCategory.SCRIPT); // default state
 		}
-		
+
 	}
-	
+
 	/**
 	 * 
 	 * 
@@ -1969,9 +1988,10 @@ public class IncidentPatternExtractor {
 	public static void main(String[] args) {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
-		String fileName = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
+		String incidentFilePath = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
+		String systemFilePath = "D:/runtime-EclipseApplication/Scenarios/Scenario1/Research_centre.cps";
 
-		extractor.extract(fileName);
+		extractor.extract(incidentFilePath, systemFilePath);
 
 	}
 }
