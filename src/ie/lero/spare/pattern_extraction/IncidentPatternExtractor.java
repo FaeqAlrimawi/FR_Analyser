@@ -215,11 +215,11 @@ public class IncidentPatternExtractor {
 
 		// =======Print results========================
 
-		printOriginalIncidentModel(true); // true: prints all activities
-		printAbstractIncidentModel(true);// true: prints all activities
+//		printOriginalIncidentModel(true); // true: prints all activities
+		printAbstractIncidentModel(false);// true: prints all activities
 
 		printRemovedEntities(true);// true: prints decoration i.e. ====Smg==
-		printAbstractActivities(true);// true: prints decoration i.e. ====Smg==
+//		printAbstractActivities(true);// true: prints decoration i.e. ====Smg==
 
 		// =======Save abstract model==================
 		String abstractModelFilePath = null;
@@ -1619,24 +1619,22 @@ public class IncidentPatternExtractor {
 		// used in any of the activities conditions and neither its parent,
 		// any of its contained assets, or any of its connections
 		for (IncidentEntity entity : entities) {
-			System.out.println(entity.getName());
-			if (!abstractIncidentModel.isUsedByActivity(entity)) {
+		
+			if (!abstractIncidentModel.isUsed(entity)) {
 				removedEntities.add(entity);
 			}
 		}
-
-		for (IncidentEntity entity : removedEntities) {
-			abstractIncidentModel.removeEntity(entity);
-		}
-
-		// update entities again
-		abstractIncidentModel.setEntity(null);
+		
+		//remove any assets and related connections that has no use in the activities
+		//or any other assets or connections that are used in activities
+		abstractIncidentModel.removeUnusedEntities();
+		
 		entities = abstractIncidentModel.getEntity();
 
 		// create an abstract entity for each instance entity using system
 		// assets
 		for (IncidentEntity entity : entities) {
-
+			System.out.println(entity.getName());
 			entityName = entity.getName();
 			systemAsset = systemModel.getAsset(entityName);
 
@@ -1687,6 +1685,8 @@ public class IncidentPatternExtractor {
 
 			prop.setName(astProp.getName());
 			prop.setValue(astProp.getValue());
+			
+			abstractedEntity.getProperties().add(prop);
 		}
 
 		// Vulnerabilities for assets
@@ -1716,9 +1716,66 @@ public class IncidentPatternExtractor {
 				default:
 					vul.setSeverity(Level.UNKNOWN);
 				}
+				
+				((Asset)abstractedEntity).getVulnerability().add(vul);
 			}
 		}
 
+		//abstract entity connections
+		for(Connection con : entity.getConnections()) {
+			environment.Connection astCon = systemModel.getConnection(con.getName());
+			
+			if(astCon == null) {
+				continue;
+			}
+			
+			environment.Connection astConAbstract = astCon.abstractConnection();
+			
+			con.setName(astConAbstract.getName());
+			con.setBidirectional(astConAbstract.isBidirectional());
+			
+			//set vulnerabilities
+			for (environment.Vulnerability astVul : astConAbstract.getVulnerabilities()) {
+				Vulnerability vul = instance.createVulnerability();
+
+				vul.setName(astVul.getName());
+				vul.setDescription(astVul.getDescription());
+				vul.setURL(astVul.getURL());
+
+				//severity level
+				switch (astVul.getSeverity().getValue()) {
+
+				case environment.Level.HIGH_VALUE:
+					vul.setSeverity(Level.HIGH);
+					break;
+				case environment.Level.MEDIUM_VALUE:
+					vul.setSeverity(Level.MEDIUM);
+					break;
+				case environment.Level.LOW_VALUE:
+					vul.setSeverity(Level.HIGH);
+					break;
+				case environment.Level.UNKNOWN_VALUE:
+					vul.setSeverity(Level.UNKNOWN);
+					break;
+				default:
+					vul.setSeverity(Level.UNKNOWN);
+				}
+				
+				con.getVulnerabilities().add(vul);
+			}
+			
+			//set properties
+			for (environment.Property astProp : astConAbstract.getProperties()) {
+				cyberPhysical_Incident.Property prop = instance.createProperty();
+
+				prop.setName(astProp.getName());
+				prop.setValue(astProp.getValue());
+				
+				con.getProperties().add(prop);
+			}
+		}
+		
+		
 		//// update all the entity name in all the conditions of the incident
 		//// activities
 		for (Activity act : abstractIncidentModel.getActivity()) {

@@ -21,12 +21,6 @@
           <entity name="busNetwork">
             <site/>
           </entity>
-          <entity name="dummy2">
-            <site/>
-          </entity>
-          <entity name="dummy1">
-            <site/>
-          </entity>
         </expression>
       </precondition>
       <postcondition name="postcondition_67">
@@ -318,11 +312,11 @@
   <asset connections="accessPoint-busNetwork" parentEntity="meetingRoom" name="accessPoint">
     <type name="ComputingDevice"/>
   </asset>
-  <asset parentEntity="dummy2" name="dummy1"/>
+  <asset connections="conDummy" parentEntity="dummy2" name="dummy1"/>
   <resource parentEntity="Visitor1" name="visitorLaptop">
     <type name="ComputingDevice"/>
   </resource>
-  <resource name="dummy2"/>
+  <resource containedEntities="dummy1" name="dummy2"/>
   <actor containedEntities="visitorLaptop" name="Visitor1">
     <type name="Actor"/>
   </actor>
@@ -340,4 +334,5 @@
   </connection>
   <connection name="accessPoint-busNetwork" entity1="accessPoint" entity2="busNetwork"/>
   <connection name="visitorLaptop-accessPoint" entity1="accessPoint" entity2="visitorLaptop"/>
+  <connection name="conDummy" entity1="dummy1" entity2="dummy2"/>
 </cyberPhysical_Incident:IncidentDiagram>
