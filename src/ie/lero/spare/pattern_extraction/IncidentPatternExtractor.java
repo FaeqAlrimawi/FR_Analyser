@@ -1775,7 +1775,6 @@ public class IncidentPatternExtractor {
 			}
 		}
 		
-		
 		//// update all the entity name in all the conditions of the incident
 		//// activities
 		for (Activity act : abstractIncidentModel.getActivity()) {
