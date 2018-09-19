@@ -21,6 +21,12 @@
           <entity name="busNetwork">
             <site/>
           </entity>
+          <entity name="dummy2">
+            <site/>
+          </entity>
+          <entity name="dummy1">
+            <site/>
+          </entity>
         </expression>
       </precondition>
       <postcondition name="postcondition_67">
@@ -312,9 +318,11 @@
   <asset connections="accessPoint-busNetwork" parentEntity="meetingRoom" name="accessPoint">
     <type name="ComputingDevice"/>
   </asset>
+  <asset parentEntity="dummy2" name="dummy1"/>
   <resource parentEntity="Visitor1" name="visitorLaptop">
     <type name="ComputingDevice"/>
   </resource>
+  <resource name="dummy2"/>
   <actor containedEntities="visitorLaptop" name="Visitor1">
     <type name="Actor"/>
   </actor>

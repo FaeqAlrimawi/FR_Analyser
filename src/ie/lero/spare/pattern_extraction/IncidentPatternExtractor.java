@@ -27,15 +27,18 @@ import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Knowledge;
+import cyberPhysical_Incident.Level;
 import cyberPhysical_Incident.Location;
 import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
 import cyberPhysical_Incident.Scene;
 import cyberPhysical_Incident.ScriptCategory;
+import cyberPhysical_Incident.Severity;
 import cyberPhysical_Incident.Type;
 import cyberPhysical_Incident.Vulnerability;
 import environment.EnvironmentDiagram;
+import environment.Property;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
@@ -86,6 +89,8 @@ public class IncidentPatternExtractor {
 	// when the abstract model was created
 	protected List<IncidentEntity> removedEntities = new LinkedList<IncidentEntity>();
 
+	protected List<IncidentEntity> unAbstractedEntities = new LinkedList<IncidentEntity>();
+	
 	public IncidentPatternExtractor() {
 
 	}
@@ -1611,10 +1616,10 @@ public class IncidentPatternExtractor {
 
 		// remove unused entities in activities. Unused means an incident entity
 		// (asset, actor, or resource) that it has not been
-		// used in any of the activities conditions and neither its parent or
-		// any of its contained assets
+		// used in any of the activities conditions and neither its parent,
+		// any of its contained assets, or any of its connections
 		for (IncidentEntity entity : entities) {
-
+			System.out.println(entity.getName());
 			if (!abstractIncidentModel.isUsedByActivity(entity)) {
 				removedEntities.add(entity);
 			}
@@ -1625,6 +1630,7 @@ public class IncidentPatternExtractor {
 		}
 
 		// update entities again
+		abstractIncidentModel.setEntity(null);
 		entities = abstractIncidentModel.getEntity();
 
 		// create an abstract entity for each instance entity using system
@@ -1632,13 +1638,15 @@ public class IncidentPatternExtractor {
 		for (IncidentEntity entity : entities) {
 
 			entityName = entity.getName();
-			systemAsset = getSystemAsset(entityName);
+			systemAsset = systemModel.getAsset(entityName);
 
 			if (systemAsset != null) {
 				abstractEntity(entity, systemAsset);
+			} else {
+				unAbstractedEntities.add(entity);
 			}
 		}
-
+		
 	}
 
 	protected IncidentEntity abstractEntity(IncidentEntity entity, environment.Asset systemAsset) {
@@ -1662,8 +1670,6 @@ public class IncidentPatternExtractor {
 
 		String newEntityName = abstractedEntity.getName();
 
-		// abstractedEntity.get
-
 		//// update type to be of the same type as the abstracted asset
 		Type type = abstractedEntity.getType();
 
@@ -1675,7 +1681,43 @@ public class IncidentPatternExtractor {
 
 		abstractedEntity.setType(type);
 
-		// other attributes maybe (e.g., contained assets, connections)
+		// properties
+		for (environment.Property astProp : abstractedSystemAsset.getProperty()) {
+			cyberPhysical_Incident.Property prop = instance.createProperty();
+
+			prop.setName(astProp.getName());
+			prop.setValue(astProp.getValue());
+		}
+
+		// Vulnerabilities for assets
+		if (Asset.class.isInstance(abstractedEntity)) {
+			for (environment.Vulnerability astVul : abstractedSystemAsset.getVulnerabilities()) {
+				Vulnerability vul = instance.createVulnerability();
+
+				vul.setName(astVul.getName());
+				vul.setDescription(astVul.getDescription());
+				vul.setURL(astVul.getURL());
+
+				//severity level
+				switch (astVul.getSeverity().getValue()) {
+
+				case environment.Level.HIGH_VALUE:
+					vul.setSeverity(Level.HIGH);
+					break;
+				case environment.Level.MEDIUM_VALUE:
+					vul.setSeverity(Level.MEDIUM);
+					break;
+				case environment.Level.LOW_VALUE:
+					vul.setSeverity(Level.HIGH);
+					break;
+				case environment.Level.UNKNOWN_VALUE:
+					vul.setSeverity(Level.UNKNOWN);
+					break;
+				default:
+					vul.setSeverity(Level.UNKNOWN);
+				}
+			}
+		}
 
 		//// update all the entity name in all the conditions of the incident
 		//// activities
@@ -1686,20 +1728,20 @@ public class IncidentPatternExtractor {
 		return abstractedEntity;
 	}
 
-	public environment.Asset getSystemAsset(String assetName) {
-
-		if (systemModel == null) {
-			return null;
-		}
-
-		for (environment.Asset ast : systemModel.getAsset()) {
-			if (ast.getName().equals(assetName)) {
-				return ast;
-			}
-		}
-
-		return null;
-	}
+//	public environment.Asset getSystemAsset(String assetName) {
+//
+//		if (systemModel == null) {
+//			return null;
+//		}
+//
+//		for (environment.Asset ast : systemModel.getAsset()) {
+//			if (ast.getName().equals(assetName)) {
+//				return ast;
+//			}
+//		}
+//
+//		return null;
+//	}
 
 	protected void updateCrimeScriptData() {
 
