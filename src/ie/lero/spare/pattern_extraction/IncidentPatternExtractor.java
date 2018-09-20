@@ -34,11 +34,9 @@ import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
 import cyberPhysical_Incident.Scene;
 import cyberPhysical_Incident.ScriptCategory;
-import cyberPhysical_Incident.Severity;
 import cyberPhysical_Incident.Type;
 import cyberPhysical_Incident.Vulnerability;
 import environment.EnvironmentDiagram;
-import environment.Property;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
@@ -89,7 +87,14 @@ public class IncidentPatternExtractor {
 	// when the abstract model was created
 	protected List<IncidentEntity> removedEntities = new LinkedList<IncidentEntity>();
 
+	//List of entities in the incident instance that were not abstracted
 	protected List<IncidentEntity> unAbstractedEntities = new LinkedList<IncidentEntity>();
+
+	// Map of incident entities (concrete entity name, abstract entity name)
+	protected Map<String, String> entitiesConcreteAbstractMap = new HashMap<String, String>();
+	
+	// Map of incident connections (concrete connection name, abstract connectionname)
+	protected Map<String, String> connectionsConcreteAbstractMap = new HashMap<String, String>();
 	
 	public IncidentPatternExtractor() {
 
@@ -215,12 +220,16 @@ public class IncidentPatternExtractor {
 
 		// =======Print results========================
 
-//		printOriginalIncidentModel(true); // true: prints all activities
-		printAbstractIncidentModel(false);// true: prints all activities
+		boolean printActivityDetails = false;
+		// printOriginalIncidentModel(printActivityDetails); // true: prints all activities
+		printAbstractIncidentModel(printActivityDetails);// true: prints all activities
 
-		printRemovedEntities(true);// true: prints decoration i.e. ====Smg==
-//		printAbstractActivities(true);// true: prints decoration i.e. ====Smg==
-
+		boolean isDecorated = true;
+		printRemovedEntities(isDecorated);// true: prints decoration i.e. ====Smg===
+		// printAbstractActivities(true);// true: prints decoration i.e.
+		printUnAbstractedEntities(isDecorated);
+		printConcreteAbstractEntityMap(isDecorated);
+		printConcreteAbstractConnectionMap(isDecorated);
 		// =======Save abstract model==================
 		String abstractModelFilePath = null;
 
@@ -1619,32 +1628,32 @@ public class IncidentPatternExtractor {
 		// used in any of the activities conditions and neither its parent,
 		// any of its contained assets, or any of its connections
 		for (IncidentEntity entity : entities) {
-		
+
 			if (!abstractIncidentModel.isUsed(entity)) {
 				removedEntities.add(entity);
 			}
 		}
-		
-		//remove any assets and related connections that has no use in the activities
-		//or any other assets or connections that are used in activities
+
+		// remove any assets and related connections that has no use in the
+		// activities
+		// or any other assets or connections that are used in activities
 		abstractIncidentModel.removeUnusedEntities();
-		
+
 		entities = abstractIncidentModel.getEntity();
 
 		// create an abstract entity for each instance entity using system
 		// assets
 		for (IncidentEntity entity : entities) {
-			System.out.println(entity.getName());
 			entityName = entity.getName();
 			systemAsset = systemModel.getAsset(entityName);
 
 			if (systemAsset != null) {
-				abstractEntity(entity, systemAsset);
+				IncidentEntity newEntity = abstractEntity(entity, systemAsset);
+				entitiesConcreteAbstractMap.put(entityName, newEntity.getName());
 			} else {
 				unAbstractedEntities.add(entity);
 			}
 		}
-		
 	}
 
 	protected IncidentEntity abstractEntity(IncidentEntity entity, environment.Asset systemAsset) {
@@ -1685,7 +1694,7 @@ public class IncidentPatternExtractor {
 
 			prop.setName(astProp.getName());
 			prop.setValue(astProp.getValue());
-			
+
 			abstractedEntity.getProperties().add(prop);
 		}
 
@@ -1698,7 +1707,7 @@ public class IncidentPatternExtractor {
 				vul.setDescription(astVul.getDescription());
 				vul.setURL(astVul.getURL());
 
-				//severity level
+				// severity level
 				switch (astVul.getSeverity().getValue()) {
 
 				case environment.Level.HIGH_VALUE:
@@ -1716,25 +1725,32 @@ public class IncidentPatternExtractor {
 				default:
 					vul.setSeverity(Level.UNKNOWN);
 				}
-				
-				((Asset)abstractedEntity).getVulnerability().add(vul);
+
+				((Asset) abstractedEntity).getVulnerability().add(vul);
 			}
 		}
 
-		//abstract entity connections
-		for(Connection con : entity.getConnections()) {
-			environment.Connection astCon = systemModel.getConnection(con.getName());
+		// abstract entity connections
+		for (Connection con : entity.getConnections()) {
 			
-			if(astCon == null) {
+			String oldConnName = con.getName();
+			environment.Connection astCon = systemModel.getConnection(oldConnName);
+
+			if (astCon == null) {
 				continue;
 			}
-			
+
 			environment.Connection astConAbstract = astCon.abstractConnection();
-			
+
 			con.setName(astConAbstract.getName());
-			con.setBidirectional(astConAbstract.isBidirectional());
 			
-			//set vulnerabilities
+			String newConnName = con.getName();
+			
+			connectionsConcreteAbstractMap.put(oldConnName, newConnName);
+			
+			con.setBidirectional(astConAbstract.isBidirectional());
+
+			// set vulnerabilities
 			for (environment.Vulnerability astVul : astConAbstract.getVulnerabilities()) {
 				Vulnerability vul = instance.createVulnerability();
 
@@ -1742,7 +1758,7 @@ public class IncidentPatternExtractor {
 				vul.setDescription(astVul.getDescription());
 				vul.setURL(astVul.getURL());
 
-				//severity level
+				// severity level
 				switch (astVul.getSeverity().getValue()) {
 
 				case environment.Level.HIGH_VALUE:
@@ -1760,21 +1776,21 @@ public class IncidentPatternExtractor {
 				default:
 					vul.setSeverity(Level.UNKNOWN);
 				}
-				
+
 				con.getVulnerabilities().add(vul);
 			}
-			
-			//set properties
+
+			// set properties
 			for (environment.Property astProp : astConAbstract.getProperties()) {
 				cyberPhysical_Incident.Property prop = instance.createProperty();
 
 				prop.setName(astProp.getName());
 				prop.setValue(astProp.getValue());
-				
+
 				con.getProperties().add(prop);
 			}
 		}
-		
+
 		//// update all the entity name in all the conditions of the incident
 		//// activities
 		for (Activity act : abstractIncidentModel.getActivity()) {
@@ -1784,20 +1800,20 @@ public class IncidentPatternExtractor {
 		return abstractedEntity;
 	}
 
-//	public environment.Asset getSystemAsset(String assetName) {
-//
-//		if (systemModel == null) {
-//			return null;
-//		}
-//
-//		for (environment.Asset ast : systemModel.getAsset()) {
-//			if (ast.getName().equals(assetName)) {
-//				return ast;
-//			}
-//		}
-//
-//		return null;
-//	}
+	// public environment.Asset getSystemAsset(String assetName) {
+	//
+	// if (systemModel == null) {
+	// return null;
+	// }
+	//
+	// for (environment.Asset ast : systemModel.getAsset()) {
+	// if (ast.getName().equals(assetName)) {
+	// return ast;
+	// }
+	// }
+	//
+	// return null;
+	// }
 
 	protected void updateCrimeScriptData() {
 
@@ -1894,7 +1910,7 @@ public class IncidentPatternExtractor {
 			}
 		}
 
-		str.append("=======================Solutions Summary=========================\n");
+		str.append("=======Solutions Summary=========================================\n");
 
 		// =======some statistics
 		str.append("-Number of Solutions found:").append(allSolutions.size()).append("\n")
@@ -1957,7 +1973,7 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("=======================Optimal Solution===========================\n");
+		str.append("=======Optimal Solution===========================================\n");
 		// print maps
 		str.append("Maps:");
 		for (int i = 0; i < optimalSolution.size(); i++) {
@@ -1992,7 +2008,7 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("=======================Input Patterns Maps=======================\n");
+		str.append("=======Input Patterns Maps=======================================\n");
 
 		for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
 
@@ -2039,7 +2055,7 @@ public class IncidentPatternExtractor {
 		} else {
 
 			if (isDecorated) {
-				str.append("=======================Activity Info=============================\n");
+				str.append("=======Activity Info=============================================\n");
 			}
 			str.append("Name: ").append(activity.getName()).append("\n");
 			str.append("Initiator: ").append(
@@ -2091,7 +2107,7 @@ public class IncidentPatternExtractor {
 
 	public void printOriginalIncidentModel(boolean printActivitiesInfo) {
 
-		System.out.println("=======================Original Model============================");
+		System.out.println("=======Original Model============================================");
 		System.out.println("Activity Sequence:");
 		printIncidentModelActivitySequence(originalIncidentModel);
 		System.out.println();
@@ -2111,7 +2127,7 @@ public class IncidentPatternExtractor {
 
 	public void printAbstractIncidentModel(boolean printActivitiesInfo) {
 
-		System.out.println("=======================Abstract Model============================");
+		System.out.println("========Abstract Model===========================================");
 		System.out.println("Activity Sequence:");
 		printIncidentModelActivitySequence(abstractIncidentModel);
 		System.out.println();
@@ -2134,7 +2150,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("=======================Removed Entities==========================\n");
+			str.append("=======Removed Entities==========================================\n");
 		} else {
 			str.append("Removed Entities: ");
 		}
@@ -2164,7 +2180,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("=======================Abstract Activities========================\n");
+			str.append("=======Abstract Activities========================================\n");
 		}
 
 		str.append("[Action sequence removed] ==> [Abstract activity added] [Pattern used]\n");
@@ -2200,6 +2216,86 @@ public class IncidentPatternExtractor {
 		System.out.println(str.toString());
 	}
 
+	public void printUnAbstractedEntities(boolean isDecorated) {
+
+		StringBuilder str = new StringBuilder();
+
+		if (isDecorated) {
+			str.append("=======Unabstracrted Entities====================================\n");
+
+			if (unAbstractedEntities.size() > 0) {
+				for (IncidentEntity entity : unAbstractedEntities) {
+					str.append(entity.getName()).append(", ");
+				}
+
+				str.deleteCharAt(str.lastIndexOf(" "));
+				str.deleteCharAt(str.lastIndexOf(","));
+				str.append("\n");
+			} else {
+				str.append("NONE");
+			}
+			
+			if (isDecorated) {
+				str.append("=================================================================");
+			}
+			
+			System.out.println(str.toString());
+
+		}
+	}
+	
+	public void printConcreteAbstractEntityMap(boolean isDecorated) {
+
+		StringBuilder str = new StringBuilder();
+
+		if (isDecorated) {
+			str.append("=======Concrete-Abstract Entities Map============================\n");
+
+			if (entitiesConcreteAbstractMap.size() > 0) {
+				str.append("[Concrete Entity] ==> [Abstract Entity]\n");
+				for (Entry<String,String> entity : entitiesConcreteAbstractMap.entrySet()) {
+					str.append(entity.getKey()).append(" ==> ").append(entity.getValue()).append("\n");
+				}
+
+			} else {
+				str.append("NONE\n");
+			}
+			
+			if (isDecorated) {
+				str.append("=================================================================");
+			}
+			
+			System.out.println(str.toString());
+
+		}
+	}
+	
+	public void printConcreteAbstractConnectionMap(boolean isDecorated) {
+
+		StringBuilder str = new StringBuilder();
+
+		if (isDecorated) {
+			str.append("=======Concrete-Abstract Connections Map=========================\n");
+
+			if (connectionsConcreteAbstractMap.size() > 0) {
+				str.append("[Concrete Connection] ==> [Abstract Connection]\n");
+				for (Entry<String,String> entity : connectionsConcreteAbstractMap.entrySet()) {
+					str.append(entity.getKey()).append(" ==> ").append(entity.getValue()).append("\n");
+				}
+
+			} else {
+				str.append("NONE\n");
+			}
+			
+			if (isDecorated) {
+				str.append("=================================================================");
+			}
+			
+			System.out.println(str.toString());
+
+		}
+	}
+
 	/**
 	 * 
 	 * 
@@ -2210,7 +2306,7 @@ public class IncidentPatternExtractor {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
 		String incidentFilePath = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
-		String systemFilePath = "D:/runtime-EclipseApplication/Scenarios/Scenario1/Research_centre.cps";
+		String systemFilePath = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/Research_centre.cps";
 
 		extractor.extract(incidentFilePath, systemFilePath);
 
