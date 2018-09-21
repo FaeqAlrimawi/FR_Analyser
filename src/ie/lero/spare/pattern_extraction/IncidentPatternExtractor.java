@@ -26,9 +26,11 @@ import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
 import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
+import cyberPhysical_Incident.Intent;
 import cyberPhysical_Incident.Knowledge;
 import cyberPhysical_Incident.Level;
 import cyberPhysical_Incident.Location;
+import cyberPhysical_Incident.Motive;
 import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
@@ -1825,7 +1827,9 @@ public class IncidentPatternExtractor {
 		 */
 
 		//// update incident category
-		int currentCategoryValue = originalIncidentModel.getCrimeScript().getCategory().getValue();
+		CrimeScript originalCrimeScript = originalIncidentModel.getCrimeScript();
+		int currentCategoryValue = originalCrimeScript!=null?originalCrimeScript.getCategory().getValue():null;
+		
 		CrimeScript absCrimeScript = abstractIncidentModel.getCrimeScript();
 
 		if (absCrimeScript == null) {
@@ -1850,6 +1854,41 @@ public class IncidentPatternExtractor {
 		default:
 			absCrimeScript.setCategory(ScriptCategory.SCRIPT); // default state
 		}
+		
+	/*	//intent
+		Intent orgIntent = originalCrimeScript.getIntent();
+		
+		if(orgIntent != null)
+		if(absCrimeScript.getIntent() == null) {
+			Intent intent = instance.createIntent();
+			intent.setName(orgIntent.getName());
+			intent.setDescription(orgIntent.getDescription());
+			absCrimeScript.setIntent(intent);
+		}
+		
+		//motive
+		EList<Motive> orgMotives = originalCrimeScript.getMotive();
+		
+		if(orgMotives != null && !orgMotives.isEmpty()) {
+			for(Motive orgMotive : orgMotives) {
+				Motive newMotive = instance.createMotive();
+				
+				newMotive.setName(orgMotive.getName());
+				newMotive.setDescription(orgMotive.getDescription());
+				newMotive.setPrimary(orgMotive.isPrimary());
+				
+			}
+		}
+		
+		//high-level crime script
+		absCrimeScript.setHigherLevelScriptName(originalCrimeScript.getHigherLevelScriptName());
+		
+		//main location
+		Location orgLoc =  originalCrimeScript.getMainLocation();
+		
+		if(orgLoc != null) {
+			
+		}*/
 
 	}
 

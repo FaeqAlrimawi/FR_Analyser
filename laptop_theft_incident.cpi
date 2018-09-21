@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="ASCII"?>
 <cyberPhysical_Incident:IncidentDiagram xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
-  <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE" higherLevelScriptName=""/>
+  <crimeScript name="laptop theft incident" description="Stealing laptop from executive's office" category="INSTANCE" offenders="Visitor1" higherLevelScriptName=""/>
   <scene name="collectData" previousScenes="connect">
-    <activity name="action8" nextActivities="action9" previousActivities="action7" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" description="offender enters kitchen" systemAction="connect">
+    <activity name="action8" nextActivities="action9" previousActivities="action7" initiator="Visitor1" targetedAssets="busNetwork" resources="Laptop1" description="offender enters kitchen" systemAction="connect">
       <precondition name="pre_66">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="hallway">
             <entity name="Visitor1">
-              <entity name="visitorLaptop">
+              <entity name="Laptop1">
                 <site/>
               </entity>
               <site/>
@@ -30,8 +30,8 @@
           </entity>
           <entity name="kitchen">
             <entity name="Visitor1">
-              <entity name="visitorLaptop">
-                <connectivity name="visitorLaptop-busNetwork"/>
+              <entity name="Laptop1">
+                <connectivity name="Laptop1-busNetwork"/>
                 <site/>
               </entity>
               <site/>
@@ -40,22 +40,22 @@
             <site/>
           </entity>
           <entity name="busNetwork">
-            <connectivity name="visitorLaptop-busNetwork"/>
+            <connectivity name="Laptop1-busNetwork"/>
             <site/>
           </entity>
         </expression>
       </postcondition>
     </activity>
-    <activity name="action9" previousActivities="action8" initiator="Visitor1" targetedAssets="packetPayload" resources="visitorLaptop" exploitedAssets="trafficData" description="offender enters executive's room" systemAction="analyseData">
+    <activity name="action9" previousActivities="action8" initiator="Visitor1" targetedAssets="packetPayload" resources="Laptop1" exploitedAssets="trafficData" description="offender enters executive's room" systemAction="analyseData">
       <precondition name="pre_68">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="hallway">
             <entity name="Visitor1">
-              <entity name="visitorLaptop">
+              <entity name="Laptop1">
                 <entity name="trafficData">
                   <site/>
                 </entity>
-                <connectivity name="visitorLaptop-busNetwork"/>
+                <connectivity name="Laptop1-busNetwork"/>
                 <site/>
               </entity>
               <site/>
@@ -74,11 +74,11 @@
           </entity>
           <entity name="meetingRoom">
             <entity name="Visitor1">
-              <entity name="visitorLaptop">
+              <entity name="Laptop1">
                 <entity name="packetPayload">
                   <site/>
                 </entity>
-                <connectivity name="visitorLaptop-busNetwork"/>
+                <connectivity name="Laptop1-busNetwork"/>
                 <site/>
               </entity>
               <site/>
@@ -194,12 +194,12 @@
     </activity>
   </scene>
   <scene name="connect" nextScenes="collectData" previousScenes="move">
-    <activity name="action4" nextActivities="action5" previousActivities="action3" initiator="Visitor1" targetedAssets="accessPoint" resources="visitorLaptop" location="meetingRoom" systemAction="">
+    <activity name="action4" nextActivities="action5" previousActivities="action3" initiator="Visitor1" targetedAssets="accessPoint" resources="Laptop1" location="meetingRoom" systemAction="">
       <precondition name="pre_1625">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="meetingRoom">
             <entity name="Visitor1">
-              <entity name="visitorLaptop">
+              <entity name="Laptop1">
                 <site/>
               </entity>
               <site/>
@@ -220,15 +220,15 @@
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="meetingRoom">
             <entity name="Visitor1">
-              <entity name="visitorLaptop">
-                <connectivity name="visitorLaptop-accessPoint"/>
+              <entity name="Laptop1">
+                <connectivity name="Laptop1-accessPoint"/>
                 <site/>
               </entity>
               <site/>
             </entity>
             <entity name="accessPoint">
               <connectivity name="accessPoint-busNetwork"/>
-              <connectivity name="visitorLaptop-accessPoint"/>
+              <connectivity name="Laptop1-accessPoint"/>
               <site/>
             </entity>
             <site/>
@@ -240,7 +240,7 @@
         </expression>
       </postcondition>
     </activity>
-    <activity name="action6" nextActivities="action7" previousActivities="action5" initiator="Visitor1" targetedAssets="busNetwork" resources="visitorLaptop" exploitedAssets="accessPoint" location="meetingRoom">
+    <activity name="action6" nextActivities="action7" previousActivities="action5" initiator="Visitor1" targetedAssets="busNetwork" resources="Laptop1" exploitedAssets="accessPoint" location="meetingRoom">
       <precondition name="pre_117">
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression"/>
       </precondition>
@@ -248,23 +248,23 @@
         <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
           <entity name="meetingRoom">
             <entity name="Visitor1">
-              <entity name="visitorLaptop">
-                <connectivity name="visitorLaptop-accessPoint"/>
-                <connectivity name="visitorLaptop-busNetwork"/>
+              <entity name="Laptop1">
+                <connectivity name="Laptop1-accessPoint"/>
+                <connectivity name="Laptop1-busNetwork"/>
                 <site/>
               </entity>
               <site/>
             </entity>
             <entity name="accessPoint">
               <connectivity name="accessPoint-busNetwork"/>
-              <connectivity name="visitorLaptop-accessPoint"/>
+              <connectivity name="Laptop1-accessPoint"/>
               <site/>
             </entity>
             <site/>
           </entity>
           <entity name="busNetwork">
             <connectivity name="accessPoint-busNetwork"/>
-            <connectivity name="visitorLaptop-busNetwork"/>
+            <connectivity name="Laptop1-busNetwork"/>
             <site/>
           </entity>
         </expression>
@@ -312,10 +312,10 @@
   <asset connections="accessPoint-busNetwork" parentEntity="meetingRoom" name="accessPoint">
     <type name="ComputingDevice"/>
   </asset>
-  <resource parentEntity="Visitor1" name="visitorLaptop">
+  <resource parentEntity="Visitor1" name="Laptop1">
     <type name="ComputingDevice"/>
   </resource>
-  <actor containedEntities="visitorLaptop" name="Visitor1">
+  <actor containedEntities="Laptop1" name="Visitor1">
     <type name="Actor"/>
   </actor>
   <connection name="roomA_hallway" entity1="meetingRoom" entity2="hallway">
@@ -327,9 +327,9 @@
   <connection name="hallway-elevatorsArea" entity1="elevatorsArea" entity2="hallway">
     <type name="PhysicalConnection"/>
   </connection>
-  <connection name="visitorLaptop-busNetwork" entity1="visitorLaptop" entity2="busNetwork">
+  <connection name="Laptop1-busNetwork" entity1="Laptop1" entity2="busNetwork">
     <type name="DigitalConnection"/>
   </connection>
   <connection name="accessPoint-busNetwork" entity1="accessPoint" entity2="busNetwork"/>
-  <connection name="visitorLaptop-accessPoint" entity1="accessPoint" entity2="visitorLaptop"/>
+  <connection name="Laptop1-accessPoint" entity1="accessPoint" entity2="Laptop1"/>
 </cyberPhysical_Incident:IncidentDiagram>
