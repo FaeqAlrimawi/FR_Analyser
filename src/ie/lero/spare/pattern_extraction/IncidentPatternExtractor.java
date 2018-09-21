@@ -26,11 +26,9 @@ import cyberPhysical_Incident.CyberPhysicalIncidentFactory;
 import cyberPhysical_Incident.Entity;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
-import cyberPhysical_Incident.Intent;
 import cyberPhysical_Incident.Knowledge;
 import cyberPhysical_Incident.Level;
 import cyberPhysical_Incident.Location;
-import cyberPhysical_Incident.Motive;
 import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
@@ -61,7 +59,11 @@ public class IncidentPatternExtractor {
 	protected static int MaxNumberOfActions = 3;
 
 	protected CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
+	
+	//used to create a random number (b/w 0-10000) and attach it with ACTIVITY_NAME
+	//to create a probabl unique name for an activity
 	protected static final int MAX_LENGTH = 10000;
+	
 	protected static final String ACTIVITY_NAME = "abstractActivity";
 
 	// the key is an integer that represents an activity pattern id taken from
@@ -73,6 +75,9 @@ public class IncidentPatternExtractor {
 	// incident model that corresponds to pattern ID [0] and Map ID [1]
 	protected Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
 
+	//holds the level of severity for each map (sequence of actions that map to a pattern)
+	protected int [] patternSeverityLevels;
+	
 	// the key is an integer which represents an activity pattern id
 	// the value is a list where each entry refers to a Map id and the activity
 	// represents an abstraction for that entry
@@ -223,12 +228,12 @@ public class IncidentPatternExtractor {
 		// =======Print results========================
 
 		boolean printActivityDetails = false;
-		// printOriginalIncidentModel(printActivityDetails); // true: prints all activities
+		 printOriginalIncidentModel(printActivityDetails); // true: prints all activities
 		printAbstractIncidentModel(printActivityDetails);// true: prints all activities
 
 		boolean isDecorated = true;
 		printRemovedEntities(isDecorated);// true: prints decoration i.e. ====Smg===
-		// printAbstractActivities(true);// true: prints decoration i.e.
+		 printAbstractActivities(true);// true: prints decoration i.e.
 		printUnAbstractedEntities(isDecorated);
 		printConcreteAbstractEntityMap(isDecorated);
 		printConcreteAbstractConnectionMap(isDecorated);
@@ -254,9 +259,12 @@ public class IncidentPatternExtractor {
 	 */
 	public void updateMatchedPatternsInModel() {
 
+		//calculates the severity level of each maps
+		calculateMapsSeveriy();
+		
 		PatternMappingSolver solver = new PatternMappingSolver();
 
-		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps);
+		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps, patternSeverityLevels);
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
 		int[] bestSolutionMapIDs = solver.getOptimalSolutionMapsID();
 
@@ -297,6 +305,19 @@ public class IncidentPatternExtractor {
 
 	}
 
+	protected void calculateMapsSeveriy() {
+		
+		int numOfPatternsMapped = allPatternsMaps.size();
+		
+		patternSeverityLevels = new int[numOfPatternsMapped];
+		
+		for (Integer patternIndex : allPatternsMaps.keySet()) {
+			
+			patternSeverityLevels[patternIndex] = activityPatterns.get(patternIndex).getSeverity().getValue();			
+		}
+
+	}
+	
 	/**
 	 * For all activities in the incident instance that were not abstracted by
 	 * the matched patterns a general abstraction is performed over each
