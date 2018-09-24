@@ -138,7 +138,6 @@ public class PatternMappingSolver {
 
 		// actual severity array, assuming its embedded in the argument
 		// variable
-		int[] severityValuesForMaps = new int[numOfAllMaps];
 		int minSeverity = 0;
 		int maxSeverity = 0;
 		int sumSeverity = 0;
@@ -162,15 +161,6 @@ public class PatternMappingSolver {
 
 		if (sumSeverity == 0) {
 			sumSeverity = 1;
-		}
-
-		System.out.println(sumSeverity);
-		int x = 0;
-		for (Integer index : patternMaps.keySet()) {
-			for (int[] ary : patternMaps.get(index)) {
-				severityValuesForMaps[x] = patternSeverityLevels[index];
-				x++;
-			}
 		}
 
 		// =============look for
@@ -201,14 +191,16 @@ public class PatternMappingSolver {
 				}
 			}
 
-			// int index = 0;
-			for (int i = 0; i < patternMaps.size(); i++) {
-				List<int[]> list = patternMaps.get(i);
-				possiblePatternsMaps[i] = new SetVar[list.size()];
+			int indexPattern = 0;
+
+			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+				List<int[]> list = entry.getValue();
+				possiblePatternsMaps[indexPattern] = new SetVar[list.size()];
 				for (int j = 0; j < list.size(); j++) {
-					possiblePatternsMaps[i][j] = model.setVar("map" + i + "-" + j, list.get(j));
+					possiblePatternsMaps[indexPattern][j] = model.setVar("map" + indexPattern + "-" + j, list.get(j));
 					// index++;
 				}
+				indexPattern++;
 			}
 
 			// ============Defining Constraints======================//
@@ -317,7 +309,7 @@ public class PatternMappingSolver {
 
 		// actual severity array, assuming its embedded in the argument
 		// variable
-//		int[] severityValuesForMaps = new int[numOfAllMaps];
+		// int[] severityValuesForMaps = new int[numOfAllMaps];
 		int minSeverity = 0;
 		int maxSeverity = 0;
 		int sumSeverity = 0;
@@ -335,7 +327,7 @@ public class PatternMappingSolver {
 			}
 
 			ind++;
-		} 
+		}
 
 		maxSeverity++;
 
@@ -353,7 +345,7 @@ public class PatternMappingSolver {
 			patterns = new SetVar[currentNumOfPatterns];
 			IntVar[] patternseverity = new IntVar[currentNumOfPatterns];
 			int[] coeffs = null;
-			
+
 			if (PatternMappingSolver.MAXIMISE) {
 				// used to update severity values
 				coeffs = new int[currentNumOfPatterns];
@@ -362,7 +354,7 @@ public class PatternMappingSolver {
 				// defines severity for a solution
 				severitySum = model.intVar("severity_sum", 0, sumSeverity);
 			}
-			
+
 			// each pattern has as domain values the range from {} to
 			// {actions in maps}
 			for (int i = 0; i < currentNumOfPatterns; i++) {
@@ -373,7 +365,7 @@ public class PatternMappingSolver {
 				}
 			}
 
-			 int indexPattern = 0;
+			int indexPattern = 0;
 
 			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
 				List<int[]> list = entry.getValue();
@@ -406,7 +398,7 @@ public class PatternMappingSolver {
 					// the severity of the pattern should equal to the pattern
 					// severity specified in the argument
 					if (PatternMappingSolver.MAXIMISE) {
-						model.ifThen(patternMember, model.arithm(patternseverity[i], "=",patternSeverityLevels[j]));
+						model.ifThen(patternMember, model.arithm(patternseverity[i], "=", patternSeverityLevels[j]));
 					}
 				}
 
@@ -417,7 +409,7 @@ public class PatternMappingSolver {
 
 			model.scalar(patternseverity, coeffs, "=", severitySum).post();
 			model.setObjective(Model.MAXIMIZE, severitySum);
-			
+
 			// ============Finding solutions======================//
 			solver = model.getSolver();
 
@@ -480,17 +472,17 @@ public class PatternMappingSolver {
 		}
 
 		// get patterns and maps ids used in this solution
-		
+
 		for (int[] map : this.optimalSolution) {
-			loop_map:
-			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+			loop_map: for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
 					if (Arrays.equals(entry.getValue().get(j), map)) {
-						//it could be the case that one map belong to two patterns
-						//currently select the first pattern matched
-						tmpPatternIDs.add(entry.getKey()); 
+						// it could be the case that one map belong to two
+						// patterns
+						// currently select the first pattern matched
+						tmpPatternIDs.add(entry.getKey());
 						tmpMapIDs.add(j);
-						break loop_map; 
+						break loop_map;
 					}
 				}
 			}
@@ -514,15 +506,15 @@ public class PatternMappingSolver {
 		List<Integer> tmpMapIDs = new LinkedList<Integer>();
 
 		for (int[] map : maps) {
-			loop_map:
-			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+			loop_map: for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
 				for (int j = 0; j < entry.getValue().size(); j++) {
 					if (Arrays.equals(entry.getValue().get(j), map)) {
-						//it could be the case that one map belong to two patterns
-						//currently select the first pattern matched
-						tmpPatternIDs.add(entry.getKey()); 
+						// it could be the case that one map belong to two
+						// patterns
+						// currently select the first pattern matched
+						tmpPatternIDs.add(entry.getKey());
 						tmpMapIDs.add(j);
-						break loop_map; 
+						break loop_map;
 					}
 				}
 			}
@@ -617,17 +609,19 @@ public class PatternMappingSolver {
 
 		int[][] allPossiblePatternsMapsInt = new int[8][];
 
-		allPossiblePatternsMapsInt[0] = new int[] { 1, 2,3 }; // sequence should
-															// be ordered in //
-															// // ascending
-															// order
+		allPossiblePatternsMapsInt[0] = new int[] { 1, 2, 3 }; // sequence
+																// should
+																// be ordered in
+																// //
+																// // ascending
+																// order
 		allPossiblePatternsMapsInt[1] = new int[] { 3, 4 };
 		allPossiblePatternsMapsInt[2] = new int[] { 6, 7 };
 		allPossiblePatternsMapsInt[3] = new int[] { 9, 10 };
-		allPossiblePatternsMapsInt[4] = new int[] { 10,11,12, 13 };
+		allPossiblePatternsMapsInt[4] = new int[] { 10, 11, 12, 13 };
 		allPossiblePatternsMapsInt[5] = new int[] { 15, 16 };
 		allPossiblePatternsMapsInt[6] = new int[] { 1, 2, 3 };
-		allPossiblePatternsMapsInt[7] = new int[] { 15,16,17 };
+		allPossiblePatternsMapsInt[7] = new int[] { 15, 16, 17 };
 
 		int numOfPatterns = 5;
 		LinkedList<int[]> pattern_1_maps = new LinkedList<int[]>();
@@ -644,7 +638,7 @@ public class PatternMappingSolver {
 
 		LinkedList<int[]> pattern_4_maps = new LinkedList<int[]>();
 		pattern_4_maps.add(allPossiblePatternsMapsInt[6]);
-		
+
 		LinkedList<int[]> pattern_5_maps = new LinkedList<int[]>();
 		pattern_5_maps.add(allPossiblePatternsMapsInt[7]);
 

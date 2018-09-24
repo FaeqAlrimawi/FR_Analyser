@@ -59,11 +59,12 @@ public class IncidentPatternExtractor {
 	protected static int MaxNumberOfActions = 3;
 
 	protected CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
-	
-	//used to create a random number (b/w 0-10000) and attach it with ACTIVITY_NAME
-	//to create a probabl unique name for an activity
+
+	// used to create a random number (b/w 0-10000) and attach it with
+	// ACTIVITY_NAME
+	// to create a probabl unique name for an activity
 	protected static final int MAX_LENGTH = 10000;
-	
+
 	protected static final String ACTIVITY_NAME = "abstractActivity";
 
 	// the key is an integer that represents an activity pattern id taken from
@@ -75,9 +76,10 @@ public class IncidentPatternExtractor {
 	// incident model that corresponds to pattern ID [0] and Map ID [1]
 	protected Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
 
-	//holds the level of severity for each map (sequence of actions that map to a pattern)
-	protected int [] patternSeverityLevels;
-	
+	// holds the level of severity for each map (sequence of actions that map to
+	// a pattern)
+	protected int[] patternSeverityLevels;
+
 	// the key is an integer which represents an activity pattern id
 	// the value is a list where each entry refers to a Map id and the activity
 	// represents an abstraction for that entry
@@ -94,15 +96,19 @@ public class IncidentPatternExtractor {
 	// when the abstract model was created
 	protected List<IncidentEntity> removedEntities = new LinkedList<IncidentEntity>();
 
-	//List of entities in the incident instance that were not abstracted
+	// List of entities in the incident instance that were not abstracted
 	protected List<IncidentEntity> unAbstractedEntities = new LinkedList<IncidentEntity>();
 
 	// Map of incident entities (concrete entity name, abstract entity name)
 	protected Map<String, String> entitiesConcreteAbstractMap = new HashMap<String, String>();
-	
-	// Map of incident connections (concrete connection name, abstract connectionname)
+
+	// Map of incident connections (concrete connection name, abstract
+	// connectionname)
 	protected Map<String, String> connectionsConcreteAbstractMap = new HashMap<String, String>();
-	
+
+	// list of patterns that had no maps in the incident instance sequence
+	protected List<ActivityPattern> unmappedPatterns = new LinkedList<ActivityPattern>();
+
 	public IncidentPatternExtractor() {
 
 	}
@@ -171,7 +177,7 @@ public class IncidentPatternExtractor {
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
 		String rogueLocationSetupFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
-		
+
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
 		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
@@ -208,7 +214,7 @@ public class IncidentPatternExtractor {
 
 		// 1-Find maps/matches for all patterns in the incident model
 		mapPatterns();
-		printInputPatternMap();
+
 		// 2-Take best solution found and apply it (i.e. add new abstract
 		// activities to the incident model while removing the corresponding
 		// ones based on the patterns used)
@@ -228,18 +234,23 @@ public class IncidentPatternExtractor {
 
 		// =======Print results========================
 		boolean printActivityDetails = false;
-//		 printOriginalIncidentModel(printActivityDetails); // true: prints all activities
-//		printAbstractIncidentModel(printActivityDetails);// true: prints all activities
+		// printOriginalIncidentModel(printActivityDetails); // true: prints all
+		// activities
+		// printAbstractIncidentModel(printActivityDetails);// true: prints all
+		// activities
 
 		boolean isDecorated = true;
 		// print generated patterns maps
-	
-//		printRemovedEntities(isDecorated);// true: prints decoration i.e. ====Smg===
-		 printAbstractActivities(isDecorated);// true: prints decoration i.e.
-//		printUnAbstractedEntities(isDecorated);
-//		printConcreteAbstractEntityMap(isDecorated);
-//		printConcreteAbstractConnectionMap(isDecorated);
-		 
+
+		// printRemovedEntities(isDecorated);// true: prints decoration i.e.
+		// ====Smg===
+		printInputPatternMap();
+		printUnmappedPatterns(isDecorated);
+		printAbstractActivities(isDecorated);// true: prints decoration i.e.
+		// printUnAbstractedEntities(isDecorated);
+		// printConcreteAbstractEntityMap(isDecorated);
+		// printConcreteAbstractConnectionMap(isDecorated);
+
 		// =======Save abstract model==================
 		String abstractModelFilePath = null;
 
@@ -262,9 +273,9 @@ public class IncidentPatternExtractor {
 	 */
 	public void updateMatchedPatternsInModel() {
 
-		//calculates the severity level of each maps
+		// calculates the severity level of each maps
 		calculateMapsSeveriy();
-		
+
 		PatternMappingSolver solver = new PatternMappingSolver();
 		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps, patternSeverityLevels);
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
@@ -308,19 +319,19 @@ public class IncidentPatternExtractor {
 	}
 
 	protected void calculateMapsSeveriy() {
-		
+
 		int numOfPatternMapped = allPatternsMaps.size();
-		
+
 		patternSeverityLevels = new int[numOfPatternMapped];
-		
-		int i= 0;
+
+		int i = 0;
 		for (Integer patternIndex : allPatternsMaps.keySet()) {
 			patternSeverityLevels[i] = activityPatterns.get(patternIndex).getSeverity().getValue();
 			i++;
 		}
 
 	}
-	
+
 	/**
 	 * For all activities in the incident instance that were not abstracted by
 	 * the matched patterns a general abstraction is performed over each
@@ -356,11 +367,13 @@ public class IncidentPatternExtractor {
 			patternMaps = matchActivityPattern(activityPatterns.get(i), i);
 
 			List<int[]> result = convertPatternResult(patternMaps);
-			
-			if(result != null && !result.isEmpty()) {
-				allPatternsMaps.put(i, result);	
+
+			if (result != null && !result.isEmpty()) {
+				allPatternsMaps.put(i, result);
+			} else {
+				unmappedPatterns.add(activityPatterns.get(i));
 			}
-			
+
 		}
 
 		return allPatternsMaps;
@@ -1759,7 +1772,7 @@ public class IncidentPatternExtractor {
 
 		// abstract entity connections
 		for (Connection con : entity.getConnections()) {
-			
+
 			String oldConnName = con.getName();
 			environment.Connection astCon = systemModel.getConnection(oldConnName);
 
@@ -1770,11 +1783,11 @@ public class IncidentPatternExtractor {
 			environment.Connection astConAbstract = astCon.abstractConnection();
 
 			con.setName(astConAbstract.getName());
-			
+
 			String newConnName = con.getName();
-			
+
 			connectionsConcreteAbstractMap.put(oldConnName, newConnName);
-			
+
 			con.setBidirectional(astConAbstract.isBidirectional());
 
 			// set vulnerabilities
@@ -1853,8 +1866,8 @@ public class IncidentPatternExtractor {
 
 		//// update incident category
 		CrimeScript originalCrimeScript = originalIncidentModel.getCrimeScript();
-		int currentCategoryValue = originalCrimeScript!=null?originalCrimeScript.getCategory().getValue():null;
-		
+		int currentCategoryValue = originalCrimeScript != null ? originalCrimeScript.getCategory().getValue() : null;
+
 		CrimeScript absCrimeScript = abstractIncidentModel.getCrimeScript();
 
 		if (absCrimeScript == null) {
@@ -1879,41 +1892,38 @@ public class IncidentPatternExtractor {
 		default:
 			absCrimeScript.setCategory(ScriptCategory.SCRIPT); // default state
 		}
-		
-	/*	//intent
-		Intent orgIntent = originalCrimeScript.getIntent();
-		
-		if(orgIntent != null)
-		if(absCrimeScript.getIntent() == null) {
-			Intent intent = instance.createIntent();
-			intent.setName(orgIntent.getName());
-			intent.setDescription(orgIntent.getDescription());
-			absCrimeScript.setIntent(intent);
-		}
-		
-		//motive
-		EList<Motive> orgMotives = originalCrimeScript.getMotive();
-		
-		if(orgMotives != null && !orgMotives.isEmpty()) {
-			for(Motive orgMotive : orgMotives) {
-				Motive newMotive = instance.createMotive();
-				
-				newMotive.setName(orgMotive.getName());
-				newMotive.setDescription(orgMotive.getDescription());
-				newMotive.setPrimary(orgMotive.isPrimary());
-				
-			}
-		}
-		
-		//high-level crime script
-		absCrimeScript.setHigherLevelScriptName(originalCrimeScript.getHigherLevelScriptName());
-		
-		//main location
-		Location orgLoc =  originalCrimeScript.getMainLocation();
-		
-		if(orgLoc != null) {
-			
-		}*/
+
+		/*
+		 * //intent Intent orgIntent = originalCrimeScript.getIntent();
+		 * 
+		 * if(orgIntent != null) if(absCrimeScript.getIntent() == null) { Intent
+		 * intent = instance.createIntent();
+		 * intent.setName(orgIntent.getName());
+		 * intent.setDescription(orgIntent.getDescription());
+		 * absCrimeScript.setIntent(intent); }
+		 * 
+		 * //motive EList<Motive> orgMotives = originalCrimeScript.getMotive();
+		 * 
+		 * if(orgMotives != null && !orgMotives.isEmpty()) { for(Motive
+		 * orgMotive : orgMotives) { Motive newMotive = instance.createMotive();
+		 * 
+		 * newMotive.setName(orgMotive.getName());
+		 * newMotive.setDescription(orgMotive.getDescription());
+		 * newMotive.setPrimary(orgMotive.isPrimary());
+		 * 
+		 * } }
+		 * 
+		 * //high-level crime script
+		 * absCrimeScript.setHigherLevelScriptName(originalCrimeScript.
+		 * getHigherLevelScriptName());
+		 * 
+		 * //main location Location orgLoc =
+		 * originalCrimeScript.getMainLocation();
+		 * 
+		 * if(orgLoc != null) {
+		 * 
+		 * }
+		 */
 
 	}
 
@@ -2286,78 +2296,105 @@ public class IncidentPatternExtractor {
 
 		if (isDecorated) {
 			str.append("=======Unabstracrted Entities====================================\n");
-
-			if (unAbstractedEntities.size() > 0) {
-				for (IncidentEntity entity : unAbstractedEntities) {
-					str.append(entity.getName()).append(", ");
-				}
-
-				str.deleteCharAt(str.lastIndexOf(" "));
-				str.deleteCharAt(str.lastIndexOf(","));
-				str.append("\n");
-			} else {
-				str.append("NONE");
-			}
-			
-			if (isDecorated) {
-				str.append("=================================================================");
-			}
-			
-			System.out.println(str.toString());
-
 		}
+
+		if (unAbstractedEntities.size() > 0) {
+			for (IncidentEntity entity : unAbstractedEntities) {
+				str.append(entity.getName()).append(", ");
+			}
+
+			str.deleteCharAt(str.lastIndexOf(" "));
+			str.deleteCharAt(str.lastIndexOf(","));
+			str.append("\n");
+		} else {
+			str.append("NONE");
+		}
+
+		if (isDecorated) {
+			str.append("=================================================================");
+		}
+
+		System.out.println(str.toString());
 	}
-	
+
 	public void printConcreteAbstractEntityMap(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
 			str.append("=======Concrete-Abstract Entities Map============================\n");
-
-			if (entitiesConcreteAbstractMap.size() > 0) {
-				str.append("[Concrete Entity] ==> [Abstract Entity]\n");
-				for (Entry<String,String> entity : entitiesConcreteAbstractMap.entrySet()) {
-					str.append(entity.getKey()).append(" ==> ").append(entity.getValue()).append("\n");
-				}
-
-			} else {
-				str.append("NONE\n");
-			}
-			
-			if (isDecorated) {
-				str.append("=================================================================");
-			}
-			
-			System.out.println(str.toString());
-
 		}
+
+		if (entitiesConcreteAbstractMap.size() > 0) {
+			str.append("[Concrete Entity] ==> [Abstract Entity]\n");
+			for (Entry<String, String> entity : entitiesConcreteAbstractMap.entrySet()) {
+				str.append(entity.getKey()).append(" ==> ").append(entity.getValue()).append("\n");
+			}
+
+		} else {
+			str.append("NONE\n");
+		}
+
+		if (isDecorated) {
+			str.append("=================================================================");
+		}
+
+		System.out.println(str.toString());
+
 	}
-	
+
 	public void printConcreteAbstractConnectionMap(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
 			str.append("=======Concrete-Abstract Connections Map=========================\n");
-
-			if (connectionsConcreteAbstractMap.size() > 0) {
-				str.append("[Concrete Connection] ==> [Abstract Connection]\n");
-				for (Entry<String,String> entity : connectionsConcreteAbstractMap.entrySet()) {
-					str.append(entity.getKey()).append(" ==> ").append(entity.getValue()).append("\n");
-				}
-
-			} else {
-				str.append("NONE\n");
-			}
-			
-			if (isDecorated) {
-				str.append("=================================================================");
-			}
-			
-			System.out.println(str.toString());
-
 		}
+
+		if (connectionsConcreteAbstractMap.size() > 0) {
+			str.append("[Concrete Connection] ==> [Abstract Connection]\n");
+			for (Entry<String, String> entity : connectionsConcreteAbstractMap.entrySet()) {
+				str.append(entity.getKey()).append(" ==> ").append(entity.getValue()).append("\n");
+			}
+
+		} else {
+			str.append("NONE\n");
+		}
+
+		if (isDecorated) {
+			str.append("=================================================================");
+		}
+
+		System.out.println(str.toString());
+
+	}
+
+	public void printUnmappedPatterns(boolean isDecorated) {
+
+		StringBuilder str = new StringBuilder();
+
+		if (isDecorated) {
+			str.append("=======Unmapped Patterns=============================================\n");
+		}
+
+		str.append("# of unmapped patterns = ").append(unmappedPatterns.size()).append("\n");
+		if (unmappedPatterns.size() > 0) {
+			for (ActivityPattern ptr : unmappedPatterns) {
+				str.append("(").append(ptr.getName()).append("), ");
+			}
+			str.deleteCharAt(str.lastIndexOf(" "));
+			str.deleteCharAt(str.lastIndexOf(","));
+			str.append("\n");
+		} else {
+			str.append("NONE\n");
+		}
+
+		if (isDecorated) {
+			str.append("=================================================================");
+		}
+
+		System.out.println(str.toString());
+
 	}
 
 	/**
