@@ -56,7 +56,7 @@ public class IncidentPatternExtractor {
 	// used to restrict the # of actions/activities to search when matching a
 	// pattern postconditions
 	// Max effective value would equal to the number of actions in a scene
-	protected static int MaxNumberOfActions = 3;
+	protected static int MaxNumberOfActions = 10;
 
 	protected CyberPhysicalIncidentFactory instance = CyberPhysicalIncidentFactory.eINSTANCE;
 
@@ -236,16 +236,16 @@ public class IncidentPatternExtractor {
 		boolean printActivityDetails = false;
 		// printOriginalIncidentModel(printActivityDetails); // true: prints all
 		// activities
-		// printAbstractIncidentModel(printActivityDetails);// true: prints all
+		 printAbstractIncidentModel(printActivityDetails);// true: prints all
 		// activities
 
 		boolean isDecorated = true;
 		// print generated patterns maps
 
-		// printRemovedEntities(isDecorated);// true: prints decoration i.e.
+		 printRemovedEntities(isDecorated);// true: prints decoration i.e.
 		// ====Smg===
 		printInputPatternMap();
-		printUnmappedPatterns(isDecorated);
+//		printUnmappedPatterns(isDecorated);
 		printAbstractActivities(isDecorated);// true: prints decoration i.e.
 		// printUnAbstractedEntities(isDecorated);
 		// printConcreteAbstractEntityMap(isDecorated);
@@ -278,6 +278,10 @@ public class IncidentPatternExtractor {
 
 		PatternMappingSolver solver = new PatternMappingSolver();
 		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps, patternSeverityLevels);
+		
+//		solver.findSolutions(allPatternsMaps, patternSeverityLevels);
+//		solver.printAllSolutions();
+
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
 		int[] bestSolutionMapIDs = solver.getOptimalSolutionMapsID();
 
@@ -308,7 +312,6 @@ public class IncidentPatternExtractor {
 
 			// save the mapping of the abstrac to the sequence
 			abstractedActivities.put(abstractActivity, activitySequence);
-
 		}
 
 		// update incident model information
@@ -338,14 +341,12 @@ public class IncidentPatternExtractor {
 	 */
 	public void abstractUnmatchedActivities() {
 
-		// implement
+		// TBD
 	}
 
 	/**
-	 * Generate how pattern specified as attribute can be mapped to incident
-	 * model
+	 * Generate how patterns can be mapped to incident instance
 	 * 
-	 * @param activityPatterns
 	 */
 	protected Map<Integer, List<int[]>> mapPatterns() {
 
@@ -1667,17 +1668,7 @@ public class IncidentPatternExtractor {
 		// (asset, actor, or resource) that it has not been
 		// used in any of the activities conditions and neither its parent,
 		// any of its contained assets, or any of its connections
-		for (IncidentEntity entity : entities) {
-
-			if (!abstractIncidentModel.isUsed(entity)) {
-				removedEntities.add(entity);
-			}
-		}
-
-		// remove any assets and related connections that has no use in the
-		// activities
-		// or any other assets or connections that are used in activities
-		abstractIncidentModel.removeUnusedEntities();
+		removedEntities = abstractIncidentModel.removeUnusedEntities();
 
 		entities = abstractIncidentModel.getEntity();
 
@@ -1710,7 +1701,6 @@ public class IncidentPatternExtractor {
 
 		String oldEntityName = entity.getName();
 
-		// for now all changes are done directly. Need to create a copy later
 		IncidentEntity abstractedEntity = entity;
 
 		abstractedEntity.setName(abstractedSystemAsset.getName());
@@ -2086,7 +2076,7 @@ public class IncidentPatternExtractor {
 
 		for (Entry<Integer, List<int[]>> entry : allPatternsMaps.entrySet()) {
 
-			str.append("Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("] = ");
+			str.append("Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("]: ");
 
 			if (entry.getValue().size() > 0) {
 				for (int i = 0; i < entry.getValue().size(); i++) {
@@ -2112,6 +2102,12 @@ public class IncidentPatternExtractor {
 				str.append("None");
 			}
 			str.append("\n");
+		}
+		
+		if (unmappedPatterns.size() > 0) {
+			for (ActivityPattern ptr : unmappedPatterns) {
+				str.append("Pattern[").append(ptr.getName()).append("]: None\n");
+			}
 		}
 
 		str.append("=================================================================");
@@ -2204,9 +2200,9 @@ public class IncidentPatternExtractor {
 		System.out.println("========Abstract Model===========================================");
 		System.out.println("Activity Sequence:");
 		printIncidentModelActivitySequence(abstractIncidentModel);
-		System.out.println();
 
 		if (printActivitiesInfo) {
+			System.out.println();
 			Activity orgAct = abstractIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 

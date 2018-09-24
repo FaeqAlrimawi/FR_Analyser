@@ -58,6 +58,9 @@
                 <connectivity name="Laptop1-busNetwork"/>
                 <site/>
               </entity>
+              <entity name="rogueAccessPoint">
+                <site/>
+              </entity>
               <site/>
             </entity>
             <site/>
@@ -310,6 +313,9 @@
     <type name="DigitalAsset"/>
   </asset>
   <asset connections="accessPoint-busNetwork" parentEntity="meetingRoom" name="accessPoint">
+    <type name="ComputingDevice"/>
+  </asset>
+  <asset name="rogueAccessPoint">
     <type name="ComputingDevice"/>
   </asset>
   <resource parentEntity="Visitor1" name="Laptop1">
