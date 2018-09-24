@@ -170,13 +170,14 @@ public class IncidentPatternExtractor {
 		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
-
+		String rogueLocationSetupFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
+		
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
 		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-
+		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
 		activityPatterns = new LinkedList<ActivityPattern>();
 
 		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
@@ -207,7 +208,7 @@ public class IncidentPatternExtractor {
 
 		// 1-Find maps/matches for all patterns in the incident model
 		mapPatterns();
-
+		printInputPatternMap();
 		// 2-Take best solution found and apply it (i.e. add new abstract
 		// activities to the incident model while removing the corresponding
 		// ones based on the patterns used)
@@ -226,17 +227,19 @@ public class IncidentPatternExtractor {
 		/** ================================================================ **/
 
 		// =======Print results========================
-
 		boolean printActivityDetails = false;
-		 printOriginalIncidentModel(printActivityDetails); // true: prints all activities
-		printAbstractIncidentModel(printActivityDetails);// true: prints all activities
+//		 printOriginalIncidentModel(printActivityDetails); // true: prints all activities
+//		printAbstractIncidentModel(printActivityDetails);// true: prints all activities
 
 		boolean isDecorated = true;
-		printRemovedEntities(isDecorated);// true: prints decoration i.e. ====Smg===
-		 printAbstractActivities(true);// true: prints decoration i.e.
-		printUnAbstractedEntities(isDecorated);
-		printConcreteAbstractEntityMap(isDecorated);
-		printConcreteAbstractConnectionMap(isDecorated);
+		// print generated patterns maps
+	
+//		printRemovedEntities(isDecorated);// true: prints decoration i.e. ====Smg===
+		 printAbstractActivities(isDecorated);// true: prints decoration i.e.
+//		printUnAbstractedEntities(isDecorated);
+//		printConcreteAbstractEntityMap(isDecorated);
+//		printConcreteAbstractConnectionMap(isDecorated);
+		 
 		// =======Save abstract model==================
 		String abstractModelFilePath = null;
 
@@ -263,7 +266,6 @@ public class IncidentPatternExtractor {
 		calculateMapsSeveriy();
 		
 		PatternMappingSolver solver = new PatternMappingSolver();
-
 		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps, patternSeverityLevels);
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
 		int[] bestSolutionMapIDs = solver.getOptimalSolutionMapsID();
@@ -307,13 +309,14 @@ public class IncidentPatternExtractor {
 
 	protected void calculateMapsSeveriy() {
 		
-		int numOfPatternsMapped = allPatternsMaps.size();
+		int numOfPatternMapped = allPatternsMaps.size();
 		
-		patternSeverityLevels = new int[numOfPatternsMapped];
+		patternSeverityLevels = new int[numOfPatternMapped];
 		
+		int i= 0;
 		for (Integer patternIndex : allPatternsMaps.keySet()) {
-			
-			patternSeverityLevels[patternIndex] = activityPatterns.get(patternIndex).getSeverity().getValue();			
+			patternSeverityLevels[i] = activityPatterns.get(patternIndex).getSeverity().getValue();
+			i++;
 		}
 
 	}
@@ -353,11 +356,12 @@ public class IncidentPatternExtractor {
 			patternMaps = matchActivityPattern(activityPatterns.get(i), i);
 
 			List<int[]> result = convertPatternResult(patternMaps);
-			allPatternsMaps.put(i, result);
+			
+			if(result != null && !result.isEmpty()) {
+				allPatternsMaps.put(i, result);	
+			}
+			
 		}
-
-		// print generated patterns maps
-		printInputPatternMap(allPatternsMaps);
 
 		return allPatternsMaps;
 	}
@@ -367,7 +371,7 @@ public class IncidentPatternExtractor {
 		// converts result into another format obtianed from matching a pattern
 		// to an incident
 
-		if (patternMaps == null) {
+		if (patternMaps == null || patternMaps.isEmpty()) {
 			return null;
 		}
 
@@ -2064,13 +2068,13 @@ public class IncidentPatternExtractor {
 		System.out.println(str.toString());
 	}
 
-	public void printInputPatternMap(Map<Integer, List<int[]>> patternMaps) {
+	public void printInputPatternMap() {
 
 		StringBuilder str = new StringBuilder();
 
 		str.append("=======Input Patterns Maps=======================================\n");
 
-		for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+		for (Entry<Integer, List<int[]>> entry : allPatternsMaps.entrySet()) {
 
 			str.append("Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("] = ");
 
@@ -2079,7 +2083,7 @@ public class IncidentPatternExtractor {
 					int[] ary = entry.getValue().get(i);
 					str.append("[");
 					for (int activityID : ary) {
-						str.append(abstractIncidentModel.getActivityName(activityID) + ", ");
+						str.append(originalIncidentModel.getActivityName(activityID) + ", ");
 					}
 
 					str.deleteCharAt(str.lastIndexOf(" "));

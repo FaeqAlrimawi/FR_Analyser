@@ -58,10 +58,10 @@ public class PatternMappingSolver {
 	 * return findSolutions(patternMaps, NumOfActions); }
 	 */
 
-	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps, boolean maximise) {
+	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps) {
 
-		PatternMappingSolver.MAXIMISE = maximise;
-		return findSolutions(patternMaps);
+		PatternMappingSolver.MAXIMISE = false;
+		return findSolutions(patternMaps, null);
 	}
 
 	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps, int[] patternSeverityLevel,
@@ -108,14 +108,6 @@ public class PatternMappingSolver {
 		return actionsArray.stream().mapToInt(i -> i).toArray();
 	}
 
-	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps, int numberOfActions,
-			boolean maximise) {
-
-		PatternMappingSolver.MAXIMISE = maximise;
-
-		return findSolutions(patternMaps, numberOfActions);
-	}
-
 	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps, int[] patternSeverityLevels) {
 
 		// numberOfActions could be defined as the max number of the maps
@@ -140,8 +132,6 @@ public class PatternMappingSolver {
 
 		int numOfPatterns = patternMaps.keySet().size();
 		SetVar[][] possiblePatternsMaps = new SetVar[numOfPatterns][];
-
-		IntVar[] possibleSeverityValues = new IntVar[patternSeverityLevels.length];
 
 		SetVar[] patterns = null;
 		boolean isSolutionfound = false;
@@ -221,14 +211,6 @@ public class PatternMappingSolver {
 				}
 			}
 
-			// possiblePatternsMaps[possiblePatternsMaps.length-1] = new
-			// SetVar[]{};
-			// possible severity values
-			// for (int i = 0; i < possibleSeverityValues.length; i++) {
-			// possibleSeverityValues[i] =
-			// model.intVar(patternSeverityLevels[i]);
-			// }
-
 			// ============Defining Constraints======================//
 			// ===1-No overlapping between maps
 			// ===2-A map should be one of the defined maps by the variable
@@ -259,19 +241,6 @@ public class PatternMappingSolver {
 				consList.clear();
 			}
 
-			// create constraints over the value of severity to be one in the
-			// defined pattern severity array
-			// for (int i = 0; i < patterns.length; i++) {
-			// for (int j = 0; j < numOfAllMaps; j++) {
-			// model.ifThen(model.allEqual(patterns[i],
-			// possiblePatternsMaps[j]),
-			// model.element(patternseverity[i], severityValuesForMaps,
-			// model.intVar(j)));
-			// }
-			// }
-
-			// model.scalar(patternseverity, coeffs, "=", severitySum).post();
-			// defines the maximum severity for a solution
 			if (PatternMappingSolver.MAXIMISE) {
 				model.scalar(patternseverity, coeffs, "=", severitySum).post();
 				model.setObjective(Model.MAXIMIZE, severitySum);
@@ -312,7 +281,6 @@ public class PatternMappingSolver {
 			}
 
 			if (isSolutionfound) {
-				System.out.println("# of patterns: " + currentNumOfPatterns);
 				break;
 			}
 
@@ -322,585 +290,6 @@ public class PatternMappingSolver {
 		analyseSolutions(solutions, patterns, severitySum);
 
 		return this.allSolutions;
-	}
-
-	public Map<Integer, List<int[]>> findSolutions2(Map<Integer, List<int[]>> patternMaps,
-			int[] patternSeverityLevels) {
-
-		// numberOfActions could be defined as the max number of the maps
-
-		this.patternMaps = patternMaps;
-
-		int numberOfActions = findMaxNumber(patternMaps);
-
-		int[] actionsArray = new int[numberOfActions];
-
-		// used as an upper bound for the set variables (i.e. patterns
-		// variables)
-		// 0,1,2,...N-1 where N is the number of actions
-		for (int i = 0; i < actionsArray.length; i++) {
-			actionsArray[i] = i;
-		}
-
-		int numOfAllMaps = 0;
-
-		for (List<int[]> list : patternMaps.values()) {
-			numOfAllMaps += list.size();
-		}
-
-		int currentNumOfPatterns = numOfAllMaps;
-		Model model = null;
-		List<Solution> solutions = null;
-		Solver solver = null;
-		IntVar severitySum = null;
-
-		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
-		SetVar[] patterns = null;
-		boolean isSolutionfound = false;
-
-		// actual severity array, assuming its embedded in the argument
-		// variable
-		int[] severityValuesForMaps = new int[numOfAllMaps];
-		int minSeverity = 0;
-		int maxSeverity = 0;
-
-		// set the max severity level (in this case it is the sum of the pattern
-		// severity levels)
-		for (Integer severity : patternSeverityLevels) {
-			maxSeverity += severity;
-		}
-
-		maxSeverity++;
-
-		System.out.println(maxSeverity);
-
-		int x = 0;
-		for (Integer index : patternMaps.keySet()) {
-			for (int[] ary : patternMaps.get(index)) {
-				System.out.println(patternSeverityLevels[index]);
-				severityValuesForMaps[x] = patternSeverityLevels[index];// maxSeverity
-																		// -
-																		// minSeverity;
-				x++;
-			}
-
-		}
-
-		// =============look for
-		// solution==========================================
-		while (currentNumOfPatterns > 0) {
-
-			model = new Model("Pattern-Map Model");
-
-			// ============Defining Variables======================//
-			patterns = new SetVar[currentNumOfPatterns];
-			IntVar[] patternseverity = new IntVar[currentNumOfPatterns];
-
-			// used to update severity values
-			int[] coeffs = new int[currentNumOfPatterns];
-			Arrays.fill(coeffs, 1); // coeff is 1
-
-			// defines severity. Currently it is considered from 1 to 10
-			severitySum = model.intVar("max_severity", 0, 99999);
-
-			// each pattern has as domain values the range from {} to
-			// {0,1,2,..,N-1}, where N is number of actions
-			for (int i = 0; i < currentNumOfPatterns; i++) {
-				patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
-				patternseverity[i] = model.intVar("pattern_" + i + "_severity", minSeverity, maxSeverity);
-			}
-
-			int index = 0;
-			for (List<int[]> list : patternMaps.values()) {
-				for (int[] ary : list) {
-					possiblePatternsMaps[index] = model.setVar("map" + index, ary);
-					index++;
-				}
-			}
-
-			// ============Defining Constraints======================//
-			// ===1-No overlapping between maps
-			// ===2-A map should be one of the defined maps by the variable
-			// possiblePatternMaps
-			// ===3-at least 1 map for each pattern
-
-			// 1-no overlapping
-			model.allDisjoint(patterns).post();
-
-			// essential: at least 1 map for each pattern
-			for (int i = 0; i < patterns.length; i++) {
-				model.member(possiblePatternsMaps, patterns[i]).post();
-			}
-
-			// create constraints over the value of severity to be one in the
-			// defined pattern severity array
-			for (int i = 0; i < patterns.length; i++) {
-				for (int j = 0; j < numOfAllMaps; j++) {
-					model.ifThen(model.allEqual(patterns[i], possiblePatternsMaps[j]),
-							model.element(patternseverity[i], severityValuesForMaps, model.intVar(j)));
-				}
-			}
-
-			// defines the maximum severity for a solution
-			model.scalar(patternseverity, coeffs, "=", severitySum).post();
-
-			if (PatternMappingSolver.MAXIMISE) {
-				model.setObjective(Model.MAXIMIZE, severitySum);
-			}
-
-			// ============Finding solutions======================//
-			solver = model.getSolver();
-			SetVar uniq;
-			solutions = new LinkedList<Solution>();
-			List<Integer> vals = new LinkedList<Integer>();
-
-			while (solver.solve()) {
-				System.out.println("new sol");
-				vals.clear();
-
-				// get the new solution
-				for (int i = 0; i < currentNumOfPatterns; i++) {
-					vals.addAll(Arrays.stream(patterns[i].getValue().toArray()).boxed().collect(Collectors.toList()));
-				}
-
-				// create a setVar of the new solution
-				uniq = model.setVar(vals.stream().mapToInt(i -> i).toArray());
-
-				// add a constraint that next solution should be different from
-				// this
-				model.not(model.union(patterns, uniq)).post();
-
-				// add a constraint that next solution should have equal or more
-				// actions
-				// could be implemented..?
-
-				// add the current solution to the solutions list
-				solutions.add(new Solution(model).record());
-
-				isSolutionfound = true;
-				// break;
-			}
-
-			if (isSolutionfound) {
-				break;
-			}
-
-			currentNumOfPatterns--;
-		}
-
-		analyseSolutions(solutions, patterns, severitySum);
-
-		return this.allSolutions;
-	}
-
-	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps) {
-
-		// numberOfActions could be defined as the max number of the maps
-
-		this.patternMaps = patternMaps;
-
-		int numberOfActions = findMaxNumber(patternMaps);
-
-		int[] actionsArray = new int[numberOfActions];
-
-		// used as an upper bound for the set variables (i.e. patterns
-		// variables)
-		// 0,1,2,...N-1 where N is the number of actions
-		for (int i = 0; i < actionsArray.length; i++) {
-			actionsArray[i] = i;
-		}
-
-		int numOfAllMaps = 0;
-
-		for (List<int[]> list : patternMaps.values()) {
-			numOfAllMaps += list.size();
-		}
-
-		int currentNumOfPatterns = numOfAllMaps;
-		Model model = null;
-		List<Solution> solutions = null;
-		Solver solver = null;
-		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
-		SetVar[] patterns = null;
-		boolean isSolutionfound = false;
-
-		// actual severity array, assuming its embedded in the argument
-		// variable
-
-		// =============look for
-		// solution==========================================
-		while (currentNumOfPatterns > 0) {
-
-			model = new Model("Pattern-Map Model");
-
-			// ============Defining Variables======================//
-			patterns = new SetVar[currentNumOfPatterns];
-			// IntVar[] patternseverity = new IntVar[currentNumOfPatterns];
-
-			// used to update severity values
-			int[] coeffs = new int[currentNumOfPatterns];
-			Arrays.fill(coeffs, 1); // coeff is 1
-
-			// defines severity. Currently it is considered from 1 to 10
-			// severitySum = model.intVar("max_severity", 0, 99999);
-
-			// each pattern has as domain values the range from {} to
-			// {0,1,2,..,N-1}, where N is number of actions
-			for (int i = 0; i < currentNumOfPatterns; i++) {
-				patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
-				// patternseverity[i] = model.intVar("pattern_" + i +
-				// "_severity", minSeverity, maxSeverity);
-			}
-
-			int index = 0;
-			for (List<int[]> list : patternMaps.values()) {
-				for (int[] ary : list) {
-					possiblePatternsMaps[index] = model.setVar("map" + index, ary);
-					index++;
-				}
-			}
-
-			// ============Defining Constraints======================//
-			// ===1-No overlapping between maps
-			// ===2-A map should be one of the defined maps by the variable
-			// possiblePatternMaps
-			// ===3-at least 1 map for each pattern
-
-			// 1-no overlapping
-			model.allDisjoint(patterns).post();
-
-			// essential: at least 1 map for each pattern
-			for (int i = 0; i < patterns.length; i++) {
-				model.member(possiblePatternsMaps, patterns[i]).post();
-			}
-
-			// create constraints over the value of severity to be one in the
-			// defined pattern severity array
-			// for (int i = 0; i < patterns.length; i++) {
-			// for (int j = 0; j < numOfAllMaps; j++) {
-			// model.ifThen(model.allEqual(patterns[i],
-			// possiblePatternsMaps[j]),
-			// model.element(patternseverity[i], severityValuesForMaps,
-			// model.intVar(j)));
-			// }
-			// }
-
-			// defines the maximum severity for a solution
-			// model.scalar(patternseverity, coeffs, "=", severitySum).post();
-			//
-			// if (PatternMappingSolver.MAXIMISE) {
-			// model.setObjective(Model.MAXIMIZE, severitySum);
-			// }
-
-			// ============Finding solutions======================//
-			solver = model.getSolver();
-			SetVar uniq;
-			solutions = new LinkedList<Solution>();
-			List<Integer> vals = new LinkedList<Integer>();
-
-			while (solver.solve()) {
-
-				vals.clear();
-
-				// get the new solution
-				for (int i = 0; i < currentNumOfPatterns; i++) {
-					vals.addAll(Arrays.stream(patterns[i].getValue().toArray()).boxed().collect(Collectors.toList()));
-				}
-
-				// create a setVar of the new solution
-				uniq = model.setVar(vals.stream().mapToInt(i -> i).toArray());
-
-				// add a constraint that next solution should be different from
-				// this
-				model.not(model.union(patterns, uniq)).post();
-
-				// add a constraint that next solution should have equal or more
-				// actions
-				// could be implemented..?
-
-				// add the current solution to the solutions list
-				solutions.add(new Solution(model).record());
-
-				isSolutionfound = true;
-				// break;
-			}
-
-			if (isSolutionfound) {
-				break;
-			}
-
-			currentNumOfPatterns--;
-		}
-
-		// analyseSolutions(solutions, patterns);
-
-		return this.allSolutions;
-	}
-
-	public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>> patternMaps, int numberOfActions) {
-
-		// numberOfActions could be defined as the max number of the maps
-
-		this.patternMaps = patternMaps;
-
-		int[] actionsArray = new int[numberOfActions];
-
-		// used as an upper bound for the set variables (i.e. patterns
-		// variables)
-		// 0,1,2,...N-1 where N is the number of actions
-		for (int i = 0; i < actionsArray.length; i++) {
-			actionsArray[i] = i;
-		}
-
-		int numOfAllMaps = 0;
-
-		for (List<int[]> list : patternMaps.values()) {
-			numOfAllMaps += list.size();
-		}
-
-		int currentNumOfPatterns = numOfAllMaps;
-		Model model = null;
-		List<Solution> solutions = null;
-		Solver solver = null;
-		IntVar severitySum = null;
-		int maxSeverity = 20;
-		int minSeverity = 1;
-		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
-		SetVar[] patterns = null;
-		boolean isSolutionfound = false;
-
-		// actual severity array, assuming its embedded in the argument
-		// variable
-		int[] severityValuesForMaps = new int[numOfAllMaps];
-
-		for (int i = 0; i < numOfAllMaps; i++) {
-			severityValuesForMaps[i] = maxSeverity - minSeverity;
-		}
-
-		// =============look for
-		// solution==========================================
-		while (currentNumOfPatterns > 0) {
-
-			model = new Model("Pattern-Map Model");
-
-			// ============Defining Variables======================//
-			patterns = new SetVar[currentNumOfPatterns];
-			IntVar[] patternseverity = new IntVar[currentNumOfPatterns];
-
-			// used to update severity values
-			int[] coeffs = new int[currentNumOfPatterns];
-			Arrays.fill(coeffs, 1); // coeff is 1
-
-			// defines severity. Currently it is considered from 1 to 10
-			severitySum = model.intVar("max_severity", 0, 99999);
-
-			// each pattern has as domain values the range from {} to
-			// {0,1,2,..,N-1}, where N is number of actions
-			for (int i = 0; i < currentNumOfPatterns; i++) {
-				patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
-				patternseverity[i] = model.intVar("pattern_" + i + "_severity", minSeverity, maxSeverity);
-			}
-
-			int index = 0;
-			for (List<int[]> list : patternMaps.values()) {
-				for (int[] ary : list) {
-					possiblePatternsMaps[index] = model.setVar("map" + index, ary);
-					index++;
-				}
-			}
-
-			// ============Defining Constraints======================//
-			// ===1-No overlapping between maps
-			// ===2-A map should be one of the defined maps by the variable
-			// possiblePatternMaps
-			// ===3-at least 1 map for each pattern
-
-			// 1-no overlapping
-			model.allDisjoint(patterns).post();
-
-			// essential: at least 1 map for each pattern
-			for (int i = 0; i < patterns.length; i++) {
-				model.member(possiblePatternsMaps, patterns[i]).post();
-			}
-
-			// create constraints over the value of severity to be one in the
-			// defined pattern severity array
-			for (int i = 0; i < patterns.length; i++) {
-				for (int j = 0; j < numOfAllMaps; j++) {
-					model.ifThen(model.allEqual(patterns[i], possiblePatternsMaps[j]),
-							model.element(patternseverity[i], severityValuesForMaps, model.intVar(j)));
-				}
-			}
-
-			// defines the maximum severity for a solution
-			model.scalar(patternseverity, coeffs, "=", severitySum).post();
-
-			if (PatternMappingSolver.MAXIMISE) {
-				model.setObjective(Model.MAXIMIZE, severitySum);
-			}
-
-			// ============Finding solutions======================//
-			solver = model.getSolver();
-			SetVar uniq;
-			solutions = new LinkedList<Solution>();
-			List<Integer> vals = new LinkedList<Integer>();
-
-			while (solver.solve()) {
-
-				vals.clear();
-
-				// get the new solution
-				for (int i = 0; i < currentNumOfPatterns; i++) {
-					vals.addAll(Arrays.stream(patterns[i].getValue().toArray()).boxed().collect(Collectors.toList()));
-				}
-
-				// create a setVar of the new solution
-				uniq = model.setVar(vals.stream().mapToInt(i -> i).toArray());
-
-				// add a constraint that next solution should be different from
-				// this
-				model.not(model.union(patterns, uniq)).post();
-
-				// add a constraint that next solution should have equal or more
-				// actions
-				// could be implemented..?
-
-				// add the current solution to the solutions list
-				solutions.add(new Solution(model).record());
-
-				isSolutionfound = true;
-				// break;
-			}
-
-			if (isSolutionfound) {
-				break;
-			}
-
-			currentNumOfPatterns--;
-		}
-
-		analyseSolutions(solutions, patterns, severitySum);
-
-		return this.allSolutions;
-	}
-
-	public List<int[]> findOptimalSolution(Map<Integer, List<int[]>> patternMaps) {
-
-		// numberOfActions could be defined as the max number of the maps
-
-		this.patternMaps = patternMaps;
-		Solution optimalSolution = null;
-
-		int numberOfActions = findMaxNumber(patternMaps);
-		int[] actionsArray = new int[numberOfActions];
-
-		// used as an upper bound for the set variables (i.e. patterns
-		// variables)
-		// 0,1,2,...N-1 where N is the number of actions
-		for (int i = 0; i < actionsArray.length; i++) {
-			actionsArray[i] = i;
-		}
-
-		int numOfAllMaps = 0;
-
-		for (List<int[]> list : patternMaps.values()) {
-			numOfAllMaps += list.size();
-		}
-
-		int currentNumOfPatterns = numOfAllMaps;
-		Model model = null;
-		List<Solution> solutions = null;
-		Solver solver = null;
-		IntVar severitySum = null;
-		int maxSeverity = 20;
-		int minSeverity = 1;
-		SetVar[] possiblePatternsMaps = new SetVar[numOfAllMaps];
-		SetVar[] patterns = null;
-
-		// actual severity array, assuming its embedded in the argument
-		// variable
-		int[] severityValuesForMaps = new int[numOfAllMaps];
-
-		for (int i = 0; i < numOfAllMaps; i++) {
-			severityValuesForMaps[i] = maxSeverity - minSeverity;
-		}
-
-		// =============look for
-		// solution==========================================
-		while (currentNumOfPatterns > 0) {
-
-			model = new Model("Pattern-Map Model");
-
-			// ============Defining Variables======================//
-			patterns = new SetVar[currentNumOfPatterns];
-			IntVar[] patternseverity = new IntVar[currentNumOfPatterns];
-
-			// used to update severity values
-			int[] coeffs = new int[currentNumOfPatterns];
-			Arrays.fill(coeffs, 1); // coeff is 1
-
-			// defines severity. Currently it is considered from 1 to 10
-			severitySum = model.intVar("max_severity", 0, 99999);
-
-			// each pattern has as domain values the range from {} to
-			// {0,1,2,..,N-1}, where N is number of actions
-			for (int i = 0; i < currentNumOfPatterns; i++) {
-				patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
-				patternseverity[i] = model.intVar("pattern_" + i + "_severity", minSeverity, maxSeverity);
-			}
-
-			int index = 0;
-			for (List<int[]> list : patternMaps.values()) {
-				for (int[] ary : list) {
-					possiblePatternsMaps[index] = model.setVar("map" + index, ary);
-					index++;
-				}
-			}
-
-			// ============Defining Constraints======================//
-			// ===1-No overlapping between maps
-			// ===2-A map should be one of the defined maps by the variable
-			// possiblePatternMaps
-			// ===3-at least 1 map for each pattern
-
-			// 1-no overlapping
-			model.allDisjoint(patterns).post();
-
-			// essential: at least 1 map for each pattern
-			for (int i = 0; i < patterns.length; i++) {
-				model.member(possiblePatternsMaps, patterns[i]).post();
-			}
-
-			// create constraints over the value of severity to be one in the
-			// defined pattern severity array
-			for (int i = 0; i < patterns.length; i++) {
-				for (int j = 0; j < numOfAllMaps; j++) {
-					model.ifThen(model.allEqual(patterns[i], possiblePatternsMaps[j]),
-							model.element(patternseverity[i], severityValuesForMaps, model.intVar(j)));
-				}
-			}
-
-			// defines the maximum severity for a solution
-			model.scalar(patternseverity, coeffs, "=", severitySum).post();
-			model.setObjective(Model.MAXIMIZE, severitySum);
-
-			// ============Finding solutions======================//
-			solver = model.getSolver();
-			SetVar uniq;
-			solutions = new LinkedList<Solution>();
-			List<Integer> vals = new LinkedList<Integer>();
-
-			optimalSolution = solver.findOptimalSolution(severitySum, Model.MAXIMIZE);
-			if (optimalSolution != null) {
-
-				break;
-			}
-
-			currentNumOfPatterns--;
-		}
-
-		return analyseOptimalSolution(optimalSolution, patterns, severitySum);
-
 	}
 
 	public List<int[]> findOptimalSolution(Map<Integer, List<int[]>> patternMaps, int[] patternSeverityLevels) {
@@ -928,7 +317,7 @@ public class PatternMappingSolver {
 
 		// actual severity array, assuming its embedded in the argument
 		// variable
-		int[] severityValuesForMaps = new int[numOfAllMaps];
+//		int[] severityValuesForMaps = new int[numOfAllMaps];
 		int minSeverity = 0;
 		int maxSeverity = 0;
 		int sumSeverity = 0;
@@ -946,21 +335,12 @@ public class PatternMappingSolver {
 			}
 
 			ind++;
-		}
+		} 
 
 		maxSeverity++;
 
 		if (sumSeverity == 0) {
 			sumSeverity = 1;
-		}
-
-		System.out.println(sumSeverity);
-		int x = 0;
-		for (Integer index : patternMaps.keySet()) {
-			for (int[] ary : patternMaps.get(index)) {
-				severityValuesForMaps[x] = patternSeverityLevels[index];
-				x++;
-			}
 		}
 
 		// =============look for
@@ -993,14 +373,16 @@ public class PatternMappingSolver {
 				}
 			}
 
-			// int index = 0;
-			for (int i = 0; i < patternMaps.size(); i++) {
-				List<int[]> list = patternMaps.get(i);
-				possiblePatternsMaps[i] = new SetVar[list.size()];
+			 int indexPattern = 0;
+
+			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+				List<int[]> list = entry.getValue();
+				possiblePatternsMaps[indexPattern] = new SetVar[list.size()];
 				for (int j = 0; j < list.size(); j++) {
-					possiblePatternsMaps[i][j] = model.setVar("map" + i + "-" + j, list.get(j));
+					possiblePatternsMaps[indexPattern][j] = model.setVar("map" + indexPattern + "-" + j, list.get(j));
 					// index++;
 				}
+				indexPattern++;
 			}
 
 			// ============Defining Constraints======================//
@@ -1024,7 +406,7 @@ public class PatternMappingSolver {
 					// the severity of the pattern should equal to the pattern
 					// severity specified in the argument
 					if (PatternMappingSolver.MAXIMISE) {
-						model.ifThen(patternMember, model.arithm(patternseverity[i], "=", patternSeverityLevels[j]));
+						model.ifThen(patternMember, model.arithm(patternseverity[i], "=",patternSeverityLevels[j]));
 					}
 				}
 
@@ -1033,6 +415,9 @@ public class PatternMappingSolver {
 				consList.clear();
 			}
 
+			model.scalar(patternseverity, coeffs, "=", severitySum).post();
+			model.setObjective(Model.MAXIMIZE, severitySum);
+			
 			// ============Finding solutions======================//
 			solver = model.getSolver();
 
@@ -1098,12 +483,12 @@ public class PatternMappingSolver {
 		
 		for (int[] map : this.optimalSolution) {
 			loop_map:
-			for (int i = 0; i < patternMaps.size(); i++) {
-				for (int j = 0; j < patternMaps.get(i).size(); j++) {
-					if (Arrays.equals(patternMaps.get(i).get(j), map)) {
+			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+				for (int j = 0; j < entry.getValue().size(); j++) {
+					if (Arrays.equals(entry.getValue().get(j), map)) {
 						//it could be the case that one map belong to two patterns
 						//currently select the first pattern matched
-						tmpPatternIDs.add(i); 
+						tmpPatternIDs.add(entry.getKey()); 
 						tmpMapIDs.add(j);
 						break loop_map; 
 					}
@@ -1129,11 +514,15 @@ public class PatternMappingSolver {
 		List<Integer> tmpMapIDs = new LinkedList<Integer>();
 
 		for (int[] map : maps) {
-			for (int i = 0; i < patternMaps.size(); i++) {
-				for (int j = 0; j < patternMaps.get(i).size(); j++) {
-					if (Arrays.equals(patternMaps.get(i).get(j), map)) {
-						tmpPatternIDs.add(i);
+			loop_map:
+			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+				for (int j = 0; j < entry.getValue().size(); j++) {
+					if (Arrays.equals(entry.getValue().get(j), map)) {
+						//it could be the case that one map belong to two patterns
+						//currently select the first pattern matched
+						tmpPatternIDs.add(entry.getKey()); 
 						tmpMapIDs.add(j);
+						break loop_map; 
 					}
 				}
 			}
@@ -1183,6 +572,7 @@ public class PatternMappingSolver {
 
 	public void printOptimalSolution() {
 
+		printInputPatternMap();
 		System.out.println("==============Optimal Solution===================");
 		// print maps
 		System.out.print("Maps:");
@@ -1207,12 +597,14 @@ public class PatternMappingSolver {
 
 		System.out.println("==============Input Patterns Maps===================");
 
+		int index = 0;
 		for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
-			System.out.print("Pattern[" + entry.getKey() + "] S(" + patternSeverityLevel[entry.getKey()] + ") = ");
+			System.out.print("Pattern[" + entry.getKey() + "] S(" + patternSeverityLevel[index] + ") = ");
 			for (int[] ary : entry.getValue()) {
 				System.out.print(Arrays.toString(ary) + ",");
 			}
 			System.out.println();
+			index++;
 		}
 
 		System.out.println("=================================================");
@@ -1223,7 +615,7 @@ public class PatternMappingSolver {
 		System.out.println("=======================================");
 		Map<Integer, List<int[]>> maps = new HashMap<Integer, List<int[]>>();
 
-		int[][] allPossiblePatternsMapsInt = new int[7][];
+		int[][] allPossiblePatternsMapsInt = new int[8][];
 
 		allPossiblePatternsMapsInt[0] = new int[] { 1, 2,3 }; // sequence should
 															// be ordered in //
@@ -1235,8 +627,9 @@ public class PatternMappingSolver {
 		allPossiblePatternsMapsInt[4] = new int[] { 10,11,12, 13 };
 		allPossiblePatternsMapsInt[5] = new int[] { 15, 16 };
 		allPossiblePatternsMapsInt[6] = new int[] { 1, 2, 3 };
+		allPossiblePatternsMapsInt[7] = new int[] { 15,16,17 };
 
-		int numOfPatterns = 4;
+		int numOfPatterns = 5;
 		LinkedList<int[]> pattern_1_maps = new LinkedList<int[]>();
 		pattern_1_maps.add(allPossiblePatternsMapsInt[0]);
 		pattern_1_maps.add(allPossiblePatternsMapsInt[1]);
@@ -1251,11 +644,15 @@ public class PatternMappingSolver {
 
 		LinkedList<int[]> pattern_4_maps = new LinkedList<int[]>();
 		pattern_4_maps.add(allPossiblePatternsMapsInt[6]);
+		
+		LinkedList<int[]> pattern_5_maps = new LinkedList<int[]>();
+		pattern_5_maps.add(allPossiblePatternsMapsInt[7]);
 
 		maps.put(0, pattern_1_maps);
 		maps.put(1, pattern_2_maps);
 		maps.put(2, pattern_3_maps);
 		maps.put(3, pattern_4_maps);
+		maps.put(4, pattern_5_maps);
 
 		System.out.println("==Map used===");
 		for (Entry<Integer, List<int[]>> entry : maps.entrySet()) {
@@ -1279,7 +676,7 @@ public class PatternMappingSolver {
 		severityLevels[1] = 3;
 		severityLevels[2] = 4;
 		severityLevels[3] = 5;
-
+		severityLevels[4] = 10;
 		// solver.findOptimalSolution(maps, severityLevels);
 		// solver.printOptimalSolution();
 
