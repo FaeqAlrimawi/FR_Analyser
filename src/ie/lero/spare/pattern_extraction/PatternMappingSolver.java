@@ -455,10 +455,6 @@ public class PatternMappingSolver {
 			}
 
 			if (optimalSolution != null) {
-				for(int i=0;i<currentNumOfPatterns;i++) {
-					System.out.println(optimalSolution.getIntVal(patternID[i]));
-				}
-			
 				break;
 			}
 
