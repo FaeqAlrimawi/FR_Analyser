@@ -184,6 +184,7 @@ public class IncidentPatternExtractor {
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
 		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+
 		activityPatterns = new LinkedList<ActivityPattern>();
 
 		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
@@ -236,16 +237,16 @@ public class IncidentPatternExtractor {
 		boolean printActivityDetails = false;
 		// printOriginalIncidentModel(printActivityDetails); // true: prints all
 		// activities
-		 printAbstractIncidentModel(printActivityDetails);// true: prints all
+		printAbstractIncidentModel(printActivityDetails);// true: prints all
 		// activities
 
 		boolean isDecorated = true;
 		// print generated patterns maps
 
-		 printRemovedEntities(isDecorated);// true: prints decoration i.e.
+		printRemovedEntities(isDecorated);// true: prints decoration i.e.
 		// ====Smg===
 		printInputPatternMap();
-//		printUnmappedPatterns(isDecorated);
+		// printUnmappedPatterns(isDecorated);
 		printAbstractActivities(isDecorated);// true: prints decoration i.e.
 		// printUnAbstractedEntities(isDecorated);
 		// printConcreteAbstractEntityMap(isDecorated);
@@ -278,9 +279,9 @@ public class IncidentPatternExtractor {
 
 		PatternMappingSolver solver = new PatternMappingSolver();
 		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps, patternSeverityLevels);
-		
-//		solver.findSolutions(allPatternsMaps, patternSeverityLevels);
-//		solver.printAllSolutions();
+
+		// solver.findSolutions(allPatternsMaps, patternSeverityLevels);
+		// solver.printAllSolutions();
 
 		int[] bestSolutionPatternIDs = solver.getOptimalSolutionPatternsID();
 		int[] bestSolutionMapIDs = solver.getOptimalSolutionMapsID();
@@ -413,9 +414,6 @@ public class IncidentPatternExtractor {
 			return null;
 		}
 
-		// EList<Activity> ptrActivities =
-		// activityPattern.getAbstractActivity();
-
 		Activity ptrActivity = !activityPattern.getAbstractActivity().isEmpty()
 				? activityPattern.getAbstractActivity().get(0) : null;
 
@@ -435,9 +433,6 @@ public class IncidentPatternExtractor {
 		// the pattern
 		HashMap<String, List<String>> prePostMappingActivities = new HashMap<String, List<String>>();
 
-		// Activity preMatchedActivity = null;
-		// Activity postMatchedActivity = null;
-
 		boolean isptrPreMatched = false;
 		boolean isptrPostMatched = false;
 
@@ -455,10 +450,8 @@ public class IncidentPatternExtractor {
 			while (true) {
 				entityMap.clear();
 				isptrPreMatched = false;
-				// System.out.println("-Checking activity [" +
-				// currentActivity.getName() + "] for precondition matching");
-				// compare precondition of the first activity
 
+				// compare precondition of the first activity
 				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
 
 				// if match found
@@ -481,12 +474,10 @@ public class IncidentPatternExtractor {
 
 						// =======create a potential abstract activity for the
 						// matched activities
-
 						createPotentialAbstractActivity(currentActivity, currentActivity, index);
 
 						entityMaps.remove(entityMaps.size() - 1);
 					} else {
-
 						// added to the temp to search in next activities
 						tmpPreMatchedActivities.add(currentActivity.getName());
 					}
@@ -559,9 +550,7 @@ public class IncidentPatternExtractor {
 
 					cnt++;
 				}
-
 			}
-
 		}
 
 		return prePostMappingActivities;
@@ -1830,21 +1819,6 @@ public class IncidentPatternExtractor {
 		return abstractedEntity;
 	}
 
-	// public environment.Asset getSystemAsset(String assetName) {
-	//
-	// if (systemModel == null) {
-	// return null;
-	// }
-	//
-	// for (environment.Asset ast : systemModel.getAsset()) {
-	// if (ast.getName().equals(assetName)) {
-	// return ast;
-	// }
-	// }
-	//
-	// return null;
-	// }
-
 	protected void updateCrimeScriptData() {
 
 		/**
@@ -1882,38 +1856,6 @@ public class IncidentPatternExtractor {
 		default:
 			absCrimeScript.setCategory(ScriptCategory.SCRIPT); // default state
 		}
-
-		/*
-		 * //intent Intent orgIntent = originalCrimeScript.getIntent();
-		 * 
-		 * if(orgIntent != null) if(absCrimeScript.getIntent() == null) { Intent
-		 * intent = instance.createIntent();
-		 * intent.setName(orgIntent.getName());
-		 * intent.setDescription(orgIntent.getDescription());
-		 * absCrimeScript.setIntent(intent); }
-		 * 
-		 * //motive EList<Motive> orgMotives = originalCrimeScript.getMotive();
-		 * 
-		 * if(orgMotives != null && !orgMotives.isEmpty()) { for(Motive
-		 * orgMotive : orgMotives) { Motive newMotive = instance.createMotive();
-		 * 
-		 * newMotive.setName(orgMotive.getName());
-		 * newMotive.setDescription(orgMotive.getDescription());
-		 * newMotive.setPrimary(orgMotive.isPrimary());
-		 * 
-		 * } }
-		 * 
-		 * //high-level crime script
-		 * absCrimeScript.setHigherLevelScriptName(originalCrimeScript.
-		 * getHigherLevelScriptName());
-		 * 
-		 * //main location Location orgLoc =
-		 * originalCrimeScript.getMainLocation();
-		 * 
-		 * if(orgLoc != null) {
-		 * 
-		 * }
-		 */
 
 	}
 
@@ -2103,7 +2045,7 @@ public class IncidentPatternExtractor {
 			}
 			str.append("\n");
 		}
-		
+
 		if (unmappedPatterns.size() > 0) {
 			for (ActivityPattern ptr : unmappedPatterns) {
 				str.append("Pattern[").append(ptr.getName()).append("]: None\n");
@@ -2395,7 +2337,7 @@ public class IncidentPatternExtractor {
 
 	/**
 	 * 
-	 * 
+	 * ===================== MAIN
 	 * 
 	 * 
 	 */
