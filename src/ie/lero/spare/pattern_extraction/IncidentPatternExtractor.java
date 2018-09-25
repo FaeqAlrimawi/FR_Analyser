@@ -2335,6 +2335,52 @@ public class IncidentPatternExtractor {
 
 	}
 
+	
+	
+	public IncidentDiagram getAbstractIncidentModel() {
+		return abstractIncidentModel;
+	}
+
+	public IncidentDiagram getOriginalIncidentModel() {
+		return originalIncidentModel;
+	}
+
+	public EnvironmentDiagram getSystemModel() {
+		return systemModel;
+	}
+
+	public Map<Integer, List<int[]>> getAllPatternsMaps() {
+		return allPatternsMaps;
+	}
+
+	public Map<Integer, List<Activity>> getPotentialAbstractActivities() {
+		return potentialAbstractActivities;
+	}
+
+	public Map<Activity, List<Activity>> getAbstractedActivities() {
+		return abstractedActivities;
+	}
+
+	public List<IncidentEntity> getRemovedEntities() {
+		return removedEntities;
+	}
+
+	public List<IncidentEntity> getUnAbstractedEntities() {
+		return unAbstractedEntities;
+	}
+
+	public Map<String, String> getEntitiesConcreteAbstractMap() {
+		return entitiesConcreteAbstractMap;
+	}
+
+	public Map<String, String> getConnectionsConcreteAbstractMap() {
+		return connectionsConcreteAbstractMap;
+	}
+
+	public List<ActivityPattern> getUnmappedPatterns() {
+		return unmappedPatterns;
+	}
+
 	/**
 	 * 
 	 * ===================== MAIN

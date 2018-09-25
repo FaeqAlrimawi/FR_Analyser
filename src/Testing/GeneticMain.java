@@ -1,4 +1,4 @@
-package i.e.lero.spare.pattern_instantiation;
+package Testing;
 
 
 import java.util.ArrayList;
@@ -169,7 +169,7 @@ public class GeneticMain {
 		}
 	}
 
-/*	public static void main(String [] args) {
+	public static void main(String [] args) {
 		
 		ModelsHandler.addIncidentModel("etc/steal_scenario/incidentInstance_steal.cpi");
 		ModelsHandler.addSystemModel("etc/steal_scenario/research_centre_model.cps");
@@ -200,7 +200,7 @@ public class GeneticMain {
 //		printPop(pop);
 		
 		//loadIncidentFromFile();
-	}*/
+	}
 	
 	public static void printFits(Population pop){
 		System.out.println("________________________");

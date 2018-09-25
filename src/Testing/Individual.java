@@ -1,4 +1,4 @@
-package i.e.lero.spare.pattern_instantiation;
+package Testing;
 
 
 import java.util.LinkedList;
