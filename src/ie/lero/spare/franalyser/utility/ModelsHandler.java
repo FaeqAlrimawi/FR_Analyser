@@ -251,8 +251,10 @@ public class ModelsHandler {
 
 		ActivityPattern pattern = null;
 
+		Random rand = new Random();
+		
 		pattern = ActivityPatternModelHandler.loadActivityPatternFromFile(filePath);
-		activityPatterns.put(filePath, pattern);
+		activityPatterns.put(filePath+rand.nextInt(1000), pattern);
 
 		if (activityPatterns.size() == 1) {
 			currentActivityPattern = pattern;

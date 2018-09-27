@@ -184,7 +184,14 @@ public class IncidentPatternExtractor {
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
 		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-
+		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		
 		activityPatterns = new LinkedList<ActivityPattern>();
 
 		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
@@ -215,12 +222,12 @@ public class IncidentPatternExtractor {
 
 		// 1-Find maps/matches for all patterns in the incident model
 		mapPatterns();
-
+		System.out.println("done");
 		// 2-Take best solution found and apply it (i.e. add new abstract
 		// activities to the incident model while removing the corresponding
 		// ones based on the patterns used)
 		updateMatchedPatternsInModel();
-
+		System.out.println("done");
 		// 3-For the rest of the activities (i.e. not matched to a pattern) a
 		// general abstraction is done, mainly, abstracting name and assets
 		abstractUnmatchedActivities(); // *maybe not needed, currently no effect
@@ -278,8 +285,10 @@ public class IncidentPatternExtractor {
 		calculateMapsSeveriy();
 
 		PatternMappingSolver solver = new PatternMappingSolver();
-		List<int[]> bestSolution = solver.findOptimalSolution(allPatternsMaps, patternSeverityLevels);
-
+		
+		System.out.println("trying to solve");
+		List<int[]> bestSolution = solver.findOptimalSolution2(allPatternsMaps, patternSeverityLevels);
+		System.out.println("solved...");
 		// solver.findSolutions(allPatternsMaps, patternSeverityLevels);
 		// solver.printAllSolutions();
 
