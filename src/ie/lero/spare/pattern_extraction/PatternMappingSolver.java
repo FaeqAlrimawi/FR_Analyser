@@ -1,6 +1,5 @@
 package ie.lero.spare.pattern_extraction;
 
-import java.security.AllPermission;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,7 +12,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -631,8 +629,8 @@ public class PatternMappingSolver {
 			
 			for (int i = 0; i < patterns.length; i++) {
 				
-				//if it is not empty it should be disjoint from all previous
-//				for (int k = i-1; k >= 0; k--) {
+				//if it is not empty it should be disjoint from all previous				
+//				for (int k = i-1; k >= 0; k--) {	
 //					model.disjoint(patterns[i], patterns[k]).post();
 //				}
 				
