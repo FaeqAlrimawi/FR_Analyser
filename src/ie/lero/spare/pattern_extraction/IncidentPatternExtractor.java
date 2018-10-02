@@ -173,10 +173,10 @@ public class IncidentPatternExtractor {
 		abstractIncidentModel = ModelsHandler.cloneIncidentModel(originalIncidentModel);
 
 		// =======Load patterns====================
-		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
-		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
-		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
-		String rogueLocationSetupFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
+		String connectToNetworkPatternFileName2 = "C:/impl files/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
+		String movePhysicallyPatternFileName2 = "C:/impl files/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
+		String collectDataPatternFileName2 = "C:/impl files/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
+		String rogueLocationSetupFileName = "C:/impl files/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
 
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
@@ -288,6 +288,7 @@ public class IncidentPatternExtractor {
 		
 		System.out.println("trying to solve");
 		List<int[]> bestSolution = solver.findOptimalSolution2(allPatternsMaps, patternSeverityLevels);
+//		solver.printOptimalSolution();
 		System.out.println("solved...");
 		// solver.findSolutions(allPatternsMaps, patternSeverityLevels);
 		// solver.printAllSolutions();
@@ -351,7 +352,7 @@ public class IncidentPatternExtractor {
 	 */
 	public void abstractUnmatchedActivities() {
 
-		// TBD
+		// TBI
 	}
 
 	/**
@@ -2399,8 +2400,8 @@ public class IncidentPatternExtractor {
 	public static void main(String[] args) {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
-		String incidentFilePath = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
-		String systemFilePath = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/Research_centre.cps";
+		String incidentFilePath = "C:/impl files/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
+		String systemFilePath = "C:/impl files/runtime-EclipseApplication_design/Examples/Scenario1_B/Research_centre.cps";
 
 		extractor.extract(incidentFilePath, systemFilePath);
 
