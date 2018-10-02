@@ -216,7 +216,7 @@ public class IncidentPatternExtractor {
 		 **/
 
 		// =======Abstract CrimeScript===================
-		updateCrimeScriptData();
+//		updateCrimeScriptData();
 
 		// =======Abstract Activities====================
 
