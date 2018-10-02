@@ -185,19 +185,19 @@ public class IncidentPatternExtractor {
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
 		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
 		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+//		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		
 		activityPatterns = new LinkedList<ActivityPattern>();
 
 		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
 
-		for (String key : ptrs.keySet()) {
-			activityPatterns.add(ptrs.get(key));
+		for (ActivityPattern ptr: ptrs.values()) {
+			activityPatterns.add(ptr);
 		}
 
 		/**
@@ -288,7 +288,7 @@ public class IncidentPatternExtractor {
 		
 		System.out.println("trying to solve");
 		List<int[]> bestSolution = solver.findOptimalSolution2(allPatternsMaps, patternSeverityLevels);
-//		solver.printOptimalSolution();
+		solver.printOptimalSolution();
 		System.out.println("solved...");
 		// solver.findSolutions(allPatternsMaps, patternSeverityLevels);
 		// solver.printAllSolutions();
