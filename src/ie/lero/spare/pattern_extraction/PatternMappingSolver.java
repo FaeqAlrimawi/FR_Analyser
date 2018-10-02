@@ -48,6 +48,7 @@ public class PatternMappingSolver {
 		allSolutionsSeverity = new LinkedList<Integer>();
 		mapIDs = new LinkedList<int[]>();
 	}
+
 	/*
 	 * public Map<Integer, List<int[]>> findSolutions(Map<Integer, List<int[]>>
 	 * patternMaps) {
@@ -356,7 +357,7 @@ public class PatternMappingSolver {
 				Arrays.fill(coeffs, 1); // coeff is 1
 
 				// defines severity for a solution
-				severitySum = model.intVar("severity_sum", 0,sumSeverity);
+				severitySum = model.intVar("severity_sum", 0, sumSeverity);
 			}
 
 			patternID = new IntVar[currentNumOfPatterns];
@@ -372,12 +373,13 @@ public class PatternMappingSolver {
 				}
 
 				// used to specify unique patterns
-				patternID[i] = model.intVar("uniquePattern" + i, patternMaps.keySet().stream().mapToInt(integ->integ).toArray());
+				patternID[i] = model.intVar("uniquePattern" + i,
+						patternMaps.keySet().stream().mapToInt(integ -> integ).toArray());
 			}
 
 			int indexPattern = 0;
-			int [] patternIDs = new int[patternMaps.keySet().size()];
-			
+			int[] patternIDs = new int[patternMaps.keySet().size()];
+
 			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
 				List<int[]> list = entry.getValue();
 				possiblePatternsMaps[indexPattern] = new SetVar[list.size()];
@@ -388,7 +390,7 @@ public class PatternMappingSolver {
 				}
 				indexPattern++;
 			}
-			
+
 			// ============Defining Constraints======================//
 			// ===1-No overlapping between maps
 			// ===2-A map should be one of the defined maps by the variable
@@ -397,7 +399,7 @@ public class PatternMappingSolver {
 
 			// 1-no overlapping
 			model.allDisjoint(patterns).post();
-			
+
 			List<Constraint> consList = new LinkedList<Constraint>();
 
 			// essential: at least 1 map for each pattern
@@ -413,15 +415,17 @@ public class PatternMappingSolver {
 					if (PatternMappingSolver.MAXIMISE) {
 						model.ifThen(patternMember, model.arithm(patternseverity[i], "=", patternSeverityLevels[j]));
 					}
-					
+
 					model.ifThen(patternMember, model.arithm(patternID[i], "=", patternIDs[j]));
-//					for (int k = i + 1; k < patterns.length; k++) {
-//							Constraint samePattern = model.and(patternMember,
-//									model.member(possiblePatternsMaps[j], patterns[k]));
-//
-//							model.ifThen(samePattern, model.arithm(uniquePattern[i], "=", notUniquePatternVal));
-//							model.ifThen(samePattern, model.arithm(uniquePattern[k], "=", notUniquePatternVal));
-//					}
+					// for (int k = i + 1; k < patterns.length; k++) {
+					// Constraint samePattern = model.and(patternMember,
+					// model.member(possiblePatternsMaps[j], patterns[k]));
+					//
+					// model.ifThen(samePattern, model.arithm(uniquePattern[i],
+					// "=", notUniquePatternVal));
+					// model.ifThen(samePattern, model.arithm(uniquePattern[k],
+					// "=", notUniquePatternVal));
+					// }
 				}
 
 				Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
@@ -431,19 +435,22 @@ public class PatternMappingSolver {
 				// constraint on number of unique patterns in a solution
 				// (maximise also)
 
-//				for (int k = i + 1; k < patterns.length; k++) {
-//					for (int j = 0; j < possiblePatternsMaps.length; j++) {
-//						Constraint samePattern = model.and(model.member(possiblePatternsMaps[j], patterns[i]),
-//								model.member(possiblePatternsMaps[j], patterns[k]));
-//
-//						model.ifThen(samePattern, model.arithm(uniquePattern[i], "=", notUniquePatternVal));
-//						model.ifThen(samePattern, model.arithm(uniquePattern[k], "=", notUniquePatternVal));
-//					}
-//				}
+				// for (int k = i + 1; k < patterns.length; k++) {
+				// for (int j = 0; j < possiblePatternsMaps.length; j++) {
+				// Constraint samePattern =
+				// model.and(model.member(possiblePatternsMaps[j], patterns[i]),
+				// model.member(possiblePatternsMaps[j], patterns[k]));
+				//
+				// model.ifThen(samePattern, model.arithm(uniquePattern[i], "=",
+				// notUniquePatternVal));
+				// model.ifThen(samePattern, model.arithm(uniquePattern[k], "=",
+				// notUniquePatternVal));
+				// }
+				// }
 			}
 
 			model.scalar(patternseverity, coeffs, "=", severitySum).post();
-//			model.scalar(uniquePattern, coeffs, "=", uniqueSum).post();
+			// model.scalar(uniquePattern, coeffs, "=", uniqueSum).post();
 			model.setObjective(Model.MAXIMIZE, severitySum);
 
 			// ============Finding solutions======================//
@@ -451,7 +458,7 @@ public class PatternMappingSolver {
 
 			if (PatternMappingSolver.MAXIMISE) {
 				optimalSolution = solver.findOptimalSolution(severitySum, Model.MAXIMIZE);
-			
+
 			}
 
 			if (optimalSolution != null) {
@@ -468,7 +475,7 @@ public class PatternMappingSolver {
 	public List<int[]> findOptimalSolution2(Map<Integer, List<int[]>> patternMaps, int[] patternSeverityLvls) {
 
 		this.patternMaps = patternMaps;
-//		this.patternSeverityLevel = patternSeverityLevels;
+		// this.patternSeverityLevel = patternSeverityLevels;
 
 		Solution optimalSolution = null;
 		PatternMappingSolver.MAXIMISE = true;
@@ -481,14 +488,14 @@ public class PatternMappingSolver {
 			numOfAllMaps += list.size();
 		}
 
-		
 		int currentNumOfPatterns = numOfAllMaps;
 		Model model = null;
 		Solver solver = null;
 		IntVar severitySum = null;
-		IntVar uniqueSum = null;
-		
-//		SetVar[][] possiblePatternsMaps = new SetVar[patternMaps.keySet().size()][];
+		// IntVar uniqueSum = null;
+
+		// SetVar[][] possiblePatternsMaps = new
+		// SetVar[patternMaps.keySet().size()][];
 		SetVar[] patterns = null;
 		IntVar[] patternID = null;
 		int uniquePatternVal = 1;
@@ -523,163 +530,154 @@ public class PatternMappingSolver {
 		}
 
 		LinkedList<int[]> empty = new LinkedList<int[]>();
-		empty.add(new int[]{});
-		
+		empty.add(new int[] {});
+
 		patternMaps.put(-1, empty);
-		
-		//create new severity levels after adding the empty entry
-		int [] patternSeverityLevels = new int[patternSeverityLvls.length+1];
+
+		// create new severity levels after adding the empty entry
+		int[] patternSeverityLevels = new int[patternSeverityLvls.length + 1];
 		ind = 0;
 		boolean afterEmptyPattern = false;
-		
-		for(Integer pattern : patternMaps.keySet()) {
-			
-	
-			if(afterEmptyPattern) {
-				patternSeverityLevels[ind] = patternSeverityLvls[ind-1];
+
+		for (Integer pattern : patternMaps.keySet()) {
+
+			if (afterEmptyPattern) {
+				patternSeverityLevels[ind] = patternSeverityLvls[ind - 1];
 				ind++;
 				continue;
 			}
-			
-			if(pattern == -1 ) {
+
+			if (pattern == -1) {
 				patternSeverityLevels[ind] = 0;
 				afterEmptyPattern = true;
 				ind++;
 				continue;
 			}
-			
+
 			patternSeverityLevels[ind] = patternSeverityLvls[ind];
-			
+
 			ind++;
 		}
-		
+
 		this.patternSeverityLevel = patternSeverityLevels;
-		
+
 		SetVar[][] possiblePatternsMaps = new SetVar[patternMaps.keySet().size()][];
-		
-//		while(currentNumOfPatterns>0) {
+
+		// while(currentNumOfPatterns>0) {
 		// =============look for
 		// solution==========================================
-			model = new Model("Pattern-Map Model");
+		model = new Model("Pattern-Map Model");
 
-			// ============Defining Variables======================//
-			patterns = new SetVar[currentNumOfPatterns];
-			IntVar[] patternseverity = new IntVar[currentNumOfPatterns];
-			int[] coeffs = null;
+		// ============Defining Variables======================//
+		patterns = new SetVar[currentNumOfPatterns];
+		IntVar[] patternseverity = new IntVar[currentNumOfPatterns];
+		int[] coeffs = null;
 
-			if (PatternMappingSolver.MAXIMISE) {
-				// used to update severity values
-				coeffs = new int[currentNumOfPatterns];
-				Arrays.fill(coeffs, 1); // coeff is 1
+		// used to update severity values
+		coeffs = new int[currentNumOfPatterns];
+		Arrays.fill(coeffs, 1); // coeff is 1
 
-				// defines severity for a solution
-				severitySum = model.intVar("severity_sum", 0,sumSeverity);
-			}
+		// defines severity for a solution
+		severitySum = model.intVar("severity_sum", 0, sumSeverity);
 
-			patternID = new IntVar[currentNumOfPatterns+1];
-//			patternID = new IntVar[currentNumOfPatterns];
-			
-			uniqueSum = model.intVar("severity_sum", currentNumOfPatterns);
+		patternID = new IntVar[currentNumOfPatterns + 1];
+		// patternID = new IntVar[currentNumOfPatterns];
 
-			// each pattern has as domain values the range from {} to
-			// {actions in maps}
-			for (int i = 0; i < currentNumOfPatterns; i++) {
-				patterns[i] = model.setVar("pattern-" + i, new int[] {}, actionsArray);
+		// uniqueSum = model.intVar("severity_sum", currentNumOfPatterns);
 
-				if (PatternMappingSolver.MAXIMISE) {
-					patternseverity[i] = model.intVar("pattern_" + i + "_severity", minSeverity, maxSeverity);
-				}
-
-				// used to specify unique patterns
-				patternID[i] = model.intVar("uniquePattern" + i, patternMaps.keySet().stream().mapToInt(integ->integ).toArray());
-			}
-			
-			patternID[patternID.length-1] = model.intVar("empty-pattern", -1);
-
-			int indexPattern = 0;
-			int [] patternIDs = new int[patternMaps.keySet().size()+1];
-//			int [] patternIDs = new int[patternMaps.keySet().size()];
-			
-			for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
-				List<int[]> list = entry.getValue();
-				possiblePatternsMaps[indexPattern] = new SetVar[list.size()];
-				for (int j = 0; j < list.size(); j++) {
-					possiblePatternsMaps[indexPattern][j] = model.setVar("map" + indexPattern + "-" + j, list.get(j));
-					patternIDs[indexPattern] = entry.getKey();
-					// index++;
-				}
-				indexPattern++;
-			}
-			
-//			possiblePatternsMaps[possiblePatternsMaps.length-1] = new SetVar[1];
-//			possiblePatternsMaps[possiblePatternsMaps.length-1][0] = model.setVar("map-empty", new int[]{});
-//
-//			patternIDs[patternIDs.length-1] = -1;
-			// ============Defining Constraints======================//
-			// ===1-No overlapping between maps
-			// ===2-A map should be one of the defined maps by the variable
-			// possiblePatternMaps
-			// ===3-at least 1 map for each pattern
-
-
-			// 1-no overlapping
-			model.allDisjoint(patterns).post();
-			
-			List<Constraint> consList = new LinkedList<Constraint>();
-			
-			for (int i = 0; i < patterns.length; i++) {
-				
-				//if it is not empty it should be disjoint from all previous				
-//				for (int k = i-1; k >= 0; k--) {	
-//					model.disjoint(patterns[i], patterns[k]).post();
-//				}
-				
-				for (int j = 0; j < possiblePatternsMaps.length; j++) {
-
-					// pattern map should be a one of the found maps
-					Constraint patternMember = model.member(possiblePatternsMaps[j], patterns[i]);
-					consList.add(patternMember);
-
-					// the severity of the pattern should equal to the pattern
-					// severity specified in the argument
-					if (PatternMappingSolver.MAXIMISE) {
-						model.ifThen(patternMember, model.arithm(patternseverity[i], "=", patternSeverityLevels[j]));
-					}
-					
-					model.ifThen(patternMember, model.arithm(patternID[i], "=", patternIDs[j]));
-				}
-
-				Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
-				model.or(res).post();
-				consList.clear();
-			}
-			model.scalar(patternseverity, coeffs, "=", severitySum).post();
-			
-			// ============Finding solutions======================//
-			solver = model.getSolver();
+		// each pattern has as domain values the range from {} to
+		// {actions in maps}
+		for (int i = 0; i < currentNumOfPatterns; i++) {
+			patterns[i] = model.setVar("p-" + i, new int[] {}, actionsArray);
 
 			if (PatternMappingSolver.MAXIMISE) {
-				optimalSolution = solver.findOptimalSolution(severitySum, Model.MAXIMIZE);
-			
+				patternseverity[i] = model.intVar("p_" + i + "_s", minSeverity, maxSeverity);
 			}
-//
-//			if (optimalSolution == null) {
-//				System.out.println("solution not found");
-//			} else {
-//				System.out.println("solution found: " + currentNumOfPatterns);
-//				break;
-//			}
-//			
-//			currentNumOfPatterns--;
-//
-//		}
+
+			// used to specify unique patterns
+			patternID[i] = model.intVar("uniquePattern" + i,
+					patternMaps.keySet().stream().mapToInt(integ -> integ).toArray());
+		}
+
+		patternID[patternID.length - 1] = model.intVar("empty-pattern", -1);
+
+		int indexPattern = 0;
+		int[] patternIDs = new int[patternMaps.keySet().size() + 1];
+		// int [] patternIDs = new int[patternMaps.keySet().size()];
+
+		for (Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+			List<int[]> list = entry.getValue();
+			possiblePatternsMaps[indexPattern] = new SetVar[list.size()];
+			for (int j = 0; j < list.size(); j++) {
+				possiblePatternsMaps[indexPattern][j] = model.setVar("map" + indexPattern + "-" + j, list.get(j));
+				patternIDs[indexPattern] = entry.getKey();
+				// index++;
+			}
+			indexPattern++;
+		}
+
+		// possiblePatternsMaps[possiblePatternsMaps.length-1] = new SetVar[1];
+		// possiblePatternsMaps[possiblePatternsMaps.length-1][0] =
+		// model.setVar("map-empty", new int[]{});
+		//
+		// patternIDs[patternIDs.length-1] = -1;
+		// ============Defining Constraints======================//
+		// ===1-No overlapping between maps
+		// ===2-A map should be one of the defined maps by the variable
+		// possiblePatternMaps
+		// ===3-at least 1 map for each pattern
+
+		// 1-no overlapping
+		model.allDisjoint(patterns).post();
+
+		List<Constraint> consList = new LinkedList<Constraint>();
+
+		for (int i = 0; i < patterns.length; i++) {
+
+			// if it is not empty it should be disjoint from all previous
+			// for (int k = i-1; k >= 0; k--) {
+			// model.disjoint(patterns[i], patterns[k]).post();
+			// }
+
+			for (int j = 0; j < possiblePatternsMaps.length; j++) {
+
+				// pattern map should be a one of the found maps
+				Constraint patternMember = model.member(possiblePatternsMaps[j], patterns[i]);
+				consList.add(patternMember);
+
+				// the severity of the pattern should equal to the pattern
+				// severity specified in the argument
+
+				//severity constraint
+				model.ifThen(patternMember, model.arithm(patternseverity[i], "=", patternSeverityLevels[j]));
+
+				//pattern constraint
+				model.ifThen(patternMember, model.arithm(patternID[i], "=", patternIDs[j]));
+			}
+
+			Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
+			model.or(res).post();
+			consList.clear();
+		}
+		model.scalar(patternseverity, coeffs, "=", severitySum).post();
+
+		// ============Finding solutions======================//
+		solver = model.getSolver();
+
+		optimalSolution = solver.findOptimalSolution(severitySum, Model.MAXIMIZE);
+
+
+		this.patternSeverityLevel = patternSeverityLvls;
+
+		solver = null;
+		model = null;
 		
 		return analyseOptimalSolution(optimalSolution, patterns, severitySum, patternID);
-			
-//			return null;
+
+		// return null;
 
 	}
-	
+
 	protected Map<Integer, List<int[]>> analyseSolutions(List<Solution> solutions, SetVar[] patterns,
 			IntVar severitySum) {
 
@@ -717,68 +715,50 @@ public class PatternMappingSolver {
 		}
 
 		this.optimalSolution = new LinkedList<int[]>();
-//		List<Integer> tmpPatternIDs = new LinkedList<Integer>();
+		// List<Integer> tmpPatternIDs = new LinkedList<Integer>();
 		List<Integer> tmpMapIDs = new LinkedList<Integer>();
 
-//		optimalSolutionPatternsID = new int[patterns.length];
+		// optimalSolutionPatternsID = new int[patterns.length];
 		List<Integer> optimalSolutionPatternsIDList = new LinkedList<Integer>();
-		
+
 		for (int i = 0; i < patterns.length; i++) {
-			
-			int [] tmp = optimalSolution.getSetVal(patterns[i]);
-			
-			if(tmp.length == 0) {
+
+			int[] tmp = optimalSolution.getSetVal(patterns[i]);
+
+			if (tmp.length == 0) {
 				continue;
 			}
-			
+
 			this.optimalSolution.add(tmp);
-//			optimalSolutionPatternsID[i] = optimalSolution.getIntVal(patternID[i]);
-			
+			// optimalSolutionPatternsID[i] =
+			// optimalSolution.getIntVal(patternID[i]);
+
 			optimalSolutionPatternsIDList.add(optimalSolution.getIntVal(patternID[i]));
-			
+
 			int index = 0;
-			 for (int[] ary: patternMaps.get(optimalSolution.getIntVal(patternID[i]))) {
-				 if (Arrays.equals(ary, tmp)) {
-					 tmpMapIDs.add(index);
-					 break;
-				 }
-				 index++;
-			 }
-			
+			for (int[] ary : patternMaps.get(optimalSolution.getIntVal(patternID[i]))) {
+				if (Arrays.equals(ary, tmp)) {
+					tmpMapIDs.add(index);
+					break;
+				}
+				index++;
+			}
+
 		}
 
-//		// get patterns and maps ids used in this solution
-//
-//		for (int[] map : this.optimalSolution) {
-//			loop_map: for (List<int[]> list : patternMaps.get(optimalSolution.getIntVal(patternID[i]))) {
-//				for (int j = 0; j < entry.getValue().size(); j++) {
-//					if (Arrays.equals(entry.getValue().get(j), map)) {
-//						// it could be the case that one map belong to two
-//						// patterns
-//						// currently select the first pattern matched
-//						tmpPatternIDs.add(entry.getKey());
-//						tmpMapIDs.add(j);
-//						break loop_map;
-//					}
-//				}
-//			}
-//		}
-//
-//		// add patterns ids
-//		optimalSolutionPatternsID = tmpPatternIDs.stream().mapToInt(i -> i).toArray();
-//
-		optimalSolutionPatternsID = optimalSolutionPatternsIDList.stream().mapToInt(i->i).toArray();
-		
-//		// add maps ids
+		optimalSolutionPatternsID = optimalSolutionPatternsIDList.stream().mapToInt(i -> i).toArray();
+
+		// // add maps ids
 		optimalSolutionMapsID = tmpMapIDs.stream().mapToInt(i -> i).toArray();
 
 		// add severity
 		optimalSolutionSeverity = optimalSolution.getIntVal(severitySum);
 
-		//remove empty entry
+		// remove empty entry
 		patternMaps.remove(-1);
-		
-//		System.out.println("unique sum = " + optimalSolution.getIntVal(uniqueSum));
+
+		// System.out.println("unique sum = " +
+		// optimalSolution.getIntVal(uniqueSum));
 
 		return this.optimalSolution;
 	}
@@ -849,27 +829,27 @@ public class PatternMappingSolver {
 
 		printInputPatternMap();
 		System.out.println("==============Optimal Solution===================");
-		
-		if(optimalSolution != null) {
-		// print maps
-		System.out.print("Maps:");
-		for (int j = 0; j < optimalSolution.size(); j++) {
-			System.out.print(Arrays.toString(optimalSolution.get(j)) + ",");
-		}
-		System.out.println();
 
-		// print patterns ids used
-		System.out.println("Pattern IDs:" + Arrays.toString(optimalSolutionPatternsID));
+		if (optimalSolution != null) {
+			// print maps
+			System.out.print("Maps:");
+			for (int j = 0; j < optimalSolution.size(); j++) {
+				System.out.print(Arrays.toString(optimalSolution.get(j)) + ",");
+			}
+			System.out.println();
 
-		// print maps ids used
-		System.out.println("Map IDs:" + Arrays.toString(optimalSolutionMapsID));
+			// print patterns ids used
+			System.out.println("Pattern IDs:" + Arrays.toString(optimalSolutionPatternsID));
 
-		// print each solution severity sum
-		System.out.println("severity:" + optimalSolutionSeverity);
+			// print maps ids used
+			System.out.println("Map IDs:" + Arrays.toString(optimalSolutionMapsID));
+
+			// print each solution severity sum
+			System.out.println("severity:" + optimalSolutionSeverity);
 		} else {
 			System.out.println("NONE");
 		}
-		
+
 		System.out.println("=================================================");
 	}
 
@@ -903,7 +883,7 @@ public class PatternMappingSolver {
 																// //
 																// // ascending
 																// order
-		allPossiblePatternsMapsInt[1] = new int[] { 3,4,5 };
+		allPossiblePatternsMapsInt[1] = new int[] { 3, 4, 5 };
 		allPossiblePatternsMapsInt[2] = new int[] { 6, 7 };
 		allPossiblePatternsMapsInt[3] = new int[] { 9, 10 };
 		allPossiblePatternsMapsInt[4] = new int[] { 10, 11, 12, 13 };
@@ -959,12 +939,12 @@ public class PatternMappingSolver {
 		severityLevels[2] = 4;
 		severityLevels[3] = 5;
 		severityLevels[4] = 3;
-//		severityLevels[5] = 0;
+		// severityLevels[5] = 0;
 		// solver.findOptimalSolution(maps, severityLevels);
 		// solver.printOptimalSolution();
 
 		solver.findOptimalSolution2(maps, severityLevels);
-//		 solver.printAllSolutions();
+		// solver.printAllSolutions();
 		solver.printOptimalSolution();
 	}
 

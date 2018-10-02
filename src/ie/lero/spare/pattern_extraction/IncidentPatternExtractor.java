@@ -288,6 +288,7 @@ public class IncidentPatternExtractor {
 		
 		System.out.println("trying to solve");
 		List<int[]> bestSolution = solver.findOptimalSolution2(allPatternsMaps, patternSeverityLevels);
+//		solver.printOptimalSolution();
 		System.out.println("solved...");
 		// solver.findSolutions(allPatternsMaps, patternSeverityLevels);
 		// solver.printAllSolutions();
@@ -351,7 +352,7 @@ public class IncidentPatternExtractor {
 	 */
 	public void abstractUnmatchedActivities() {
 
-		// TBD
+		// TBI
 	}
 
 	/**
