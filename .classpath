@@ -10,8 +10,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/jlibbig"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/incidentpatternB"/>
 	<classpathentry kind="lib" path="lib/choco-solver-4.0.8.jar"/>
-	<classpathentry kind="lib" path="C:/impl files/eclipse-neon3/plugins/org.eclipse.emf.common_2.12.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="C:/impl files/eclipse-neon3/plugins/org.eclipse.emf.ecore_2.12.0.v20160420-0247.jar"/>
-	<classpathentry kind="lib" path="C:/impl files/eclipse-neon3/plugins/org.eclipse.emf.ecore.xmi_2.12.0.v20160420-0247.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Faeq/PhD work/impl files/eclipse-neon3/plugins/org.eclipse.emf.common_2.12.0.v20160420-0247.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Faeq/PhD work/impl files/eclipse-neon3/plugins/org.eclipse.emf.ecore_2.12.0.v20160420-0247.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Faeq/PhD work/impl files/eclipse-neon3/plugins/org.eclipse.emf.ecore.xmi_2.12.0.v20160420-0247.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
