@@ -472,6 +472,7 @@ public class PatternMappingSolver {
 
 	}
 
+	
 	public List<int[]> findOptimalSolution2(Map<Integer, List<int[]>> patternMaps, int[] patternSeverityLvls) {
 
 		
@@ -488,7 +489,10 @@ public class PatternMappingSolver {
 			numOfAllMaps += list.size();
 		}
 
-		int currentNumOfPatterns = numOfAllMaps;
+		//implement the function getNumberOfPossiblePatterns()
+		int currentNumOfPatterns = numOfAllMaps;//getNumberOfPossiblePatterns();
+		
+		
 		Model model = null;
 		Solver solver = null;
 		IntVar severitySum = null;
@@ -578,7 +582,7 @@ public class PatternMappingSolver {
 		Arrays.fill(coeffs, 1); // coeff is 1
 
 		// defines severity for a solution
-		severitySum = model.intVar("severity_sum", 0, sumSeverity);
+		severitySum = model.intVar("severity_sum", 0, 50);
 
 		patternID = new IntVar[currentNumOfPatterns + 1];
 		// patternID = new IntVar[currentNumOfPatterns];
@@ -652,6 +656,8 @@ public class PatternMappingSolver {
 				// severity specified in the argument
 				Constraint severityValue = model.arithm(patternseverity[i], "=", patternSeverityLevels[j]);
 				Constraint ptrValue = model.arithm(patternID[i], "=", patternIDs[j]);
+
+				//Constraint severityValue = model.element(patternseverity[i], patternSeverityLevels, model.intVar(j));
 				
 				// severity constraint
 				model.ifThen(patternMember, model.and(severityValue, ptrValue));
@@ -684,7 +690,40 @@ public class PatternMappingSolver {
 		// return null;
 
 	}
-
+	
+	protected int getNumberOfPossiblePatterns() {
+		
+		int result  = 0;
+		
+		//TBI
+		
+//		int index = 0;
+//		int [] currentMap = new int[]{};
+//		
+//		for(int i=0;i<patternMaps.size();i++) {
+//			
+//			for(int j= 0;j<patternMaps.get(i).size();j++) {
+//				if(isIntersect(patternMaps.get(i).get(j), isIntersect(patternMaps.get(i).get(j)))
+//			}
+//		}
+		return result;
+	}
+//	protected List<Integer> getNumberOfPatternsAndMaxSeverity(Map<Integer, List<int[]>> patternMaps, int[] patternSeverityLvls) {
+//	
+//		List<Integer> values = new LinkedList<Integer>();
+//		
+//		int index = 0;
+//		int [] currentMap = new int[]{};
+//		
+//		for(Entry<Integer, List<int[]>> entry : patternMaps.entrySet()) {
+//			
+//			for(int [] map : entry.getValue()) {
+//				
+//			}
+//		}
+//		return values;
+//	}
+	
 	protected Map<Integer, List<int[]>> analyseSolutions(List<Solution> solutions, SetVar[] patterns,
 			IntVar severitySum) {
 
@@ -884,19 +923,19 @@ public class PatternMappingSolver {
 
 		int[][] allPossiblePatternsMapsInt = new int[8][];
 
-		allPossiblePatternsMapsInt[0] = new int[] { 1, 2, 3 }; // sequence
+		allPossiblePatternsMapsInt[0] = new int[] {  3,4}; // sequence
 																// should
 																// be ordered in
 																// //
 																// // ascending
 																// order
-		allPossiblePatternsMapsInt[1] = new int[] { 5, 6 };
+		allPossiblePatternsMapsInt[1] = new int[] { 11, 12 };
 		allPossiblePatternsMapsInt[2] = new int[] { 6, 7 };
 		allPossiblePatternsMapsInt[3] = new int[] { 9, 10 };
-		allPossiblePatternsMapsInt[4] = new int[] { 10, 11, 12, 13 };
+		allPossiblePatternsMapsInt[4] = new int[] {  11, 12, 13 };
 		allPossiblePatternsMapsInt[5] = new int[] { 15, 16 };
-		allPossiblePatternsMapsInt[6] = new int[] { 1, 2, 3,4 };
-		allPossiblePatternsMapsInt[7] = new int[] {  2, 3 };
+		allPossiblePatternsMapsInt[6] = new int[] { 7,8 };
+		allPossiblePatternsMapsInt[7] = new int[] {   3,4 };
 
 		int numOfPatterns = 5;
 		LinkedList<int[]> pattern_1_maps = new LinkedList<int[]>();
@@ -941,8 +980,8 @@ public class PatternMappingSolver {
 
 		int[] severityLevels = new int[numOfPatterns];
 
-		severityLevels[0] = 2;
-		severityLevels[1] = 3;
+		severityLevels[0] = 15;
+		severityLevels[1] = 10;
 		severityLevels[2] = 4;
 		severityLevels[3] = 5;
 		severityLevels[4] = 3;
