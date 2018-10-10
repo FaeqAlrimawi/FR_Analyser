@@ -185,10 +185,10 @@ public class IncidentPatternExtractor {
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
 		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
 		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-//		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 //		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 //		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		
@@ -1851,22 +1851,17 @@ public class IncidentPatternExtractor {
 		switch (currentCategoryValue) {
 
 		case ScriptCategory.INSTANCE_VALUE: // incident instance
-			absCrimeScript.setCategory(ScriptCategory.TRACK); // least abstract
+			absCrimeScript.setCategory(ScriptCategory.PATTERN); // least abstract
 			break;
-		case ScriptCategory.TRACK_VALUE:
-			absCrimeScript.setCategory(ScriptCategory.SCRIPT);
+		case ScriptCategory.PATTERN_VALUE:
+			absCrimeScript.setCategory(ScriptCategory.PROTOPATTERN);
 			break;
-		case ScriptCategory.SCRIPT_VALUE:
-			absCrimeScript.setCategory(ScriptCategory.PROTOSCRIPT);
-			break;
-		case ScriptCategory.PROTOSCRIPT_VALUE:
-			absCrimeScript.setCategory(ScriptCategory.METASCRIPT); // most
-																	// abstract
+		case ScriptCategory.PROTOPATTERN_VALUE:
+			absCrimeScript.setCategory(ScriptCategory.METAPATTERN); // most abstract
 			break;
 		default:
-			absCrimeScript.setCategory(ScriptCategory.SCRIPT); // default state
+			absCrimeScript.setCategory(ScriptCategory.PATTERN); // default state
 		}
-
 	}
 
 	/**
