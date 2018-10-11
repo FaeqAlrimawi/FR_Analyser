@@ -72,15 +72,42 @@ public class IncidentPatternInstantiator {
 
 	}
 
-	public void execute(String incidentPatternFile, String systemModelFile, int threadPoolSiz,
+	public void execute(String incidentPatternFile, String systemModelFile,
 			IncidentPatternInstantiationListener listen) {
+
+		
+		//brs output folder (containing states) has the same name as the system model file name
+		String BRS_outputFolder = systemModelFile.substring(0, systemModelFile.lastIndexOf("."));
+		
+		//brs file has the same name as the system model file name but with .big extension instead of .cps
+		String BRS_file = BRS_outputFolder+".big";//"etc/scenario1/research_centre_system.big";
+		
+		execute(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder, listen);
+	}
+
+	public void execute(IncidentPatternInstantiationListener listen) {
+
+		String systemModelFile = "etc/scenario1/research_centre_model.cps";
+		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
+
+		execute(incidentPatternFile, systemModelFile, listen);
+
+	}
+
+//	public void execute(String incidentPatternFile, String systemModelFile,
+//			IncidentPatternInstantiationListener listen) {
+//
+//		execute(incidentPatternFile, systemModelFile, 1, listen);
+//
+//	}
+
+	public void execute(String incidentPatternFile, String systemModelFile, 		
+			String BRS_file, String BRS_outputFolder, IncidentPatternInstantiationListener listen) {
 
 		listener = listen;
 
 		// String xQueryMatcherFile = xqueryFile;
-		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_500";
-
+	
 		try {
 
 			// currently creates a folder named "log" where the states folder is
@@ -254,22 +281,6 @@ public class IncidentPatternInstantiator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public void execute(int threadPoolSiz, IncidentPatternInstantiationListener listen) {
-
-		String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-
-		execute(incidentPatternFile, systemModelFile, threadPoolSiz, listen);
-
-	}
-
-	public void execute(String incidentPatternFile, String systemModelFile,
-			IncidentPatternInstantiationListener listen) {
-
-		execute(incidentPatternFile, systemModelFile, 1, listen);
-
 	}
 
 	/**
@@ -714,6 +725,7 @@ public class IncidentPatternInstantiator {
 					if (result != null) {
 						logger.putMessage(result);
 					}
+					
 				} else {
 					logger.putMessage("Thread[" + threadID + "]>>NO potential incident instances generated");
 				}
