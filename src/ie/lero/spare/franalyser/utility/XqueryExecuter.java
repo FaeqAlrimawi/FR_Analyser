@@ -181,11 +181,11 @@ public class XqueryExecuter {
 		String query = null;
 		
 		if(type == PredicateType.Precondition) {
-			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
+			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//activity[@name=\""+activityName+"\"]/"
 					+ "precondition/expression/entity";
 				
 		} else if (type == PredicateType.Postcondition) {
-			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//"+INCIDENT_ROOT_ELEMENT+"/activity[@name=\""+activityName+"\"]/"
+			query = NS_DECELERATION+"doc(\""+INCIDENT_DOC+"\")//activity[@name=\""+activityName+"\"]/"
 					+ "postcondition/expression/entity";
 			
 		}

@@ -41,6 +41,15 @@ public class JSONTerms {
 //	public static final String BIGRAPHER_CONTROL_ARITY = "control_arity";
 	public static final String BIGRAPHER_NAME = "name";
 	
+	//bigrapher transition file
+	public static final String TRANSITIONS_BRS = "brs";
+	public static final String TRANSITIONS__PROP_BRS = "pbrs";
+	public static final String TRANSITIONS__STOCHASTIC_BRS = "sbrs";
+	public static final String TRANSITIONS__TARGET = "target";
+	public static final String TRANSITIONS__SOURCE = "source";
+	public static final String TRANSITIONS__PROBABILITY = "probability";
+	public static final String TRANSITIONS__LABEL = "label";
+	
 	
 	
 }

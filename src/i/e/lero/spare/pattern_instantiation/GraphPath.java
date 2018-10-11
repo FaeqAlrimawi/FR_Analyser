@@ -350,9 +350,9 @@ public class GraphPath {
 		return actions;
 	}
 	
-	public float getPathProbability() {
+	public double getPathProbability() {
 		
-		float prob = -1;
+		double prob = -1;
 		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
 		
 		if(stateTransitions.size()>1) {

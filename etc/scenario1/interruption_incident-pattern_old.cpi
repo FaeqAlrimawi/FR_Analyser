@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<cyberPhysical_Incident:IncidentDiagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
-  <crimeScript name="Eavsdropping" description="eavesdrop on the internal network of an organisation" category="SCRIPT" scenes="Execution" goals="goal2 goal1"/>
-  <scene name="Execution" activities="activity1 activity2 activity3"/>
+<cyberPhysical_Incident:IncidentDiagram xmlns:cyberPhysical_Incident="http://www.example.org/cyberPhysical_Incident">
+  <crimeScript name="Eavsdropping" description="eavesdrop on the internal network of an organisation" category="PATTERN" scenes="execution" goals="goal2 goal1"/>
   <goal name="goal1" description="Gain access to internal network"/>
   <goal name="goal2" description="collect information"/>
   <motive name="Competitive_advantage" description="competitive advantage"/>
@@ -32,7 +31,7 @@
   <resource parentEntity="laptopX" name="HVACmalware">
     <type name="Application"/>
   </resource>
-  <actor parentEntity="hallway" containedEntities="laptopX" name="offender1" role="offender">
+  <actor parentEntity="hallway" containedEntities="laptopX" name="offender1" >
     <type name="Actor"/>
   </actor>
   <connection name="location_SD1-Hallway" entity1="hallway" entity2="location_SD1">
@@ -47,6 +46,7 @@
   <connection name="HVAC-IB" entity1="busNetwork" entity2="HVAC">
     <type name="DigitalConnection"/>
   </connection>
+  <scene name="execution">
   <activity name="activity1" nextActivities="activity2" goals="goal2" initiator="offender1" type="UNKNOWN" behaviourType="UNKNOWN" description="enter location containing a vulnerable smart device that is connected to the digital network">
     <precondition name="pre1" description="offender in hallway">
       <expression xsi:type="cyberPhysical_Incident:BigraphExpression">
@@ -207,4 +207,5 @@
       </expression>
     </postcondition>
   </activity>
+  </scene>
 </cyberPhysical_Incident:IncidentDiagram>

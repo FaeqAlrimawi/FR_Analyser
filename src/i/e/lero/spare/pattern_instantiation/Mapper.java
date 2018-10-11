@@ -125,10 +125,12 @@ public class Mapper {
 		
 		systemAssets = systemModel.getAsset();
 		incidentEntities = new LinkedList<IncidentEntity>();
-		
-		incidentEntities.addAll(incidentPattern.getAsset());
-		incidentEntities.addAll(incidentPattern.getActor());
-		incidentEntities.addAll(incidentPattern.getResource());
+
+		incidentEntities.addAll(incidentPattern.getEntity());
+//		incidentEntities.addAll(incidentPattern.getAsset());
+//		incidentEntities.addAll(incidentPattern.getActor());
+//		incidentEntities.addAll(incidentPattern.getResource());
+
 		
 		AssetMap map = new AssetMap();
 		
@@ -137,7 +139,7 @@ public class Mapper {
 		mainPool.shutdown();
 			
 		map.setMatchedSystemAssets(result);
-		
+
 		return map;
 	}
 	

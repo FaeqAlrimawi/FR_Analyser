@@ -258,7 +258,7 @@ public class LabelExtractor {
 		StringBuilder res = new StringBuilder();
 		ArrayList<Integer> nodes = (ArrayList) transitionSystem.getDigraph().getNodes();
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
-		float prob = 0;
+		double prob = 0;
 		String label;
 		String newFileName = SystemInstanceHandler.getOutputFolder()+"/"+outputFileName;
 		res.append(nodes.size()).append(" ").append(digraph.getNumberOfEdges()).append("\r\n");

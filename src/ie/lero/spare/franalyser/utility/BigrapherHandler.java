@@ -35,6 +35,7 @@ public class BigrapherHandler implements SystemExecutor {
 	private String validBigrapherString = "model file parsed correctly";
 	private TransitionSystem transitionSystem;
 	private String transitionFileName = "transitions.txt";
+	private String transitionFileNameJSON = "transitions.json";
 	private Signature bigraphSignature;
 	private static HashMap<Integer, Bigraph> states;
 	/*private ForkJoinPool mainPool;
@@ -251,7 +252,7 @@ public class BigrapherHandler implements SystemExecutor {
 	public TransitionSystem createTransitionSystem() {
 		if (transitionSystem == null) {
 			if (outputFolder != null) {
-				TransitionSystem.setFileName(outputFolder + "/" + transitionFileName);
+				TransitionSystem.setFileName(outputFolder + "/" + transitionFileNameJSON);
 				transitionSystem = TransitionSystem.getTransitionSystemInstance();
 			}
 		}

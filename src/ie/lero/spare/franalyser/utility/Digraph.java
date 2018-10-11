@@ -1,24 +1,24 @@
 package ie.lero.spare.franalyser.utility;
 
-import java.util.*;
-
-import i.e.lero.spare.pattern_instantiation.GraphPath;
-import i.e.lero.spare.pattern_instantiation.Predicate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Digraph<V> {
 
     public static class Edge<V>{
         private V vertex;
-        private float probability;
+        private double probability;
         private String label;
         
-        public Edge(V v, float prob, String lbl){
+        public Edge(V v, double prob, String lbl){
             vertex = v; 
             probability = prob;
             label = lbl;
         }
         
-        public Edge(V v, float prob){
+        public Edge(V v, double prob){
             vertex = v; 
             probability = prob;
             label = null;
@@ -28,7 +28,7 @@ public class Digraph<V> {
             return vertex;
         }
 
-        public float getProbability() {
+        public double getProbability() {
             return probability;
         }
 
@@ -94,14 +94,14 @@ public class Digraph<V> {
      * Add an edge to the graph; if either vertex does not exist, it's added.
      * This implementation allows the creation of multi-edges and self-loops.
      */
-    public void add(V from, V to, float probability) {
+    public void add(V from, V to, double probability) {
         this.add(from);
         this.add(to);
 
         neighbors.get(from).add(new Edge<V>(to, probability));
     }
     
-    public void add(V from, V to, float probability, String label) {
+    public void add(V from, V to, double probability, String label) {
         this.add(from);
         this.add(to);
         neighbors.get(from).add(new Edge<V>(to, probability, label));
@@ -140,7 +140,7 @@ public class Digraph<V> {
       return false;
     }
 
-    public float getProbability(V from, V to) {
+    public double getProbability(V from, V to) {
         for(Edge<V> e :  neighbors.get(from)){
             if(e.vertex.equals(to))
                 return e.probability;
@@ -148,14 +148,19 @@ public class Digraph<V> {
         return -1;
     }
     
-    public List<V> getNodes() {
+	public List<V> getNodes() {
     	List<V> inList = new ArrayList<V>();
         for (V to : neighbors.keySet()) {
-                   inList.add(to);
+             inList.add(to);
         }
         return inList;
     }
     
+	public int getNumberOfNodes() {
+    	
+		return neighbors.size();
+    }
+	
     public String getLabel(V from, V to) {
         for(Edge<V> e :  neighbors.get(from)){
             if(e.vertex.equals(to))
