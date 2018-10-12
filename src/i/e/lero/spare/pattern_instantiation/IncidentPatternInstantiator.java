@@ -75,6 +75,7 @@ public class IncidentPatternInstantiator {
 	public void execute(String incidentPatternFile, String systemModelFile,
 			IncidentPatternInstantiationListener listen) {
 
+		//ttttt
 		
 		//brs output folder (containing states) has the same name as the system model file name
 		String BRS_outputFolder = systemModelFile.substring(0, systemModelFile.lastIndexOf("."));
