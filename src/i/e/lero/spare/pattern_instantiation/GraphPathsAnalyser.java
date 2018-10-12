@@ -94,21 +94,29 @@ public class GraphPathsAnalyser {
 
 	/**
 	 * Returns all actions with their frequency i.e. how many times they appeared in the different paths
-	 * @return
+	 * @return a Map in which the key is the action and the value is the frequency
 	 */
 	public HashMap<String, Integer> getActionsFrequency() {
+	
+		if(actionsFrequency == null || actionsFrequency.isEmpty()) {
+			analyseActionsFrequency();
+		}
 		
-		
+			return actionsFrequency;
+	}
+	
+	private void analyseActionsFrequency() {
+			
 		actionsFrequency = mainPool.invoke(new ActionsFrequencyAnalyser(0, paths.size()));
 		
-		return actionsFrequency;
+//		return actionsFrequency;
 	}
 	
 	/**
 	 * Returns all actions with their frequency i.e. how many times they appeared in the different paths
 	 * @return
 	 */
-	public HashMap<String, Integer> getActionsFrequencyOriginal() {
+	private HashMap<String, Integer> getActionsFrequencyOriginal() {
 		
 		actionsFrequency = new HashMap<String, Integer>();
 		LinkedList<String> actions;
@@ -170,7 +178,7 @@ public class GraphPathsAnalyser {
 	        return sortedMap;
 	    }
 
-	public LinkedList<String> getCommonAssets() {
+	private LinkedList<String> getCommonAssets() {
 		
 		//to be implemented
 		//
@@ -185,9 +193,18 @@ public class GraphPathsAnalyser {
 	 */
 	public LinkedList<Integer> getTopPaths(LinkedList<String> actions, boolean isExact) {
 		
-		topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(), actions, isExact));
+		if(topPaths == null || topPaths.isEmpty()) {
+			analyseTopPaths(actions, isExact);
+		}
 		
 		return topPaths;
+	}
+	
+	private void analyseTopPaths(LinkedList<String> actions, boolean isExact) {
+		
+		topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(), actions, isExact));
+		
+//		return topPaths;
 	}
 	
 	/**
@@ -197,6 +214,15 @@ public class GraphPathsAnalyser {
 	 * @return List of path IDs
 	 */
 	public LinkedList<Integer> getTopPaths(double actionsFrequencyPercentage, boolean isExact) {
+		
+		if(topPaths == null || topPaths.isEmpty()) {
+			analyseTopPaths(actionsFrequencyPercentage, isExact);
+		}
+		
+		return topPaths;
+	}
+	
+	private void analyseTopPaths(double actionsFrequencyPercentage, boolean isExact) {
 		
 		LinkedList<String> actions = new LinkedList<String>();
 		
@@ -218,14 +244,14 @@ public class GraphPathsAnalyser {
 		
 		topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(), actions, isExact));
 		
-		return topPaths;
+//		return topPaths;
 	}
 	
 	/**
 	 * Returns all paths that contain all common actions
 	 * @return
 	 */
-	public LinkedList<Integer> getTopPathsOriginal() {
+	private LinkedList<Integer> getTopPathsOriginal() {
 		
 		topPaths = new LinkedList<Integer>();
 		LinkedList<String> pathActions;
@@ -261,22 +287,31 @@ public class GraphPathsAnalyser {
 	 */
 	public LinkedList<Integer> getShortestPaths() {
 		
+		if(shortestPaths == null || shortestPaths.isEmpty()) {
+			analyseShortestPaths();
+		}
+		
+		return shortestPaths;
+	}
+	
+	private void analyseShortestPaths() {
+		
 		//shortestPaths = new LinkedList<Integer>();
 		
-		if(paths == null || paths.size() == 0) {
-			return shortestPaths;
-		}
+//		if(paths == null || paths.size() == 0) {
+//			return shortestPaths;
+//		}
 		
 		shortestPaths = mainPool.invoke(new PathsAnalyserParallelism(0, paths.size(), PathsAnalyserParallelism.SHORTEST));
 		
-		return shortestPaths;
+//		return shortestPaths;
 	}
 	
 	/**
 	 * Returns the shortest paths i.e. paths that has the minimum number of states/actions
 	 * @return IDs of the shortest paths
 	 */
-	public LinkedList<Integer> getShortestPathsOriginal() {
+	private LinkedList<Integer> getShortestPathsOriginal() {
 		shortestPaths = new LinkedList<Integer>();
 		
 		//initial smallest size
@@ -309,19 +344,27 @@ public class GraphPathsAnalyser {
 	}
 	
 	public LinkedList<Integer> getLongestPaths() {
-		longestPaths = new LinkedList<Integer>();
 		
-		if(paths == null || paths.size() == 0) {
-			return shortestPaths;
+		if(longestPaths == null || longestPaths.isEmpty()) {
+			analyseLongestPaths();
 		}
 		
-		
-		longestPaths = mainPool.invoke(new PathsAnalyserParallelism(0, paths.size(), PathsAnalyserParallelism.LONGEST));
-				
 		return longestPaths;
 	}
 	
-	public LinkedList<Integer> getLongestPathsOriginal() {
+	private void analyseLongestPaths() {
+//		longestPaths = new LinkedList<Integer>();
+		
+//		if(paths == null || paths.size() == 0) {
+//			return shortestPaths;
+//		}
+	
+		longestPaths = mainPool.invoke(new PathsAnalyserParallelism(0, paths.size(), PathsAnalyserParallelism.LONGEST));
+				
+//		return longestPaths;
+	}
+	
+	private LinkedList<Integer> getLongestPathsOriginal() {
 		longestPaths = new LinkedList<Integer>();
 		
 		if(paths == null || paths.size() == 0) {
@@ -352,6 +395,7 @@ public class GraphPathsAnalyser {
 				
 		return longestPaths;
 	}
+	
 	public String print() {
 		
 		StringBuilder str = new StringBuilder();

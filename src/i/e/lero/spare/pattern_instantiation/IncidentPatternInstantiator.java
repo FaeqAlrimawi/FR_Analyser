@@ -3,6 +3,7 @@ package i.e.lero.spare.pattern_instantiation;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream.GetField;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
@@ -72,47 +73,49 @@ public class IncidentPatternInstantiator {
 
 	}
 
+	/**
+	 * Maps given incident pattern to the given system model. Bigraph
+	 * representation of the system and generated states are considered to have
+	 * the same name as the system model file name
+	 * 
+	 * @param incidentPatternFile incident pattern file path
+	 * @param systemModelFile system model file path
+	 * @param GUIlistener a GUI listener used to send messages to the GUI
+	 */
 	public void execute(String incidentPatternFile, String systemModelFile,
-			IncidentPatternInstantiationListener listen) {
+			IncidentPatternInstantiationListener GUIlistener) {
 
-		//ttttt
-		
-		//brs output folder (containing states) has the same name as the system model file name
+		// brs output folder (containing states) has the same name as the system
+		// model file name
 		String BRS_outputFolder = systemModelFile.substring(0, systemModelFile.lastIndexOf("."));
-		
-		//brs file has the same name as the system model file name but with .big extension instead of .cps
-		String BRS_file = BRS_outputFolder+".big";//"etc/scenario1/research_centre_system.big";
-		
-		execute(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder, listen);
+
+		// brs file has the same name as the system model file name but with
+		// .big extension instead of .cps
+		String BRS_file = BRS_outputFolder + ".big";
+
+		execute(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder, GUIlistener);
 	}
 
-	public void execute(IncidentPatternInstantiationListener listen) {
+	/**
+	 * Maps given incident pattern to the given system model. 
+	 * 
+	 * @param incidentPatternFile incident pattern file path
+	 * @param systemModelFile system model file path
+	 * @param BRS_file Bigraphical Reactive System representation file path
+	 * @param BRS_statesFolder folder containing generated states using BRS
+	 * @param GUIlistener a GUI listener used to send messages to the GUI
+	 */
+	public void execute(String incidentPatternFile, String systemModelFile, String BRS_file, String BRS_statesFolder,
+			IncidentPatternInstantiationListener GUIlistener) {
 
-		String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-
-		execute(incidentPatternFile, systemModelFile, listen);
-
-	}
-
-//	public void execute(String incidentPatternFile, String systemModelFile,
-//			IncidentPatternInstantiationListener listen) {
-//
-//		execute(incidentPatternFile, systemModelFile, 1, listen);
-//
-//	}
-
-	public void execute(String incidentPatternFile, String systemModelFile, 		
-			String BRS_file, String BRS_outputFolder, IncidentPatternInstantiationListener listen) {
-
-		listener = listen;
+		listener = GUIlistener;
 
 		// String xQueryMatcherFile = xqueryFile;
-	
+
 		try {
 
 			// currently creates a folder named "log" where the states folder is
-			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
+			outputFolder = BRS_statesFolder.substring(0, BRS_statesFolder.lastIndexOf("/"));
 
 			runLogger();
 
@@ -130,7 +133,7 @@ public class IncidentPatternInstantiator {
 			logger.putMessage("////Executing Scenario1\\\\\\\\");
 			logger.putMessage("*Incident pattern file \"" + incidentPatternFile + "\"");
 			logger.putMessage("*System model file \"" + systemModelFile + "\"");
-			logger.putMessage("*BRS file \"" + BRS_file + "\" & states folder \"" + BRS_outputFolder + "\"");
+			logger.putMessage("*BRS file \"" + BRS_file + "\" & states folder \"" + BRS_statesFolder + "\"");
 
 			// start a timer
 			timer.start();
@@ -200,7 +203,7 @@ public class IncidentPatternInstantiator {
 					">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
 
 			// initialise the system (load states and transition system)
-			boolean isInitialised = initialiseBigraphSystem(BRS_file, BRS_outputFolder);
+			boolean isInitialised = initialiseBigraphSystem(BRS_file, BRS_statesFolder);
 
 			if (isInitialised) {
 				logger.putMessage(">>Initialisation completed successfully");
@@ -634,6 +637,8 @@ public class IncidentPatternInstantiator {
 		@Override
 		public void run() {
 
+			GraphPathsAnalyser pathsAnalyser = null;
+			
 			StopWatch timer = new StopWatch();
 
 			timer.start();
@@ -720,13 +725,13 @@ public class IncidentPatternInstantiator {
 							+ "] of generated potential incident instances...");
 
 					// create an analysis object for the identified paths
-					GraphPathsAnalyser pathsAnalyser = new GraphPathsAnalyser(paths);
-					String result = pathsAnalyser.analyse();
+					pathsAnalyser = new GraphPathsAnalyser(paths);
+//					String result = pathsAnalyser.analyse();
 
-					if (result != null) {
-						logger.putMessage(result);
-					}
-					
+//					if (result != null) {
+//						logger.putMessage(result);
+//					}
+
 				} else {
 					logger.putMessage("Thread[" + threadID + "]>>NO potential incident instances generated");
 				}
@@ -746,10 +751,10 @@ public class IncidentPatternInstantiator {
 				int mins = (int) (timePassed / 60000) % 60;
 				int secs = (int) (timePassed / 1000) % 60;
 				int secMils = (int) timePassed % 1000;
-
+				String strTime = timePassed + "ms [" + hours + "h:"
+						+ mins + "m:" + secs + "s:" + secMils + "ms]";
 				// execution time
-				logger.putMessage("Thread[" + threadID + "]>>Execution time: " + timePassed + "ms [" + hours + "h:"
-						+ mins + "m:" + secs + "s:" + secMils + "ms]");
+				logger.putMessage("Thread[" + threadID + "]>>Execution time: " + strTime);
 
 				logger.putMessage("Thread[" + threadID + "]>>Finished Successfully");
 				logger.putMessage("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
@@ -758,6 +763,7 @@ public class IncidentPatternInstantiator {
 					listener.updateProgress(incrementValue / 3 + incrementValue % 3);
 				}
 
+				listener.updateResult(threadID, pathsAnalyser, getOutputFileName(), strTime);
 				/*
 				 * inc.generateDistinctPaths(); LinkedList<GraphPath> paths =
 				 * inc.getAllPaths();
