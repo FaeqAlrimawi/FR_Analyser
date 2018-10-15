@@ -4,7 +4,6 @@ package ie.lero.spare.pattern_instantiation;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInputStream.GetField;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
@@ -442,39 +441,39 @@ public class IncidentPatternInstantiator {
 				return;
 			}
 
-			logger.putMessage(">>Asset sets (" + lst.size() + "):");
-
-			// boolean oldIsPrintToScreen = isPrintToScreen;
-
-			// print the sets only if there are less than 200. Else, print a 100
-			// but save the rest to a file
-			int maxNum = 200;
-
-			if (isSaveLog && lst.size() > maxNum) {
-				if (isPrintToScreen) {
-					System.out.println("*See log file (" + Logger.getInstance().getLogFolder() + "/"
-							+ Logger.getInstance().getLogFileName() + ") for All generated sets]");
-				}
-
-				int index = 0;
-
-				for (; index < 20; index++) {
-					logger.putMessage("-Set[" + index + "]: " + Arrays.toString(lst.get(index)));
-				}
-
-				logger.setPrintToScreen(false);
-				for (; index < lst.size(); index++) {
-					logger.putMessage("-Set[" + index + "]: " + Arrays.toString(lst.get(index)));
-				}
-				logger.setPrintToScreen(true);
-
-			} else {
-				for (int i = 0; i < lst.size(); i++) {
-					logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
-				}
-			}
-
-			// isPrintToScreen = oldIsPrintToScreen;
+//			logger.putMessage(">>Asset sets (" + lst.size() + "):");
+//
+//			// boolean oldIsPrintToScreen = isPrintToScreen;
+//
+//			// print the sets only if there are less than 200. Else, print a 100
+//			// but save the rest to a file
+//			int maxNum = 200;
+//
+//			if (isSaveLog && lst.size() > maxNum) {
+//				if (isPrintToScreen) {
+//					System.out.println("*See log file (" + Logger.getInstance().getLogFolder() + "/"
+//							+ Logger.getInstance().getLogFileName() + ") for All generated sets]");
+//				}
+//
+//				int index = 0;
+//
+//				for (; index < 20; index++) {
+//					logger.putMessage("-Set[" + index + "]: " + Arrays.toString(lst.get(index)));
+//				}
+//
+//				logger.setPrintToScreen(false);
+//				for (; index < lst.size(); index++) {
+//					logger.putMessage("-Set[" + index + "]: " + Arrays.toString(lst.get(index)));
+//				}
+//				logger.setPrintToScreen(true);
+//
+//			} else {
+//				for (int i = 0; i < lst.size(); i++) {
+//					logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
+//				}
+//			}
+//
+//			// isPrintToScreen = oldIsPrintToScreen;
 
 			logger.putMessage(
 					">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
