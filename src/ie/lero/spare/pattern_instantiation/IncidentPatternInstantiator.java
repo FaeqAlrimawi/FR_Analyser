@@ -79,9 +79,12 @@ public class IncidentPatternInstantiator {
 	 * representation of the system and generated states are considered to have
 	 * the same name as the system model file name
 	 * 
-	 * @param incidentPatternFile incident pattern file path
-	 * @param systemModelFile system model file path
-	 * @param GUIlistener a GUI listener used to send messages to the GUI
+	 * @param incidentPatternFile
+	 *            incident pattern file path
+	 * @param systemModelFile
+	 *            system model file path
+	 * @param GUIlistener
+	 *            a GUI listener used to send messages to the GUI
 	 */
 	public void execute(String incidentPatternFile, String systemModelFile,
 			IncidentPatternInstantiationListener GUIlistener) {
@@ -98,13 +101,18 @@ public class IncidentPatternInstantiator {
 	}
 
 	/**
-	 * Maps given incident pattern to the given system model. 
+	 * Maps given incident pattern to the given system model.
 	 * 
-	 * @param incidentPatternFile incident pattern file path
-	 * @param systemModelFile system model file path
-	 * @param BRS_file Bigraphical Reactive System representation file path
-	 * @param BRS_statesFolder folder containing generated states using BRS
-	 * @param GUIlistener a GUI listener used to send messages to the GUI
+	 * @param incidentPatternFile
+	 *            incident pattern file path
+	 * @param systemModelFile
+	 *            system model file path
+	 * @param BRS_file
+	 *            Bigraphical Reactive System representation file path
+	 * @param BRS_statesFolder
+	 *            folder containing generated states using BRS
+	 * @param GUIlistener
+	 *            a GUI listener used to send messages to the GUI
 	 */
 	public void execute(String incidentPatternFile, String systemModelFile, String BRS_file, String BRS_statesFolder,
 			IncidentPatternInstantiationListener GUIlistener) {
@@ -314,90 +322,6 @@ public class IncidentPatternInstantiator {
 
 	}
 
-	/**
-	 * This method details the steps for mapping an incident pattern to a system
-	 * representation it requires: 1-incident pattern file (i.e. *.cpi),
-	 * 2-system model (i.e. *.environment), and 3-Bigraph representation of the
-	 * system (i.e. *.big)
-	 */
-	private void executeExample() {
-
-		// String xQueryMatcherFile = xqueryFile;//in the xquery file the
-		// incident and system model paths should be adjusted if changed from
-		// current location
-		String BRS_file = "etc/example/research_centre_system.big";
-		String BRS_outputFolder = "etc/example/research_centre_output";
-		String systemModelFile = "etc/example/research_centre_model.cps";
-		String incidentPatternFile = "etc/example/interruption_incident-pattern.cpi";
-
-		XqueryExecuter.SPACE_DOC = systemModelFile;
-		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
-
-		Mapper m = new Mapper();
-		// finds components in a system representation (space.xml) that match
-		// the entities identified in an incident (incident.xml)
-		System.out.println(">>Matching incident pattern entities to system assets");
-		AssetMap am = m.findMatches();
-
-		// if there are incident assets with no matches from space model then
-		// exit
-		if (am.hasEntitiesWithNoMatch()) {
-			System.out.println(">>Some incident entities have no matches in the system assets. These are:");
-			// getIncidetnAssetWithNoMatch method has some issues
-			List<String> asts = am.getIncidentAssetsWithNoMatch();
-			System.out.println(asts.toString());
-			return; // execution stops if there are incident entities with
-					// no matching
-		}
-
-		// print matched assets
-		/*
-		 * for(String n : am.getIncidentAssetNames()) {
-		 * //getIncidetnAssetWithNoMatch method has some issues
-		 * System.out.println(n+":"+Arrays.toString(am.getSpaceAssetMatched(n)))
-		 * ; }
-		 */
-
-		// print matched assets
-		System.out.println(">>Entity-Asset map:");
-		System.out.println(am.toString());
-
-		// generate sequences
-		LinkedList<String[]> lst = am.generateUniqueCombinations();
-
-		// checks if there are sequences generated or not. if not, then
-		// execution is terminated
-		// this can be loosened to allow same asset to be mapped to two entities
-		if (lst == null || lst.isEmpty()) {
-			System.out.println(">>No combinations found.... exisitng program");
-			return;
-		}
-
-		// print sequences
-		/*
-		 * System.out.println("Sequences ["+lst.size()+"]"); for (String[] s :
-		 * lst) { System.out.println(Arrays.toString(s)); }
-		 */
-
-		System.out.println(">>Initialise the System");
-		// initialise BRS system
-		boolean isInitialised = initialiseBigraphSystem(BRS_file, BRS_outputFolder);
-		if (!isInitialised) {
-			System.out.println(">>System could not be initialised....execution is terminated");
-		}
-
-		// create threads that handle each sequence generated from asset
-		// matching
-		PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
-		String[] incidentAssetNames = am.getIncidentEntityNames();
-
-		for (int i = 0; i < lst.size(); i++) {// adjust the length
-			incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-			System.out.println(">>Asset set[" + i + "]: " + Arrays.toString(lst.get(i)));
-			// incidentInstances[i].start();
-		}
-	}
-
 	private void executeStealScenario() {
 
 		String BRS_file = "etc/steal_scenario/research_centre_system.big";
@@ -417,17 +341,30 @@ public class IncidentPatternInstantiator {
 
 		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
 	}
-	
+
 	private void executeLeroScenario() {
 
-		String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
-		String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
+		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
+		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
 		String systemModelFile = "D:/Bigrapher data/scenario2/lero.cps";
 		String incidentPatternFile = "D:/Bigrapher data/scenario2/interruption_incident-pattern_modified.cpi";
 
+		executeScenario(incidentPatternFile, systemModelFile);
+	}
+
+	private void executeScenario(String incidentPatternFile, String systemModelFile) {
+
+		// brs output folder (containing states) has the same name as the system
+		// model file name
+		String BRS_outputFolder = systemModelFile.substring(0, systemModelFile.lastIndexOf("."));
+
+		// brs file has the same name as the system model file name but with
+		// .big extension instead of .cps
+		String BRS_file = BRS_outputFolder + ".big";
+		
 		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
 	}
-	
+
 	private void executeScenario(String incidentPatternFile, String systemModelFile, String BRS_file,
 			String BRS_outputFolder) {
 
@@ -447,7 +384,7 @@ public class IncidentPatternInstantiator {
 			runLogger();
 
 			StopWatch timer = new StopWatch();
-			
+
 			logger.putMessage("////Executing Scenario\\\\\\\\");
 			logger.putMessage("*Incident pattern file \"" + incidentPatternFile + "\"");
 			logger.putMessage("*System model file \"" + systemModelFile + "\"");
@@ -649,7 +586,7 @@ public class IncidentPatternInstantiator {
 		public void run() {
 
 			GraphPathsAnalyser pathsAnalyser = null;
-			
+
 			StopWatch timer = new StopWatch();
 
 			timer.start();
@@ -737,11 +674,11 @@ public class IncidentPatternInstantiator {
 
 					// create an analysis object for the identified paths
 					pathsAnalyser = new GraphPathsAnalyser(paths);
-//					String result = pathsAnalyser.analyse();
+					// String result = pathsAnalyser.analyse();
 
-//					if (result != null) {
-//						logger.putMessage(result);
-//					}
+					// if (result != null) {
+					// logger.putMessage(result);
+					// }
 
 				} else {
 					logger.putMessage("Thread[" + threadID + "]>>NO potential incident instances generated");
@@ -762,8 +699,7 @@ public class IncidentPatternInstantiator {
 				int mins = (int) (timePassed / 60000) % 60;
 				int secs = (int) (timePassed / 1000) % 60;
 				int secMils = (int) timePassed % 1000;
-				String strTime = timePassed + "ms [" + hours + "h:"
-						+ mins + "m:" + secs + "s:" + secMils + "ms]";
+				String strTime = timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]";
 				// execution time
 				logger.putMessage("Thread[" + threadID + "]>>Execution time: " + strTime);
 
@@ -1060,7 +996,7 @@ public class IncidentPatternInstantiator {
 		// ins.executeExample();
 
 		ins.executeLeroScenario();
-//		ins.executeScenario1();
+		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
 	}
