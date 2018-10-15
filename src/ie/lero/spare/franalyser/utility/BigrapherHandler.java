@@ -12,8 +12,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import i.e.lero.spare.pattern_instantiation.LabelExtractor;
-import i.e.lero.spare.pattern_instantiation.SystemExecutor;
+import ie.lero.spare.pattern_instantiation.LabelExtractor;
+import ie.lero.spare.pattern_instantiation.SystemExecutor;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
 import it.uniud.mads.jlibbig.core.std.Handle;
