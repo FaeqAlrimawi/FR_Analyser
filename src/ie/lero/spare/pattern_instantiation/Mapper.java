@@ -14,6 +14,10 @@ import java.util.function.Function;
 
 import javax.xml.xquery.XQException;
 
+import com.openpojo.reflection.PojoClass;
+import com.openpojo.reflection.impl.PojoClassFactory;
+
+import cyberPhysical_Incident.AbstractionLevel;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Knowledge;
@@ -26,9 +30,8 @@ import environment.DigitalNetwork;
 import environment.EnvironmentDiagram;
 import environment.PhysicalAsset;
 import environment.PhysicalStructure;
-import ie.lero.spare.franalyser.utility.IncidentModelHandler;
+import environment.impl.ComputingDeviceImpl;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
-import ie.lero.spare.franalyser.utility.SystemModelHandler;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class Mapper {
@@ -39,10 +42,11 @@ public class Mapper {
 	private LinkedList<IncidentEntity> incidentEntities;
 	private int incidentEntitiesThreshold = 10;
 	private int systemAssetsThreshold = 100;
-
+	
 	public Mapper() {
 
 		mainPool = new ForkJoinPool();
+		
 	}
 
 	/*
@@ -313,34 +317,47 @@ public class Mapper {
 
 			/** matching Type **/
 			Class<?> potentialClass = null;
+//
+//			if (entity.getType() != null) {
+//				String typeName = entity.getType().getName();
+//				try {
+//					String potentialClassName = "environment.impl." + typeName;
+//
+//					if (!typeName.endsWith("Impl")) {
+//						potentialClassName += "Impl";
+//					}
+//
+//					potentialClass = Class.forName(potentialClassName);
+//
+//				} catch (ClassNotFoundException e) {
+//					// type mismatch i.e. there is no type available in the
+//					// system model
+//					// currently return false
+//					return false;
+//				}
+//
+//				// if the current asset object is not of the same class or
+//				// subclass of the potential class
+//				// then return false (type mismatch)
+//
+//				AbstractionLevel entityTypeLevel = entity.getType().getAbstractionLevel();
+//
+//				switch (entityTypeLevel.getValue()) {
+//
+//				case AbstractionLevel.SAME_VALUE:
+//
+//				}
+//
+//				if (!potentialClass.isInstance(asset)) {
+//					return false;
+//				}
+//
+//			}
 
-			if (entity.getType() != null) {
-				String typeName = entity.getType().getName();
-				try {
-					String potentialClassName = "environment.impl." + typeName;
-
-					if (!typeName.endsWith("Impl")) {
-						potentialClassName += "Impl";
-					}
-
-					potentialClass = Class.forName(potentialClassName);
-
-				} catch (ClassNotFoundException e) {
-					// type mismatch i.e. there is no type available in the
-					// system model
-					// currently return false
-					return false;
-				}
-
-				// if the current asset object is not of the same class or
-				// subclass of the potential class
-				// then return false (type mismatch)
-				if (!potentialClass.isInstance(asset)) {
-					return false;
-				}
-
+			if(!isTypeMatched(entity, asset)) {
+				return false;
 			}
-
+			
 			/** matching Parent type **/
 			IncidentEntity parent = (IncidentEntity) entity.getParentEntity();
 
@@ -666,4 +683,67 @@ public class Mapper {
 			return true;
 		}
 	}
+
+	protected boolean isTypeMatched(IncidentEntity entity, environment.Asset asset) {
+
+		if (entity.getType() == null) {
+			return true; // allowed to pass for other checks (e.g., connections)
+		}
+
+		Class potentialClass;
+		String typeName = entity.getType().getName();
+		AbstractionLevel entityTypeLevel = entity.getType().getAbstractionLevel();
+
+		try {
+			String potentialClassName = "environment.impl." + typeName;
+
+			if (!typeName.endsWith("Impl")) {
+				potentialClassName += "Impl";
+			}
+
+			potentialClass = Class.forName(potentialClassName);
+
+		} catch (ClassNotFoundException e) {
+			// type mismatch i.e. there is no type available in the
+			// system model
+			// currently return false
+			return false;
+		}
+
+		String potentialClassName = potentialClass.getSimpleName();
+		
+		switch (entityTypeLevel.getValue()) {
+
+		// exact type
+		case AbstractionLevel.EXACT_VALUE:
+			if (potentialClassName.equals(asset.getClass().getSimpleName())) {
+				return true;
+			}
+			return false;
+
+		// exact type or any of its subclasses (e.g., computing device or
+		// desktop)
+		case AbstractionLevel.ANYSUBCLASS_VALUE:
+			if (potentialClass.isInstance(asset)) {
+				return true;
+			}
+			return false;
+
+//		case AbstractionLevel.SUBCLASS_VALUE://this to be anysibling class			
+
+		}
+		
+		return false;
+
+	}
+	
+//	public static void main(String[]args){
+//		
+////		PojoClassFactory.
+//		for(PojoClass pojoClass : PojoClassFactory.enumerateClassesByExtendingType("environment.impl", ComputingDeviceImpl.class, null)) {
+//		    System.out.println(pojoClass.getName());
+//		}
+//		
+//		System.out.println(" sss  "+ComputingDevice.class.getName());
+//	}
 }
