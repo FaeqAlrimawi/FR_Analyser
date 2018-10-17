@@ -429,7 +429,7 @@ public class IncidentPatternInstantiator {
 			}
 
 			// print matched assets
-			logger.putMessage(">>Number of Assets (also entities) =  " + am.getIncidentEntityNames().length);
+			logger.putMessage(">>Incident Entities =  " + am.getIncidentEntityNames().length);
 			logger.putMessage(">>Incident entities order: " + Arrays.toString(am.getIncidentEntityNames()));
 			logger.putMessage(">>Entity-Asset map:");
 			logger.putMessage(am.toString());
