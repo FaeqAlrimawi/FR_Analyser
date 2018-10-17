@@ -429,6 +429,9 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(am.toString());
 			logger.putMessage(">>Generating asset sets..");
 
+			if(isPrintToScreen) {
+				return;
+			}
 			// generate sequences
 			LinkedList<String[]> lst = am.generateUniqueCombinations();
 

@@ -42,11 +42,11 @@ public class Mapper {
 	private LinkedList<IncidentEntity> incidentEntities;
 	private int incidentEntitiesThreshold = 10;
 	private int systemAssetsThreshold = 100;
-	
+
 	public Mapper() {
 
 		mainPool = new ForkJoinPool();
-		
+
 	}
 
 	/*
@@ -315,164 +315,68 @@ public class Mapper {
 			 * 6-Properities if found in the entity
 			 */
 
+			//
+			// if (entity.getType() != null) {
+			// String typeName = entity.getType().getName();
+			// try {
+			// String potentialClassName = "environment.impl." + typeName;
+			//
+			// if (!typeName.endsWith("Impl")) {
+			// potentialClassName += "Impl";
+			// }
+			//
+			// potentialClass = Class.forName(potentialClassName);
+			//
+			// } catch (ClassNotFoundException e) {
+			// // type mismatch i.e. there is no type available in the
+			// // system model
+			// // currently return false
+			// return false;
+			// }
+			//
+			// // if the current asset object is not of the same class or
+			// // subclass of the potential class
+			// // then return false (type mismatch)
+			//
+			// AbstractionLevel entityTypeLevel =
+			// entity.getType().getAbstractionLevel();
+			//
+			// switch (entityTypeLevel.getValue()) {
+			//
+			// case AbstractionLevel.SAME_VALUE:
+			//
+			// }
+			//
+			// if (!potentialClass.isInstance(asset)) {
+			// return false;
+			// }
+			//
+			// }
+
 			/** matching Type **/
 			Class<?> potentialClass = null;
-//
-//			if (entity.getType() != null) {
-//				String typeName = entity.getType().getName();
-//				try {
-//					String potentialClassName = "environment.impl." + typeName;
-//
-//					if (!typeName.endsWith("Impl")) {
-//						potentialClassName += "Impl";
-//					}
-//
-//					potentialClass = Class.forName(potentialClassName);
-//
-//				} catch (ClassNotFoundException e) {
-//					// type mismatch i.e. there is no type available in the
-//					// system model
-//					// currently return false
-//					return false;
-//				}
-//
-//				// if the current asset object is not of the same class or
-//				// subclass of the potential class
-//				// then return false (type mismatch)
-//
-//				AbstractionLevel entityTypeLevel = entity.getType().getAbstractionLevel();
-//
-//				switch (entityTypeLevel.getValue()) {
-//
-//				case AbstractionLevel.SAME_VALUE:
-//
-//				}
-//
-//				if (!potentialClass.isInstance(asset)) {
-//					return false;
-//				}
-//
-//			}
 
-			if(!isTypeMatched(entity, asset)) {
+			if (!isTypeMatched(entity, asset)) {
 				return false;
 			}
-			
-			/** matching Parent type **/
-			IncidentEntity parent = (IncidentEntity) entity.getParentEntity();
 
-			if (parent != null) {
-
-				if (parent.getType() != null) {
-					String typeName = parent.getType().getName();
-					try {
-						String potentialClassName = "environment.impl." + typeName;
-
-						if (!typeName.endsWith("Impl")) {
-							potentialClassName += "Impl";
-						}
-
-						potentialClass = Class.forName(potentialClassName);
-
-					} catch (ClassNotFoundException e) {
-						// type mismatch i.e. there is no type available in the
-						// system model
-						// currently return false (maybe loosened a little like
-						// ignore)
-						return false;
-					}
-
-					// if the current asset object is not of the same class or
-					// subclass of the potential class
-					// then return false (type mismatch)
-					environment.Asset parentAsset = null;
-
-					if (environment.DigitalAsset.class.isInstance(asset)) {
-						parentAsset = ((environment.DigitalAsset) asset).getParentAsset();
-					} else if (environment.PhysicalAsset.class.isInstance(asset)) {
-						parentAsset = ((environment.PhysicalAsset) asset).getParentAsset();
-					}
-
-					// if the asset has no parent but the incident entity
-					// has
-					// then return false (no match)
-					if (parentAsset == null) {
-						return false;
-					}
-
-					// if the entity is fixed at that location, then both entity
-					// and asset should have the same class type
-					if (entity.getMobility() == Mobility.FIXED) {
-
-						if (!potentialClass.isInstance(parentAsset)) {
-							return false;
-						}
-
-						// else if entity is movable (i.e. can change location
-					} else if (entity.getMobility() == Mobility.MOVABLE) {
-
-						// if the entity parent is of type physical structure,
-						// then
-						// asset parent should be of type physical structure
-						if (PhysicalStructure.class.isInstance(parent)) {
-							if (!PhysicalStructure.class.isInstance(parentAsset)) {
-								return false;
-							}
-						}
-
-						// if the entity parent is of type computing device,
-						// then
-						// asset parent should be of type computing device
-						if (ComputingDevice.class.isInstance(parent)) {
-							if (!ComputingDevice.class.isInstance(parentAsset)) {
-								return false;
-							}
-						}
-
-						// if the entity parent is of type digital network, then
-						// asset parent should be of type digital network
-						if (DigitalNetwork.class.isInstance(parent)) {
-							if (!DigitalNetwork.class.isInstance(parentAsset)) {
-								return false;
-							}
-						}
-
-						// general case (other cases could be added as the ones
-						// before)
-						if (DigitalAsset.class.isInstance(parent)) {
-							if (!DigitalAsset.class.isInstance(parentAsset)) {
-								return false;
-							}
-						}
-						// general case (other cases could be added as the ones
-						// before)
-						if (PhysicalAsset.class.isInstance(parent)) {
-							if (!PhysicalAsset.class.isInstance(parentAsset)) {
-								return false;
-							}
-						}
-
-					} else if (entity.getMobility() == Mobility.UNKNOWN) {
-						// if mobility is unknown, then parents should match on
-						// the level of physical or digital
-						// general case (other cases could be added as the ones
-						// before)
-						if (DigitalAsset.class.isInstance(parent)) {
-							if (!DigitalAsset.class.isInstance(parentAsset)) {
-								return false;
-							}
-						}
-						// general case (other cases could be added as the ones
-						// before)
-						if (PhysicalAsset.class.isInstance(parent)) {
-							if (!PhysicalAsset.class.isInstance(parentAsset)) {
-								return false;
-							}
-						}
-					}
-
-				}
+			/** matching mobility **/
+			if(!isMobilityMatched(entity, asset)) {
+				return false;
 			}
+
+			/** matching Parent type **/
+			IncidentEntity parentEntity = (IncidentEntity) entity.getParentEntity();
+
+			environment.Asset parentAsset = null;
+
+			if (environment.DigitalAsset.class.isInstance(asset)) {
+				parentAsset = ((environment.DigitalAsset) asset).getParentAsset();
+			} else if (environment.PhysicalAsset.class.isInstance(asset)) {
+				parentAsset = ((environment.PhysicalAsset) asset).getParentAsset();
+			}
+
+			isParentTypeMatched(parentEntity, parentAsset, entity.getMobility());
 
 			/** matching contained assets (number & type) **/
 			// if knowledge is exact then both should have the same number of
@@ -545,10 +449,14 @@ public class Mapper {
 
 					containedAsset = containedAssets.get(i);
 
-					if (potentialClass.isInstance(containedAsset)) {
-						matchedcontainedAssets.add(i);
-						iscontainedEntityMatched = true;
-						break;
+					// match of contained assets based on mobility and type
+					// (exact or not)
+					if (containedEntity.getMobility() == Mobility.FIXED) {
+						if (isTypeMatched(containedEntity, containedAsset)) {
+							matchedcontainedAssets.add(i);
+							iscontainedEntityMatched = true;
+							break;
+						}
 					}
 				}
 
@@ -623,6 +531,7 @@ public class Mapper {
 
 					assetCon = assetCons.get(i);
 
+					// main comparison
 					if (potentialClass.isInstance(assetCon)) {
 						matchedAssetCons.add(i);
 						isConnectionMatched = true;
@@ -711,7 +620,7 @@ public class Mapper {
 		}
 
 		String potentialClassName = potentialClass.getSimpleName();
-		
+
 		switch (entityTypeLevel.getValue()) {
 
 		// exact type
@@ -729,21 +638,161 @@ public class Mapper {
 			}
 			return false;
 
-//		case AbstractionLevel.SUBCLASS_VALUE://this to be anysibling class			
+		// case AbstractionLevel.SUBCLASS_VALUE://this to be anysibling class
 
 		}
-		
+
 		return false;
 
 	}
-	
-//	public static void main(String[]args){
-//		
-////		PojoClassFactory.
-//		for(PojoClass pojoClass : PojoClassFactory.enumerateClassesByExtendingType("environment.impl", ComputingDeviceImpl.class, null)) {
-//		    System.out.println(pojoClass.getName());
-//		}
-//		
-//		System.out.println(" sss  "+ComputingDevice.class.getName());
-//	}
+
+	protected boolean isParentTypeMatched(IncidentEntity parentEntity, environment.Asset parentAsset,
+			Mobility entityMobility) {
+
+		if (parentEntity == null || parentEntity.getType() == null) {
+			return true;
+		}
+
+		// if the asset has no parent but the incident entity
+		// has
+		// then return false (no match)
+		if (parentAsset == null) {
+			return false;
+		}
+
+		String typeName = parentEntity.getType().getName();
+		Class potentialClass;
+
+		try {
+			String potentialClassName = "environment.impl." + typeName;
+
+			if (!typeName.endsWith("Impl")) {
+				potentialClassName += "Impl";
+			}
+
+			potentialClass = Class.forName(potentialClassName);
+
+		} catch (ClassNotFoundException e) {
+			// type mismatch i.e. there is no type available in the
+			// system model
+			// currently return false (maybe loosened a little like
+			// ignore)
+			return false;
+		}
+
+		switch (entityMobility) {
+
+		case FIXED:
+
+			return isTypeMatched(parentEntity, parentAsset);
+
+		case MOVABLE:
+
+			// check first as fixed
+			if (isTypeMatched(parentEntity, parentAsset)) {
+				return true;
+			}
+
+			// if the entity parent is of type physical structure,
+			// then
+			// asset parent should be of type physical structure
+			if (PhysicalStructure.class.isInstance(parentEntity)) {
+				if (PhysicalStructure.class.isInstance(parentAsset)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+			// if the entity parent is of type computing device,
+			// then
+			// asset parent should be of type computing device
+			if (ComputingDevice.class.isInstance(parentEntity)) {
+				if (ComputingDevice.class.isInstance(parentAsset)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+			// if the entity parent is of type digital network, then
+			// asset parent should be of type digital network
+			if (DigitalNetwork.class.isInstance(parentEntity)) {
+				if (DigitalNetwork.class.isInstance(parentAsset)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+			// general case (other cases could be added as the ones
+			// before)
+			if (DigitalAsset.class.isInstance(parentEntity)) {
+				if (DigitalAsset.class.isInstance(parentAsset)) {
+					return true;
+				} else {
+					return false;
+				}
+			} else { // else parent entity is physical
+				if (PhysicalAsset.class.isInstance(parentAsset)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+		case UNKNOWN:
+			// if it is not known if it is fixed or movable, then try fixed,
+			// then movable if fixed returned false
+
+			if (!isParentTypeMatched(parentEntity, parentAsset, Mobility.FIXED)) {
+
+				return isParentTypeMatched(parentEntity, parentAsset, Mobility.MOVABLE);
+			}
+
+			return true;
+
+		default:
+			return false;
+		}
+
+	}
+
+	protected boolean isMobilityMatched(IncidentEntity entity, environment.Asset asset) {
+
+		switch (entity.getMobility()) {
+
+		case FIXED:
+			if (asset.getMobility() == environment.Mobility.FIXED) {
+				return true;
+			}
+
+			return false;
+
+		case MOVABLE:
+			if (asset.getMobility() == environment.Mobility.MOVABLE) {
+				return true;
+			}
+
+			return false;
+
+		case UNKNOWN:
+			return true;
+		}
+
+		return false;
+
+	}
+
+	// public static void main(String[]args){
+	//
+	//// PojoClassFactory.
+	// for(PojoClass pojoClass :
+	// PojoClassFactory.enumerateClassesByExtendingType("environment.impl",
+	// ComputingDeviceImpl.class, null)) {
+	// System.out.println(pojoClass.getName());
+	// }
+	//
+	// System.out.println(" sss "+ComputingDevice.class.getName());
+	// }
 }
