@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.function.IntFunction;
 
 import environment.EnvironmentDiagram;
+import environment.Mobility;
 import ie.lero.spare.pattern_instantiation.AssetMap;
 
 public class CartesianIterator<T> implements Iterator<String[]> {
@@ -21,8 +22,11 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 	private String[] next = null;
 	private String previous = null;
 	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-	private List<int []> entitiesRules = AssetMap.rulesList;
-	
+	private List<int[]> entitiesRules = AssetMap.rulesList;
+
+	// used to refine the matching to the incident entities
+	public static boolean isStrict = false;
+
 	public CartesianIterator(String[][] sets, IntFunction<String[]> arrayConstructor) {
 		Objects.requireNonNull(sets);
 		Objects.requireNonNull(arrayConstructor);
@@ -113,8 +117,16 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 				tmp /= radix;
 			}
 
-			if (!isDuplicate && checkSet(value)) {
-				results.add(value);
+			if (!isDuplicate) {
+
+				if (isStrict) {
+					if (checkSetBasedOnEntities(value)) {
+						results.add(value);
+					}
+				} else {
+					results.add(value);
+				}
+
 			}
 		}
 
@@ -133,18 +145,28 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 		// return (int) Math.pow(sets[0].length, sets.length);
 	}
 
-	protected boolean checkSet(LinkedList<String> set) {
+	protected boolean checkSetBasedOnEntities(LinkedList<String> set) {
 
-		List<int[]> assetsRules = createIncidentEntitiesRules(set); 
-		
-		for(int i =0;i<entitiesRules.size();i++) {
-			
-			if(!Arrays.equals(entitiesRules.get(i), assetsRules.get(i))) {
-				return false;
+		List<int[]> assetsRules = createIncidentEntitiesRules(set);
+
+		for (int i = 0; i < entitiesRules.size(); i++) {
+
+			// if(!Arrays.equals(entitiesRules.get(i), assetsRules.get(i))) {
+			// return false;
+			// }
+			for (int j = 0; j < entitiesRules.get(i).length; j++) {
+				if (entitiesRules.get(i)[j] == 1 && assetsRules.get(i)[j] == 0) {
+					return false;
+				}
 			}
 		}
-		
+
 		return true;
+	}
+
+	protected void checkSetBasedOnSystem(LinkedList<String> set) {
+
+		// TBD
 	}
 
 	protected List<int[]> createIncidentEntitiesRules(List<String> assetSet) {
@@ -179,7 +201,7 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 			src = assets.get(i);
 			index = i + 1;
 			int[] tmpAry = rulesList.get(i);
-			for (int j = 0; j < tmpAry.length; j = (j + 1) * rulesNum) {
+			for (int j = 0; j < tmpAry.length;) {
 				des = assets.get(index);
 
 				// [1] isConnected
@@ -199,23 +221,32 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 					tmpAry[j] = 0;
 				}
 
+				// next property
+				j++;
+
 				// [2] is the destination parent of source
 				environment.Asset srcParent = src.getParentAsset();
 
 				if (srcParent != null && srcParent.getName().equals(des.getName())) {
-					tmpAry[j + 1] = 1;
+					tmpAry[j] = 1;
 				} else {
-					tmpAry[j + 1] = 0;
+					tmpAry[j] = 0;
 				}
+
+				// next property
+				j++;
 
 				// [3] is destination a child in source
 				if (src.getContainedAssets().contains(des)) {
-					tmpAry[j + 2] = 1;
+					tmpAry[j] = 1;
 				} else {
-					tmpAry[j + 2] = 0;
+					tmpAry[j] = 0;
 				}
 
 				index++;
+
+				// next property
+				j++;
 			}
 		}
 

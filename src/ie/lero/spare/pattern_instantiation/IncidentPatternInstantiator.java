@@ -54,8 +54,9 @@ public class IncidentPatternInstantiator {
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = true;
-
+	private boolean isSaveLog = false;
+	private boolean dummy = true;
+	
 	private String outputFolder = ".";
 
 	private void runLogger() {
@@ -175,7 +176,8 @@ public class IncidentPatternInstantiator {
 			listener.updateAssetMapInfo(am.toStringCompact());
 
 			// generate sequences
-			LinkedList<String[]> lst = am.generateUniqueCombinations();
+			boolean isStrict = true;
+			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict);
 
 			listener.updateProgress(10);
 			listener.updateAssetSetInfo(lst);
@@ -346,8 +348,11 @@ public class IncidentPatternInstantiator {
 
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
+		String interruptionPattern = "interruption_incident-pattern_modified.cpi";
+		String dataCollectionPattern = "dataCollection_incident-pattern.cpi";
+		
 		String systemModelFile = "D:/Bigrapher data/scenario2/lero.cps";
-		String incidentPatternFile = "D:/Bigrapher data/scenario2/dataCollection_incident-pattern.cpi";
+		String incidentPatternFile = "D:/Bigrapher data/scenario2/"+interruptionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
@@ -432,7 +437,8 @@ public class IncidentPatternInstantiator {
 
 			
 			// generate sequences
-			LinkedList<String[]> lst = am.generateUniqueCombinations();
+			boolean isStrict = true;
+			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict);
 
 			// checks if there are sequences generated or not. if not, then
 			// execution is terminated
@@ -481,7 +487,7 @@ public class IncidentPatternInstantiator {
 //
 //			// isPrintToScreen = oldIsPrintToScreen;
 
-			if(isPrintToScreen) {
+			if(dummy) {
 				return;
 			}
 			
