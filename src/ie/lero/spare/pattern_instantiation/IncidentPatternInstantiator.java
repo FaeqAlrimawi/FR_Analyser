@@ -346,7 +346,7 @@ public class IncidentPatternInstantiator {
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
 		String systemModelFile = "D:/Bigrapher data/scenario2/lero.cps";
-		String incidentPatternFile = "D:/Bigrapher data/scenario2/interruption_incident-pattern_modified.cpi";
+		String incidentPatternFile = "D:/Bigrapher data/scenario2/dataCollection_incident-pattern.cpi";
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
@@ -429,9 +429,7 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(am.toString());
 			logger.putMessage(">>Generating asset sets..");
 
-			if(isPrintToScreen) {
-				return;
-			}
+			
 			// generate sequences
 			LinkedList<String[]> lst = am.generateUniqueCombinations();
 
@@ -444,7 +442,8 @@ public class IncidentPatternInstantiator {
 				return;
 			}
 
-//			logger.putMessage(">>Asset sets (" + lst.size() + "):");
+			
+			logger.putMessage(">>Number of Asset Sets generated = " + lst.size() + " Sets");
 //
 //			// boolean oldIsPrintToScreen = isPrintToScreen;
 //
@@ -478,6 +477,10 @@ public class IncidentPatternInstantiator {
 //
 //			// isPrintToScreen = oldIsPrintToScreen;
 
+			if(isPrintToScreen) {
+				return;
+			}
+			
 			logger.putMessage(
 					">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
 

@@ -621,10 +621,10 @@ public class Mapper {
 
 		String potentialClassName = potentialClass.getSimpleName();
 
-		switch (entityTypeLevel.getValue()) {
+		switch (entityTypeLevel) {
 
 		// exact type
-		case AbstractionLevel.EXACT_VALUE:
+		case EXACT:
 			if (potentialClassName.equals(asset.getClass().getSimpleName())) {
 				return true;
 			}
@@ -632,13 +632,13 @@ public class Mapper {
 
 		// exact type or any of its subclasses (e.g., computing device or
 		// desktop)
-		case AbstractionLevel.ANYSUBCLASS_VALUE:
+		case ANYSUBCLASS:
 			if (potentialClass.isInstance(asset)) {
 				return true;
 			}
 			return false;
 
-		// case AbstractionLevel.SUBCLASS_VALUE://this to be anysibling class
+		// ANYSIBLINGCLASS_VALUE://this to be anysibling class
 
 		}
 
