@@ -137,7 +137,6 @@ public class GeneticMain {
 						cyberPhysical_Incident.IncidentEntity ent1 = (cyberPhysical_Incident.IncidentEntity)con.getEntity1();
 						cyberPhysical_Incident.IncidentEntity ent2 = (cyberPhysical_Incident.IncidentEntity)con.getEntity2();
 						
-						
 						if ((ent1 != null && ent1.getName().equals(des.getName()))
 								|| (ent2 != null && ent2.getName().equals(des.getName()))){
 							rules[ind+1] = 1;//con.getType().ordinal();

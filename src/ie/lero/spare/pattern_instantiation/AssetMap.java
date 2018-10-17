@@ -11,7 +11,11 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.xml.xquery.XQException;
 
+import cyberPhysical_Incident.Activity;
+import cyberPhysical_Incident.IncidentDiagram;
+import cyberPhysical_Incident.IncidentEntity;
 import ie.lero.spare.franalyser.utility.CartesianIterator;
+import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class AssetMap {
@@ -24,6 +28,14 @@ public class AssetMap {
 	private int numberOfSegments = 2;
 	private int sizeofSegment = 3;
 	//private LinkedList<String> systemAssets;
+	
+	//for generating sequences
+
+	//number of rules
+	//rules for each asset are 3 currently: hasConnectivity? 0 or Type, isParent? 0 or 1, isChild? 0 or 1
+	public static final int rulesNum = 3;
+	//rules for each general asset in relation to other general assets in the generalEntities array
+	public static List<int []> rulesList;
 	
 	public AssetMap(){
 		numberOfSets=0;
@@ -371,9 +383,79 @@ public class AssetMap {
 		return tmp;
 	}*/
 	
+	private void createIncidentEntitiesRules() {
+		
+		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
+		
+		List<IncidentEntity> generalEntities = new LinkedList<IncidentEntity>();
+			
+		for(String entityName : incidentEntityNames) {
+			generalEntities.add(incidentModel.getEntity(entityName));
+		}
+		
+		//rules for each asset are 4 currently: isSame? 0 or 1, hasConnectivity? 0 or 1, isParent? 0 or 1, isChild? 0 or 1
+		//the size of the rules array = rulesNum*neighbourhood*size of generalAsset array (i.e. number of general assets)  
+		int numOfEntities = generalEntities.size();
+
+		IncidentEntity src, des;
+		
+		rulesList = new LinkedList<int[]>();
+		
+		for(int i=0;i<numOfEntities-1;i++) {
+			rulesList.add(new int[(numOfEntities-1-i)*rulesNum]);
+		}
+
+		int index = 0;
+		
+		//determine properties
+		for (int i=0;i<rulesList.size();i++){
+			src = generalEntities.get(i);
+			index = i+1;
+			int [] tmpAry = rulesList.get(i);
+			for(int j=0;j<tmpAry.length;j = (j+1)*rulesNum){
+					des = generalEntities.get(index);
+			
+					//[1] isConnected
+					for(cyberPhysical_Incident.Connection con: src.getConnections()) {
+						
+						cyberPhysical_Incident.IncidentEntity ent1 = (cyberPhysical_Incident.IncidentEntity)con.getEntity1();
+						cyberPhysical_Incident.IncidentEntity ent2 = (cyberPhysical_Incident.IncidentEntity)con.getEntity2();
+						
+						if ((ent1 != null && ent1.getName().equals(des.getName()))
+								|| (ent2 != null && ent2.getName().equals(des.getName()))){
+							tmpAry[j] = 1;//con.getType().ordinal();
+							break;
+						} 
+					}
+					
+					if(tmpAry[j] != 1) {
+						tmpAry[j] = 0;
+					}
+					
+					//[2] is the destination parent of source
+					if(src.getParentEntity() != null && 
+							((cyberPhysical_Incident.IncidentEntity)src.getParentEntity()).getName().equals(des.getName())) {
+						tmpAry[j+1] = 1;
+					} else {
+						tmpAry[j+1] = 0;
+					}
+					
+					//[3] is destination a child in source
+					if(src.getContainedEntities().contains(des)){
+						tmpAry[j+2] = 1;
+					} else {
+						tmpAry[j+2] = 0;
+					}
+					
+					index++;
+			}
+		}
+	}
+	
 public LinkedList<String[]> generateUniqueCombinations() {
 
 	String [][] systemAssetMatches = getDoubleArrayOfMatches();
+	createIncidentEntitiesRules();
 	
 	CartesianIterator<String> it =  new CartesianIterator<String>(systemAssetMatches, String[]::new);
 		uniqueCombinations = new LinkedList<String[]>();

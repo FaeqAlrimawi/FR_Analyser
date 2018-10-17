@@ -54,7 +54,7 @@ public class IncidentPatternInstantiator {
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
 
 	private String outputFolder = ".";
 
@@ -63,11 +63,12 @@ public class IncidentPatternInstantiator {
 		logger = Logger.getInstance();
 
 		logger.setListener(listener);
-		logger.setLogFolder(outputFolder + "/log");
-		logger.createLogFile(); // file name is created internally by the logger
-								// (name: log[time_date].txt)
 		logger.setPrintToScreen(isPrintToScreen);
 		logger.setSaveLog(isSaveLog);
+		logger.setLogFolder(outputFolder + "/log");
+		
+		logger.createLogFile(); // file name is created internally by the logger
+								// (name: log[time_date].txt)
 
 		logger.start();
 
@@ -444,7 +445,10 @@ public class IncidentPatternInstantiator {
 
 			
 			logger.putMessage(">>Number of Asset Sets generated = " + lst.size() + " Sets");
-//
+			logger.putMessage("Incident entity set:" + Arrays.toString(am.getIncidentEntityNames()));
+			for (int i = 0; i < lst.size(); i++) {
+				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
+			}
 //			// boolean oldIsPrintToScreen = isPrintToScreen;
 //
 //			// print the sets only if there are less than 200. Else, print a 100
