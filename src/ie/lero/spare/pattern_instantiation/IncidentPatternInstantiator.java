@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -368,6 +369,20 @@ public class IncidentPatternInstantiator {
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
 
+	private void executeScenarioFromConsole() {
+		
+		Scanner scanner = new Scanner(System.in);
+		
+		System.out.println("Enter Incident pattern file path:");
+		String incidentPatternFile = scanner.nextLine();
+		
+		System.out.println("Enter System model file path:");
+		String systemModelFile = scanner.nextLine();
+		
+
+		executeScenario(incidentPatternFile, systemModelFile);
+	}
+	
 	private void executeScenario(String incidentPatternFile, String systemModelFile) {
 
 		// brs output folder (containing states) has the same name as the system
@@ -1076,7 +1091,8 @@ public class IncidentPatternInstantiator {
 
 		// ins.executeExample();
 
-		ins.executeLeroScenario();
+//		ins.executeLeroScenario();
+		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
