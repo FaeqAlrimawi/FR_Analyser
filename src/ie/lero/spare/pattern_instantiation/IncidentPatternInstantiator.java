@@ -363,7 +363,7 @@ public class IncidentPatternInstantiator {
 		String dataCollectionPattern = "dataCollection_incident-pattern.cpi";
 
 		String systemModelFile = "D:/Bigrapher data/scenario2/lero.cps";
-		String incidentPatternFile = "D:/Bigrapher data/scenario2/" + dataCollectionPattern;
+		String incidentPatternFile = "D:/Bigrapher data/scenario2/" + interruptionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
