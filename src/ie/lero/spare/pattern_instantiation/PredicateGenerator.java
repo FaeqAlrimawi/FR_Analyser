@@ -1,6 +1,7 @@
 package ie.lero.spare.pattern_instantiation;
 
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 

@@ -474,8 +474,9 @@ public class Predicate {
 			for(int i=0;i<ary.length();i++) {
 				node = new BigraphNode();
 				tmpObj = ary.getJSONObject(i);
-				node.setControl(tmpObj.get(JSONTerms.CONTROL).toString());
 				node.setId(tmpObj.get(JSONTerms.NAME).toString());
+		
+				node.setControl(tmpObj.get(JSONTerms.CONTROL).toString());
 				node.setIncidentAssetName(tmpObj.get(JSONTerms.INCIDENT_ASSET_NAME).toString());
 				//if the current entity has no entity parent i.e. has a root as a parent
 				if(tmpObject.isNull(JSONTerms.NAME)) {

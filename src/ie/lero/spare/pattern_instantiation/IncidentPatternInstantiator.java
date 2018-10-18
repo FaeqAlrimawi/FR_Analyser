@@ -520,6 +520,26 @@ public class IncidentPatternInstantiator {
 
 			logger.putMessage(
 					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
+
+			logger.putMessage(">>Checking system model assets for undefined controls in the bigraph system");
+			List<environment.Asset> asts = getAssetNamesWithMissingControls();
+
+			if (asts == null) {
+				logger.putError(">>System is not initialised");
+			} else {
+				if (!asts.isEmpty()) {
+					logger.putError(">>There are assets with undefined controls. These are");
+					StringBuilder strBldr = new StringBuilder();
+					for (environment.Asset ast : asts) {
+						strBldr.append(ast.getName()).append(", ");
+					}
+					strBldr.deleteCharAt(strBldr.length() - 1);
+					strBldr.deleteCharAt(strBldr.length() - 1);
+
+					logger.putError(strBldr.toString());
+					return;
+				}
+			}
 			// logger.putMessage(">>State Transitions:");
 			// logger.putMessage(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 
@@ -589,7 +609,9 @@ public class IncidentPatternInstantiator {
 	}
 
 	/**
-	 * returns the list of assets with controls that are not found in the bigraph system
+	 * returns the list of assets with controls that are not found in the
+	 * bigraph system
+	 * 
 	 * @return List of assets with unmatched controls
 	 */
 	protected List<environment.Asset> getAssetNamesWithMissingControls() {
@@ -597,19 +619,18 @@ public class IncidentPatternInstantiator {
 		List<environment.Asset> assets = new LinkedList<environment.Asset>();
 
 		Signature sig = null;
-		
-		if(isSystemInitialised) {
-		sig = SystemInstanceHandler.getGlobalBigraphSignature();
+
+		if (isSystemInitialised) {
+			sig = SystemInstanceHandler.getGlobalBigraphSignature();
 		} else {
 			return null;
 		}
-		
+
 		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
 
 		for (environment.Asset ast : systemModel.getAsset()) {
 			if (sig.getByName(ast.getControl()) == null) {
 				assets.add(ast);
-				System.out.println(ast.getName());
 			}
 		}
 
@@ -768,7 +789,9 @@ public class IncidentPatternInstantiator {
 					listener.updateProgress(incrementValue / 3 + incrementValue % 3);
 				}
 
-				listener.updateResult(threadID, pathsAnalyser, getOutputFileName(), strTime);
+				if (listener != null) {
+					listener.updateResult(threadID, pathsAnalyser, getOutputFileName(), strTime);
+				}
 				/*
 				 * inc.generateDistinctPaths(); LinkedList<GraphPath> paths =
 				 * inc.getAllPaths();
