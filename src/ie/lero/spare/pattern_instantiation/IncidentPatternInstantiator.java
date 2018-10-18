@@ -65,7 +65,7 @@ public class IncidentPatternInstantiator {
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
 	private boolean dummy = true;
 
 	private String outputFolder = ".";
@@ -554,7 +554,7 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(
 					">>Creating threads for asset sets. [" + threadPoolSize + "] thread(s) are running in parallel.");
 
-			for (int i = 0; i < lst.size(); i++) {// adjust the length
+			for (int i = 0; i < 1; i++) {// adjust the length
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 				executor.submit(incidentInstances[i]);
 			}
