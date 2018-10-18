@@ -20,11 +20,13 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
+import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
+import it.uniud.mads.jlibbig.core.std.Signature;
 import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternInstantiator {
@@ -34,10 +36,15 @@ public class IncidentPatternInstantiator {
 	// parallelism parameters
 	private int threadPoolSize = 1; // sets how many asset sets can run in
 									// parallel
-	private int parallelActivities = 1; // sets how many activities can be
-										// analysed in parallel
-	private int matchingThreshold = 100; // set how many bigraph matching can be
-											// done in parallel
+
+	// sets how many activities can be
+	// analysed in parallel
+	private int parallelActivities = 1;
+
+	// set how many bigraph matching can be
+	// done in parallel
+	private int matchingThreshold = 100;
+
 	private ExecutorService executor;
 	private ForkJoinPool mainPool = new ForkJoinPool();
 
@@ -51,12 +58,16 @@ public class IncidentPatternInstantiator {
 	boolean isSetsSelected = false;
 	LinkedList<Integer> assetSetsSelected;
 
+	// system initialisation (creating bigraph signature, loading states)
+	// indication
+	private boolean isSystemInitialised = false;
+
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
 	private boolean isSaveLog = false;
 	private boolean dummy = true;
-	
+
 	private String outputFolder = ".";
 
 	private void runLogger() {
@@ -67,7 +78,7 @@ public class IncidentPatternInstantiator {
 		logger.setPrintToScreen(isPrintToScreen);
 		logger.setSaveLog(isSaveLog);
 		logger.setLogFolder(outputFolder + "/log");
-		
+
 		logger.createLogFile(); // file name is created internally by the logger
 								// (name: log[time_date].txt)
 
@@ -350,9 +361,9 @@ public class IncidentPatternInstantiator {
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
 		String interruptionPattern = "interruption_incident-pattern_modified.cpi";
 		String dataCollectionPattern = "dataCollection_incident-pattern.cpi";
-		
+
 		String systemModelFile = "D:/Bigrapher data/scenario2/lero.cps";
-		String incidentPatternFile = "D:/Bigrapher data/scenario2/"+interruptionPattern;
+		String incidentPatternFile = "D:/Bigrapher data/scenario2/" + dataCollectionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
@@ -366,11 +377,11 @@ public class IncidentPatternInstantiator {
 		// brs file has the same name as the system model file name but with
 		// .big extension instead of .cps
 		String BRS_file = BRS_outputFolder + ".big";
-		
+
 		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
 	}
 
-	private void executeScenario(String incidentPatternFile, String systemModelFile, String BRS_file,
+	protected void executeScenario(String incidentPatternFile, String systemModelFile, String BRS_file,
 			String BRS_outputFolder) {
 
 		// String xQueryMatcherFile = xqueryFile;
@@ -435,7 +446,6 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(am.toString());
 			logger.putMessage(">>Generating asset sets..");
 
-			
 			// generate sequences
 			boolean isStrict = true;
 			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict);
@@ -449,58 +459,63 @@ public class IncidentPatternInstantiator {
 				return;
 			}
 
-			
 			logger.putMessage(">>Number of Asset Sets generated = " + lst.size() + " Sets");
 			logger.putMessage("Incident entity set:" + Arrays.toString(am.getIncidentEntityNames()));
 			for (int i = 0; i < lst.size(); i++) {
 				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
 			}
-//			// boolean oldIsPrintToScreen = isPrintToScreen;
-//
-//			// print the sets only if there are less than 200. Else, print a 100
-//			// but save the rest to a file
-//			int maxNum = 200;
-//
-//			if (isSaveLog && lst.size() > maxNum) {
-//				if (isPrintToScreen) {
-//					System.out.println("*See log file (" + Logger.getInstance().getLogFolder() + "/"
-//							+ Logger.getInstance().getLogFileName() + ") for All generated sets]");
-//				}
-//
-//				int index = 0;
-//
-//				for (; index < 20; index++) {
-//					logger.putMessage("-Set[" + index + "]: " + Arrays.toString(lst.get(index)));
-//				}
-//
-//				logger.setPrintToScreen(false);
-//				for (; index < lst.size(); index++) {
-//					logger.putMessage("-Set[" + index + "]: " + Arrays.toString(lst.get(index)));
-//				}
-//				logger.setPrintToScreen(true);
-//
-//			} else {
-//				for (int i = 0; i < lst.size(); i++) {
-//					logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
-//				}
-//			}
-//
-//			// isPrintToScreen = oldIsPrintToScreen;
+			// // boolean oldIsPrintToScreen = isPrintToScreen;
+			//
+			// // print the sets only if there are less than 200. Else, print a
+			// 100
+			// // but save the rest to a file
+			// int maxNum = 200;
+			//
+			// if (isSaveLog && lst.size() > maxNum) {
+			// if (isPrintToScreen) {
+			// System.out.println("*See log file (" +
+			// Logger.getInstance().getLogFolder() + "/"
+			// + Logger.getInstance().getLogFileName() + ") for All generated
+			// sets]");
+			// }
+			//
+			// int index = 0;
+			//
+			// for (; index < 20; index++) {
+			// logger.putMessage("-Set[" + index + "]: " +
+			// Arrays.toString(lst.get(index)));
+			// }
+			//
+			// logger.setPrintToScreen(false);
+			// for (; index < lst.size(); index++) {
+			// logger.putMessage("-Set[" + index + "]: " +
+			// Arrays.toString(lst.get(index)));
+			// }
+			// logger.setPrintToScreen(true);
+			//
+			// } else {
+			// for (int i = 0; i < lst.size(); i++) {
+			// logger.putMessage("-Set[" + i + "]: " +
+			// Arrays.toString(lst.get(i)));
+			// }
+			// }
+			//
+			// // isPrintToScreen = oldIsPrintToScreen;
 
-			if(dummy) {
-				return;
-			}
-			
-			logger.putMessage(
-					">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
+			/** Initialise system **/
+			if (!isSystemInitialised) {
+				logger.putMessage(
+						">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
 
-			// initialise BRS system
-			boolean isInitialised = initialiseBigraphSystem(BRS_file, BRS_outputFolder);
+				// initialise BRS system
+				isSystemInitialised = initialiseBigraphSystem(BRS_file, BRS_outputFolder);
 
-			if (isInitialised) {
-				logger.putMessage(">>Initialisation completed successfully");
-			} else {
-				logger.putMessage(">>Initialisation was NOT completed successfully. Execution is terminated");
+				if (isSystemInitialised) {
+					logger.putMessage(">>Initialisation completed successfully");
+				} else {
+					logger.putMessage(">>Initialisation was NOT completed successfully. Execution is terminated");
+					return;
+				}
 			}
 
 			logger.putMessage(
@@ -571,6 +586,34 @@ public class IncidentPatternInstantiator {
 			logger.terminateLogging();
 		}
 
+	}
+
+	/**
+	 * returns the list of assets with controls that are not found in the bigraph system
+	 * @return List of assets with unmatched controls
+	 */
+	protected List<environment.Asset> getAssetNamesWithMissingControls() {
+
+		List<environment.Asset> assets = new LinkedList<environment.Asset>();
+
+		Signature sig = null;
+		
+		if(isSystemInitialised) {
+		sig = SystemInstanceHandler.getGlobalBigraphSignature();
+		} else {
+			return null;
+		}
+		
+		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+
+		for (environment.Asset ast : systemModel.getAsset()) {
+			if (sig.getByName(ast.getControl()) == null) {
+				assets.add(ast);
+				System.out.println(ast.getName());
+			}
+		}
+
+		return assets;
 	}
 
 	class PotentialIncidentInstance implements Runnable {

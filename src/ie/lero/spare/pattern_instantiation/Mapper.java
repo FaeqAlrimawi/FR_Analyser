@@ -18,6 +18,8 @@ import com.openpojo.reflection.PojoClass;
 import com.openpojo.reflection.impl.PojoClassFactory;
 
 import cyberPhysical_Incident.AbstractionLevel;
+import cyberPhysical_Incident.Connection;
+import cyberPhysical_Incident.ConnectionState;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Knowledge;
@@ -315,57 +317,19 @@ public class Mapper {
 			 * 6-Properities if found in the entity
 			 */
 
-			//
-			// if (entity.getType() != null) {
-			// String typeName = entity.getType().getName();
-			// try {
-			// String potentialClassName = "environment.impl." + typeName;
-			//
-			// if (!typeName.endsWith("Impl")) {
-			// potentialClassName += "Impl";
-			// }
-			//
-			// potentialClass = Class.forName(potentialClassName);
-			//
-			// } catch (ClassNotFoundException e) {
-			// // type mismatch i.e. there is no type available in the
-			// // system model
-			// // currently return false
-			// return false;
-			// }
-			//
-			// // if the current asset object is not of the same class or
-			// // subclass of the potential class
-			// // then return false (type mismatch)
-			//
-			// AbstractionLevel entityTypeLevel =
-			// entity.getType().getAbstractionLevel();
-			//
-			// switch (entityTypeLevel.getValue()) {
-			//
-			// case AbstractionLevel.SAME_VALUE:
-			//
-			// }
-			//
-			// if (!potentialClass.isInstance(asset)) {
-			// return false;
-			// }
-			//
-			// }
-
-			/** matching Type **/
+			/** Type **/
 			Class<?> potentialClass = null;
 
 			if (!isTypeMatched(entity, asset)) {
 				return false;
 			}
 
-			/** matching mobility **/
-			if(!isMobilityMatched(entity, asset)) {
+			/** Mobility **/
+			if (!isMobilityMatched(entity, asset)) {
 				return false;
 			}
 
-			/** matching Parent type **/
+			/** Parent type **/
 			IncidentEntity parentEntity = (IncidentEntity) entity.getParentEntity();
 
 			environment.Asset parentAsset = null;
@@ -378,7 +342,7 @@ public class Mapper {
 
 			isParentTypeMatched(parentEntity, parentAsset, entity.getMobility());
 
-			/** matching contained assets (number & type) **/
+			/** Contained assets (number & type) **/
 			// if knowledge is exact then both should have the same number of
 			// connections
 			// otherwise there's no match
@@ -407,6 +371,11 @@ public class Mapper {
 					continue;// ignored
 				}
 
+				if(containedEntity.getMobility() == Mobility.MOVABLE
+						|| containedEntity.getMobility() == Mobility.UNKNOWN) {
+				continue;	
+				}
+				
 				// if contained entity mobility is movable then it is also
 				// ignored
 				// too loose
@@ -451,18 +420,16 @@ public class Mapper {
 
 					// match of contained assets based on mobility and type
 					// (exact or not)
-					if (containedEntity.getMobility() == Mobility.FIXED) {
-						if (isTypeMatched(containedEntity, containedAsset)) {
-							matchedcontainedAssets.add(i);
-							iscontainedEntityMatched = true;
-							break;
-						}
+					if (isTypeMatched(containedEntity, containedAsset)) {
+						matchedcontainedAssets.add(i);
+						iscontainedEntityMatched = true;
+						break;
 					}
 				}
 
 				// if the contained entity is fixed and none of the contained
 				// assets match the incident contained entity, then return false
-				if (containedEntity.getMobility() == Mobility.FIXED && !iscontainedEntityMatched) {
+				if (!iscontainedEntityMatched) {
 					return false;
 				}
 
@@ -470,7 +437,7 @@ public class Mapper {
 
 			}
 
-			/** matching connections (number & type) **/
+			/** Connections (number & type) **/
 			// if knowledge is exact then both should have the same number of
 			// connections
 			// otherwise there's no match
@@ -495,6 +462,12 @@ public class Mapper {
 
 				if (entityCon.getType() == null) {
 					continue;// ignored
+				}
+
+				// only check connections that have permenant state
+				if (entityCon.getState() == ConnectionState.TEMPORARY
+						|| entityCon.getState() == ConnectionState.UNKNOWN) {
+					continue;
 				}
 
 				String typeName = entityCon.getType().getName();
@@ -532,7 +505,7 @@ public class Mapper {
 					assetCon = assetCons.get(i);
 
 					// main comparison
-					if (potentialClass.isInstance(assetCon)) {
+					if (isConnectionTypeMatched(entityCon, assetCon)) {
 						matchedAssetCons.add(i);
 						isConnectionMatched = true;
 						break;
@@ -634,6 +607,59 @@ public class Mapper {
 		// desktop)
 		case ANYSUBCLASS:
 			if (potentialClass.isInstance(asset)) {
+				return true;
+			}
+			return false;
+
+		// ANYSIBLINGCLASS_VALUE://this to be anysibling class
+
+		}
+
+		return false;
+
+	}
+
+	protected boolean isConnectionTypeMatched(Connection entityConnection, environment.Connection assetConnection) {
+
+		if (entityConnection.getType() == null) {
+			return true; // allowed to pass for other checks (e.g., connections)
+		}
+
+		Class potentialClass;
+		String typeName = entityConnection.getType().getName();
+		AbstractionLevel conTypeLevel = entityConnection.getType().getAbstractionLevel();
+
+		try {
+			String potentialClassName = "environment.impl." + typeName;
+
+			if (!typeName.endsWith("Impl")) {
+				potentialClassName += "Impl";
+			}
+
+			potentialClass = Class.forName(potentialClassName);
+
+		} catch (ClassNotFoundException e) {
+			// type mismatch i.e. there is no type available in the
+			// system model
+			// currently return false
+			return false;
+		}
+
+		String potentialClassName = potentialClass.getSimpleName();
+
+		switch (conTypeLevel) {
+
+		// exact type
+		case EXACT:
+			if (potentialClassName.equals(assetConnection.getClass().getSimpleName())) {
+				return true;
+			}
+			return false;
+
+		// exact type or any of its subclasses (e.g., computing device or
+		// desktop)
+		case ANYSUBCLASS:
+			if (potentialClass.isInstance(assetConnection)) {
 				return true;
 			}
 			return false;
