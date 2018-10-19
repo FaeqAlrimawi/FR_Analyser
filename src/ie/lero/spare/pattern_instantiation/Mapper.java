@@ -14,9 +14,6 @@ import java.util.function.Function;
 
 import javax.xml.xquery.XQException;
 
-import com.openpojo.reflection.PojoClass;
-import com.openpojo.reflection.impl.PojoClassFactory;
-
 import cyberPhysical_Incident.AbstractionLevel;
 import cyberPhysical_Incident.Connection;
 import cyberPhysical_Incident.ConnectionState;
@@ -32,7 +29,6 @@ import environment.DigitalNetwork;
 import environment.EnvironmentDiagram;
 import environment.PhysicalAsset;
 import environment.PhysicalStructure;
-import environment.impl.ComputingDeviceImpl;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 

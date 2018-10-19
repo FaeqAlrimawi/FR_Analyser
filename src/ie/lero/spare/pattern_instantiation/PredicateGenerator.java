@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.xquery.XQException;
 
@@ -12,31 +14,58 @@ import org.json.JSONObject;
 
 import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.IncidentDiagram;
+import environment.EnvironmentDiagram;
+import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.JSONTerms;
+import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
 public class PredicateGenerator {
 
-	//private AssetMap assetMap;
+	// private AssetMap assetMap;
 	private PredicateHandler predHandler;
-	private String [] spaceAssetSet;
-	private String [] incidentAssetNames;
-//	private boolean isDebugging = true;
-	private String [] systemAssetControls;
-	
+	private String[] spaceAssetSet;
+	private String[] incidentAssetNames;
+	// private boolean isDebugging = true;
+	private String[] systemAssetControls;
+
+	// used to find a map of an asset to a control
+	private Map<String, String> assetControlMap;
+
 	public PredicateGenerator() {
 		predHandler = new PredicateHandler();
 
+		loadAssetControlMap();
+
 	}
 
-/*	public PredicateGenerator(AssetMap map) {
-		this();
-	//	assetMap = map;
-		incidentAssetNames = map.getIncidentEntityNames();
-	}*/
-	
+	protected void loadAssetControlMap() {
+
+		assetControlMap = new HashMap<String, String>();
+
+		String mapFile = "./etc/data/asset-control map.txt";
+
+		String[] lines = FileManipulator.readFileNewLine(mapFile);
+
+		String assetClass = null;
+		String controlName = null;
+		String[] tmp;
+
+		for (String line : lines) {
+			tmp = line.split(" ");
+			assetClass = tmp[0];
+			controlName = tmp[1];
+			assetControlMap.put(assetClass, controlName);
+		}
+	}
+
+	/*
+	 * public PredicateGenerator(AssetMap map) { this(); // assetMap = map;
+	 * incidentAssetNames = map.getIncidentEntityNames(); }
+	 */
+
 	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName) {
 		this();
 		spaceAssetSet = systemAsset;
@@ -44,48 +73,49 @@ public class PredicateGenerator {
 	}
 
 	private HashMap<String, Activity> createIncidentActivities() {
-		
+
 		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
-		
-		for(Activity act : incidentModel.getActivity()) {
-			
+
+		for (Activity act : incidentModel.getActivity()) {
+
 			predHandler.addIncidentActivity(new IncidentActivity(act));
 		}
-		
+
 		predHandler.updateNextPreviousActivities();
-		
+
 		predHandler.createActivitiesDigraph();
-			
+
 		return predHandler.getIncidentActivities();
 	}
-	
+
 	private HashMap<String, Activity> createIncidentActivitiesUsingXquery() {
 		String[] tmp;
-		String [] nextPreviousActivities;
+		String[] nextPreviousActivities;
 		IncidentActivity activity;
 
 		try {
 			nextPreviousActivities = XqueryExecuter.returnNextPreviousActivities();
-			
+
 			if (nextPreviousActivities != null) {
-				for(String res : nextPreviousActivities) {
-					tmp = res.split("##"); //first is activity name, 2nd is next activities, 3rd previous activities
+				for (String res : nextPreviousActivities) {
+					tmp = res.split("##"); // first is activity name, 2nd is
+											// next activities, 3rd previous
+											// activities
 					activity = new IncidentActivity(tmp[0]);
 					predHandler.addIncidentActivity(activity);
 				}
 			}
-			
+
 			predHandler.updateNextPreviousActivitiesUsingXquery();
 			predHandler.createActivitiesDigraph();
-			
+
 		} catch (FileNotFoundException | XQException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return predHandler.getIncidentActivities();
 	}
-	
 
 	public PredicateHandler generatePredicates() {
 
@@ -97,7 +127,11 @@ public class PredicateGenerator {
 			HashMap<String, Activity> activities = createIncidentActivities();
 
 			// get controls for the asset set from the system file
-			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
+			// systemAssetControls =
+			// XqueryExecuter.getSystemAssetControls(spaceAssetSet);
+
+			// populates the controls array based on the map and the asset set
+			updateAssetControls();
 
 			// create the Bigraph representation (from LibBig library) for the
 			// pre/postconditions of the activities
@@ -106,7 +140,7 @@ public class PredicateGenerator {
 			for (String activity : activities.keySet()) {
 				for (PredicateType type : types) {
 					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
-					
+
 					// if there is no condition returend then skip creating a
 					// predicate for it
 					if (condition == null || condition.isNull(JSONTerms.ENTITY)) {
@@ -136,56 +170,80 @@ public class PredicateGenerator {
 		return predHandler;
 	}
 
-	/*public PredicateHandler generatePredicatesUpdated() {
+	protected void updateAssetControls() {
 
-		PredicateType[] types = { PredicateType.Precondition, PredicateType.Postcondition };
+		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
 
-		try {
+		environment.Asset tmpAst;
+		List<String> unMatchedAssets = new LinkedList<String>();
 
-			// create activties of the incident
-			HashMap<String, Activity> activities = createIncidentActivities();
+		systemAssetControls = new String[spaceAssetSet.length];
 
-			// get controls for the asset set from the system file
-			systemAssetControls = XqueryExecuter.getSystemAssetControls(spaceAssetSet);
+		for (int i = 0; i < spaceAssetSet.length; i++) {
 
-			// create the Bigraph representation (from LibBig library) for the
-			// pre/postconditions of the activities
-			// assumption: esach activity has ONE precondition and ONE
-			// postcondition
-			for (String activity : activities.keySet()) {
-				for (PredicateType type : types) {
-					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
-					
-					// if there is no condition returend then skip creating a
-					// predicate for it
-					if (condition == null || condition.isNull(JSONTerms.ENTITY)) {
-						continue;
-					}
+			tmpAst = systemModel.getAsset(spaceAssetSet[i]);
 
-					Predicate p = new Predicate();
-					p.setIncidentActivity(activities.get(activity));
-					p.setPredicateType(type);
-					p.setName(activity + "_" + type.toString()); // e.g., name =
-																	// activity1_pre1
-					// updates entity names and controls from incident pattern
-					// to that from the system model
-					if (convertToMatchedAssets(condition)) {
-						p.setBigraphPredicate(condition);
-						if (p.getBigraphPredicate() != null)
-							predHandler.addActivityPredicate(activity, p);
-					}
-				}
-
+			if (tmpAst == null) {
+				continue;
 			}
 
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return predHandler;
-	}*/
+			String className = tmpAst.getClass().getSimpleName().replace("Impl", "");
+			String control = assetControlMap.get(className);
 
-	
+			if (control == null) {
+				unMatchedAssets.add(spaceAssetSet[i]+"[" + className + "]");
+				continue;
+			}
+
+			systemAssetControls[i] = control;
+		}
+
+		if (!unMatchedAssets.isEmpty()) {
+			Logger.getInstance().putError("PredicateGenerator>>Some assets have no map to controls. These are:"
+					+ Arrays.toString(unMatchedAssets.toArray()));
+		}
+	}
+
+	/*
+	 * public PredicateHandler generatePredicatesUpdated() {
+	 * 
+	 * PredicateType[] types = { PredicateType.Precondition,
+	 * PredicateType.Postcondition };
+	 * 
+	 * try {
+	 * 
+	 * // create activties of the incident HashMap<String, Activity> activities
+	 * = createIncidentActivities();
+	 * 
+	 * // get controls for the asset set from the system file
+	 * systemAssetControls =
+	 * XqueryExecuter.getSystemAssetControls(spaceAssetSet);
+	 * 
+	 * // create the Bigraph representation (from LibBig library) for the //
+	 * pre/postconditions of the activities // assumption: esach activity has
+	 * ONE precondition and ONE // postcondition for (String activity :
+	 * activities.keySet()) { for (PredicateType type : types) { JSONObject
+	 * condition = XqueryExecuter.getBigraphConditions(activity, type);
+	 * 
+	 * // if there is no condition returend then skip creating a // predicate
+	 * for it if (condition == null || condition.isNull(JSONTerms.ENTITY)) {
+	 * continue; }
+	 * 
+	 * Predicate p = new Predicate();
+	 * p.setIncidentActivity(activities.get(activity));
+	 * p.setPredicateType(type); p.setName(activity + "_" + type.toString()); //
+	 * e.g., name = // activity1_pre1 // updates entity names and controls from
+	 * incident pattern // to that from the system model if
+	 * (convertToMatchedAssets(condition)) { p.setBigraphPredicate(condition);
+	 * if (p.getBigraphPredicate() != null)
+	 * predHandler.addActivityPredicate(activity, p); } }
+	 * 
+	 * }
+	 * 
+	 * } catch (FileNotFoundException | XQException e) { // TODO Auto-generated
+	 * catch block e.printStackTrace(); } return predHandler; }
+	 */
+
 	private boolean convertToMatchedAssets(JSONObject obj) {
 
 		JSONArray tmpAry;
@@ -195,7 +253,7 @@ public class PredicateGenerator {
 		if (obj.isNull(JSONTerms.ENTITY)) {
 			return false;
 		}
-		
+
 		objs.add(obj);
 
 		while (!objs.isEmpty()) {
@@ -209,7 +267,7 @@ public class PredicateGenerator {
 			}
 			for (int i = 0; i < tmpAry.length(); i++) {
 				JSONObject tmpObj = tmpAry.getJSONObject(i);
-				
+
 				String name = tmpObj.get(JSONTerms.NAME).toString();
 				for (int j = 0; j < incidentAssetNames.length; j++) {
 					if (incidentAssetNames[j].equals(name)) {
@@ -220,11 +278,11 @@ public class PredicateGenerator {
 					}
 				}
 
-				//add contained entities
+				// add contained entities
 				if (!tmpObj.isNull(JSONTerms.ENTITY)) {
 					objs.add(tmpObj);
 				}
-				
+
 			}
 
 		}
@@ -232,29 +290,25 @@ public class PredicateGenerator {
 		return true;
 	}
 
-/*	public String matchConditionAssetsToSpaceAssets(String condition) {
-		String result = condition;
+	/*
+	 * public String matchConditionAssetsToSpaceAssets(String condition) {
+	 * String result = condition;
+	 * 
+	 * //assuming a well formatted Bigraph statement for (int
+	 * i=0;i<incidentAssetNames.length;i++) { //if the condition contains the
+	 * name of an incident asset then replace with
+	 * if(condition.contains(incidentAssetNames[i])) {
+	 * 
+	 * result=result.replaceAll(incidentAssetNames[i], spaceAssetSet[i]); } }
+	 * 
+	 * return result; }
+	 */
 
-		//assuming a well formatted Bigraph statement
-		for (int i=0;i<incidentAssetNames.length;i++) {
-			//if the condition contains the name of an incident asset then replace with 
-			if(condition.contains(incidentAssetNames[i])) {
-		
-				result=result.replaceAll(incidentAssetNames[i], spaceAssetSet[i]);
-			}
-		}
-
-		return result;
-	}*/
-
-	/*public AssetMap getAssetMap() {
-		return assetMap;
-	}
-
-	public void setAssetMap(AssetMap assetMap) {
-		this.assetMap = assetMap;
-	}
-*/
+	/*
+	 * public AssetMap getAssetMap() { return assetMap; }
+	 * 
+	 * public void setAssetMap(AssetMap assetMap) { this.assetMap = assetMap; }
+	 */
 	public PredicateHandler getPredHandler() {
 		return predHandler;
 	}
@@ -262,12 +316,10 @@ public class PredicateGenerator {
 	public void setPredHandler(PredicateHandler predHandler) {
 		this.predHandler = predHandler;
 	}
-	
-/*	private void print(String msg) {
-		if(isDebugging) {
-			System.out.println("PredicateGenerator"+msg);
-		}
-	}*/
-	
+
+	/*
+	 * private void print(String msg) { if(isDebugging) {
+	 * System.out.println("PredicateGenerator"+msg); } }
+	 */
 
 }

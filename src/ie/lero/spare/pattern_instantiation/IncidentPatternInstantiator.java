@@ -35,16 +35,12 @@ public class IncidentPatternInstantiator {
 	// private String xqueryFile = "etc/match_query.xq";
 
 	// parallelism parameters
-	private int threadPoolSize = 1; // sets how many asset sets can run in
-									// parallel
+	// sets how many asset sets can run in parallel
+	private int threadPoolSize = 1; 
 
 	// sets how many activities can be
 	// analysed in parallel
 	private int parallelActivities = 1;
-
-	// set how many bigraph matching can be
-	// done in parallel
-	private int matchingThreshold = 100;
 
 	private ExecutorService executor;
 	private ForkJoinPool mainPool = new ForkJoinPool();
@@ -536,28 +532,6 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(
 					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
 
-			logger.putMessage(">>Checking system model assets for undefined controls in the bigraph system");
-			List<environment.Asset> asts = getAssetNamesWithMissingControls();
-
-			if (asts == null) {
-				logger.putError(">>System is not initialised");
-			} else {
-				if (!asts.isEmpty()) {
-					logger.putError(">>There are assets with undefined controls. These are");
-					StringBuilder strBldr = new StringBuilder();
-					for (environment.Asset ast : asts) {
-						strBldr.append(ast.getName()).append(", ");
-					}
-					strBldr.deleteCharAt(strBldr.length() - 1);
-					strBldr.deleteCharAt(strBldr.length() - 1);
-
-					logger.putError(strBldr.toString());
-					return;
-				}
-			}
-			// logger.putMessage(">>State Transitions:");
-			// logger.putMessage(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
-
 			// create threads that handle each sequence generated from asset
 			// matching
 			executor = Executors.newFixedThreadPool(threadPoolSize);
@@ -629,28 +603,28 @@ public class IncidentPatternInstantiator {
 	 * 
 	 * @return List of assets with unmatched controls
 	 */
-	protected List<environment.Asset> getAssetNamesWithMissingControls() {
-
-		List<environment.Asset> assets = new LinkedList<environment.Asset>();
-
-		Signature sig = null;
-
-		if (isSystemInitialised) {
-			sig = SystemInstanceHandler.getGlobalBigraphSignature();
-		} else {
-			return null;
-		}
-
-		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
-
-		for (environment.Asset ast : systemModel.getAsset()) {
-			if (sig.getByName(ast.getControl()) == null) {
-				assets.add(ast);
-			}
-		}
-
-		return assets;
-	}
+//	protected List<environment.Asset> getAssetNamesWithMissingControls() {
+//
+//		List<environment.Asset> assets = new LinkedList<environment.Asset>();
+//
+//		Signature sig = null;
+//
+//		if (isSystemInitialised) {
+//			sig = SystemInstanceHandler.getGlobalBigraphSignature();
+//		} else {
+//			return null;
+//		}
+//
+//		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+//
+//		for (environment.Asset ast : systemModel.getAsset()) {
+//			if (sig.getByName(ast.getControl()) == null) {
+//				assets.add(ast);
+//			}
+//		}
+//
+//		return assets;
+//	}
 
 	class PotentialIncidentInstance implements Runnable {
 
@@ -703,7 +677,7 @@ public class IncidentPatternInstantiator {
 				// accessed through predicateHandler
 				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID);
 				analyser.setNumberofActivityParallelExecution(parallelActivities);
-				analyser.setThreshold(matchingThreshold);
+//				analyser.setThreshold(matchingThreshold);
 
 				logger.putMessage("Thread[" + threadID + "]>>Identifying states and their transitions...");
 
@@ -896,13 +870,13 @@ public class IncidentPatternInstantiator {
 		this.parallelActivities = parallelActivities;
 	}
 
-	public int getMatchingThreshold() {
-		return matchingThreshold;
-	}
-
-	public void setMatchingThreshold(int matchingThreshold) {
-		this.matchingThreshold = matchingThreshold;
-	}
+//	public int getMatchingThreshold() {
+//		return matchingThreshold;
+//	}
+//
+//	public void setMatchingThreshold(int matchingThreshold) {
+//		this.matchingThreshold = matchingThreshold;
+//	}
 
 	class InstancesSaver implements Runnable {
 
@@ -1091,8 +1065,8 @@ public class IncidentPatternInstantiator {
 
 		// ins.executeExample();
 
-//		ins.executeLeroScenario();
-		ins.executeScenarioFromConsole();
+		ins.executeLeroScenario();
+//		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
