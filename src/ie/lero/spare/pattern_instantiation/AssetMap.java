@@ -265,18 +265,9 @@ public class AssetMap {
 		// String [] assetNames;
 		LinkedList<String> names = new LinkedList<String>();
 
-		if (!hasEntitiesWithNoMatch()) {
-			return null;
-		}
-
-		/*
-		 * for(int i=0;i<systemAssetMatches.length;i++) {
-		 * if(systemAssetMatches[i][0] == null ||
-		 * systemAssetMatches[i][0].equals("") ) {
-		 * names.append(incidentEntityNames[i]).append(","); } }
-		 * names.deleteCharAt(names.length()-1); assetNames =
-		 * names.toString().split(",");
-		 */
+//		if (!hasEntitiesWithNoMatch()) {
+//			return null;
+//		}
 
 		for (Entry<String, List<String>> entity : matchedSystemAssets.entrySet()) {
 

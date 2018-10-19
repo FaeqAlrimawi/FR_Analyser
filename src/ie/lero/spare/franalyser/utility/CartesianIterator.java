@@ -151,9 +151,6 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 
 		for (int i = 0; i < entitiesRules.size(); i++) {
 
-			// if(!Arrays.equals(entitiesRules.get(i), assetsRules.get(i))) {
-			// return false;
-			// }
 			for (int j = 0; j < entitiesRules.get(i).length; j++) {
 				if (entitiesRules.get(i)[j] == 1 && assetsRules.get(i)[j] == 0) {
 					return false;

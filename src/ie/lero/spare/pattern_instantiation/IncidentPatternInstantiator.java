@@ -21,13 +21,11 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
-import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
-import it.uniud.mads.jlibbig.core.std.Signature;
 import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternInstantiator {
@@ -36,7 +34,7 @@ public class IncidentPatternInstantiator {
 
 	// parallelism parameters
 	// sets how many asset sets can run in parallel
-	private int threadPoolSize = 1; 
+	private int threadPoolSize = 1;
 
 	// sets how many activities can be
 	// analysed in parallel
@@ -63,7 +61,7 @@ public class IncidentPatternInstantiator {
 	private Logger logger;
 	private boolean isPrintToScreen = true;
 	private boolean isSaveLog = true;
-	private boolean dummy = true;
+	// private boolean dummy = true;
 
 	private String outputFolder = ".";
 
@@ -76,8 +74,7 @@ public class IncidentPatternInstantiator {
 		logger.setSaveLog(isSaveLog);
 		logger.setLogFolder(outputFolder + "/log");
 
-		logger.createLogFile(); // file name is created internally by the logger
-								// (name: log[time_date].txt)
+		logger.createLogFile();
 
 		logger.start();
 
@@ -366,19 +363,18 @@ public class IncidentPatternInstantiator {
 	}
 
 	private void executeScenarioFromConsole() {
-		
+
 		Scanner scanner = new Scanner(System.in);
-		
+
 		System.out.println("Enter Incident pattern file path:");
 		String incidentPatternFile = scanner.nextLine();
-		
+
 		System.out.println("Enter System model file path:");
 		String systemModelFile = scanner.nextLine();
-		
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
-	
+
 	private void executeScenario(String incidentPatternFile, String systemModelFile) {
 
 		// brs output folder (containing states) has the same name as the system
@@ -412,7 +408,7 @@ public class IncidentPatternInstantiator {
 
 			StopWatch timer = new StopWatch();
 
-			logger.putMessage("////Executing Scenario\\\\\\\\");
+			logger.putMessage("#########Executing Scenario#########");
 			logger.putMessage("*Incident pattern file \"" + incidentPatternFile + "\"");
 			logger.putMessage("*System model file \"" + systemModelFile + "\"");
 			logger.putMessage("*BRS file \"" + BRS_file + "\" & states folder \"" + BRS_outputFolder + "\"");
@@ -434,20 +430,23 @@ public class IncidentPatternInstantiator {
 			ModelsHandler.addIncidentModel(incidentPatternFile);
 			ModelsHandler.addSystemModel(systemModelFile);
 
+			/**
+			 * finding matches also can be accomplished using Xquery (but more
+			 * // strict criteria is applied) AssetMap am =
+			 * m.findMatchesUsingXquery(xqueryFilePath);
+			 **/
 			AssetMap am = m.findMatches();
-			// finding matches also can be accomplished using Xquery (but more
-			// strict criteria is applied)
-			// AssetMap am = m.findMatchesUsingXquery(xqueryFilePath);
-
+			
 			// if there are incident assets with no matches from space model
 			// then exit
-			if (am.hasEntitiesWithNoMatch()) {
+			List<String> asts = am.getIncidentAssetsWithNoMatch();
+			if (asts == null || !asts.isEmpty()) {
 				logger.putError(">>Some incident entities have no matches in the system assets. These are:");
-				// getIncidetnAssetWithNoMatch method has some issues
-				List<String> asts = am.getIncidentAssetsWithNoMatch();
 				logger.putError(asts.toString());
-				return; // execution stops if there are incident entities with
-						// no matching
+
+				// execution stops if there are incident entities with
+				// no matching
+				return;
 			}
 
 			// print matched assets
@@ -457,7 +456,11 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(am.toString());
 			logger.putMessage(">>Generating asset sets..");
 
-			// generate sequences
+			// generate sequences. If isStrict is false then generated sequences
+			// is only based on having unique sets with unique assets mapped to
+			// an entities in each set. if isStrict is set to true, then
+			// relationships between entities in the incident pattern are
+			// considered when generating sequences
 			boolean isStrict = true;
 			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict);
 
@@ -472,9 +475,11 @@ public class IncidentPatternInstantiator {
 
 			logger.putMessage(">>Number of Asset Sets generated = " + lst.size() + " Sets");
 			logger.putMessage("Incident entity set:" + Arrays.toString(am.getIncidentEntityNames()));
+			
 			for (int i = 0; i < lst.size(); i++) {
 				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
 			}
+			
 			// // boolean oldIsPrintToScreen = isPrintToScreen;
 			//
 			// // print the sets only if there are less than 200. Else, print a
@@ -528,6 +533,7 @@ public class IncidentPatternInstantiator {
 					return;
 				}
 			}
+			/***************/
 
 			logger.putMessage(
 					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
@@ -559,8 +565,6 @@ public class IncidentPatternInstantiator {
 			}
 
 			mainPool.shutdown();
-			// logger.putMessage(">>Instantiation is completed. Still saving
-			// generated instances...");
 
 			// if it returns false then maximum waiting time is reached
 			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
@@ -582,7 +586,7 @@ public class IncidentPatternInstantiator {
 			int secMils = (int) timePassed % 1000;
 
 			// execution time
-			logger.putMessage("////Execution finished\\\\\\\\");
+			logger.putMessage("##################Execution finished##################");
 			logger.putMessage("Execution time: " + timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:"
 					+ secMils + "ms]");
 
@@ -603,28 +607,28 @@ public class IncidentPatternInstantiator {
 	 * 
 	 * @return List of assets with unmatched controls
 	 */
-//	protected List<environment.Asset> getAssetNamesWithMissingControls() {
-//
-//		List<environment.Asset> assets = new LinkedList<environment.Asset>();
-//
-//		Signature sig = null;
-//
-//		if (isSystemInitialised) {
-//			sig = SystemInstanceHandler.getGlobalBigraphSignature();
-//		} else {
-//			return null;
-//		}
-//
-//		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
-//
-//		for (environment.Asset ast : systemModel.getAsset()) {
-//			if (sig.getByName(ast.getControl()) == null) {
-//				assets.add(ast);
-//			}
-//		}
-//
-//		return assets;
-//	}
+	// protected List<environment.Asset> getAssetNamesWithMissingControls() {
+	//
+	// List<environment.Asset> assets = new LinkedList<environment.Asset>();
+	//
+	// Signature sig = null;
+	//
+	// if (isSystemInitialised) {
+	// sig = SystemInstanceHandler.getGlobalBigraphSignature();
+	// } else {
+	// return null;
+	// }
+	//
+	// EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+	//
+	// for (environment.Asset ast : systemModel.getAsset()) {
+	// if (sig.getByName(ast.getControl()) == null) {
+	// assets.add(ast);
+	// }
+	// }
+	//
+	// return assets;
+	// }
 
 	class PotentialIncidentInstance implements Runnable {
 
@@ -677,7 +681,7 @@ public class IncidentPatternInstantiator {
 				// accessed through predicateHandler
 				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID);
 				analyser.setNumberofActivityParallelExecution(parallelActivities);
-//				analyser.setThreshold(matchingThreshold);
+				// analyser.setThreshold(matchingThreshold);
 
 				logger.putMessage("Thread[" + threadID + "]>>Identifying states and their transitions...");
 
@@ -870,13 +874,13 @@ public class IncidentPatternInstantiator {
 		this.parallelActivities = parallelActivities;
 	}
 
-//	public int getMatchingThreshold() {
-//		return matchingThreshold;
-//	}
-//
-//	public void setMatchingThreshold(int matchingThreshold) {
-//		this.matchingThreshold = matchingThreshold;
-//	}
+	// public int getMatchingThreshold() {
+	// return matchingThreshold;
+	// }
+	//
+	// public void setMatchingThreshold(int matchingThreshold) {
+	// this.matchingThreshold = matchingThreshold;
+	// }
 
 	class InstancesSaver implements Runnable {
 
@@ -1066,7 +1070,7 @@ public class IncidentPatternInstantiator {
 		// ins.executeExample();
 
 		ins.executeLeroScenario();
-//		ins.executeScenarioFromConsole();
+		// ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
