@@ -353,13 +353,16 @@ public class IncidentPatternInstantiator {
 
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
-		String interruptionPattern = "interruption_incident-pattern2.cpi";
-		String dataCollectionPattern = "dataCollection_incident-pattern.cpi";
+		String interruptionPattern = "D:/Bigrapher data/scenario2/interruption_incident-pattern2.cpi";
+		String dataCollectionPattern = "D:/Bigrapher data/scenario2/dataCollection_incident-pattern.cpi";
 
-		String systemModelFile = "D:/Bigrapher data/scenario2/lero.cps";
-		String incidentPatternFile = "D:/Bigrapher data/scenario2/" + interruptionPattern;
+		String leroSystemModel = "D:/Bigrapher data/scenario2/lero.cps";
+		String NIISystemModel = "D:/Bigrapher data/scenario1/NII.cps";
+		
+		String systemModelFile = NIISystemModel;
+		String incidentPatternFile = interruptionPattern;
 
-		executeScenario(incidentPatternFile, systemModelFile);
+		executeScenario(incidentPatternFile, systemModelFile);	
 	}
 
 	private void executeScenarioFromConsole() {
