@@ -360,7 +360,7 @@ public class IncidentPatternInstantiator {
 		String leroSystemModel = "D:/Bigrapher data/scenario2/lero.cps";
 		String NIISystemModel = "D:/Bigrapher data/scenario1/NII.cps";
 
-		String systemModelFile = NIISystemModel;
+		String systemModelFile = leroSystemModel;
 		String incidentPatternFile = dataCollectionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);

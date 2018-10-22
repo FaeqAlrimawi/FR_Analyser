@@ -154,7 +154,7 @@ public class PredicateGenerator {
 																	// activity1_pre1
 					// updates entity names and controls from incident pattern
 					// to that from the system model
-					if (convertToMatchedAssets(condition)) {
+					if (convertToMatchedAssets(condition, p.getName())) {
 						p.setBigraphPredicate(condition);
 						if (p.getBigraphPredicate() != null)
 							predHandler.addActivityPredicate(activity, p);
@@ -191,7 +191,7 @@ public class PredicateGenerator {
 			String control = assetControlMap.get(className);
 
 			if (control == null) {
-				unMatchedAssets.add(spaceAssetSet[i]+"[" + className + "]");
+				unMatchedAssets.add(spaceAssetSet[i] + "[" + className + "]");
 				continue;
 			}
 
@@ -244,7 +244,7 @@ public class PredicateGenerator {
 	 * catch block e.printStackTrace(); } return predHandler; }
 	 */
 
-	private boolean convertToMatchedAssets(JSONObject obj) {
+	private boolean convertToMatchedAssets(JSONObject obj, String conditionName) {
 
 		JSONArray tmpAry;
 		JSONObject tmpObject;
@@ -255,6 +255,8 @@ public class PredicateGenerator {
 		}
 
 		objs.add(obj);
+		List<String> unMatchedEntityNames = new LinkedList<String>();
+		boolean isAdded = false;
 
 		while (!objs.isEmpty()) {
 			tmpObject = objs.pop();
@@ -274,17 +276,32 @@ public class PredicateGenerator {
 						tmpObj.put(JSONTerms.NAME, spaceAssetSet[j]);
 						tmpObj.put(JSONTerms.CONTROL, systemAssetControls[j]);
 						tmpObj.put(JSONTerms.INCIDENT_ASSET_NAME, incidentAssetNames[j]);
+						isAdded = true;
 						break;
 					}
 				}
 
+				if (!isAdded) {
+					if (!unMatchedEntityNames.contains(name)) {
+						unMatchedEntityNames.add(name);
+					}
+				}
+				
 				// add contained entities
 				if (!tmpObj.isNull(JSONTerms.ENTITY)) {
 					objs.add(tmpObj);
 				}
 
+				isAdded = false;
 			}
 
+		}
+
+		if (!unMatchedEntityNames.isEmpty()) {
+			Logger.getInstance()
+					.putError("PredicateGenerator>>Some entities in condition [" +conditionName+"] have no map to incident entities:"
+							+ Arrays.toString(unMatchedEntityNames.toArray()));
+			return false;
 		}
 
 		return true;

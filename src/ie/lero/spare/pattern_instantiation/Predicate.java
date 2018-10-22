@@ -476,7 +476,7 @@ public class Predicate {
 				tmpObj = ary.getJSONObject(i);
 				node.setId(tmpObj.get(JSONTerms.NAME).toString());
 		
-				
+				System.out.println(tmpObj.get(JSONTerms.NAME));
 				node.setControl(tmpObj.get(JSONTerms.CONTROL).toString());
 				node.setIncidentAssetName(tmpObj.get(JSONTerms.INCIDENT_ASSET_NAME).toString());
 				//if the current entity has no entity parent i.e. has a root as a parent
