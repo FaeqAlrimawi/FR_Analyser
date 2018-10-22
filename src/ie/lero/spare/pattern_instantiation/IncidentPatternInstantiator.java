@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -358,11 +359,11 @@ public class IncidentPatternInstantiator {
 
 		String leroSystemModel = "D:/Bigrapher data/scenario2/lero.cps";
 		String NIISystemModel = "D:/Bigrapher data/scenario1/NII.cps";
-		
+
 		String systemModelFile = NIISystemModel;
 		String incidentPatternFile = interruptionPattern;
 
-		executeScenario(incidentPatternFile, systemModelFile);	
+		executeScenario(incidentPatternFile, systemModelFile);
 	}
 
 	private void executeScenarioFromConsole() {
@@ -407,13 +408,13 @@ public class IncidentPatternInstantiator {
 			// currently creates a folder named "log" where the states folder is
 			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
 
-			//create output folder
-			File tmp  = new File(outputFolder+"/output");
-			
-			if(!tmp.exists()) {
+			// create output folder
+			File tmp = new File(outputFolder + "/output");
+
+			if (!tmp.exists()) {
 				tmp.mkdir();
 			}
-			
+
 			runLogger();
 
 			StopWatch timer = new StopWatch();
@@ -446,7 +447,7 @@ public class IncidentPatternInstantiator {
 			 * m.findMatchesUsingXquery(xqueryFilePath);
 			 **/
 			AssetMap am = m.findMatches();
-			
+
 			// if there are incident assets with no matches from space model
 			// then exit
 			List<String> asts = am.getIncidentAssetsWithNoMatch();
@@ -485,11 +486,11 @@ public class IncidentPatternInstantiator {
 
 			logger.putMessage(">>Number of Asset Sets generated = " + lst.size() + " Sets");
 			logger.putMessage("Incident entity set:" + Arrays.toString(am.getIncidentEntityNames()));
-			
+
 			for (int i = 0; i < lst.size(); i++) {
 				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
 			}
-			
+
 			// // boolean oldIsPrintToScreen = isPrintToScreen;
 			//
 			// // print the sets only if there are less than 200. Else, print a
@@ -544,15 +545,15 @@ public class IncidentPatternInstantiator {
 				}
 			}
 			/***************/
-			
-			//create a new transition file with labels
+
+			// create a new transition file with labels
 			String outputFile = LabelExtractor.createNewLabelledTransitionFile();
-			if(outputFile != null) {
-				logger.putMessage(">>New Labelled transitions is created: "+ outputFile);	
+			if (outputFile != null) {
+				logger.putMessage(">>New Labelled transitions is created: " + outputFile);
 			} else {
 				logger.putError(">>Failed to create a new labelled transition file");
 			}
-			
+
 			logger.putMessage(
 					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
 
@@ -648,7 +649,7 @@ public class IncidentPatternInstantiator {
 	// return assets;
 	// }
 
-	class PotentialIncidentInstance implements Runnable {
+	class PotentialIncidentInstance implements Callable<Integer> {
 
 		private String[] systemAssetNames;
 		private String[] incidentEntityNames;
@@ -673,7 +674,7 @@ public class IncidentPatternInstantiator {
 		}
 
 		@Override
-		public void run() {
+		public Integer call() throws Exception {
 
 			GraphPathsAnalyser pathsAnalyser = null;
 
@@ -812,8 +813,12 @@ public class IncidentPatternInstantiator {
 				 */
 				// System.out.println(predic.toString());
 
+				return 1;
+				
 			} catch (Exception e) {
 				e.printStackTrace();
+				
+				return -1;
 			}
 		}
 
@@ -900,7 +905,7 @@ public class IncidentPatternInstantiator {
 	// this.matchingThreshold = matchingThreshold;
 	// }
 
-	class InstancesSaver implements Runnable {
+	class InstancesSaver implements Callable<Integer> {
 
 		private String outputFileName;
 		private String[] systemAssetNames;
@@ -920,7 +925,7 @@ public class IncidentPatternInstantiator {
 		}
 
 		@Override
-		public void run() {
+		public Integer call() throws Exception {
 
 			File threadFile = new File(outputFileName);
 			// BufferedWriter threadWriter;
@@ -954,8 +959,8 @@ public class IncidentPatternInstantiator {
 
 				// add instances generated. Format:
 				// {instance_id:1,transitions:[{source:3,target:4,action:"enter"},...,{...}]}
-				jsonStr.append("\"potential_incident_instances\":{").append("\"num\":").append(size).append(",")
-						.append("\"instances\":[");
+				jsonStr.append("\"potential_incident_instances\":{").append("\"instances_count\":").append(size)
+						.append(",").append("\"instances\":[");
 
 				/*
 				 * for(int i=0; i<size;i++) {
@@ -997,14 +1002,15 @@ public class IncidentPatternInstantiator {
 						+ threadFile.getAbsolutePath());
 
 				obj = null;
+				
+				return 1;
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				return -1;
 			}
-
 		}
-
 	}
 
 	class GraphPathsToStringConverter extends RecursiveTask<String> {
@@ -1065,7 +1071,6 @@ public class IncidentPatternInstantiator {
 				// result = jsonStr;
 				return result.toString();
 			}
-
 		}
 
 		private Collection<GraphPathsToStringConverter> createSubTasks() {

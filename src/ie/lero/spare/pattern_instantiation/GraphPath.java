@@ -138,13 +138,15 @@ public class GraphPath {
 			action = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1));
 			res.append("{\"source\":").append(stateTransitions.get(i)).append(",")
 			.append("\"target\":").append(stateTransitions.get(i+1)).append(",")
-			.append("\"action\":\"").append(action).append("\"}");
+			.append("\"action\":\"").append(action).append("\"},");
 			
-			//if not last transitions
-			if(i < stateTransitions.size()-2) {
-				res.append(",");
-			}
+//			//if not last transitions
+//			if(i < stateTransitions.size()-2) {
+//				res.append(",");
+//			}
 		}
+		
+		res.deleteCharAt(res.length()-1);
 		res.append("]");
 		return res.toString();
 	}
