@@ -127,18 +127,18 @@ public class GraphPath {
 		res.append("\"transitions\":[");
 		
 		if(stateTransitions.size() == 1) {
-			res.append("{\"s\":").append(stateTransitions.get(0)).append(",")
-			.append("\"t\":").append(stateTransitions.get(0)).append(",")
-			.append("\"a\":\"\"}");
+			res.append("{\"source\":").append(stateTransitions.get(0)).append(",")
+			.append("\"target\":").append(stateTransitions.get(0)).append(",")
+			.append("\"action\":\"\"}");
 			
 			return res.toString();
 		}
 		
 		for(int i=0;i<stateTransitions.size()-1;i++) {
 			action = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1));
-			res.append("{\"s\":").append(stateTransitions.get(i)).append(",")
-			.append("\"t\":").append(stateTransitions.get(i+1)).append(",")
-			.append("\"a\":\"").append(action).append("\"}");
+			res.append("{\"source\":").append(stateTransitions.get(i)).append(",")
+			.append("\"target\":").append(stateTransitions.get(i+1)).append(",")
+			.append("\"action\":\"").append(action).append("\"}");
 			
 			//if not last transitions
 			if(i < stateTransitions.size()-2) {

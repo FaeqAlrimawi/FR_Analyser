@@ -407,6 +407,13 @@ public class IncidentPatternInstantiator {
 			// currently creates a folder named "log" where the states folder is
 			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
 
+			//create output folder
+			File tmp  = new File(outputFolder+"/output");
+			
+			if(!tmp.exists()) {
+				tmp.mkdir();
+			}
+			
 			runLogger();
 
 			StopWatch timer = new StopWatch();
