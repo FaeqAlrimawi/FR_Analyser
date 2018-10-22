@@ -361,7 +361,7 @@ public class IncidentPatternInstantiator {
 		String NIISystemModel = "D:/Bigrapher data/scenario1/NII.cps";
 
 		String systemModelFile = NIISystemModel;
-		String incidentPatternFile = interruptionPattern;
+		String incidentPatternFile = dataCollectionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
