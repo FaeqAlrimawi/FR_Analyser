@@ -1,10 +1,12 @@
 package ie.lero.spare.pattern_instantiation;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -22,37 +24,42 @@ import ie.lero.spare.franalyser.utility.TransitionSystem;
 public class LabelExtractor {
 
 	// private String[] predicatesFileLines;
-	private String outputFolder = SystemInstanceHandler.getOutputFolder();
-//	private String transitionFileName = "transitions.txt";
+	private static String outputFolder = SystemInstanceHandler.getOutputFolder();
+	// private String transitionFileName = "transitions.txt";
 	// private String predicateFilePath = outputPath+"/pred";
 	// private ArrayList<ReactionRule> reactionRules;
-	private String rulesKeywordsFileName = "rules_keywords.txt"; //defualt file name for the keywords
-	private String outputFileName = "transitions_labelled.txt";
-	private String [] rulesKeywords;
-	TransitionSystem transitionSystem = TransitionSystem.getTransitionSystemInstance();
+	private static String rulesKeywordsFileName = "rules_keywords.txt"; // defualt file
+																	// name for
+																	// the
+																	// keywords
+	private static String outputFileName = "transitions_labelled.json";
+	private static String[] rulesKeywords;
+	private static TransitionSystem transitionSystem = TransitionSystem.getTransitionSystemInstance();
 
 	public LabelExtractor() {
 		// reactionRules = new ArrayList<ReactionRule>();
-		//TransitionSystem.setFileName(outputPath + "/" + transitionFileName);
+		// TransitionSystem.setFileName(outputPath + "/" + transitionFileName);
 
-		//transitionSystem = TransitionSystem.getTransitionSystemInstance();
+		// transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
 
 	public LabelExtractor(String keywordsFileName) {
 		// reactionRules = new ArrayList<ReactionRule>();
 		this.rulesKeywordsFileName = keywordsFileName;
-	//	TransitionSystem.setFileName(outputPath + "/" + this.transitionFileName);
-	//	transitionSystem = TransitionSystem.getTransitionSystemInstance();
+		// TransitionSystem.setFileName(outputPath + "/" +
+		// this.transitionFileName);
+		// transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
-	
-	public LabelExtractor(String [] keywords) {
+
+	public LabelExtractor(String[] keywords) {
 		// reactionRules = new ArrayList<ReactionRule>();
-		
-		if(keywords != null && keywords.length>0) {
-		this.rulesKeywords = Arrays.copyOf(keywords, keywords.length);
+
+		if (keywords != null && keywords.length > 0) {
+			this.rulesKeywords = Arrays.copyOf(keywords, keywords.length);
 		}
-	//	TransitionSystem.setFileName(outputPath + "/" + this.transitionFileName);
-	//	transitionSystem = TransitionSystem.getTransitionSystemInstance();
+		// TransitionSystem.setFileName(outputPath + "/" +
+		// this.transitionFileName);
+		// transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
 
 	/**
@@ -63,32 +70,38 @@ public class LabelExtractor {
 	 * target state. The Digraph in the TransitionSystem class is updated after
 	 * this with the labels name
 	 */
-	public Digraph<Integer> updateDigraphLabels() {
+	public static Digraph<Integer> updateDigraphLabels(String [] actionNames) {
 
+		if(actionNames == null || actionNames.length  == 0) {
+			return null;
+		}
+		
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		ArrayList<String> labels = new ArrayList<String>();
 		String label = "";
 
-		if(rulesKeywords == null || rulesKeywords.length == 0) {
-		rulesKeywords = FileManipulator.readFile(outputFolder + "/" + rulesKeywordsFileName);
+		rulesKeywords = Arrays.copyOf(actionNames, actionNames.length);
 		
-		//remove any unnecessary white spaces
-		for(int i=0;i<rulesKeywords.length; i++) {
-			rulesKeywords[i]=rulesKeywords[i].trim();
+		if (rulesKeywords == null || rulesKeywords.length == 0) {
+			rulesKeywords = FileManipulator.readFile(outputFolder + "/" + rulesKeywordsFileName);
+
+			// remove any unnecessary white spaces
+			for (int i = 0; i < rulesKeywords.length; i++) {
+				rulesKeywords[i] = rulesKeywords[i].trim();
+			}
 		}
-		}
-		
+
 		for (Integer stateSrc : digraph.getNodes()) {
-//			System.out.println(stateSrc);
-//			System.out.println(digraph.outboundNeighbors(stateSrc));
+			// System.out.println(stateSrc);
+			// System.out.println(digraph.outboundNeighbors(stateSrc));
 			for (Integer stateDes : digraph.outboundNeighbors(stateSrc)) {
 				label = updateTransitionLabel(stateSrc, stateDes);
 				labels.add(label);
 				digraph.setLabel(stateSrc, stateDes, label);
 			}
 		}
-		
-//		System.out.println(digraph);
+
+		// System.out.println(digraph);
 		return digraph;
 
 	}
@@ -99,11 +112,68 @@ public class LabelExtractor {
 	 * rule. Extraction is done based on the presence of a keyword in a source
 	 * state and it being missing in the target state. It is assumed that there
 	 * is a txt file in the output folder holding the keywords for rules (named
-	 * "rules_keywords") in which each rule keyword is separated by a semicolon. Also the
-	 * states are in json format
+	 * "rules_keywords") in which each rule keyword is separated by a semicolon.
+	 * Also the states are in json format
 	 * 
 	 */
-/*	public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
+	/*
+	 * public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
+	 * 
+	 * JSONParser parser = new JSONParser(); String tmp; ArrayList<String>
+	 * srcControlNames = new ArrayList<String>(); ArrayList<String>
+	 * desControlNames = new ArrayList<String>(); ArrayList<String>
+	 * missingControls = new ArrayList<String>(); String label = ""; int index =
+	 * 0;
+	 * 
+	 * boolean isLabelFound = false;
+	 * 
+	 * try { JSONObject src = (JSONObject) parser.parse(new
+	 * FileReader(outputFolder + "/" + stateSrc + ".json")); JSONObject des =
+	 * (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateDes +
+	 * ".json"));
+	 * 
+	 * JSONArray arSrc = (JSONArray) src.get(JSONTerms.BIGRAPHER_NODES);
+	 * Iterator<JSONObject> itSrc = arSrc.iterator();
+	 * 
+	 * JSONArray arDes = (JSONArray) des.get(JSONTerms.BIGRAPHER_NODES);
+	 * Iterator<JSONObject> itDes = arDes.iterator();
+	 * 
+	 * // get controls in the source state file while (itSrc.hasNext()) { tmp =
+	 * (String) ((JSONObject)
+	 * itSrc.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.
+	 * BIGRAPHER_CONTROL_ID); srcControlNames.add(tmp); }
+	 * 
+	 * // get controls in the destination state file while (itDes.hasNext()) {
+	 * tmp = (String) ((JSONObject)
+	 * itDes.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.
+	 * BIGRAPHER_CONTROL_ID); desControlNames.add(tmp);
+	 * 
+	 * }
+	 * 
+	 * // find controls of source state that are missing in the destination //
+	 * state for (String controlName : srcControlNames) { if
+	 * (!desControlNames.contains(controlName)) {
+	 * missingControls.add(controlName); // check if the control name is a rule
+	 * keyword for (String ruleKeyword : rulesKeywords) { if
+	 * (ruleKeyword.equalsIgnoreCase(controlName)) { label = controlName;
+	 * isLabelFound = true; break; } } } else { index =
+	 * desControlNames.indexOf(controlName); if (index != -1) {
+	 * desControlNames.remove(index); }
+	 * 
+	 * }
+	 * 
+	 * if (isLabelFound) { break; } }
+	 * 
+	 * // System.out.println(state.toString()); } catch (FileNotFoundException
+	 * e) { // TODO Auto-generated catch block e.printStackTrace(); } catch
+	 * (IOException e) { // TODO Auto-generated catch block e.printStackTrace();
+	 * } catch (ParseException e) { // TODO Auto-generated catch block
+	 * e.printStackTrace(); }
+	 * 
+	 * return label; }
+	 */
+
+	public static String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
 
 		JSONParser parser = new JSONParser();
 		String tmp;
@@ -127,89 +197,15 @@ public class LabelExtractor {
 
 			// get controls in the source state file
 			while (itSrc.hasNext()) {
-				tmp = (String) ((JSONObject) itSrc.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CONTROL_ID);
+				tmp = (String) ((JSONObject) itSrc.next().get(JSONTerms.BIGRAPHER_CONTROL))
+						.get(JSONTerms.BIGRAPHER_CNTRL_NAME);
 				srcControlNames.add(tmp);
 			}
 
 			// get controls in the destination state file
 			while (itDes.hasNext()) {
-				tmp = (String) ((JSONObject) itDes.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CONTROL_ID);
-				desControlNames.add(tmp);
-
-			}
-
-			// find controls of source state that are missing in the destination
-			// state
-			for (String controlName : srcControlNames) {
-				if (!desControlNames.contains(controlName)) {
-					missingControls.add(controlName);
-					// check if the control name is a rule keyword
-					for (String ruleKeyword : rulesKeywords) {
-						if (ruleKeyword.equalsIgnoreCase(controlName)) {
-							label = controlName;
-							isLabelFound = true;
-							break;
-						}
-					}
-				} else {
-					index = desControlNames.indexOf(controlName);
-					if (index != -1) {
-						desControlNames.remove(index);
-					}
-
-				}
-
-				if (isLabelFound) {
-					break;
-				}
-			}
-
-			// System.out.println(state.toString());
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return label;
-	}*/
-
-	public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
-
-		JSONParser parser = new JSONParser();
-		String tmp;
-		ArrayList<String> srcControlNames = new ArrayList<String>();
-		ArrayList<String> desControlNames = new ArrayList<String>();
-		ArrayList<String> missingControls = new ArrayList<String>();
-		String label = "";
-		int index = 0;
-
-		boolean isLabelFound = false;
-
-		try {
-			JSONObject src = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateSrc + ".json"));
-			JSONObject des = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateDes + ".json"));
-
-			JSONArray arSrc = (JSONArray) src.get(JSONTerms.BIGRAPHER_NODES);
-			Iterator<JSONObject> itSrc = arSrc.iterator();
-
-			JSONArray arDes = (JSONArray) des.get(JSONTerms.BIGRAPHER_NODES);
-			Iterator<JSONObject> itDes = arDes.iterator();
-
-			// get controls in the source state file
-			while (itSrc.hasNext()) {
-				tmp = (String) ((JSONObject) itSrc.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CNTRL_NAME);
-				srcControlNames.add(tmp);
-			}
-
-			// get controls in the destination state file
-			while (itDes.hasNext()) {
-				tmp = (String) ((JSONObject) itDes.next().get(JSONTerms.BIGRAPHER_CONTROL)).get(JSONTerms.BIGRAPHER_CNTRL_NAME);
+				tmp = (String) ((JSONObject) itDes.next().get(JSONTerms.BIGRAPHER_CONTROL))
+						.get(JSONTerms.BIGRAPHER_CNTRL_NAME);
 				desControlNames.add(tmp);
 
 			}
@@ -254,70 +250,141 @@ public class LabelExtractor {
 
 		return label;
 	}
-	public void createNewLabelledTransitionFile() {
+
+	public static String createNewLabelledTransitionFile() {
+		
 		StringBuilder res = new StringBuilder();
-		ArrayList<Integer> nodes = (ArrayList) transitionSystem.getDigraph().getNodes();
+		// ArrayList<Integer> nodes = (ArrayList)
+		// transitionSystem.getDigraph().getNodes();
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		double prob = 0;
 		String label;
-		String newFileName = SystemInstanceHandler.getOutputFolder()+"/"+outputFileName;
-		res.append(nodes.size()).append(" ").append(digraph.getNumberOfEdges()).append("\r\n");
-		for (Integer state : transitionSystem.getDigraph().getNodes()) {
-			for (Integer stateDes : digraph.outboundNeighbors(state)) {
-				prob = digraph.getProbability(state, stateDes);
-				label = digraph.getLabel(state, stateDes);
-				if (prob != -1) {
-					if (label != null && !label.isEmpty()) {
-						res.append(state).append(" ").append(stateDes).append(" ").append(prob).append(" ")
-								.append(label).append("\r\n");
+		String newFileName = outputFolder + "/" + outputFileName;
+		// res.append(nodes.size()).append("
+		// ").append(digraph.getNumberOfEdges()).append("\r\n");
+
+		File file = new File(newFileName);
+		
+		//if the file is already created then no need to create it again
+		if(file.exists()) {
+			return newFileName;
+		}
+		
+		//if there is no transition digraph
+		if(transitionSystem == null || transitionSystem.getDigraph() == null) {
+			return null;
+		}
+		
+		JSONParser parser = new JSONParser();
+		
+		try {
+
+			JSONObject originalObj = (JSONObject) parser.parse(new FileReader(TransitionSystem.getFileName()));
+
+			String brsType = null;
+			
+			//set brs type (i.e. brs, pbrs, or sbrs)
+			if(originalObj.containsKey(JSONTerms.TRANSITIONS_BRS)) {
+				brsType = JSONTerms.TRANSITIONS_BRS;
+			} else if(originalObj.containsKey(JSONTerms.TRANSITIONS__PROP_BRS)) {
+				brsType = JSONTerms.TRANSITIONS__PROP_BRS;
+			}else if(originalObj.containsKey(JSONTerms.TRANSITIONS__STOCHASTIC_BRS)) {
+				brsType = JSONTerms.TRANSITIONS__STOCHASTIC_BRS;
+			}
+			
+			//default is brs
+			if(brsType == null || brsType.isEmpty()) {
+				brsType = JSONTerms.TRANSITIONS_BRS;
+			}
+			
+			res.append("{\"").append(brsType).append("\": [");
+			
+			for (Integer state : transitionSystem.getDigraph().getNodes()) {
+				for (Integer stateDes : digraph.outboundNeighbors(state)) {
+					prob = digraph.getProbability(state, stateDes);
+					label = digraph.getLabel(state, stateDes);
+					if (prob != -1) {
+						if (label != null && !label.isEmpty()) {
+							res.append("{\"source\":").append(state)
+							.append(",\"target\":").append(stateDes)
+							.append(",\"prob\":").append(prob)
+							.append(", \"action\":").append(label)
+							.append("},");
+						} else {
+							res.append("{\"source\":").append(state)
+							.append(",\"target\":").append(stateDes)
+							.append(",\"prob\":").append(prob)
+							.append("},");
+//							res.append(state).append(" ").append(stateDes).append(" ").append(prob).append("\r\n");
+						}
 					} else {
-						res.append(state).append(" ").append(stateDes).append(" ").append(prob).append("\r\n");
-					}
-				} else {
-					if (label != null && !label.isEmpty()) {
-						res.append(state).append(" ").append(stateDes).append(" ").append(label).append("\r\n");
-					} else {
-						res.append(state).append(" ").append(stateDes).append("\r\n");
+						if (label != null && !label.isEmpty()) {
+							res.append("{\"source\":").append(state)
+							.append(",\"target\":").append(stateDes)
+							.append(", \"action\":").append(label)
+							.append("},");
+						} else {
+							res.append("{\"source\":").append(state)
+							.append(",\"target\":").append(stateDes)
+							.append("},");
+						}
 					}
 				}
 			}
-		}
 
-		// write the new file
-		BufferedWriter writer;
-		try {
-			writer = new BufferedWriter(new FileWriter(outputFolder + "/" + newFileName));
-
-			writer.write(res.toString());
-
-			writer.close();
-		} catch (IOException e1) { // TODO Auto-generated catch
+			//remove last comma
+			res.deleteCharAt(res.length()-1);
+			
+			//close the json object
+			res.append("]}");
+			
+			org.json.JSONObject objLabelled = new org.json.JSONObject(res.toString());
+//			
+//			// write the new file
+//			BufferedWriter writer;
+//
+//			writer = new BufferedWriter(new FileWriter(outputFolder + "/" + newFileName));
+//
+//			writer.write(res.toString());
+//
+//			writer.close();
+			
+			try (final BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
+				writer.write(objLabelled.toString(4));
+			}
+			
+			return newFileName;
+			
+		} catch (Exception e1) { // TODO Auto-generated catch
 			e1.printStackTrace();
+			return null;
 		}
+		
+		
 	}
 
 	public String getOutputPath() {
 		return outputFolder;
 	}
 
-	public void setOutputPath(String outputPath) {
-		this.outputFolder = outputPath;
+	public static void setOutputPath(String outputPath) {
+		outputFolder = outputPath;
 	}
 
 	public String getRulesKeywordsFileName() {
 		return rulesKeywordsFileName;
 	}
 
-	public void setRulesKeywordsFileName(String rulesKeywordsFileName) {
-		this.rulesKeywordsFileName = rulesKeywordsFileName;
+	public static void setRulesKeywordsFileName(String rulesKeywordsFileNm) {
+		rulesKeywordsFileName = rulesKeywordsFileNm;
 	}
-	
-	public String[] getRulesKeywords() {
+
+	public static String[] getRulesKeywords() {
 		return rulesKeywords;
 	}
 
-	public void setRulesKeywords(String[] rulesKeywords) {
-		this.rulesKeywords = rulesKeywords;
+	public static void setRulesKeywords(String[] rulesKeywrds) {
+		rulesKeywords = rulesKeywrds;
 	}
 
 	/*
@@ -456,12 +523,13 @@ public class LabelExtractor {
 	 * 
 	 * }
 	 */
-	
+
 	public static void main(String[] args) {
 
 		LabelExtractor ex = new LabelExtractor("output");
-		
-		//##### one way to identify the labels is by using the redex and reactum of
+
+		// ##### one way to identify the labels is by using the redex and
+		// reactum of
 		// rules as predicates
 		// however, this requires more computational power and it can assign
 		// more than one label to a single transition
@@ -471,14 +539,16 @@ public class LabelExtractor {
 		 */
 		// ex.extractLabel(1, 4);
 
-		//##### another way is to define a keyword for each reaction rule such as its name as a
+		// ##### another way is to define a keyword for each reaction rule such
+		// as its name as a
 		// control which is then used to identify transitions
-		// it requires adding controls that identify the action in each reaction rule
-		//it also requires the Digraph of the transition system created
-		ex.updateDigraphLabels();
-		
-		//this creates a new transitions file with the labels
-		ex.createNewLabelledTransitionFile();
+		// it requires adding controls that identify the action in each reaction
+		// rule
+		// it also requires the Digraph of the transition system created
+//		ex.updateDigraphLabels();
+
+		// this creates a new transitions file with the labels
+//		ex.createNewLabelledTransitionFile();
 
 	}
 

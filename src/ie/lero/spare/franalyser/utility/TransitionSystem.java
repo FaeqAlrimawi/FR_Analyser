@@ -352,6 +352,10 @@ public class TransitionSystem {
 		transitionSystem = null;
 	}
 
+	public static String getFileName() {
+		return fileName;
+	}
+	
 	public Digraph<Integer> getDigraph() {
 		return transitionGraph;
 	}

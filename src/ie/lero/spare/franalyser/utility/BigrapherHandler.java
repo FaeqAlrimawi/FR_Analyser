@@ -434,9 +434,8 @@ public class BigrapherHandler implements SystemExecutor {
 		
 		//update digraph with action labels
 		rulesKeywords = getActionNamesFromBRSFile();
-		LabelExtractor lbl = new LabelExtractor(rulesKeywords);
 		
-		lbl.updateDigraphLabels();
+		LabelExtractor.updateDigraphLabels(rulesKeywords);
 		
 		return transitionSystem;
 	}

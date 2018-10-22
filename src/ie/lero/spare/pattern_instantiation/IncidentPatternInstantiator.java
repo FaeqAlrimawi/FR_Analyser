@@ -353,7 +353,7 @@ public class IncidentPatternInstantiator {
 
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
-		String interruptionPattern = "interruption_incident-pattern_modified.cpi";
+		String interruptionPattern = "interruption_incident-pattern2.cpi";
 		String dataCollectionPattern = "dataCollection_incident-pattern.cpi";
 
 		String systemModelFile = "D:/Bigrapher data/scenario2/lero.cps";
@@ -534,7 +534,15 @@ public class IncidentPatternInstantiator {
 				}
 			}
 			/***************/
-
+			
+			//create a new transition file with labels
+			String outputFile = LabelExtractor.createNewLabelledTransitionFile();
+			if(outputFile != null) {
+				logger.putMessage(">>New Labelled transitions is created: "+ outputFile);	
+			} else {
+				logger.putError(">>Failed to create a new labelled transition file");
+			}
+			
 			logger.putMessage(
 					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
 
