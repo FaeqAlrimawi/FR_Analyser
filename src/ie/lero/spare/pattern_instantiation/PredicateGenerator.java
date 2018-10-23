@@ -267,6 +267,7 @@ public class PredicateGenerator {
 				tmpAry = new JSONArray();
 				tmpAry.put((JSONObject) tmpObject.get(JSONTerms.ENTITY));
 			}
+			
 			for (int i = 0; i < tmpAry.length(); i++) {
 				JSONObject tmpObj = tmpAry.getJSONObject(i);
 

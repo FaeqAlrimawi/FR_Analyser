@@ -809,7 +809,19 @@ public class IncidentPatternInstantiator {
 				analyser.setNumberofActivityParallelExecution(parallelActivities);
 				// analyser.setThreshold(matchingThreshold);
 
-				logger.putMessage("Thread[" + threadID + "]>>Mapping asset set :" + Arrays.toString(systemAssetNames));
+				StringBuilder str =new StringBuilder();
+				
+				str.append("[");
+				for(int i=0;i<systemAssetNames.length;i++) {
+					str.append(systemAssetNames[i]).append(":").append(incidentEntityNames[i]).append(", ");
+				}
+				
+				if(str.length() >0) {
+					str.deleteCharAt(str.length()-1);
+					str.deleteCharAt(str.length()-1);
+					str.append("]");
+				}
+				logger.putMessage("Thread[" + threadID + "]>>Mapping asset set :" + str.toString());
 				logger.putMessage("Thread[" + threadID + "]>>Identifying states and their transitions...");
 
 				// identify states that satisfy the pre-/post-conditions of each
