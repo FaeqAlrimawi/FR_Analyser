@@ -415,8 +415,6 @@ public class IncidentPatternInstantiator {
 
 		try {
 
-			generateAssetControlDependency();
-
 			// currently creates a folder named "log" where the states folder is
 			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
 
@@ -566,6 +564,10 @@ public class IncidentPatternInstantiator {
 				logger.putError(">>Failed to create a new labelled transition file");
 			}
 
+			// create a map of system class to possible controls (which are the
+			// class and its superclasses)
+			// generateAssetControlMap();
+
 			logger.putMessage(
 					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
 
@@ -634,7 +636,7 @@ public class IncidentPatternInstantiator {
 
 	}
 
-	public void generateAssetControlDependency() {
+	public void generateAssetControlMap() {
 
 		Method[] packageMethods = CyberPhysicalSystemPackage.class.getDeclaredMethods();
 
@@ -646,21 +648,21 @@ public class IncidentPatternInstantiator {
 
 			className = mthd.getName();
 			Class cls = mthd.getReturnType();
-			
-			//only consider EClass as the classes
-			if(!cls.getSimpleName().equals("EClass")) {
+
+			// only consider EClass as the classes
+			if (!cls.getSimpleName().equals("EClass")) {
 				continue;
 			}
-			
-			//remove [get] at the beginning
+
+			// remove [get] at the beginning
 			// if it contains __ then it is not a class its an attribut
-			if(className.startsWith("get")) {
+			if (className.startsWith("get")) {
 				className = className.replace("get", "");
 			}
-			
+
 			// create a class from the name
 			String fullClassName = "environment.impl." + className + "Impl";
-			
+
 			int numOfLevels = 10;
 
 			try {
@@ -670,15 +672,15 @@ public class IncidentPatternInstantiator {
 				List<String> classHierarchy = new LinkedList<String>();
 				int cnt = 0;
 
-//				System.out.println("generated class: "+potentialClass.getSimpleName());
-				
+				// System.out.println("generated class:
+				// "+potentialClass.getSimpleName());
+
 				do {
 					classHierarchy.add(potentialClass.getSimpleName().replace("Impl", ""));
 					potentialClass = potentialClass.getSuperclass();
 					cnt++;
-				} while (potentialClass != null && 
-						!potentialClass.getSimpleName().equals("Container")
-						 && cnt < numOfLevels);
+				} while (potentialClass != null && !potentialClass.getSimpleName().equals("Container")
+						&& cnt < numOfLevels);
 
 				// add new entry to the map
 				classMap.put(className, classHierarchy);
@@ -691,30 +693,31 @@ public class IncidentPatternInstantiator {
 		}
 
 		StringBuilder str = new StringBuilder();
-		
+
 		str.append("{\"systemclass-control-map\":[");
 		for (Entry<String, List<String>> entry : classMap.entrySet()) {
 
 			str.append("{\"class-name\":").append(entry.getKey()).append(", \"controls\":[");
-			for( String nm : entry.getValue()) {
-				str.append("\"").append(nm).append("\",");	
+			for (String nm : entry.getValue()) {
+				str.append("\"").append(nm).append("\",");
 			}
-			//remove comma
-			str.deleteCharAt(str.length()-1);
+			// remove comma
+			str.deleteCharAt(str.length() - 1);
 			str.append("]},");
-//			System.out.println(entry.getKey() + "::" + Arrays.toString(entry.getValue().toArray()));
-			
+			// System.out.println(entry.getKey() + "::" +
+			// Arrays.toString(entry.getValue().toArray()));
+
 		}
-		
-		str.deleteCharAt(str.length()-1);
+
+		str.deleteCharAt(str.length() - 1);
 		str.append("]}");
-		
+
 		JSONObject obj = new JSONObject(str.toString());
-		
+
 		String fileName = "AssetControl_map.json";
-		
+
 		File file = new File(fileName);
-		
+
 		try (final BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
 			writer.write(obj.toString(4));
 		} catch (IOException e) {
@@ -722,7 +725,6 @@ public class IncidentPatternInstantiator {
 			e.printStackTrace();
 		}
 
-		
 	}
 
 	/**
@@ -829,24 +831,28 @@ public class IncidentPatternInstantiator {
 				 * ); threadWriter.close(); return; }
 				 */
 
-				// how to represent all possible paths to the given sequence of
-				// assets?
-				// incidentpath can be used to hold one path, but now it is
-				// holding everything
-				// IncidentPath inc = new IncidentPath(predicateHandler);
+				/**
+				 * how to represent all possible paths to the given sequence of
+				 * assets? incidentpath can be used to hold one path, but now it
+				 * is holding everything IncidentPath inc = new
+				 * IncidentPath(predicateHandler);
+				 **/
 				// inc.generateDistinctPaths();
 
-				// this gives details about the states and their transitions
-				// that satisfy the conditions of each activity
-				// it prints transitions between pre and post within one
-				// activity, post of current to pre of next activity, pre of
-				// current to pre of next
+				/**
+				 * this gives details about the states and their transitions
+				 * that satisfy the conditions of each activity it prints
+				 * transitions between pre and post within one activity, post of
+				 * current to pre of next activity, pre of current to pre of
+				 * next
+				 **/
 				// predicateHandler.printAll();
 
 				// one way to find all possible paths between activities is to
 				// find all transitions from the precondition of the initial
 				// activity to the postconditions of the final activity
 				logger.putMessage("Thread[" + threadID + "]>>Generating potential incident instances...");
+				
 				// LinkedList<GraphPath> paths =
 				// predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(),
 				// predicateHandler.getFinalActivity());
@@ -1163,18 +1169,11 @@ public class IncidentPatternInstantiator {
 				return result.toString();
 
 			} else {
-				// StringBuilder jsonStr = new StringBuilder();
 
 				for (int i = indexStart; i < indexEnd; i++) {
 					result.append("{\"instance_id\":").append(i).append(",").append(paths.get(i).toJSON()).append("}");
 					result.append(",");
-					/*
-					 * if(i < size-1) { jsonStr.append(","); }
-					 */
-
 				}
-
-				// result = jsonStr;
 				return result.toString();
 			}
 		}
@@ -1198,8 +1197,8 @@ public class IncidentPatternInstantiator {
 
 		// ins.executeExample();
 
-//		ins.executeLeroScenario();
-		ins.generateAssetControlDependency();
+		ins.executeLeroScenario();
+		// ins.generateAssetControlMap();
 		// ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
