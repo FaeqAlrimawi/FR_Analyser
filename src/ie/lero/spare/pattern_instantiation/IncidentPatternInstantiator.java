@@ -4,11 +4,16 @@ package ie.lero.spare.pattern_instantiation;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -20,8 +25,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import org.eclipse.emf.ecore.EClass;
 import org.json.JSONObject;
+import org.testng.internal.ClassHelper;
 
+import cyberPhysical_Incident.Asset;
+import cyberPhysical_Incident.CyberPhysicalIncidentPackage;
+import environment.CyberPhysicalSystemPackage;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
@@ -354,14 +364,14 @@ public class IncidentPatternInstantiator {
 
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
-		String interruptionPattern = "D:/Bigrapher data/scenario2/interruption_incident-pattern2.cpi";
-		String dataCollectionPattern = "D:/Bigrapher data/scenario2/dataCollection_incident-pattern.cpi";
+		String interruptionPattern = "D:/Bigrapher data/incident patterns/interruption_incident-pattern.cpi";
+		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
 
 		String leroSystemModel = "D:/Bigrapher data/scenario2/lero.cps";
 		String NIISystemModel = "D:/Bigrapher data/scenario1/NII.cps";
 
 		String systemModelFile = leroSystemModel;
-		String incidentPatternFile = dataCollectionPattern;
+		String incidentPatternFile = interruptionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
@@ -404,6 +414,8 @@ public class IncidentPatternInstantiator {
 		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
 
 		try {
+
+			generateAssetControlDependency();
 
 			// currently creates a folder named "log" where the states folder is
 			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
@@ -568,7 +580,7 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(
 					">>Creating threads for asset sets. [" + threadPoolSize + "] thread(s) are running in parallel.");
 
-			for (int i = 0; i < 1; i++) {// adjust the length
+			for (int i = 0; i < lst.size(); i++) {// adjust the length
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 				executor.submit(incidentInstances[i]);
 			}
@@ -615,9 +627,102 @@ public class IncidentPatternInstantiator {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
-			logger.terminateLogging();
+			if (logger != null) {
+				logger.terminateLogging();
+			}
 		}
 
+	}
+
+	public void generateAssetControlDependency() {
+
+		Method[] packageMethods = CyberPhysicalSystemPackage.class.getDeclaredMethods();
+
+		Map<String, List<String>> classMap = new HashMap<String, List<String>>();
+
+		String className = null;
+
+		for (Method mthd : packageMethods) {
+
+			className = mthd.getName();
+			Class cls = mthd.getReturnType();
+			
+			//only consider EClass as the classes
+			if(!cls.getSimpleName().equals("EClass")) {
+				continue;
+			}
+			
+			//remove [get] at the beginning
+			// if it contains __ then it is not a class its an attribut
+			if(className.startsWith("get")) {
+				className = className.replace("get", "");
+			}
+			
+			// create a class from the name
+			String fullClassName = "environment.impl." + className + "Impl";
+			
+			int numOfLevels = 10;
+
+			try {
+
+				Class potentialClass = Class.forName(fullClassName);
+
+				List<String> classHierarchy = new LinkedList<String>();
+				int cnt = 0;
+
+//				System.out.println("generated class: "+potentialClass.getSimpleName());
+				
+				do {
+					classHierarchy.add(potentialClass.getSimpleName().replace("Impl", ""));
+					potentialClass = potentialClass.getSuperclass();
+					cnt++;
+				} while (potentialClass != null && 
+						!potentialClass.getSimpleName().equals("Container")
+						 && cnt < numOfLevels);
+
+				// add new entry to the map
+				classMap.put(className, classHierarchy);
+
+			} catch (ClassNotFoundException e) {
+
+				// if there's no such class then continue
+				continue;
+			}
+		}
+
+		StringBuilder str = new StringBuilder();
+		
+		str.append("{\"systemclass-control-map\":[");
+		for (Entry<String, List<String>> entry : classMap.entrySet()) {
+
+			str.append("{\"class-name\":").append(entry.getKey()).append(", \"controls\":[");
+			for( String nm : entry.getValue()) {
+				str.append("\"").append(nm).append("\",");	
+			}
+			//remove comma
+			str.deleteCharAt(str.length()-1);
+			str.append("]},");
+//			System.out.println(entry.getKey() + "::" + Arrays.toString(entry.getValue().toArray()));
+			
+		}
+		
+		str.deleteCharAt(str.length()-1);
+		str.append("]}");
+		
+		JSONObject obj = new JSONObject(str.toString());
+		
+		String fileName = "AssetControl_map.json";
+		
+		File file = new File(fileName);
+		
+		try (final BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
+			writer.write(obj.toString(4));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
 	}
 
 	/**
@@ -702,6 +807,7 @@ public class IncidentPatternInstantiator {
 				analyser.setNumberofActivityParallelExecution(parallelActivities);
 				// analyser.setThreshold(matchingThreshold);
 
+				logger.putMessage("Thread[" + threadID + "]>>Mapping asset set :" + Arrays.toString(systemAssetNames));
 				logger.putMessage("Thread[" + threadID + "]>>Identifying states and their transitions...");
 
 				// identify states that satisfy the pre-/post-conditions of each
@@ -814,10 +920,10 @@ public class IncidentPatternInstantiator {
 				// System.out.println(predic.toString());
 
 				return 1;
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
-				
+
 				return -1;
 			}
 		}
@@ -1002,7 +1108,7 @@ public class IncidentPatternInstantiator {
 						+ threadFile.getAbsolutePath());
 
 				obj = null;
-				
+
 				return 1;
 
 			} catch (IOException e) {
@@ -1092,7 +1198,8 @@ public class IncidentPatternInstantiator {
 
 		// ins.executeExample();
 
-		ins.executeLeroScenario();
+//		ins.executeLeroScenario();
+		ins.generateAssetControlDependency();
 		// ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();

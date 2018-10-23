@@ -1,0 +1,491 @@
+{"systemclass-control-map": [
+    {
+        "controls": [
+            "Server",
+            "Computer",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Server"
+    },
+    {
+        "controls": [
+            "DigitalConnection",
+            "Connection"
+        ],
+        "class-name": "DigitalConnection"
+    },
+    {
+        "controls": ["Port"],
+        "class-name": "Port"
+    },
+    {
+        "controls": [
+            "Toilet",
+            "Room",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Toilet"
+    },
+    {
+        "controls": [
+            "Process",
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "Process"
+    },
+    {
+        "controls": [
+            "EmbeddedComputer",
+            "Computer",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "EmbeddedComputer"
+    },
+    {
+        "controls": [
+            "Walkway",
+            "PhysicalConnection",
+            "Connection"
+        ],
+        "class-name": "Walkway"
+    },
+    {
+        "controls": [
+            "HVAC",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "HVAC"
+    },
+    {
+        "controls": [
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "PhysicalAsset"
+    },
+    {
+        "controls": [
+            "BusConnection",
+            "DigitalConnection",
+            "Connection"
+        ],
+        "class-name": "BusConnection"
+    },
+    {
+        "controls": [
+            "CardReader",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "CardReader"
+    },
+    {
+        "controls": [
+            "PhysicalConnection",
+            "Connection"
+        ],
+        "class-name": "PhysicalConnection"
+    },
+    {
+        "controls": [
+            "Actor",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Actor"
+    },
+    {
+        "controls": [
+            "Computer",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Computer"
+    },
+    {
+        "controls": ["Asset"],
+        "class-name": "Asset"
+    },
+    {
+        "controls": [
+            "Hallway",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Hallway"
+    },
+    {
+        "controls": [
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "ComputingDevice"
+    },
+    {
+        "controls": [
+            "FireAlarm",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "FireAlarm"
+    },
+    {
+        "controls": [
+            "DishWasher",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "DishWasher"
+    },
+    {
+        "controls": ["Vulnerability"],
+        "class-name": "Vulnerability"
+    },
+    {
+        "controls": [
+            "DigitalNetwork",
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "DigitalNetwork"
+    },
+    {
+        "controls": [
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "DigitalAsset"
+    },
+    {
+        "controls": [
+            "Employee",
+            "Actor",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Employee"
+    },
+    {
+        "controls": [
+            "Kitchen",
+            "Room",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Kitchen"
+    },
+    {
+        "controls": [
+            "Ethernet",
+            "WiredConnection",
+            "PhysicalConnection",
+            "Connection"
+        ],
+        "class-name": "Ethernet"
+    },
+    {
+        "controls": [
+            "File",
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "File"
+    },
+    {
+        "controls": [
+            "Application",
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "Application"
+    },
+    {
+        "controls": [
+            "Building",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Building"
+    },
+    {
+        "controls": [
+            "Office",
+            "Room",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Office"
+    },
+    {
+        "controls": [
+            "Laptop",
+            "Computer",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Laptop"
+    },
+    {
+        "controls": ["Action"],
+        "class-name": "Action"
+    },
+    {
+        "controls": [
+            "Visitor",
+            "Actor",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Visitor"
+    },
+    {
+        "controls": [
+            "CoffeeMachine",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "CoffeeMachine"
+    },
+    {
+        "controls": [
+            "ElevatorsArea",
+            "Room",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "ElevatorsArea"
+    },
+    {
+        "controls": [
+            "IPConnection",
+            "DigitalConnection",
+            "Connection"
+        ],
+        "class-name": "IPConnection"
+    },
+    {
+        "controls": [
+            "KNX",
+            "BusConnection",
+            "DigitalConnection",
+            "Connection"
+        ],
+        "class-name": "KNX"
+    },
+    {
+        "controls": [
+            "Elevator",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Elevator"
+    },
+    {
+        "controls": [
+            "MicroController",
+            "EmbeddedComputer",
+            "Computer",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "MicroController"
+    },
+    {
+        "controls": [
+            "BusNetwork",
+            "DigitalNetwork",
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "BusNetwork"
+    },
+    {
+        "controls": [
+            "Stairs",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Stairs"
+    },
+    {
+        "controls": [
+            "Lounge",
+            "Room",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Lounge"
+    },
+    {
+        "controls": [
+            "Malware",
+            "Application",
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "Malware"
+    },
+    {
+        "controls": [
+            "SmartTV",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "SmartTV"
+    },
+    {
+        "controls": ["Property"],
+        "class-name": "Property"
+    },
+    {
+        "controls": [
+            "Room",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Room"
+    },
+    {
+        "controls": [
+            "Floor",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Floor"
+    },
+    {
+        "controls": ["Credential"],
+        "class-name": "Credential"
+    },
+    {
+        "controls": [
+            "AccessPoint",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "AccessPoint"
+    },
+    {
+        "controls": ["Connection"],
+        "class-name": "Connection"
+    },
+    {
+        "controls": [
+            "Lab",
+            "Room",
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Lab"
+    },
+    {
+        "controls": [
+            "PhysicalStructure",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "PhysicalStructure"
+    },
+    {
+        "controls": [
+            "SmartLight",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "SmartLight"
+    },
+    {
+        "controls": [
+            "Workstation",
+            "Computer",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Workstation"
+    },
+    {
+        "controls": ["Type"],
+        "class-name": "Type"
+    },
+    {
+        "controls": [
+            "Desktop",
+            "Computer",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "Desktop"
+    },
+    {
+        "controls": [
+            "X10",
+            "BusConnection",
+            "DigitalConnection",
+            "Connection"
+        ],
+        "class-name": "X10"
+    },
+    {
+        "controls": ["EnvironmentDiagram"],
+        "class-name": "EnvironmentDiagram"
+    },
+    {
+        "controls": [
+            "WiredConnection",
+            "PhysicalConnection",
+            "Connection"
+        ],
+        "class-name": "WiredConnection"
+    },
+    {
+        "controls": [
+            "IPNetwork",
+            "DigitalNetwork",
+            "DigitalAsset",
+            "Asset"
+        ],
+        "class-name": "IPNetwork"
+    },
+    {
+        "controls": [
+            "CCTV",
+            "ComputingDevice",
+            "PhysicalAsset",
+            "Asset"
+        ],
+        "class-name": "CCTV"
+    }
+]}
