@@ -4,7 +4,6 @@ package ie.lero.spare.pattern_instantiation;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -27,12 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
-import org.eclipse.emf.ecore.EClass;
 import org.json.JSONObject;
-import org.testng.internal.ClassHelper;
 
-import cyberPhysical_Incident.Asset;
-import cyberPhysical_Incident.CyberPhysicalIncidentPackage;
 import environment.CyberPhysicalSystemPackage;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
@@ -85,8 +80,9 @@ public class IncidentPatternInstantiator {
 	// key is the system class while the value is a Control (which should be
 	// found in the .big file provided when analysing an incidnet pattern)
 	private static Map<String, String> assetControlMap;
-	private static String systemControlMapFileName = "./etc/data/asset-control map.txt";
+	private static String systemControlMapFileName = "./asset-control map.txt";
 	
+
 	private void runLogger() {
 
 		logger = Logger.getInstance();
@@ -394,7 +390,8 @@ public class IncidentPatternInstantiator {
 		System.out.println("Enter Incident pattern file path:");
 		String incidentPatternFile = scanner.nextLine();
 
-		System.out.println("Enter System model file path:");
+		System.out.println(
+				"Enter System model file path (*.big file and output folder containing states should have the same name as the system):");
 		String systemModelFile = scanner.nextLine();
 
 		executeScenario(incidentPatternFile, systemModelFile);
@@ -461,6 +458,21 @@ public class IncidentPatternInstantiator {
 			// access the models
 			ModelsHandler.addIncidentModel(incidentPatternFile);
 			ModelsHandler.addSystemModel(systemModelFile);
+
+			// IncidentDiagram incident =
+			// ModelsHandler.getCurrentIncidentModel();
+			// EnvironmentDiagram system =
+			// ModelsHandler.getCurrentSystemModel();
+			//
+			// //initialise activities
+			// incident.getActivity();
+			// //initialise incident entity list
+			// incident.getEntity();
+			// //initialise incident entity map
+			// incident.getEntity("dummy");
+			//
+			// //initialise assets list
+			// system.getAsset("dummy");
 
 			/**
 			 * finding matches also can be accomplished using Xquery (but more
@@ -567,9 +579,9 @@ public class IncidentPatternInstantiator {
 			}
 			/***************/
 
-			//load systemClass-Control map
+			// load systemClass-Control map
 			loadAssetControlMap(BRS_file);
-			
+
 			// create a new transition file with labels
 			String outputFile = LabelExtractor.createNewLabelledTransitionFile();
 			if (outputFile != null) {
@@ -597,18 +609,21 @@ public class IncidentPatternInstantiator {
 					">>Creating threads for asset sets. [" + threadPoolSize + "] thread(s) are running in parallel.");
 
 			List<Future<Integer>> instances = new LinkedList<Future<Integer>>();
-			
+
+			// print separator
+			logger.putSeparator();
+
 			for (int i = 0; i < lst.size(); i++) {// adjust the length
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 				instances.add(executor.submit(incidentInstances[i]));
 			}
 
-			for(Future<Integer> fut : instances) {
-				if(!fut.isDone()) {
+			for (Future<Integer> fut : instances) {
+				if (!fut.isDone()) {
 					fut.get();
 				}
 			}
-			
+
 			// no more tasks will be added so it will execute the submitted ones
 			// and then terminate
 			executor.shutdown();
@@ -752,7 +767,7 @@ public class IncidentPatternInstantiator {
 	protected static void loadAssetControlMap(String systemFileName) {
 
 		assetControlMap = new HashMap<String, String>();
-		
+
 		List<String> unMatchedControls = new LinkedList<String>();
 		Signature signature = SystemInstanceHandler.getGlobalBigraphSignature();
 
@@ -769,8 +784,8 @@ public class IncidentPatternInstantiator {
 
 			if (signature != null && signature.getByName(controlName) == null) {
 				unMatchedControls.add(controlName);
-			} 
-			
+			}
+
 			assetControlMap.put(assetClass, controlName);
 
 		}
@@ -863,12 +878,13 @@ public class IncidentPatternInstantiator {
 				// which later can be matched against states of the system (also
 				// presented in Bigraph)
 				boolean isSuccessful = updateAssetControls();
-				
-				if(!isSuccessful) {
-				return -1;	
+
+				if (!isSuccessful) {
+					return -1;
 				}
-				
-				PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentEntityNames, systemAssetControls);
+
+				PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentEntityNames,
+						systemAssetControls);
 				PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
 
 				// this object identifies states and state transitions that
@@ -952,7 +968,7 @@ public class IncidentPatternInstantiator {
 					// file
 					InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames,
 							systemAssetNames, paths);
-					mainPool.submit(saver).get();
+					mainPool.submit(saver);
 
 					logger.putMessage("Thread[" + threadID + "]>>Analysing [" + paths.size()
 							+ "] of generated potential incident instances...");
@@ -989,7 +1005,9 @@ public class IncidentPatternInstantiator {
 				logger.putMessage("Thread[" + threadID + "]>>Execution time: " + strTime);
 
 				logger.putMessage("Thread[" + threadID + "]>>Finished Successfully");
-				logger.putMessage("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n\n");
+
+				// print separator
+				logger.putSeparator();
 
 				if (listener != null) {
 					listener.updateProgress(incrementValue / 3 + incrementValue % 3);
@@ -1019,17 +1037,18 @@ public class IncidentPatternInstantiator {
 			EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
 
 			environment.Asset tmpAst;
-			
-			//holds the names of the assets that their classes have no control map in the .txt file
+
+			// holds the names of the assets that their classes have no control
+			// map in the .txt file
 			List<String> unMatchedAssets = new LinkedList<String>();
-			
-			//hold the controls that have don't exist in the .big file
-			List<String> unMatchedControls= new LinkedList<String>();
-			
+
+			// hold the controls that have don't exist in the .big file
+			List<String> unMatchedControls = new LinkedList<String>();
+
 			Signature sig = SystemInstanceHandler.getGlobalBigraphSignature();
-			
+
 			boolean isSuccessful = true;
-			
+
 			systemAssetControls = new String[systemAssetNames.length];
 
 			for (int i = 0; i < systemAssetNames.length; i++) {
@@ -1054,19 +1073,21 @@ public class IncidentPatternInstantiator {
 				systemAssetControls[i] = control;
 			}
 
-			//if an asset class has no entry in the map of systemClass to controls
+			// if an asset class has no entry in the map of systemClass to
+			// controls
 			if (!unMatchedAssets.isEmpty()) {
-				logger.putError("Thread["+threadID+"]>>Some assets have no map to controls. These are:"
+				logger.putError("Thread[" + threadID + "]>>Some assets have no map to controls. These are:"
 						+ Arrays.toString(unMatchedAssets.toArray()));
 				isSuccessful = false;
 			}
-			
-			if(!unMatchedControls.isEmpty()) {
-				logger.putError("Thread["+threadID+"]>>Some controls in ("+systemControlMapFileName+") have no equivalent in the .big file. These are:"
+
+			if (!unMatchedControls.isEmpty()) {
+				logger.putError("Thread[" + threadID + "]>>Some controls in (" + systemControlMapFileName
+						+ ") have no equivalent in the .big file. These are:"
 						+ Arrays.toString(unMatchedControls.toArray()));
 				isSuccessful = false;
 			}
-			
+
 			return isSuccessful;
 		}
 
@@ -1324,9 +1345,9 @@ public class IncidentPatternInstantiator {
 
 		// ins.executeExample();
 
-		ins.executeLeroScenario();
+//		 ins.executeLeroScenario();
 		// ins.generateAssetControlMap();
-		// ins.executeScenarioFromConsole();
+		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();

@@ -90,9 +90,9 @@ public class PredicateGenerator {
 
 	private HashMap<String, Activity> createIncidentActivities() {
 
-		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
+		List<Activity> activities = ModelsHandler.getCurrentIncidentModelActivities();
 
-		for (Activity act : incidentModel.getActivity()) {
+		for (Activity act : activities) {
 
 			predHandler.addIncidentActivity(new IncidentActivity(act));
 		}

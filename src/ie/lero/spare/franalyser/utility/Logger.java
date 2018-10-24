@@ -36,6 +36,7 @@ public class Logger implements Runnable {
 	private static String terminatingString = "LoggingDone";
 	private static String terminatingStringWithDelimiter = terminatingString + msgTypeDelimiter + MSG_INFO;
 
+	private static final String SEPARATOR = "*=========================================================================================================*";
 	private Logger() {
 
 		timeNow = LocalDateTime.now();
@@ -227,25 +228,31 @@ public class Logger implements Runnable {
 	 * public BlockingQueue<String> getMsgQ() { return msgQ; }
 	 */
 
-	public void putMessage(String msg) {
+	public synchronized void putMessage(String msg) {
 
 		putMessage(msg, MSG_INFO);
 
 	}
 	
-	public void putError(String msg) {
+	public synchronized void putError(String msg) {
 
 		putMessage(msg, MSG_ERROR);
 
 	}
 
-	public void putWarning(String msg) {
+	public synchronized void putWarning(String msg) {
 
 		putMessage(msg, MSG_WARNING);
 
 	}
 	
-	public void putMessage(String msg, int msgType) {
+	public void putSeparator() {
+
+		putMessage(SEPARATOR);
+
+	}
+	
+	public synchronized void putMessage(String msg, int msgType) {
 		try {
 
 			msg = msg + msgTypeDelimiter + msgType;
@@ -256,7 +263,7 @@ public class Logger implements Runnable {
 		}
 	}
 
-	public void terminateLogging() {
+	public synchronized void terminateLogging() {
 
 		putMessage(Logger.terminatingString);
 

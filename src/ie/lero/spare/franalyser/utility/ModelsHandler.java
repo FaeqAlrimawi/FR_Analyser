@@ -2,11 +2,14 @@ package ie.lero.spare.franalyser.utility;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import cyberPhysical_Incident.Activity;
 import cyberPhysical_Incident.ActivityPattern;
 import cyberPhysical_Incident.IncidentDiagram;
+import cyberPhysical_Incident.IncidentEntity;
 import environment.EnvironmentDiagram;
 import externalUtility.IncidentModelHandler;
 
@@ -121,7 +124,7 @@ public class ModelsHandler {
 	public static IncidentDiagram cloneIncidentModel(IncidentDiagram incidentModel) {
 
 		try {
-	
+
 			String filePath = saveIncidentModel(incidentModel);
 
 			if (filePath != null) {
@@ -129,10 +132,10 @@ public class ModelsHandler {
 				IncidentDiagram inc = loadIncidentModel(filePath);
 
 				// remove tmp (i.e. the copy) file File tmpFile = new
-				/*File tmpFile = new File(filePath);
+				File tmpFile = new File(filePath);
 				if (tmpFile.exists()) {
 					tmpFile.delete();
-				}*/
+				}
 
 				return inc;
 			}
@@ -252,9 +255,9 @@ public class ModelsHandler {
 		ActivityPattern pattern = null;
 
 		Random rand = new Random();
-		
+
 		pattern = ActivityPatternModelHandler.loadActivityPatternFromFile(filePath);
-		activityPatterns.put(filePath+rand.nextInt(1000), pattern);
+		activityPatterns.put(filePath + rand.nextInt(1000), pattern);
 
 		if (activityPatterns.size() == 1) {
 			currentActivityPattern = pattern;
@@ -286,6 +289,25 @@ public class ModelsHandler {
 		return currentIncidentModel;
 	}
 
+	public synchronized static List<Activity> getCurrentIncidentModelActivities() {
+
+		if (currentIncidentModel == null) {
+			return null;
+		}
+
+		return currentIncidentModel.getActivity();
+	}
+
+	public synchronized static IncidentEntity getCurrentIncidentModelEntity(String entityName) {
+
+		if (currentIncidentModel == null) {
+			return null;
+		}
+
+		return currentIncidentModel.getEntity(entityName);
+	}
+
+	
 	public static void setCurrentIncidentModel(IncidentDiagram currentIncidentModel) {
 		ModelsHandler.currentIncidentModel = currentIncidentModel;
 	}
