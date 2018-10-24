@@ -16,10 +16,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveTask;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
@@ -32,6 +34,7 @@ import org.testng.internal.ClassHelper;
 import cyberPhysical_Incident.Asset;
 import cyberPhysical_Incident.CyberPhysicalIncidentPackage;
 import environment.CyberPhysicalSystemPackage;
+import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.Logger;
@@ -78,8 +81,11 @@ public class IncidentPatternInstantiator {
 
 	private String outputFolder = ".";
 
-	//used to hold the map between system classes and controls 
+	// used to hold the map between system classes and controls
+	// key is the system class while the value is a Control (which should be
+	// found in the .big file provided when analysing an incidnet pattern)
 	private static Map<String, String> assetControlMap;
+	private static String systemControlMapFileName = "./etc/data/asset-control map.txt";
 	
 	private void runLogger() {
 
@@ -360,7 +366,7 @@ public class IncidentPatternInstantiator {
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi"; 	
+		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
 
 		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
 	}
@@ -561,6 +567,9 @@ public class IncidentPatternInstantiator {
 			}
 			/***************/
 
+			//load systemClass-Control map
+			loadAssetControlMap(BRS_file);
+			
 			// create a new transition file with labels
 			String outputFile = LabelExtractor.createNewLabelledTransitionFile();
 			if (outputFile != null) {
@@ -587,11 +596,19 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(
 					">>Creating threads for asset sets. [" + threadPoolSize + "] thread(s) are running in parallel.");
 
+			List<Future<Integer>> instances = new LinkedList<Future<Integer>>();
+			
 			for (int i = 0; i < lst.size(); i++) {// adjust the length
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-				executor.submit(incidentInstances[i]);
+				instances.add(executor.submit(incidentInstances[i]));
 			}
 
+			for(Future<Integer> fut : instances) {
+				if(!fut.isDone()) {
+					fut.get();
+				}
+			}
+			
 			// no more tasks will be added so it will execute the submitted ones
 			// and then terminate
 			executor.shutdown();
@@ -631,7 +648,7 @@ public class IncidentPatternInstantiator {
 			// stop logging after all finished
 			// logger.putMessage(Logger.terminatingString);
 
-		} catch (InterruptedException e) {
+		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		} finally {
 			if (logger != null) {
@@ -735,13 +752,11 @@ public class IncidentPatternInstantiator {
 	protected static void loadAssetControlMap(String systemFileName) {
 
 		assetControlMap = new HashMap<String, String>();
-
-		String mapFile = "./etc/data/asset-control map.txt";
-
+		
 		List<String> unMatchedControls = new LinkedList<String>();
 		Signature signature = SystemInstanceHandler.getGlobalBigraphSignature();
 
-		String[] lines = FileManipulator.readFileNewLine(mapFile);
+		String[] lines = FileManipulator.readFileNewLine(systemControlMapFileName);
 
 		String assetClass = null;
 		String controlName = null;
@@ -754,18 +769,28 @@ public class IncidentPatternInstantiator {
 
 			if (signature != null && signature.getByName(controlName) == null) {
 				unMatchedControls.add(controlName);
-			} else {
-				assetControlMap.put(assetClass, controlName);
-			}
+			} 
+			
+			assetControlMap.put(assetClass, controlName);
+
 		}
 
-		Logger.getInstance().putMessage(">>System-Class<>Control map is created.");
+		Logger.getInstance().putMessage(">>System-Class<->Control map is created.");
 		if (!unMatchedControls.isEmpty()) {
-			Logger.getInstance().putError(">>Some Controls in the map have no equivalent in ["+systemFileName+":"
+			Logger.getInstance().putMessage(">>Some Controls in the map have no equivalent in (" + systemFileName + "):"
 					+ Arrays.toString(unMatchedControls.toArray()));
 		}
 	}
-	
+
+	public static Map<String, String> getAssetControlMap() {
+
+		if (assetControlMap == null || assetControlMap.isEmpty()) {
+			loadAssetControlMap(null);
+		}
+
+		return assetControlMap;
+	}
+
 	/**
 	 * returns the list of assets with controls that are not found in the
 	 * bigraph system
@@ -801,6 +826,7 @@ public class IncidentPatternInstantiator {
 		private String[] incidentEntityNames;
 		private int threadID;
 		private String outputFileName;
+		private String[] systemAssetControls;
 
 		public PotentialIncidentInstance(String[] sa, String[] ie, int id) {
 
@@ -836,8 +862,13 @@ public class IncidentPatternInstantiator {
 				// conditions into bigraphs
 				// which later can be matched against states of the system (also
 				// presented in Bigraph)
-
-				PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentEntityNames);
+				boolean isSuccessful = updateAssetControls();
+				
+				if(!isSuccessful) {
+				return -1;	
+				}
+				
+				PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentEntityNames, systemAssetControls);
 				PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
 
 				// this object identifies states and state transitions that
@@ -848,16 +879,16 @@ public class IncidentPatternInstantiator {
 				analyser.setNumberofActivityParallelExecution(parallelActivities);
 				// analyser.setThreshold(matchingThreshold);
 
-				StringBuilder str =new StringBuilder();
-				
+				StringBuilder str = new StringBuilder();
+
 				str.append("[");
-				for(int i=0;i<systemAssetNames.length;i++) {
+				for (int i = 0; i < systemAssetNames.length; i++) {
 					str.append(systemAssetNames[i]).append(":").append(incidentEntityNames[i]).append(", ");
 				}
-				
-				if(str.length() >0) {
-					str.deleteCharAt(str.length()-1);
-					str.deleteCharAt(str.length()-1);
+
+				if (str.length() > 0) {
+					str.deleteCharAt(str.length() - 1);
+					str.deleteCharAt(str.length() - 1);
 					str.append("]");
 				}
 				logger.putMessage("Thread[" + threadID + "]>>Mapping asset set :" + str.toString());
@@ -903,7 +934,7 @@ public class IncidentPatternInstantiator {
 				// find all transitions from the precondition of the initial
 				// activity to the postconditions of the final activity
 				logger.putMessage("Thread[" + threadID + "]>>Generating potential incident instances...");
-				
+
 				// LinkedList<GraphPath> paths =
 				// predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(),
 				// predicateHandler.getFinalActivity());
@@ -921,7 +952,7 @@ public class IncidentPatternInstantiator {
 					// file
 					InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames,
 							systemAssetNames, paths);
-					mainPool.submit(saver);
+					mainPool.submit(saver).get();
 
 					logger.putMessage("Thread[" + threadID + "]>>Analysing [" + paths.size()
 							+ "] of generated potential incident instances...");
@@ -962,11 +993,9 @@ public class IncidentPatternInstantiator {
 
 				if (listener != null) {
 					listener.updateProgress(incrementValue / 3 + incrementValue % 3);
-				}
-
-				if (listener != null) {
 					listener.updateResult(threadID, pathsAnalyser, getOutputFileName(), strTime);
 				}
+
 				/*
 				 * inc.generateDistinctPaths(); LinkedList<GraphPath> paths =
 				 * inc.getAllPaths();
@@ -976,7 +1005,7 @@ public class IncidentPatternInstantiator {
 				 */
 				// System.out.println(predic.toString());
 
-				return 1;
+				return 0;
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -985,14 +1014,61 @@ public class IncidentPatternInstantiator {
 			}
 		}
 
-		/*
-		 * public void start() { print(">>Thread [" + threadID
-		 * +"] is starting...\n"); //System.out.println("system assets: " +
-		 * Arrays.toString(systemAssetNames)); if (t == null) { t = new
-		 * Thread(this, "" + threadID); t.start(); }
-		 * 
-		 * }
-		 */
+		protected boolean updateAssetControls() {
+
+			EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+
+			environment.Asset tmpAst;
+			
+			//holds the names of the assets that their classes have no control map in the .txt file
+			List<String> unMatchedAssets = new LinkedList<String>();
+			
+			//hold the controls that have don't exist in the .big file
+			List<String> unMatchedControls= new LinkedList<String>();
+			
+			Signature sig = SystemInstanceHandler.getGlobalBigraphSignature();
+			
+			boolean isSuccessful = true;
+			
+			systemAssetControls = new String[systemAssetNames.length];
+
+			for (int i = 0; i < systemAssetNames.length; i++) {
+
+				tmpAst = systemModel.getAsset(systemAssetNames[i]);
+
+				if (tmpAst == null) {
+					continue;
+				}
+
+				String className = tmpAst.getClass().getSimpleName().replace("Impl", "");
+				String control = assetControlMap.get(className);
+
+				if (control == null) {
+					unMatchedAssets.add(systemAssetNames[i] + "::" + className + "");
+					continue;
+				} else if (sig != null && sig.getByName(control) == null) {
+					unMatchedControls.add(control);
+					continue;
+				}
+
+				systemAssetControls[i] = control;
+			}
+
+			//if an asset class has no entry in the map of systemClass to controls
+			if (!unMatchedAssets.isEmpty()) {
+				logger.putError("Thread["+threadID+"]>>Some assets have no map to controls. These are:"
+						+ Arrays.toString(unMatchedAssets.toArray()));
+				isSuccessful = false;
+			}
+			
+			if(!unMatchedControls.isEmpty()) {
+				logger.putError("Thread["+threadID+"]>>Some controls in ("+systemControlMapFileName+") have no equivalent in the .big file. These are:"
+						+ Arrays.toString(unMatchedControls.toArray()));
+				isSuccessful = false;
+			}
+			
+			return isSuccessful;
+		}
 
 		public String[] getSystemAssetNames() {
 			return systemAssetNames;

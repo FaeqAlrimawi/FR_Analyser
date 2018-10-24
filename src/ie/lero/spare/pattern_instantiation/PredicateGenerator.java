@@ -81,10 +81,11 @@ public class PredicateGenerator {
 	 * incidentAssetNames = map.getIncidentEntityNames(); }
 	 */
 
-	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName) {
+	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName, String[] systemAssetControl) {
 		this();
 		spaceAssetSet = systemAsset;
 		this.incidentAssetNames = incidentAssetName;
+		this.systemAssetControls = systemAssetControl;
 	}
 
 	private HashMap<String, Activity> createIncidentActivities() {
@@ -146,7 +147,7 @@ public class PredicateGenerator {
 			// XqueryExecuter.getSystemAssetControls(spaceAssetSet);
 
 			// populates the controls array based on the map and the asset set
-			updateAssetControls();
+//			updateAssetControls();
 
 			// create the Bigraph representation (from LibBig library) for the
 			// pre/postconditions of the activities
@@ -185,39 +186,39 @@ public class PredicateGenerator {
 		return predHandler;
 	}
 
-	protected void updateAssetControls() {
-
-		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
-
-		environment.Asset tmpAst;
-		List<String> unMatchedAssets = new LinkedList<String>();
-
-		systemAssetControls = new String[spaceAssetSet.length];
-
-		for (int i = 0; i < spaceAssetSet.length; i++) {
-
-			tmpAst = systemModel.getAsset(spaceAssetSet[i]);
-
-			if (tmpAst == null) {
-				continue;
-			}
-
-			String className = tmpAst.getClass().getSimpleName().replace("Impl", "");
-			String control = assetControlMap.get(className);
-
-			if (control == null) {
-				unMatchedAssets.add(spaceAssetSet[i] + "[" + className + "]");
-				continue;
-			}
-
-			systemAssetControls[i] = control;
-		}
-
-		if (!unMatchedAssets.isEmpty()) {
-			Logger.getInstance().putError("PredicateGenerator>>Some assets have no map to controls. These are:"
-					+ Arrays.toString(unMatchedAssets.toArray()));
-		}
-	}
+//	protected void updateAssetControls() {
+//
+//		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+//
+//		environment.Asset tmpAst;
+//		List<String> unMatchedAssets = new LinkedList<String>();
+//
+//		systemAssetControls = new String[spaceAssetSet.length];
+//
+//		for (int i = 0; i < spaceAssetSet.length; i++) {
+//
+//			tmpAst = systemModel.getAsset(spaceAssetSet[i]);
+//
+//			if (tmpAst == null) {
+//				continue;
+//			}
+//
+//			String className = tmpAst.getClass().getSimpleName().replace("Impl", "");
+//			String control = assetControlMap.get(className);
+//
+//			if (control == null) {
+//				unMatchedAssets.add(spaceAssetSet[i] + "[" + className + "]");
+//				continue;
+//			}
+//
+//			systemAssetControls[i] = control;
+//		}
+//
+//		if (!unMatchedAssets.isEmpty()) {
+//			Logger.getInstance().putError("PredicateGenerator>>Some assets have no map to controls. These are:"
+//					+ Arrays.toString(unMatchedAssets.toArray()));
+//		}
+//	}
 
 	/*
 	 * public PredicateHandler generatePredicatesUpdated() {
