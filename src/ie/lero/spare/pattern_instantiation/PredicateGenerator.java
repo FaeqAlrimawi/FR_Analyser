@@ -21,6 +21,7 @@ import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
+import it.uniud.mads.jlibbig.core.Signature;
 
 public class PredicateGenerator {
 
@@ -37,29 +38,43 @@ public class PredicateGenerator {
 	public PredicateGenerator() {
 		predHandler = new PredicateHandler();
 
-		loadAssetControlMap();
+		assetControlMap = IncidentPatternInstantiator.getAssetControlMap();
+//		loadAssetControlMap();
 
 	}
 
-	protected void loadAssetControlMap() {
-
-		assetControlMap = new HashMap<String, String>();
-
-		String mapFile = "./etc/data/asset-control map.txt";
-
-		String[] lines = FileManipulator.readFileNewLine(mapFile);
-
-		String assetClass = null;
-		String controlName = null;
-		String[] tmp;
-
-		for (String line : lines) {
-			tmp = line.split(" ");
-			assetClass = tmp[0];
-			controlName = tmp[1];
-			assetControlMap.put(assetClass, controlName);
-		}
-	}
+//	protected void loadAssetControlMap() {
+//
+//		assetControlMap = new HashMap<String, String>();
+//
+//		String mapFile = "./etc/data/asset-control map.txt";
+//
+//		List<String> unMatchedControls = new LinkedList<String>();
+//		Signature signature = SystemInstanceHandler.getGlobalBigraphSignature();
+//
+//		String[] lines = FileManipulator.readFileNewLine(mapFile);
+//
+//		String assetClass = null;
+//		String controlName = null;
+//		String[] tmp;
+//
+//		for (String line : lines) {
+//			tmp = line.split(" ");
+//			assetClass = tmp[0];
+//			controlName = tmp[1];
+//
+//			if (signature != null && signature.getByName(controlName) == null) {
+//				unMatchedControls.add(controlName);
+//			} else {
+//				assetControlMap.put(assetClass, controlName);
+//			}
+//		}
+//
+//		if (!unMatchedControls.isEmpty()) {
+//			Logger.getInstance().putError("Loading Asset-Control Map error. No such Controls:"
+//					+ Arrays.toString(unMatchedControls.toArray()));
+//		}
+//	}
 
 	/*
 	 * public PredicateGenerator(AssetMap map) { this(); // assetMap = map;
@@ -267,7 +282,7 @@ public class PredicateGenerator {
 				tmpAry = new JSONArray();
 				tmpAry.put((JSONObject) tmpObject.get(JSONTerms.ENTITY));
 			}
-			
+
 			for (int i = 0; i < tmpAry.length(); i++) {
 				JSONObject tmpObj = tmpAry.getJSONObject(i);
 
@@ -287,7 +302,7 @@ public class PredicateGenerator {
 						unMatchedEntityNames.add(name);
 					}
 				}
-				
+
 				// add contained entities
 				if (!tmpObj.isNull(JSONTerms.ENTITY)) {
 					objs.add(tmpObj);
@@ -299,9 +314,8 @@ public class PredicateGenerator {
 		}
 
 		if (!unMatchedEntityNames.isEmpty()) {
-			Logger.getInstance()
-					.putError("PredicateGenerator>>Some entities in condition [" +conditionName+"] have no map to incident entities:"
-							+ Arrays.toString(unMatchedEntityNames.toArray()));
+			Logger.getInstance().putError("PredicateGenerator>>Some entities in condition [" + conditionName
+					+ "] have no map to incident entities:" + Arrays.toString(unMatchedEntityNames.toArray()));
 			return false;
 		}
 

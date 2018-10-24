@@ -33,10 +33,12 @@ import cyberPhysical_Incident.Asset;
 import cyberPhysical_Incident.CyberPhysicalIncidentPackage;
 import environment.CyberPhysicalSystemPackage;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
+import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
+import it.uniud.mads.jlibbig.core.Signature;
 import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternInstantiator {
@@ -76,6 +78,9 @@ public class IncidentPatternInstantiator {
 
 	private String outputFolder = ".";
 
+	//used to hold the map between system classes and controls 
+	private static Map<String, String> assetControlMap;
+	
 	private void runLogger() {
 
 		logger = Logger.getInstance();
@@ -355,7 +360,7 @@ public class IncidentPatternInstantiator {
 		String BRS_file = "etc/scenario1/research_centre_system.big";
 		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
 		String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
+		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi"; 	
 
 		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
 	}
@@ -367,8 +372,8 @@ public class IncidentPatternInstantiator {
 		String interruptionPattern = "D:/Bigrapher data/incident patterns/interruption_incident-pattern.cpi";
 		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
 
-		String leroSystemModel = "D:/Bigrapher data/scenario2/lero.cps";
-		String NIISystemModel = "D:/Bigrapher data/scenario1/NII.cps";
+		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
+		String NIISystemModel = "D:/Bigrapher data/NII/NII.cps";
 
 		String systemModelFile = leroSystemModel;
 		String incidentPatternFile = interruptionPattern;
@@ -727,6 +732,40 @@ public class IncidentPatternInstantiator {
 
 	}
 
+	protected static void loadAssetControlMap(String systemFileName) {
+
+		assetControlMap = new HashMap<String, String>();
+
+		String mapFile = "./etc/data/asset-control map.txt";
+
+		List<String> unMatchedControls = new LinkedList<String>();
+		Signature signature = SystemInstanceHandler.getGlobalBigraphSignature();
+
+		String[] lines = FileManipulator.readFileNewLine(mapFile);
+
+		String assetClass = null;
+		String controlName = null;
+		String[] tmp;
+
+		for (String line : lines) {
+			tmp = line.split(" ");
+			assetClass = tmp[0];
+			controlName = tmp[1];
+
+			if (signature != null && signature.getByName(controlName) == null) {
+				unMatchedControls.add(controlName);
+			} else {
+				assetControlMap.put(assetClass, controlName);
+			}
+		}
+
+		Logger.getInstance().putMessage(">>System-Class<>Control map is created.");
+		if (!unMatchedControls.isEmpty()) {
+			Logger.getInstance().putError(">>Some Controls in the map have no equivalent in ["+systemFileName+":"
+					+ Arrays.toString(unMatchedControls.toArray()));
+		}
+	}
+	
 	/**
 	 * returns the list of assets with controls that are not found in the
 	 * bigraph system
