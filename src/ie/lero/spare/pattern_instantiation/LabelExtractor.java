@@ -76,6 +76,9 @@ public class LabelExtractor {
 			return null;
 		}
 		
+		outputFolder = SystemInstanceHandler.getOutputFolder();
+		transitionSystem = TransitionSystem.getTransitionSystemInstance();
+		
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		ArrayList<String> labels = new ArrayList<String>();
 		String label = "";
