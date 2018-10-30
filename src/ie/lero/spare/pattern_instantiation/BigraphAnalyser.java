@@ -93,7 +93,7 @@ public class BigraphAnalyser {
 		logger = Logger.getInstance();
 		predicateHandler = predHandler;
 		this.threadID = threadID;
-		mainPool = new ForkJoinPool();
+		mainPool = new ForkJoinPool(1);
 		// setParitionSize();
 	}
 

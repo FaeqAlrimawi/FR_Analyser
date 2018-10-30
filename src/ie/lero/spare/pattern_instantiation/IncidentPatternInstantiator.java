@@ -371,7 +371,7 @@ public class IncidentPatternInstantiator {
 
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
-		String interruptionPattern = "D:/Bigrapher data/incident patterns/interruption_incident-pattern.cpi";
+		String interruptionPattern = "D:/Bigrapher data/incident patterns/collectData-pattern.cpi";
 		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
 
 		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
@@ -1345,9 +1345,9 @@ public class IncidentPatternInstantiator {
 
 		// ins.executeExample();
 
-//		 ins.executeLeroScenario();
+		 ins.executeLeroScenario();
 		// ins.generateAssetControlMap();
-		ins.executeScenarioFromConsole();
+//		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
