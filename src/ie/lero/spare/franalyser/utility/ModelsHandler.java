@@ -327,5 +327,15 @@ public class ModelsHandler {
 	public static void setCurrentActivityPattern(ActivityPattern newCurrentActivityPattern) {
 		ModelsHandler.currentActivityPattern = newCurrentActivityPattern;
 	}
+	
+	public static void clearAll() {
+		currentActivityPattern = null;
+		currentIncidentModel = null;
+		currentSystemModel = null;
+		
+		incidentModels.clear();
+		systemModels.clear();
+		activityPatterns.clear();
+	}
 
 }
