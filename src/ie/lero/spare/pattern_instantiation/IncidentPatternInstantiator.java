@@ -81,7 +81,6 @@ public class IncidentPatternInstantiator {
 	// found in the .big file provided when analysing an incidnet pattern)
 	private static Map<String, String> assetControlMap;
 	private static String systemControlMapFileName = "./asset-control map.txt";
-	
 
 	private void runLogger() {
 
@@ -99,16 +98,13 @@ public class IncidentPatternInstantiator {
 	}
 
 	/**
-	 * Maps given incident pattern to the given system model. Bigraph
-	 * representation of the system and generated states are considered to have
-	 * the same name as the system model file name
+	 * Maps given incident pattern to the given system model. Bigraph representation
+	 * of the system and generated states are considered to have the same name as
+	 * the system model file name
 	 * 
-	 * @param incidentPatternFile
-	 *            incident pattern file path
-	 * @param systemModelFile
-	 *            system model file path
-	 * @param GUIlistener
-	 *            a GUI listener used to send messages to the GUI
+	 * @param incidentPatternFile incident pattern file path
+	 * @param systemModelFile     system model file path
+	 * @param GUIlistener         a GUI listener used to send messages to the GUI
 	 */
 	public void execute(String incidentPatternFile, String systemModelFile,
 			IncidentPatternInstantiationListener GUIlistener) {
@@ -127,16 +123,12 @@ public class IncidentPatternInstantiator {
 	/**
 	 * Maps given incident pattern to the given system model.
 	 * 
-	 * @param incidentPatternFile
-	 *            incident pattern file path
-	 * @param systemModelFile
-	 *            system model file path
-	 * @param BRS_file
-	 *            Bigraphical Reactive System representation file path
-	 * @param BRS_statesFolder
-	 *            folder containing generated states using BRS
-	 * @param GUIlistener
-	 *            a GUI listener used to send messages to the GUI
+	 * @param incidentPatternFile incident pattern file path
+	 * @param systemModelFile     system model file path
+	 * @param BRS_file            Bigraphical Reactive System representation file
+	 *                            path
+	 * @param BRS_statesFolder    folder containing generated states using BRS
+	 * @param GUIlistener         a GUI listener used to send messages to the GUI
 	 */
 	public void execute(String incidentPatternFile, String systemModelFile, String BRS_file, String BRS_statesFolder,
 			IncidentPatternInstantiationListener GUIlistener) {
@@ -322,14 +314,12 @@ public class IncidentPatternInstantiator {
 	}
 
 	/**
-	 * This method intialises the BRS system by executing the BRS file, then
-	 * loading states as Bigraph objects
+	 * This method intialises the BRS system by executing the BRS file, then loading
+	 * states as Bigraph objects
 	 * 
-	 * @param BRSFileName
-	 *            The BRS file describing the system components and its
-	 *            evolution
-	 * @param outputFolder
-	 *            Output folder
+	 * @param BRSFileName  The BRS file describing the system components and its
+	 *                     evolution
+	 * @param outputFolder Output folder
 	 * @return
 	 */
 	private boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
@@ -371,11 +361,11 @@ public class IncidentPatternInstantiator {
 
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
-		String interruptionPattern = "D:/Bigrapher data/incident patterns/collectData-pattern.cpi";
-		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
+		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
+		String dataCollectionPattern = "/home/faeq/Desktop/lero/dataCollection_incident-pattern.cpi";
 
-		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
-		String NIISystemModel = "D:/Bigrapher data/NII/NII.cps";
+		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
+		String NIISystemModel = "/home/faeq/Desktop/lero/NII.cps";
 
 		String systemModelFile = leroSystemModel;
 		String incidentPatternFile = interruptionPattern;
@@ -475,9 +465,8 @@ public class IncidentPatternInstantiator {
 			// system.getAsset("dummy");
 
 			/**
-			 * finding matches also can be accomplished using Xquery (but more
-			 * // strict criteria is applied) AssetMap am =
-			 * m.findMatchesUsingXquery(xqueryFilePath);
+			 * finding matches also can be accomplished using Xquery (but more // strict
+			 * criteria is applied) AssetMap am = m.findMatchesUsingXquery(xqueryFilePath);
 			 **/
 			AssetMap am = m.findMatches();
 
@@ -807,8 +796,8 @@ public class IncidentPatternInstantiator {
 	}
 
 	/**
-	 * returns the list of assets with controls that are not found in the
-	 * bigraph system
+	 * returns the list of assets with controls that are not found in the bigraph
+	 * system
 	 * 
 	 * @return List of assets with unmatched controls
 	 */
@@ -851,7 +840,7 @@ public class IncidentPatternInstantiator {
 			threadID = id;
 
 			// default output
-			setOutputFileName(outputFolder + "/output/" + threadID + ".json");
+			setOutputFileName(outputFolder + "/output/" + threadID+"_"+TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json");
 		}
 
 		public PotentialIncidentInstance(String[] sa, String[] ia, int id, String outputFileName) {
@@ -921,28 +910,25 @@ public class IncidentPatternInstantiator {
 
 				// print all possible state transitions satisfying conditions
 				/*
-				 * if(!predicateHandler.areAllSatisfied()){
-				 * logger.putMessage("Thread["+
+				 * if(!predicateHandler.areAllSatisfied()){ logger.putMessage("Thread["+
 				 * threadID+"]>>Activities are not satisfied:" +
 				 * predicateHandler.getActivitiesNotSatisfied());
-				 * logger.putMessage("Thread["+threadID+"]>>Terminating thread"
-				 * ); threadWriter.close(); return; }
+				 * logger.putMessage("Thread["+threadID+"]>>Terminating thread" );
+				 * threadWriter.close(); return; }
 				 */
 
 				/**
-				 * how to represent all possible paths to the given sequence of
-				 * assets? incidentpath can be used to hold one path, but now it
-				 * is holding everything IncidentPath inc = new
-				 * IncidentPath(predicateHandler);
+				 * how to represent all possible paths to the given sequence of assets?
+				 * incidentpath can be used to hold one path, but now it is holding everything
+				 * IncidentPath inc = new IncidentPath(predicateHandler);
 				 **/
 				// inc.generateDistinctPaths();
 
 				/**
-				 * this gives details about the states and their transitions
-				 * that satisfy the conditions of each activity it prints
-				 * transitions between pre and post within one activity, post of
-				 * current to pre of next activity, pre of current to pre of
-				 * next
+				 * this gives details about the states and their transitions that satisfy the
+				 * conditions of each activity it prints transitions between pre and post within
+				 * one activity, post of current to pre of next activity, pre of current to pre
+				 * of next
 				 **/
 				// predicateHandler.printAll();
 
@@ -1015,11 +1001,9 @@ public class IncidentPatternInstantiator {
 				}
 
 				/*
-				 * inc.generateDistinctPaths(); LinkedList<GraphPath> paths =
-				 * inc.getAllPaths();
+				 * inc.generateDistinctPaths(); LinkedList<GraphPath> paths = inc.getAllPaths();
 				 * 
-				 * for(GraphPath p : paths) {
-				 * System.out.println(p.toSimpleString()); }
+				 * for(GraphPath p : paths) { System.out.println(p.toSimpleString()); }
 				 */
 				// System.out.println(predic.toString());
 
@@ -1341,16 +1325,46 @@ public class IncidentPatternInstantiator {
 
 	public static void main(String[] args) {
 
-		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+		
 
 		// ins.executeExample();
 
-		 ins.executeLeroScenario();
+//		ins.executeLeroScenario();
 		// ins.generateAssetControlMap();
 //		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
+		
+		
+		// setting tests
+		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
+
+		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
+
+		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
+		String[] states = new String[10];
+		
+		for(int i=4;i<=states.length;i++) {
+			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+			
+			
+			states[i] = "/home/faeq/Desktop/lero/lero"+i;
+			ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states[i]);
+//			break;
+			ins = null;
+			
+			System.out.println("Waiting 3s...");
+			
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+
 	}
 
 }
