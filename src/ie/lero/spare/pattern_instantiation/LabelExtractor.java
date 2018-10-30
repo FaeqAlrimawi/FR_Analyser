@@ -188,9 +188,13 @@ public class LabelExtractor {
 
 		boolean isLabelFound = false;
 
+		FileReader r1, r2;
 		try {
-			JSONObject src = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateSrc + ".json"));
-			JSONObject des = (JSONObject) parser.parse(new FileReader(outputFolder + "/" + stateDes + ".json"));
+			r1 = new FileReader(outputFolder + "/" + stateSrc + ".json");
+			r2 = new FileReader(outputFolder + "/" + stateDes + ".json");
+			
+			JSONObject src = (JSONObject) parser.parse(r1);
+			JSONObject des = (JSONObject) parser.parse(r2);
 
 			JSONArray arSrc = (JSONArray) src.get(JSONTerms.BIGRAPHER_NODES);
 			Iterator<JSONObject> itSrc = arSrc.iterator();
@@ -239,6 +243,8 @@ public class LabelExtractor {
 				}
 			}
 
+			r1.close();
+			r2.close();
 			// System.out.println(state.toString());
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
