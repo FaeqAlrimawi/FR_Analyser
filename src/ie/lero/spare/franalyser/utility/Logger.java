@@ -26,7 +26,7 @@ public class Logger implements Runnable {
 	// private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy
 	// HH:mm:ss");
 	private DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
-	private static Logger logger = new Logger();
+	private static Logger logger = null;
 	private Thread thread;
 	public static final int MSG_INFO = 0;
 	public static final int MSG_ERROR = 1;
@@ -273,5 +273,10 @@ public class Logger implements Runnable {
 
 		thread = new Thread(this);
 		thread.start();
+	}
+	
+	public static void setInstanceNull() {
+		
+		logger = null;
 	}
 }

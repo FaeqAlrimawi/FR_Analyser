@@ -391,4 +391,8 @@ public class TransitionSystem {
 		
 	}
 	
+	public static void setInstanceNull() {
+		transitionSystem = null;
+	}
+	
 }

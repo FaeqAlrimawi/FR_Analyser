@@ -24,7 +24,7 @@ public class SystemInstanceHandler {
 		Logger logger = Logger.getInstance();
 
 		if (executor == null) {
-			logger.putMessage("BRSHandler>> Bigraph System Executor is not set");
+			logger.putError("BRSHandler>> Bigraph System Executor is not set");
 			isDone = false;
 		} else {
 			logger.putMessage("BRSHandler>> Executing the Bigraphical Reactive System (BRS)...");

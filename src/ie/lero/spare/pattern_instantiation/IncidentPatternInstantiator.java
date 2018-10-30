@@ -1345,7 +1345,7 @@ public class IncidentPatternInstantiator {
 		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
 		String[] states = new String[10];
 		
-		for(int i=4;i<=states.length;i++) {
+		for(int i=5;i<=states.length;i++) {
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			
 			
@@ -1353,8 +1353,9 @@ public class IncidentPatternInstantiator {
 			ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states[i]);
 //			break;
 			ins = null;
-			
-			System.out.println("Waiting 3s...");
+			Logger.setInstanceNull();
+			TransitionSystem.setInstanceNull();
+//			System.out.println("Waiting 3s...");
 			
 			try {
 				Thread.sleep(3000);
