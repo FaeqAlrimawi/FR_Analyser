@@ -245,6 +245,9 @@ public class LabelExtractor {
 
 			r1.close();
 			r2.close();
+			src = null;
+			des = null;
+			
 			// System.out.println(state.toString());
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

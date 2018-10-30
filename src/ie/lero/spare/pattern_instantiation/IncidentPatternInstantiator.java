@@ -1363,6 +1363,7 @@ public class IncidentPatternInstantiator {
 			TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
 //			System.out.println("Waiting 3s...");
+			Runtime.getRuntime().gc();
 			
 			//wait 3 seconds
 			try {
