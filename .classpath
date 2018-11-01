@@ -17,6 +17,6 @@
 	<classpathentry kind="lib" path="lib/ecore/org.eclipse.emf.ecore.xmi_2.12.0.v20160420-0247.jar"/>
 	<classpathentry kind="lib" path="lib/openpojo-0.8.10.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/incidentpatternB"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/environment"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
