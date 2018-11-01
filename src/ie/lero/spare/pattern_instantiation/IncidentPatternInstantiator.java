@@ -71,7 +71,7 @@ public class IncidentPatternInstantiator {
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
 	// private boolean dummy = true;
 
 	private String outputFolder = ".";
@@ -366,7 +366,7 @@ public class IncidentPatternInstantiator {
 
 		String interruptionPattern = "D:/Bigrapher data/incident patterns/infectWithMalware-pattern.cpi";
 		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
-		
+
 		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
 		String NIISystemModel = "D:/Bigrapher data/NII/NII.cps";
 
@@ -406,6 +406,7 @@ public class IncidentPatternInstantiator {
 	protected void executeScenario(String incidentPatternFile, String systemModelFile, String BRS_file,
 			String BRS_outputFolder) {
 
+        
 		// String xQueryMatcherFile = xqueryFile;
 
 		// set the model file paths for the xquery as it is used by other
@@ -427,7 +428,7 @@ public class IncidentPatternInstantiator {
 			}
 
 			runLogger();
-
+	        
 			StopWatch timer = new StopWatch();
 
 			logger.putMessage("#########Executing Scenario#########");
@@ -435,6 +436,16 @@ public class IncidentPatternInstantiator {
 			logger.putMessage("*System model file \"" + systemModelFile + "\"");
 			logger.putMessage("*BRS file \"" + BRS_file + "\" & states folder \"" + BRS_outputFolder + "\"");
 
+
+			//memory used
+			Runtime runtime = Runtime.getRuntime();
+			
+			// Run the garbage collector
+	        runtime.gc();
+	        // Calculate the used memory
+	        long memory = runtime.totalMemory() - runtime.freeMemory();
+	        logger.putMessage(">>Memory used at the start: " + memory+"Bytes");
+	        
 			// start a timer to see how long it takes for the whole execution to
 			// finish
 			timer.start();
@@ -604,7 +615,13 @@ public class IncidentPatternInstantiator {
 
 			// print separator
 			logger.putSeparator();
-
+			
+			// Run the garbage collector
+	        runtime.gc();
+	        // Calculate the used memory
+	        memory = runtime.totalMemory() - runtime.freeMemory();
+	        logger.putMessage(">>Memory before executing sets: " + memory + "Bytes");
+	        
 			for (int i = 0; i < lst.size(); i++) {// adjust the length
 				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
 				instances.add(executor.submit(incidentInstances[i]));
@@ -642,19 +659,16 @@ public class IncidentPatternInstantiator {
 
 			long timePassed = timer.getEllapsedMillis();
 
+			int secMils = (int) timePassed % 1000;
 			int hours = (int) (timePassed / 3600000) % 60;
 			int mins = (int) (timePassed / 60000) % 60;
 			int secs = (int) (timePassed / 1000) % 60;
-			int secMils = (int) timePassed % 1000;
 
 			// execution time
 			logger.putMessage("##################Execution finished##################");
 			logger.putMessage("Execution time: " + timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:"
 					+ secMils + "ms]");
-
-			// stop logging after all finished
-			// logger.putMessage(Logger.terminatingString);
-
+	       
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		} finally {
@@ -843,7 +857,8 @@ public class IncidentPatternInstantiator {
 			threadID = id;
 
 			// default output
-			setOutputFileName(outputFolder + "/output/" + threadID+"_"+TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json");
+			setOutputFileName(outputFolder + "/output/" + threadID + "_"
+					+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json");
 		}
 
 		public PotentialIncidentInstance(String[] sa, String[] ia, int id, String outputFileName) {
@@ -962,31 +977,32 @@ public class IncidentPatternInstantiator {
 					logger.putMessage("Thread[" + threadID + "]>>Analysing [" + paths.size()
 							+ "] of generated potential incident instances...");
 
-					/**Analyse generated transitions**/
+					/** Analyse generated transitions **/
 					// create an analysis object for the identified paths
 					pathsAnalyser = new GraphPathsAnalyser(paths);
-					 String result = pathsAnalyser.analyse();
+					String result = pathsAnalyser.analyse();
 
-					 logger.putMessage(result);
-					 
-					 //save analysis result
-					 String jsonStr = pathsAnalyser.convertToJSONStr();
-					 String analyseFileName = outputFolder + "/output/" + threadID+"_analysis_"+TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json";
-					 File threadFile = new File(analyseFileName);
-					 
-					 JSONObject obj = new JSONObject(jsonStr);
+					logger.putMessage(result);
 
-						if (!threadFile.exists()) {
-							threadFile.createNewFile();
-						}
+					// save analysis result
+					String jsonStr = pathsAnalyser.convertToJSONStr();
+					String analyseFileName = outputFolder + "/output/" + threadID + "_analysis_"
+							+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json";
+					File threadFile = new File(analyseFileName);
 
-						// write paths to a file
-						try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
-							writer.write(obj.toString(4));
-						}
-						
-						logger.putMessage("Thread[" + threadID + "]>>Analysis result is stored in:"+analyseFileName);
-						/**********************/
+					JSONObject obj = new JSONObject(jsonStr);
+
+					if (!threadFile.exists()) {
+						threadFile.createNewFile();
+					}
+
+					// write paths to a file
+					try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
+						writer.write(obj.toString(4));
+					}
+
+					logger.putMessage("Thread[" + threadID + "]>>Analysis result is stored in:" + analyseFileName);
+					/**********************/
 
 				} else {
 					logger.putMessage("Thread[" + threadID + "]>>NO potential incident instances generated");
@@ -1021,13 +1037,21 @@ public class IncidentPatternInstantiator {
 					listener.updateResult(threadID, pathsAnalyser, getOutputFileName(), strTime);
 				}
 
-				/*
-				 * inc.generateDistinctPaths(); LinkedList<GraphPath> paths = inc.getAllPaths();
-				 * 
-				 * for(GraphPath p : paths) { System.out.println(p.toSimpleString()); }
-				 */
-				// System.out.println(predic.toString());
-
+				//memory used
+				Runtime runtime = Runtime.getRuntime();
+				
+				// Run the garbage collector
+		        runtime.gc();
+		        // Calculate the used memory
+		        long memory = runtime.totalMemory() - runtime.freeMemory();
+		        logger.putMessage("Thread[" + threadID + "]>>Used memory: " + memory + "Bytes");
+				
+//		        predicateGenerator = null;
+//		        predicateHandler = null;
+//		        analyser = null;
+//		        paths = null;
+//		        pathsAnalyser = null;
+		          
 				return 0;
 
 			} catch (Exception e) {
@@ -1346,45 +1370,43 @@ public class IncidentPatternInstantiator {
 
 	public static void main(String[] args) {
 
-		
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 		// ins.executeExample();
 
-		ins.executeLeroScenario();
+//		ins.executeLeroScenario();
 		// ins.generateAssetControlMap();
 //		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
-		
-		
-		//test
-//		test();
+
+		// test
+		test();
 
 	}
-	
+
 	public static void test() {
 		// setting tests
-				String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
+		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
 
-				String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
+		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
 
-				String BRS_file = "/home/faeq/Desktop/lero/lero.big";
-				String[] states = new String[10];
-				
-				for(int i=0;i<states.length;i++) {
-					
-					states[i] = "/home/faeq/Desktop/lero/lero"+(i+1);
-				}
-				
+		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
+		String[] states = new String[10];
 
-		for(int i=0;i<states.length;i++) {
-			
+		for (int i = 0; i < states.length; i++) {
+
+			states[i] = "/home/faeq/Desktop/lero/lero" + (i + 1);
+		}
+
+		for (int i = 0; i < states.length; i++) {
+
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states[i]);
-			
-			//reset
+
+	        
+			// reset
 			ins = null;
 			Logger.setInstanceNull();
 			TransitionSystem.setInstanceNull();
@@ -1392,16 +1414,16 @@ public class IncidentPatternInstantiator {
 //			System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
 			System.out.println("\n\n");
-			//wait 3 seconds
+			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
-		
+
 		System.out.println("Complete...");
 
 	}
