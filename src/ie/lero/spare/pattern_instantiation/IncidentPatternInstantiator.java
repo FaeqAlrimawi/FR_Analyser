@@ -959,10 +959,31 @@ public class IncidentPatternInstantiator {
 					logger.putMessage("Thread[" + threadID + "]>>Analysing [" + paths.size()
 							+ "] of generated potential incident instances...");
 
+					/**Analyse generated transitions**/
 					// create an analysis object for the identified paths
 					pathsAnalyser = new GraphPathsAnalyser(paths);
-					// String result = pathsAnalyser.analyse();
+					 String result = pathsAnalyser.analyse();
 
+					 logger.putMessage(result);
+					 
+					 //save analysis result
+					 String jsonStr = pathsAnalyser.convertToJSONStr();
+					 String analyseFileName = outputFolder + "/output/" + threadID+"_analysis_"+TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json";
+					 File threadFile = new File(analyseFileName);
+					 
+					 JSONObject obj = new JSONObject(jsonStr);
+
+						if (!threadFile.exists()) {
+							threadFile.createNewFile();
+						}
+
+						// write paths to a file
+						try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
+							writer.write(obj.toString(4));
+						}
+					
+						/**********************/
+						
 					// if (result != null) {
 					// logger.putMessage(result);
 					// }
@@ -1364,7 +1385,7 @@ public class IncidentPatternInstantiator {
 			ModelsHandler.clearAll();
 //			System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
-			
+			System.out.println("\n\n");
 			//wait 3 seconds
 			try {
 				Thread.sleep(3000);
@@ -1374,6 +1395,8 @@ public class IncidentPatternInstantiator {
 			}
 			
 		}
+		
+		System.out.println("Complete...");
 
 	}
 
