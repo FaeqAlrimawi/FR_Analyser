@@ -14,6 +14,19 @@ public class JSONTerms {
 	public static final String INCIDENT_ASSET_NAME = "incidentAssetName";
 	public static final String TRUE_VALUE = "true";
 
+	//potential instance generated strings
+	public static final String INSTANCE_POTENTIAL = "potential_incident_instances";
+	public static final String INSTANCE_POTENTIAL_COUNT = "instances_count";
+	public static final String INSTANCE_POTENTIAL_INSTANCES = "instances";
+	public static final String INSTANCE_POTENTIAL_INSTANCES_ID = "instance_id";
+	public static final String INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS = "transitions";
+	public static final String INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTION = "action";
+	public static final String INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_SOURCE = "source";
+	public static final String INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_TARGET = "target";
+	public static final String INSTANCE_MAP = "map";
+	public static final String INSTANCE_MAP_SYSTEM_ASSET_NAME = "system_asset_name";
+	public static final String INSTANCE_MAP_INCIDENT_ENTITY_NAME= "incident_entity_name";
+	
 	//bigrapher state
 	public static final String BIGRAPHER_PLACE_GRAPH = "place_graph";
 	public static final String BIGRAPHER_DAG = "dag";

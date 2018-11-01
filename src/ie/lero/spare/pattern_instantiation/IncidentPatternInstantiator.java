@@ -71,7 +71,7 @@ public class IncidentPatternInstantiator {
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = true;
+	private boolean isSaveLog = false;
 	// private boolean dummy = true;
 
 	private String outputFolder = ".";
@@ -361,13 +361,16 @@ public class IncidentPatternInstantiator {
 
 		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
 		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
-		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
-		String dataCollectionPattern = "/home/faeq/Desktop/lero/dataCollection_incident-pattern.cpi";
+//		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
+//		String dataCollectionPattern = "/home/faeq/Desktop/lero/dataCollection_incident-pattern.cpi";
 
-		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
-		String NIISystemModel = "/home/faeq/Desktop/lero/NII.cps";
+		String interruptionPattern = "D:/Bigrapher data/incident patterns/infectWithMalware-pattern.cpi";
+		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
+		
+		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
+		String NIISystemModel = "D:/Bigrapher data/NII/NII.cps";
 
-		String systemModelFile = leroSystemModel;
+		String systemModelFile = NIISystemModel;
 		String incidentPatternFile = interruptionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
@@ -1347,10 +1350,10 @@ public class IncidentPatternInstantiator {
 	public static void main(String[] args) {
 
 		
-
+		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 		// ins.executeExample();
 
-//		ins.executeLeroScenario();
+		ins.executeLeroScenario();
 		// ins.generateAssetControlMap();
 //		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
@@ -1358,19 +1361,25 @@ public class IncidentPatternInstantiator {
 		// ins.test1();
 		
 		
+		//test
+//		test();
+
+	}
+	
+	public static void test() {
 		// setting tests
-		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
+				String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
 
-		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
+				String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
 
-		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
-		String[] states = new String[10];
-		
-		for(int i=0;i<states.length;i++) {
-			
-			states[i] = "/home/faeq/Desktop/lero/lero"+(i+1);
-		}
-		
+				String BRS_file = "/home/faeq/Desktop/lero/lero.big";
+				String[] states = new String[10];
+				
+				for(int i=0;i<states.length;i++) {
+					
+					states[i] = "/home/faeq/Desktop/lero/lero"+(i+1);
+				}
+				
 
 		for(int i=0;i<states.length;i++) {
 			
