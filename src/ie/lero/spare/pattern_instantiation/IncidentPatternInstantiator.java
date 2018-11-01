@@ -984,12 +984,9 @@ public class IncidentPatternInstantiator {
 						try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
 							writer.write(obj.toString(4));
 						}
-					
-						/**********************/
 						
-					// if (result != null) {
-					// logger.putMessage(result);
-					// }
+						logger.putMessage("Thread[" + threadID + "]>>Analysis result is stored in:"+analyseFileName);
+						/**********************/
 
 				} else {
 					logger.putMessage("Thread[" + threadID + "]>>NO potential incident instances generated");
