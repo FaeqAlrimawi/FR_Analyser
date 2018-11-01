@@ -962,13 +962,31 @@ public class IncidentPatternInstantiator {
 					logger.putMessage("Thread[" + threadID + "]>>Analysing [" + paths.size()
 							+ "] of generated potential incident instances...");
 
+					/**Analyse generated transitions**/
 					// create an analysis object for the identified paths
 					pathsAnalyser = new GraphPathsAnalyser(paths);
 					 String result = pathsAnalyser.analyse();
 
-					// if (result != null) {
-					// logger.putMessage(result);
-					// }
+					 logger.putMessage(result);
+					 
+					 //save analysis result
+					 String jsonStr = pathsAnalyser.convertToJSONStr();
+					 String analyseFileName = outputFolder + "/output/" + threadID+"_analysis_"+TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json";
+					 File threadFile = new File(analyseFileName);
+					 
+					 JSONObject obj = new JSONObject(jsonStr);
+
+						if (!threadFile.exists()) {
+							threadFile.createNewFile();
+						}
+
+						// write paths to a file
+						try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
+							writer.write(obj.toString(4));
+						}
+						
+						logger.putMessage("Thread[" + threadID + "]>>Analysis result is stored in:"+analyseFileName);
+						/**********************/
 
 				} else {
 					logger.putMessage("Thread[" + threadID + "]>>NO potential incident instances generated");
