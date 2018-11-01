@@ -163,6 +163,7 @@ public class InstanceChecker {
 //		ins.checkIfCorrect(VMCPU16);//checked
 //		ins.checkIfCorrect(VMCPU8);//checked
 //		ins.checkIfCorrect(VMCPU4);//checked
+//		ins.checkIfCorrect(VMnoThreads);//checked
 		
 		
 		

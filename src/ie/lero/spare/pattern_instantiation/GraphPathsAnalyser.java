@@ -401,6 +401,7 @@ public class GraphPathsAnalyser {
 		StringBuilder str = new StringBuilder();
 		String newLine = "\n";
 		int actionsNum = 0;
+		int percision = 1000000;
 		
 		if(paths == null || paths.size() == 0) {
 			return null;
@@ -411,7 +412,7 @@ public class GraphPathsAnalyser {
 		str.append(newLine).append("-Actions Frequency: [");
 		int size = paths.size();
 		for(Entry<String, Integer> freq : actionsFrequency.entrySet()) {
-			double perc = (int)(((double)freq.getValue()/(double)size)*10000)/100;
+			double perc = (int)(((double)freq.getValue()/(double)size)*percision)/100;
 			str.append(freq.getKey()).append("=").append(freq.getValue()).append(" (").append(perc).append("%), ");
 		}
 		
@@ -448,7 +449,7 @@ public String convertToJSONStr() {
 		
 		StringBuilder str = new StringBuilder();
 		int actionsNum = 0;
-		int precision = 10000;
+		int precision = 1000000;
 		
 		if(paths == null || paths.size() == 0) {
 			return null;
