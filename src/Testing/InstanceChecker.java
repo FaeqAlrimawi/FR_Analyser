@@ -145,17 +145,19 @@ public class InstanceChecker {
 		String ubuntuCPU8 = "D:/Bigrapher data/lero/instantiation data/ubunut data/CPU-8/output";
 		String ubuntuCPU4 = "D:/Bigrapher data/lero/instantiation data/ubunut data/CPU-4/output";
 		String ubuntuCPU2 = "D:/Bigrapher data/lero/instantiation data/ubunut data/CPU-2/output";
-		String ubuntuCPU1 = "D:/Bigrapher data/lero/instantiation data/ubunut data/CPU-1/output";
+		String ubuntuNoThreads = "D:/Bigrapher data/lero/instantiation data/ubunut data/No threads/output";
 		
 		String VMCPU16 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-16/output";
 		String VMCPU8 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-8/output";
 		String VMCPU4 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-4/output";
 		String VMCPU2 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-2/output";
+		String VMnoThreads = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/No threads/output";
 		
 		//ubuntu
 //		ins.checkIfCorrect(ubuntuCPU8);//checked
 //		ins.checkIfCorrect(ubuntuCPU4);//checked
 //		ins.checkIfCorrect(ubuntuCPU2);//checked
+//		ins.checkIfCorrect(ubuntuNoThreads);//checked
 		
 		//VM ubuntu
 //		ins.checkIfCorrect(VMCPU16);//checked

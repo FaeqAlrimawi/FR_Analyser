@@ -964,7 +964,7 @@ public class IncidentPatternInstantiator {
 
 					// create an analysis object for the identified paths
 					pathsAnalyser = new GraphPathsAnalyser(paths);
-					// String result = pathsAnalyser.analyse();
+					 String result = pathsAnalyser.analyse();
 
 					// if (result != null) {
 					// logger.putMessage(result);
