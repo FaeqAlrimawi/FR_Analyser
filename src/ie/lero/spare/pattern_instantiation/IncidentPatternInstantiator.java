@@ -368,7 +368,7 @@ public class IncidentPatternInstantiator {
 		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
 		String NIIgeneratedIncidentPattern = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal_abstract.cpi";
 		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
-		String NIISystemModel = "D:/Bigrapher data/NII/NII.cps";
+		String NIISystemModel = "D:/Bigrapher data/NII/NII_ext.cps";
 
 		String systemModelFile = NIISystemModel;
 		String incidentPatternFile = NIIgeneratedIncidentPattern;

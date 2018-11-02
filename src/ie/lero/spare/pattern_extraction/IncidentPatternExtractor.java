@@ -29,6 +29,7 @@ import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Knowledge;
 import cyberPhysical_Incident.Level;
 import cyberPhysical_Incident.Location;
+import cyberPhysical_Incident.Mobility;
 import cyberPhysical_Incident.Postcondition;
 import cyberPhysical_Incident.Precondition;
 import cyberPhysical_Incident.Resource;
@@ -1812,10 +1813,21 @@ public class IncidentPatternExtractor {
 			type = instance.createType();
 		}
 
+		//set name
 		type.setName(abstractedSystemAsset.getClass().getSimpleName().replace("Impl", ""));
 
+		//set type
 		abstractedEntity.setType(type);
 
+
+		// set mobility
+		
+		if(abstractedSystemAsset.getMobility() == environment.Mobility.MOVABLE) {
+			abstractedEntity.setMobility(Mobility.MOVABLE);	
+		} else if(abstractedSystemAsset.getMobility() == environment.Mobility.FIXED) {
+			abstractedEntity.setMobility(Mobility.FIXED);	
+		}
+		
 		// properties
 		for (environment.Property astProp : abstractedSystemAsset.getProperty()) {
 			cyberPhysical_Incident.Property prop = instance.createProperty();
@@ -2500,7 +2512,7 @@ public class IncidentPatternExtractor {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
 		String incidentFilePath = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal.cpi";
-		String systemFilePath = "D:/Bigrapher data/NII/NII.cps";
+		String systemFilePath = "D:/Bigrapher data/NII/NII_ext.cps";
 
 		extractor.extract(incidentFilePath, systemFilePath);
 
