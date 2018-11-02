@@ -37,9 +37,11 @@ import cyberPhysical_Incident.ScriptCategory;
 import cyberPhysical_Incident.Type;
 import cyberPhysical_Incident.Vulnerability;
 import environment.EnvironmentDiagram;
+import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
+import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternExtractor {
 
@@ -109,6 +111,26 @@ public class IncidentPatternExtractor {
 	// list of patterns that had no maps in the incident instance sequence
 	protected List<ActivityPattern> unmappedPatterns = new LinkedList<ActivityPattern>();
 
+	// Logging
+	protected Logger logger;
+	protected boolean isPrintToScreen = true;
+	protected boolean isSaveLog = true;
+	protected String outputFolder;
+
+	private void runLogger() {
+
+		logger = Logger.getInstance();
+
+		logger.setPrintToScreen(isPrintToScreen);
+		logger.setSaveLog(isSaveLog);
+		logger.setLogFolder(outputFolder + "/log");
+
+		logger.createLogFile();
+
+		logger.start();
+
+	}
+
 	public IncidentPatternExtractor() {
 
 	}
@@ -160,19 +182,39 @@ public class IncidentPatternExtractor {
 	public IncidentDiagram extract() {
 
 		if (originalIncidentModel == null) {
-			System.out.println("Incident model is null");
+			logger.putError("Incident model is null");
 			return null;
 		}
 
 		if (systemModel == null) {
-			System.out.println("System model is null");
+			logger.putError("System model is null");
 			return null;
+		}
+
+		// start timing
+		StopWatch timer = new StopWatch();
+
+		timer.start();
+
+		logger.putMessage("#####################Incident Pattern Extraction#####################");
+
+		// print incident instance file name, if available
+		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
+			logger.putMessage("Incident instance file:" + originalIncidentFilePath);
+		} else {
+
+		}
+
+		// print system file name, if available
+		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
+			logger.putMessage("System file:" + systemFilePath);
 		}
 
 		// create a copy
 		abstractIncidentModel = ModelsHandler.cloneIncidentModel(originalIncidentModel);
 
 		// =======Load patterns====================
+		logger.putMessage("Load activity patterns...");
 		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
@@ -189,16 +231,18 @@ public class IncidentPatternExtractor {
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
 		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-		
+		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		// ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+
 		activityPatterns = new LinkedList<ActivityPattern>();
 
 		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
 
-		for (ActivityPattern ptr: ptrs.values()) {
+		for (ActivityPattern ptr : ptrs.values()) {
 			activityPatterns.add(ptr);
 		}
+
+		logger.putMessage("Activity patterns loaded: " + ptrs.keySet());
 
 		/**
 		 * =======Create Abstract Incident Model=========================== The
@@ -216,50 +260,78 @@ public class IncidentPatternExtractor {
 		 **/
 
 		// =======Abstract CrimeScript===================
+		logger.putMessage("## Extract CrimeScript information ##");
 		updateCrimeScriptData();
 
 		// =======Abstract Activities====================
-
-		// 1-Find maps/matches for all patterns in the incident model
+		logger.putMessage("## Extract Activities ##");
+		
+		/** 1-Find mapsmatches for all patterns in the incident model **/
+		logger.putMessage("Map activity patterns to the sequence of actions");
+		
 		mapPatterns();
-		System.out.println("done");
-		// 2-Take best solution found and apply it (i.e. add new abstract
-		// activities to the incident model while removing the corresponding
-		// ones based on the patterns used)
+
+		// print found map between activity patterns and actions
+		logger.putMessage(getInputPatternMap());
+
+		/**
+		 * 2-Take best solution found and apply it (i.e. add new abstract
+		 * activities to the incident model while removing the corresponding
+		 * ones based on the patterns used)
+		 **/
+		logger.putMessage("Create abstract activity sequence");
 		updateMatchedPatternsInModel();
-		System.out.println("done");
-		// 3-For the rest of the activities (i.e. not matched to a pattern) a
-		// general abstraction is done, mainly, abstracting name and assets
+
+		/**
+		 * 3-For the rest of the activities (i.e. not matched to a pattern) a
+		 * general abstraction is done, mainly, abstracting name and assets
+		 **/
 		abstractUnmatchedActivities(); // *maybe not needed, currently no effect
 
 		// =======Abstract entities====================
+		logger.putMessage("## Extract Incident Entities ##");
+		
 		// remove unused entities after abstracting activities, then use the
 		// system model
 		// to create
+		logger.putError("Create an abstract asset of the asset that corresponds to an incident entity");
 		abstractEntities();
 
 		/** ================================================================ **/
 
 		// =======Print results========================
-		boolean printActivityDetails = false;
-		// printOriginalIncidentModel(printActivityDetails); // true: prints all
-		// activities
-		printAbstractIncidentModel(printActivityDetails);// true: prints all
-		// activities
-
+		logger.putMessage("## Results ##");
+		
+		//prints details of each activity if true
+		boolean printActivityDetails = true;
+		
+		//prints decoration (e.g., "=====Some Title=============") if true
 		boolean isDecorated = true;
-		// print generated patterns maps
+		
+		//print original incident model
+		logger.putMessage(getOriginalIncidentModel(printActivityDetails)); 
+		
+		//print abstracted incident model
+		logger.putMessage(getAbstractIncidentModel(printActivityDetails));
 
-		printRemovedEntities(isDecorated);// true: prints decoration i.e.
-		// ====Smg===
-		printInputPatternMap();
-		// printUnmappedPatterns(isDecorated);
-		printAbstractActivities(isDecorated);// true: prints decoration i.e.
-		// printUnAbstractedEntities(isDecorated);
-		// printConcreteAbstractEntityMap(isDecorated);
-		// printConcreteAbstractConnectionMap(isDecorated);
+		//print removed entities
+		logger.putMessage(getRemovedEntities(isDecorated));
+
+		//print abstracted activities
+		logger.putMessage(getAbstractActivities(isDecorated));
+		
+		//print un-abstracted entities 
+		logger.putMessage(getUnAbstractedEntities(isDecorated));
+		
+		//print concrete-to-abstract entity map
+		logger.putMessage(getConcreteAbstractEntityMap(isDecorated));
+		
+		//print concrete-to=abstract connection map
+		logger.putMessage(getConcreteAbstractConnectionMap(isDecorated));
 
 		// =======Save abstract model==================
+		logger.putSeparator();
+		
 		String abstractModelFilePath = null;
 
 		if (originalIncidentFilePath != null) {
@@ -270,7 +342,24 @@ public class IncidentPatternExtractor {
 		}
 
 		ModelsHandler.saveIncidentModel(abstractIncidentModel, abstractModelFilePath);
+		logger.putMessage("Extracted incident model is saved to:" + abstractModelFilePath);
+		
+		timer.stop();
+		
+		long timePassed = timer.getEllapsedMillis();
 
+		int secMils = (int) timePassed % 1000;
+		int hours = (int) (timePassed / 3600000) % 60;
+		int mins = (int) (timePassed / 60000) % 60;
+		int secs = (int) (timePassed / 1000) % 60;
+
+		// execution time
+		logger.putMessage("##################### Execution Completed #####################");
+		logger.putMessage("Execution time: " + timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:"
+				+ secMils + "ms]");
+		
+		logger.putSeparator();
+		logger.putMessage("Execution time:");
 		return abstractIncidentModel;
 	}
 
@@ -285,7 +374,7 @@ public class IncidentPatternExtractor {
 		calculateMapsSeveriy();
 
 		PatternMappingSolver solver = new PatternMappingSolver();
-		
+
 		System.out.println("trying to solve");
 		List<int[]> bestSolution = solver.findOptimalSolution2(allPatternsMaps, patternSeverityLevels);
 		solver.printOptimalSolution();
@@ -1851,13 +1940,15 @@ public class IncidentPatternExtractor {
 		switch (currentCategoryValue) {
 
 		case ScriptCategory.INSTANCE_VALUE: // incident instance
-			absCrimeScript.setCategory(ScriptCategory.PATTERN); // least abstract
+			absCrimeScript.setCategory(ScriptCategory.PATTERN); // least
+																// abstract
 			break;
 		case ScriptCategory.PATTERN_VALUE:
 			absCrimeScript.setCategory(ScriptCategory.PROTOPATTERN);
 			break;
 		case ScriptCategory.PROTOPATTERN_VALUE:
-			absCrimeScript.setCategory(ScriptCategory.METAPATTERN); // most abstract
+			absCrimeScript.setCategory(ScriptCategory.METAPATTERN); // most
+																	// abstract
 			break;
 		default:
 			absCrimeScript.setCategory(ScriptCategory.PATTERN); // default state
@@ -1979,7 +2070,7 @@ public class IncidentPatternExtractor {
 		return str.toString();
 	}
 
-	public void printOptimalSolution(List<int[]> optimalSolution, int[] optimalSolutionPatternsID,
+	public String getOptimalSolution(List<int[]> optimalSolution, int[] optimalSolutionPatternsID,
 			int[] optimalSolutionMapsID, int optimalSolutionSeverity) {
 
 		StringBuilder str = new StringBuilder();
@@ -2012,10 +2103,10 @@ public class IncidentPatternExtractor {
 
 		str.append("=================================================================");
 
-		System.out.println(str.toString());
+		return str.toString();
 	}
 
-	public void printInputPatternMap() {
+	public String getInputPatternMap() {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2059,10 +2150,10 @@ public class IncidentPatternExtractor {
 
 		str.append("=================================================================");
 
-		System.out.println(str.toString());
+		return str.toString();
 	}
 
-	public void printActivity(Activity activity, boolean isDecorated) {
+	public String getActivityInfo(Activity activity, boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 		String nullValue = "-";
@@ -2103,10 +2194,10 @@ public class IncidentPatternExtractor {
 
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 	}
 
-	public void printIncidentModelActivitySequence(IncidentDiagram abstractIncidentModel) {
+	public String getIncidentModelActivitySequence(IncidentDiagram abstractIncidentModel) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2119,50 +2210,55 @@ public class IncidentPatternExtractor {
 			orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 	}
 
-	public void printOriginalIncidentModel(boolean printActivitiesInfo) {
+	public String getOriginalIncidentModel(boolean printActivitiesInfo) {
 
-		System.out.println("=======Original Model============================================");
-		System.out.println("Activity Sequence:");
-		printIncidentModelActivitySequence(originalIncidentModel);
-		System.out.println();
+		StringBuilder str = new StringBuilder();
+
+		str.append("=======Original Model============================================").append("Activity Sequence:")
+				.append(getIncidentModelActivitySequence(originalIncidentModel)).append("\n");
 
 		if (printActivitiesInfo) {
 			Activity orgAct = originalIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 
 			while (orgNxt != null && !orgNxt.equals(orgAct)) {
-				printActivity(orgNxt, false);
+				str.append(getActivityInfo(orgNxt, false));
 				orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
 			}
 		}
 
-		System.out.println("=================================================================");
+		str.append("=================================================================");
+
+		return str.toString();
 	}
 
-	public void printAbstractIncidentModel(boolean printActivitiesInfo) {
+	public String getAbstractIncidentModel(boolean printActivitiesInfo) {
 
-		System.out.println("========Abstract Model===========================================");
-		System.out.println("Activity Sequence:");
-		printIncidentModelActivitySequence(abstractIncidentModel);
+		StringBuilder str = new StringBuilder();
+
+		str.append("========Abstract Model===========================================").append("Activity Sequence:")
+				.append(getIncidentModelActivitySequence(abstractIncidentModel));
 
 		if (printActivitiesInfo) {
-			System.out.println();
+			str.append("\n");
 			Activity orgAct = abstractIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 
 			while (orgNxt != null && !orgNxt.equals(orgAct)) {
-				printActivity(orgNxt, false);
+				str.append(getActivityInfo(orgNxt, false));
 				orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
 			}
 		}
 
-		System.out.println("=================================================================");
+		str.append("=================================================================");
+
+		return str.toString();
 	}
 
-	public void printRemovedEntities(boolean isDecorated) {
+	public String getRemovedEntities(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2188,11 +2284,11 @@ public class IncidentPatternExtractor {
 			str.append("=================================================================");
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 
 	}
 
-	public void printAbstractActivities(boolean isDecorated) {
+	public String getAbstractActivities(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2230,10 +2326,10 @@ public class IncidentPatternExtractor {
 			str.append("=================================================================");
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 	}
 
-	public void printUnAbstractedEntities(boolean isDecorated) {
+	public String getUnAbstractedEntities(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2257,10 +2353,10 @@ public class IncidentPatternExtractor {
 			str.append("=================================================================");
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 	}
 
-	public void printConcreteAbstractEntityMap(boolean isDecorated) {
+	public String getConcreteAbstractEntityMap(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2282,11 +2378,11 @@ public class IncidentPatternExtractor {
 			str.append("=================================================================");
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 
 	}
 
-	public void printConcreteAbstractConnectionMap(boolean isDecorated) {
+	public String getConcreteAbstractConnectionMap(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2308,11 +2404,11 @@ public class IncidentPatternExtractor {
 			str.append("=================================================================");
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 
 	}
 
-	public void printUnmappedPatterns(boolean isDecorated) {
+	public String getUnmappedPatterns(boolean isDecorated) {
 
 		StringBuilder str = new StringBuilder();
 
@@ -2336,12 +2432,10 @@ public class IncidentPatternExtractor {
 			str.append("=================================================================");
 		}
 
-		System.out.println(str.toString());
+		return str.toString();
 
 	}
 
-	
-	
 	public IncidentDiagram getAbstractIncidentModel() {
 		return abstractIncidentModel;
 	}
@@ -2395,8 +2489,8 @@ public class IncidentPatternExtractor {
 	public static void main(String[] args) {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
-		String incidentFilePath = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/incidentInstance_steal.cpi";
-		String systemFilePath = "D:/runtime-EclipseApplication_design/Examples/Scenario1_B/Research_centre.cps";
+		String incidentFilePath = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal.cpi";
+		String systemFilePath = "D:/Bigrapher data/NII/NII.cps";
 
 		extractor.extract(incidentFilePath, systemFilePath);
 

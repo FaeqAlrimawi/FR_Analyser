@@ -366,12 +366,12 @@ public class IncidentPatternInstantiator {
 
 		String interruptionPattern = "D:/Bigrapher data/incident patterns/infectWithMalware-pattern.cpi";
 		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
-
+		String NIIgeneratedIncidentPattern = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal_abstract.cpi";
 		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
 		String NIISystemModel = "D:/Bigrapher data/NII/NII.cps";
 
 		String systemModelFile = NIISystemModel;
-		String incidentPatternFile = interruptionPattern;
+		String incidentPatternFile = NIIgeneratedIncidentPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
@@ -665,7 +665,7 @@ public class IncidentPatternInstantiator {
 			int secs = (int) (timePassed / 1000) % 60;
 
 			// execution time
-			logger.putMessage("##################Execution finished##################");
+			logger.putMessage("################## Execution Completed ##################");
 			logger.putMessage("Execution time: " + timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:"
 					+ secMils + "ms]");
 	       
@@ -1373,7 +1373,7 @@ public class IncidentPatternInstantiator {
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 		// ins.executeExample();
 
-//		ins.executeLeroScenario();
+		ins.executeLeroScenario();
 		// ins.generateAssetControlMap();
 //		ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
@@ -1381,7 +1381,7 @@ public class IncidentPatternInstantiator {
 		// ins.test1();
 
 		// test
-		test();
+//		test();
 
 	}
 
