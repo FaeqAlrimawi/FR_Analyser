@@ -60,7 +60,7 @@ public class BigraphAnalyser {
 	private int threshold = 200;
 	private static final int Adjust_Threshold_State_Number = 1000;
 	private static final double PERCENTAGE__OF_STATES = 0.10;
-
+	private static final int DEFAULT_THRESHOLD = 100;
 	// using forkjoin threading for dividing the matching process of states to a condition
 	private ForkJoinPool mainPool;
 
@@ -94,6 +94,7 @@ public class BigraphAnalyser {
 		predicateHandler = predHandler;
 		this.threadID = threadID;
 		mainPool = new ForkJoinPool();
+		threshold = DEFAULT_THRESHOLD;
 		// setParitionSize();
 	}
 
@@ -168,10 +169,13 @@ public class BigraphAnalyser {
 
 			if (isThreading) {
 
-				int numberOfPartitions = 0;
+				int numberOfPartitions = (int) Math.ceil(states.size()/(1.0*threshold));
 
-				if (states.size() > Adjust_Threshold_State_Number) {
-					threshold = (int) (states.size() * PERCENTAGE__OF_STATES);
+				if (numberOfPartitions < mainPool.getParallelism()) {
+					
+					numberOfPartitions = mainPool.getParallelism();
+					
+					threshold = (int)Math.ceil(states.size()/(1.0*numberOfPartitions));
 				}
 
 				if (states.size() > threshold) {

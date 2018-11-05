@@ -1790,11 +1790,7 @@ public class IncidentPatternExtractor {
 		removedEntities = abstractIncidentModel.removeUnusedEntities();
 
 		entities = abstractIncidentModel.getEntity();
-
-		if (classMap == null || classMap.isEmpty()) {
-			classMap = generateAssetClassAbstractionLevels();
-		}
-
+		
 		// create an abstract entity for each instance entity using system
 		// assets
 		for (IncidentEntity entity : entities) {
@@ -1821,8 +1817,6 @@ public class IncidentPatternExtractor {
 		if (abstractedSystemAsset == null) {
 			return null;
 		}
-
-		String assetClassName = systemAsset.getClass().getSimpleName().replace("Impl", "");
 
 		String oldEntityName = entity.getName();
 
@@ -1854,8 +1848,8 @@ public class IncidentPatternExtractor {
 		for (Entry<String, List<String>> entry : classMap.entrySet()) {
 			System.out.println(entry.getKey() + " " + entry.getValue());
 		}
-		System.out.println("cls: " + assetClassName);
-		incidentEntityTypeName = classMap.get(assetClassName).get(0);
+		
+		incidentEntityTypeName = getAbstractType(systemAsset);
 
 		type.setName(incidentEntityTypeName);
 		// set type
@@ -1981,6 +1975,39 @@ public class IncidentPatternExtractor {
 		return abstractedEntity;
 	}
 
+	protected String getAbstractType(environment.Asset systemAsset) {
+		
+		String type = "";
+		
+		if (classMap == null || classMap.isEmpty()) {
+			classMap = generateAssetClassAbstractionLevels();
+		}
+
+		//get asset class name
+		String assetClassName = systemAsset.getClass().getSimpleName().replace("Impl", "");
+		
+		//get abstraction classes for the asset class (e.g., smart light, computing device)
+		List<String> abstractionLevels = classMap.get(assetClassName);
+		
+		//determine which level of abstraction to choose from the list of levels
+		if(abstractionLevels != null && !abstractionLevels.isEmpty()) {
+			
+			//use the level of abstractions map to determine required level
+			Integer levelIndex = classAbstractionLevelMap.get(assetClassName);
+			
+			if(levelIndex != null && levelIndex < abstractionLevels.size()) {
+				type = abstractionLevels.get(levelIndex);
+			//if there's no level specified for the asset class then get the default	
+			} else {
+				type = abstractionLevels.get(DEFAULT_ABSTRACTION_LEVEL);
+			}
+		//if the asset class name is not in the map, then the type of the entity will be the same as the class	
+		} else {
+			type = assetClassName;
+		}
+		
+		return type;
+	}
 	protected void updateCrimeScriptData() {
 
 		/**
@@ -2076,6 +2103,9 @@ public class IncidentPatternExtractor {
 		}
 
 		//set default abstraction level
+		
+		this.classMap = classMap;
+		this.classAbstractionLevelMap = defaultAbstractionLevel;
 		
 		return classMap;
 	}
@@ -2288,9 +2318,11 @@ public class IncidentPatternExtractor {
 		} else {
 
 			if (isDecorated) {
-				str.append("\n=======Activity Info=============================================\n");
+				str.append("\n======= ["+activity.getName()+"] Info=============================================\n");
+			} else {
+				str.append("====== [").append(activity.getName()).append("] ======\n");
 			}
-			str.append("Name: ").append(activity.getName()).append("\n");
+//			str.append("Name: ").append(activity.getName()).append("\n");
 			str.append("Initiator: ").append(
 					activity.getInitiator() != null ? ((IncidentEntity) activity.getInitiator()).getName() : nullValue)
 					.append("\n");
@@ -2313,8 +2345,11 @@ public class IncidentPatternExtractor {
 			str.append("Type: ").append(activity.getType()).append("\n");
 			str.append("Behaviour: ").append(activity.getBehaviourType()).append("\n");
 
+			
 			if (isDecorated) {
 				str.append("=================================================================");
+			} else {
+				str.append("===========================").append("\n");
 			}
 
 		}
