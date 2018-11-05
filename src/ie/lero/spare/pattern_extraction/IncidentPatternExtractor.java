@@ -114,19 +114,23 @@ public class IncidentPatternExtractor {
 	// list of patterns that had no maps in the incident instance sequence
 	protected List<ActivityPattern> unmappedPatterns = new LinkedList<ActivityPattern>();
 
-	
-	/**Entity abstraction parameters**/
-	//key is class name and the list of strings are the names of its superclasses
+	/** Entity abstraction parameters **/
+	// key is class name and the list of strings are the names of its
+	// superclasses
 	Map<String, List<String>> classMap;
-	
-	//Map of abstraction level for each class name in the classMap
-	//key is string class (should be one of the names in the classMap variable) and value is the index of class
-	Map<String, String> classAbstractionLevelMap;
-	
-	//maximum abstraction level
+
+	// Map of abstraction level for each class name in the classMap
+	// key is string class (should be one of the names in the classMap variable)
+	// and value is the index of class name available in the list of class names
+	// on the classMap variable
+	Map<String, Integer> classAbstractionLevelMap;
+
+	// maximum abstraction level
 	protected final int MAX_ABSTRACTION_LEVEL = 10;
 	
-	
+	//default abstraction level for all entities
+	protected final int DEFAULT_ABSTRACTION_LEVEL = 0;
+
 	// Logging
 	protected Logger logger;
 	protected boolean isPrintToScreen = true;
@@ -135,12 +139,12 @@ public class IncidentPatternExtractor {
 
 	private void runLogger() {
 
-		if(originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
+		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
 			outputFolder = originalIncidentFilePath.substring(0, originalIncidentFilePath.lastIndexOf("/"));
 		} else {
 			outputFolder = ".";
 		}
- 
+
 		logger = Logger.getInstance();
 
 		logger.setPrintToScreen(isPrintToScreen);
@@ -214,7 +218,7 @@ public class IncidentPatternExtractor {
 		}
 
 		runLogger();
-		
+
 		// start timing
 		StopWatch timer = new StopWatch();
 
@@ -285,16 +289,16 @@ public class IncidentPatternExtractor {
 
 		// =======Abstract CrimeScript===================
 		logger.putMessage("## Extract CrimeScript information ##");
-		
+
 		logger.putMessage("create abstract CrimeScript entity from original");
 		updateCrimeScriptData();
 
 		// =======Abstract Activities====================
 		logger.putMessage("## Extract Activities ##");
-		
+
 		/** 1-Find mapsmatches for all patterns in the incident model **/
 		logger.putMessage("Map activity patterns to the sequence of actions");
-		
+
 		mapPatterns();
 
 		// print found map between activity patterns and actions
@@ -306,7 +310,7 @@ public class IncidentPatternExtractor {
 		 * ones based on the patterns used)
 		 **/
 		logger.putMessage("Create abstract activity sequence");
-		
+
 		updateMatchedPatternsInModel();
 
 		/**
@@ -317,49 +321,49 @@ public class IncidentPatternExtractor {
 
 		// =======Abstract entities====================
 		logger.putMessage("## Extract Incident Entities ##");
-		
+
 		// remove unused entities after abstracting activities, then use the
 		// system model
 		// to create
 		logger.putMessage("Generate abstract assets of the assets that correspond to incident entities");
-		
+
 		abstractEntities();
 
 		/** ================================================================ **/
 
 		// =======Print results========================
 		logger.putMessage("## Results ##");
-		
-		//prints details of each activity if true
+
+		// prints details of each activity if true
 		boolean printActivityDetails = true;
-		
-		//prints decoration (e.g., "=====Some Title=============") if true
+
+		// prints decoration (e.g., "=====Some Title=============") if true
 		boolean isDecorated = true;
-		
-		//print original incident model
-		logger.putMessage(getOriginalIncidentModel(printActivityDetails)); 
-		
-		//print abstracted incident model
+
+		// print original incident model
+		logger.putMessage(getOriginalIncidentModel(printActivityDetails));
+
+		// print abstracted incident model
 		logger.putMessage(getAbstractIncidentModel(printActivityDetails));
 
-		//print removed entities
+		// print removed entities
 		logger.putMessage(getRemovedEntities(isDecorated));
 
-		//print abstracted activities
+		// print abstracted activities
 		logger.putMessage(getAbstractActivities(isDecorated));
-		
-		//print un-abstracted entities 
+
+		// print un-abstracted entities
 		logger.putMessage(getUnAbstractedEntities(isDecorated));
-		
-		//print concrete-to-abstract entity map
+
+		// print concrete-to-abstract entity map
 		logger.putMessage(getConcreteAbstractEntityMap(isDecorated));
-		
-		//print concrete-to=abstract connection map
+
+		// print concrete-to=abstract connection map
 		logger.putMessage(getConcreteAbstractConnectionMap(isDecorated));
 
 		// =======Save abstract model==================
 		logger.putSeparator();
-		
+
 		String abstractModelFilePath = null;
 
 		if (originalIncidentFilePath != null) {
@@ -371,9 +375,9 @@ public class IncidentPatternExtractor {
 
 		ModelsHandler.saveIncidentModel(abstractIncidentModel, abstractModelFilePath);
 		logger.putMessage("Extracted incident model is saved to:" + abstractModelFilePath);
-		
+
 		timer.stop();
-		
+
 		long timePassed = timer.getEllapsedMillis();
 
 		int secMils = (int) timePassed % 1000;
@@ -383,11 +387,11 @@ public class IncidentPatternExtractor {
 
 		// execution time
 		logger.putMessage("##################### Execution Completed #####################");
-		logger.putMessage("Execution time: " + timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:"
-				+ secMils + "ms]");
-		
+		logger.putMessage(
+				"Execution time: " + timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
+
 		logger.terminateLogging();
-		
+
 		return abstractIncidentModel;
 	}
 
@@ -1787,10 +1791,10 @@ public class IncidentPatternExtractor {
 
 		entities = abstractIncidentModel.getEntity();
 
-		if(classMap == null || classMap.isEmpty()) {
-			classMap = generateAssetClassHierarchy();
+		if (classMap == null || classMap.isEmpty()) {
+			classMap = generateAssetClassAbstractionLevels();
 		}
-		
+
 		// create an abstract entity for each instance entity using system
 		// assets
 		for (IncidentEntity entity : entities) {
@@ -1819,11 +1823,11 @@ public class IncidentPatternExtractor {
 		}
 
 		String assetClassName = systemAsset.getClass().getSimpleName().replace("Impl", "");
-		
+
 		String oldEntityName = entity.getName();
 
 		String incidentEntityTypeName = "";
-		
+
 		IncidentEntity abstractedEntity = entity;
 
 		abstractedEntity.setName(abstractedSystemAsset.getName());
@@ -1837,33 +1841,34 @@ public class IncidentPatternExtractor {
 			type = instance.createType();
 		}
 
-		//set type name. Can be done either using the type generate by the abstract asset, or the type used from the classMap
-		
-		//setting the name using generated type from abstract asset
-//		type.setName(abstractedSystemAsset.getClass().getSimpleName().replace("Impl", ""));
+		// set type name. Can be done either using the type generate by the
+		// abstract asset, or the type used from the classMap
 
-		//setting type name using the classMap
-		//takes the first option (i.e. 0) other options are more abstract
-		
-		for(Entry<String, List<String>> entry : classMap.entrySet()) {
+		// setting the name using generated type from abstract asset
+		// type.setName(abstractedSystemAsset.getClass().getSimpleName().replace("Impl",
+		// ""));
+
+		// setting type name using the classMap
+		// takes the first option (i.e. 0) other options are more abstract
+
+		for (Entry<String, List<String>> entry : classMap.entrySet()) {
 			System.out.println(entry.getKey() + " " + entry.getValue());
 		}
 		System.out.println("cls: " + assetClassName);
 		incidentEntityTypeName = classMap.get(assetClassName).get(0);
-		
+
 		type.setName(incidentEntityTypeName);
-		//set type
+		// set type
 		abstractedEntity.setType(type);
 
-
 		// set mobility
-		
-		if(abstractedSystemAsset.getMobility() == environment.Mobility.MOVABLE) {
-			abstractedEntity.setMobility(Mobility.MOVABLE);	
-		} else if(abstractedSystemAsset.getMobility() == environment.Mobility.FIXED) {
-			abstractedEntity.setMobility(Mobility.FIXED);	
+
+		if (abstractedSystemAsset.getMobility() == environment.Mobility.MOVABLE) {
+			abstractedEntity.setMobility(Mobility.MOVABLE);
+		} else if (abstractedSystemAsset.getMobility() == environment.Mobility.FIXED) {
+			abstractedEntity.setMobility(Mobility.FIXED);
 		}
-		
+
 		// properties
 		for (environment.Property astProp : abstractedSystemAsset.getProperty()) {
 			cyberPhysical_Incident.Property prop = instance.createProperty();
@@ -2013,12 +2018,13 @@ public class IncidentPatternExtractor {
 		}
 	}
 
-	public Map<String, List<String>> generateAssetClassHierarchy() {
+	public Map<String, List<String>> generateAssetClassAbstractionLevels() {
 
 		Method[] packageMethods = CyberPhysicalSystemPackage.class.getDeclaredMethods();
 
 		Map<String, List<String>> classMap = new HashMap<String, List<String>>();
-
+		Map<String, Integer> defaultAbstractionLevel = new HashMap<String, Integer>();
+		
 		String className = null;
 
 		for (Method mthd : packageMethods) {
@@ -2049,9 +2055,6 @@ public class IncidentPatternExtractor {
 				List<String> classHierarchy = new LinkedList<String>();
 				int cnt = 0;
 
-				// System.out.println("generated class:
-				// "+potentialClass.getSimpleName());
-
 				do {
 					classHierarchy.add(potentialClass.getSimpleName().replace("Impl", ""));
 					potentialClass = potentialClass.getSuperclass();
@@ -2061,6 +2064,9 @@ public class IncidentPatternExtractor {
 
 				// add new entry to the map
 				classMap.put(className, classHierarchy);
+				
+				//default class abstaction is the same class
+				defaultAbstractionLevel.put(className, DEFAULT_ABSTRACTION_LEVEL);
 
 			} catch (ClassNotFoundException e) {
 
@@ -2068,9 +2074,12 @@ public class IncidentPatternExtractor {
 				continue;
 			}
 		}
+
+		//set default abstraction level
 		
 		return classMap;
 	}
+
 	/**
 	 * 
 	 * 
