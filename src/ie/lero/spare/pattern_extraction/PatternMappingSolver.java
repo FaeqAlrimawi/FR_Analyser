@@ -670,7 +670,7 @@ public class PatternMappingSolver {
 			model.or(res).post();
 			consList.clear();
 		}
-		model.scalar(patternseverity, coeffs, "=", severitySum).post();
+//		model.scalar(patternseverity, coeffs, "=", severitySum).post();
 
 		// ============Finding solutions======================//
 		solver = model.getSolver();

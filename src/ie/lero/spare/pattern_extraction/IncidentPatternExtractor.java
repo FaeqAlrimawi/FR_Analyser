@@ -1,5 +1,6 @@
 package ie.lero.spare.pattern_extraction;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,6 +38,7 @@ import cyberPhysical_Incident.Scene;
 import cyberPhysical_Incident.ScriptCategory;
 import cyberPhysical_Incident.Type;
 import cyberPhysical_Incident.Vulnerability;
+import environment.CyberPhysicalSystemPackage;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
@@ -112,6 +114,19 @@ public class IncidentPatternExtractor {
 	// list of patterns that had no maps in the incident instance sequence
 	protected List<ActivityPattern> unmappedPatterns = new LinkedList<ActivityPattern>();
 
+	
+	/**Entity abstraction parameters**/
+	//key is class name and the list of strings are the names of its superclasses
+	Map<String, List<String>> classMap;
+	
+	//Map of abstraction level for each class name in the classMap
+	//key is string class (should be one of the names in the classMap variable) and value is the index of class
+	Map<String, String> classAbstractionLevelMap;
+	
+	//maximum abstraction level
+	protected final int MAX_ABSTRACTION_LEVEL = 10;
+	
+	
 	// Logging
 	protected Logger logger;
 	protected boolean isPrintToScreen = true;
@@ -307,6 +322,7 @@ public class IncidentPatternExtractor {
 		// system model
 		// to create
 		logger.putMessage("Generate abstract assets of the assets that correspond to incident entities");
+		
 		abstractEntities();
 
 		/** ================================================================ **/
@@ -1771,6 +1787,10 @@ public class IncidentPatternExtractor {
 
 		entities = abstractIncidentModel.getEntity();
 
+		if(classMap == null || classMap.isEmpty()) {
+			classMap = generateAssetClassHierarchy();
+		}
+		
 		// create an abstract entity for each instance entity using system
 		// assets
 		for (IncidentEntity entity : entities) {
@@ -1798,8 +1818,12 @@ public class IncidentPatternExtractor {
 			return null;
 		}
 
+		String assetClassName = systemAsset.getClass().getSimpleName().replace("Impl", "");
+		
 		String oldEntityName = entity.getName();
 
+		String incidentEntityTypeName = "";
+		
 		IncidentEntity abstractedEntity = entity;
 
 		abstractedEntity.setName(abstractedSystemAsset.getName());
@@ -1813,9 +1837,21 @@ public class IncidentPatternExtractor {
 			type = instance.createType();
 		}
 
-		//set name
-		type.setName(abstractedSystemAsset.getClass().getSimpleName().replace("Impl", ""));
+		//set type name. Can be done either using the type generate by the abstract asset, or the type used from the classMap
+		
+		//setting the name using generated type from abstract asset
+//		type.setName(abstractedSystemAsset.getClass().getSimpleName().replace("Impl", ""));
 
+		//setting type name using the classMap
+		//takes the first option (i.e. 0) other options are more abstract
+		
+		for(Entry<String, List<String>> entry : classMap.entrySet()) {
+			System.out.println(entry.getKey() + " " + entry.getValue());
+		}
+		System.out.println("cls: " + assetClassName);
+		incidentEntityTypeName = classMap.get(assetClassName).get(0);
+		
+		type.setName(incidentEntityTypeName);
 		//set type
 		abstractedEntity.setType(type);
 
@@ -1977,6 +2013,64 @@ public class IncidentPatternExtractor {
 		}
 	}
 
+	public Map<String, List<String>> generateAssetClassHierarchy() {
+
+		Method[] packageMethods = CyberPhysicalSystemPackage.class.getDeclaredMethods();
+
+		Map<String, List<String>> classMap = new HashMap<String, List<String>>();
+
+		String className = null;
+
+		for (Method mthd : packageMethods) {
+
+			className = mthd.getName();
+			Class cls = mthd.getReturnType();
+
+			// only consider EClass as the classes
+			if (!cls.getSimpleName().equals("EClass")) {
+				continue;
+			}
+
+			// remove [get] at the beginning
+			// if it contains __ then it is not a class its an attribut
+			if (className.startsWith("get")) {
+				className = className.replace("get", "");
+			}
+
+			// create a class from the name
+			String fullClassName = "environment.impl." + className + "Impl";
+
+			int numOfLevels = 10;
+
+			try {
+
+				Class potentialClass = Class.forName(fullClassName);
+
+				List<String> classHierarchy = new LinkedList<String>();
+				int cnt = 0;
+
+				// System.out.println("generated class:
+				// "+potentialClass.getSimpleName());
+
+				do {
+					classHierarchy.add(potentialClass.getSimpleName().replace("Impl", ""));
+					potentialClass = potentialClass.getSuperclass();
+					cnt++;
+				} while (potentialClass != null && !potentialClass.getSimpleName().equals("Container")
+						&& cnt < numOfLevels);
+
+				// add new entry to the map
+				classMap.put(className, classHierarchy);
+
+			} catch (ClassNotFoundException e) {
+
+				// if there's no such class then continue
+				continue;
+			}
+		}
+		
+		return classMap;
+	}
 	/**
 	 * 
 	 * 
