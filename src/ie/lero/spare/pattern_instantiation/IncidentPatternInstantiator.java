@@ -366,12 +366,19 @@ public class IncidentPatternInstantiator {
 
 		String interruptionPattern = "D:/Bigrapher data/incident patterns/infectWithMalware-pattern.cpi";
 		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
+		
+		String NIIncidentInstance = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal.cpi";
 		String NIIgeneratedIncidentPattern = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal_abstract.cpi";
+		String NIIgeneratedIncidentPattern_ubuntu = "/home/faeq/Desktop/NII/incident instances/incidentInstance_steal_abstract.cpi";
+		
 		String leroSystemModel = "D:/Bigrapher data/lero/lero.cps";
+		String leroSystemModel_ubuntu = "/home/faeq/Desktop/lero/lero.cps";
+		
 		String NIISystemModel = "D:/Bigrapher data/NII/NII_ext.cps";
-
+		String NIISystemModel_ubuntu = "/home/faeq/Desktop/NII/NII_ext.cps";
+		
 		String systemModelFile = NIISystemModel;
-		String incidentPatternFile = NIIgeneratedIncidentPattern;
+		String incidentPatternFile = NIIncidentInstance;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
@@ -1006,6 +1013,7 @@ public class IncidentPatternInstantiator {
 
 				} else {
 					logger.putMessage("Thread[" + threadID + "]>>NO potential incident instances generated");
+					
 				}
 
 				// print(pathsAnalyser.print());

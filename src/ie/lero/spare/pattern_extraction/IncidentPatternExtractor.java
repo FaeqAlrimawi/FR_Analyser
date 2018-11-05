@@ -2342,15 +2342,18 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("\n=======Original Model============================================").append("Activity Sequence:")
-				.append(getIncidentModelActivitySequence(originalIncidentModel)).append("\n");
+		str.append("\n=======Original Model============================================\n");
+		
+		str.append("Activity Sequence:")
+		.append(getIncidentModelActivitySequence(originalIncidentModel))
+		.append("\n\n");
 
 		if (printActivitiesInfo) {
 			Activity orgAct = originalIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 
 			while (orgNxt != null && !orgNxt.equals(orgAct)) {
-				str.append(getActivityInfo(orgNxt, false));
+				str.append(getActivityInfo(orgNxt, false)).append("\n");
 				orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
 			}
 		}
@@ -2364,16 +2367,19 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("\n========Abstract Model===========================================").append("Activity Sequence:")
-				.append(getIncidentModelActivitySequence(abstractIncidentModel));
-
+		str.append("\n========Abstract Model===========================================\n");
+		
+		str.append("Activity Sequence:")
+		.append(getIncidentModelActivitySequence(abstractIncidentModel))
+		.append("\n\n");
+		
 		if (printActivitiesInfo) {
-			str.append("\n");
+		
 			Activity orgAct = abstractIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 
 			while (orgNxt != null && !orgNxt.equals(orgAct)) {
-				str.append(getActivityInfo(orgNxt, false));
+				str.append(getActivityInfo(orgNxt, false)).append("\n");
 				orgNxt = !orgNxt.getNextActivities().isEmpty() ? orgNxt.getNextActivities().get(0) : null;
 			}
 		}
@@ -2471,7 +2477,7 @@ public class IncidentPatternExtractor {
 			str.deleteCharAt(str.lastIndexOf(","));
 			str.append("\n");
 		} else {
-			str.append("NONE");
+			str.append("NONE\n");
 		}
 
 		if (isDecorated) {
