@@ -33,7 +33,7 @@ public class GraphPathsAnalyser {
 	private final static int THRESHOLD = 100; //threshold for the number of states on which task is further subdivided into halfs
 	private boolean isAll = true;
 	private double percentageFrequency = 0.5;
-	
+	int precision = 1000000;
 	public GraphPathsAnalyser(LinkedList<GraphPath> paths) {
 		this.paths = paths;
 	//	allShortestPaths = new LinkedList<Integer>();
@@ -401,7 +401,6 @@ public class GraphPathsAnalyser {
 		StringBuilder str = new StringBuilder();
 		String newLine = "\n";
 		int actionsNum = 0;
-		int percision = 1000000;
 		
 		if(paths == null || paths.size() == 0) {
 			return null;
@@ -412,7 +411,7 @@ public class GraphPathsAnalyser {
 		str.append(newLine).append("-Actions Frequency: [");
 		int size = paths.size();
 		for(Entry<String, Integer> freq : actionsFrequency.entrySet()) {
-			double perc = (int)(((double)freq.getValue()/(double)size)*percision)/100;
+			double perc = ((int)(((double)freq.getValue()/(double)size)*precision)/precision)*100.0;
 			str.append(freq.getKey()).append("=").append(freq.getValue()).append(" (").append(perc).append("%), ");
 		}
 		
@@ -449,7 +448,6 @@ public String convertToJSONStr() {
 		
 		StringBuilder str = new StringBuilder();
 		int actionsNum = 0;
-		int precision = 1000000;
 		
 		if(paths == null || paths.size() == 0) {
 			return null;
