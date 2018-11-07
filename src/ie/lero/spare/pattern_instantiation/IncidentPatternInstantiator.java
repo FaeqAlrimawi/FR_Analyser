@@ -365,7 +365,7 @@ public class IncidentPatternInstantiator {
 //		String dataCollectionPattern = "/home/faeq/Desktop/lero/dataCollection_incident-pattern.cpi";
 
 		String interruptionPattern = "D:/Bigrapher data/incident patterns/infectWithMalware-pattern.cpi";
-		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/dataCollection_incident-pattern.cpi";
+		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/collectData-pattern.cpi";
 		
 		String NIIncidentInstance = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal.cpi";
 		String NIIgeneratedIncidentPattern = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal_abstract.cpi";
@@ -377,8 +377,8 @@ public class IncidentPatternInstantiator {
 		String NIISystemModel = "D:/Bigrapher data/NII/NII_ext.cps";
 		String NIISystemModel_ubuntu = "/home/faeq/Desktop/NII/NII_ext.cps";
 		
-		String systemModelFile = NIISystemModel;
-		String incidentPatternFile = NIIncidentInstance;
+		String systemModelFile = leroSystemModel;
+		String incidentPatternFile = dataCollectionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}

@@ -38,7 +38,7 @@ public class BigraphAnalyser {
 	private boolean isThreading = true;
 
 	// determine if predicates should run in parallel
-	private boolean isPredicateThreading = true;
+	private boolean isPredicateThreading = false;
 
 	// determines how many activities should be threaded
 	private int numberofActivityParallelExecution = 1;
@@ -57,7 +57,8 @@ public class BigraphAnalyser {
 
 	// threshold for the number of states on which task is further subdivided
 	// into halfs
-	private int threshold = 200;
+	private int threshold;
+	private int thresholdResidue;
 	private static final int Adjust_Threshold_State_Number = 1000;
 	private static final double PERCENTAGE__OF_STATES = 0.10;
 	private static final int DEFAULT_THRESHOLD = 100;
@@ -71,6 +72,8 @@ public class BigraphAnalyser {
 	// private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd
 	// HH:mm:ss");
 
+	protected int numberOfPartitions = 0;
+	
 	private LinkedList<Future<Integer>> predicateResults = new LinkedList<Future<Integer>>();
 	private Logger logger;
 
@@ -169,26 +172,35 @@ public class BigraphAnalyser {
 
 			if (isThreading) {
 
-				int numberOfPartitions = (int) Math.ceil(states.size()/(1.0*threshold));
+				numberOfPartitions = mainPool.getParallelism();//(int) Math.ceil(states.size()/(1.0*threshold));
 
-				if (numberOfPartitions < mainPool.getParallelism()) {
-					
-					numberOfPartitions = mainPool.getParallelism();
-					
-					threshold = (int)Math.ceil(states.size()/(1.0*numberOfPartitions));
-				}
-
-				if (states.size() > threshold) {
-					numberOfPartitions = (int) Math.pow(2,
-							Math.ceil(32 - Integer.numberOfLeadingZeros(states.size() / threshold)));
-				} else {
+				if(numberOfPartitions == 0) {
 					numberOfPartitions = 1;
 				}
+				
+				threshold = (int)Math.floor(states.size()/(1.0*numberOfPartitions));
+				
+				//update threshold residue 
+				thresholdResidue = (int)Math.ceil(states.size()%(threshold*1.0));
+//				if (numberOfPartitions < mainPool.getParallelism()) {
+//					
+//					numberOfPartitions = mainPool.getParallelism();
+//					
+//					threshold = (int)Math.ceil(states.size()/(1.0*numberOfPartitions));
+//				}
+
+//				if (states.size() > threshold) {
+//					numberOfPartitions = (int) Math.pow(2,
+//							Math.ceil(32 - Integer.numberOfLeadingZeros(states.size() / threshold)));
+//				} else {
+//					numberOfPartitions = 1;
+//				}
 
 				if (isTestingTime) {
 					logger.putMessage("Thread[" + threadID + "]>>BigraphAnalyser>>number of states: " + states.size()
 							+ ", partition size <= threshold [" + threshold + "] ("
 							+ (int) ((threshold * 1.0 / states.size()) * 10000) / 100.0 + "%)"
+							+ ", threshold residue = " + thresholdResidue
 							+ ", number of partitions: " + numberOfPartitions + ", Number of parallel activities = "
 							+ numberofActivityParallelExecution + ", Parallelism for matching (= num of processors): "
 							+ mainPool.getParallelism());
@@ -575,7 +587,7 @@ public class BigraphAnalyser {
 		// private LinkedList<Bigraph> states;
 		private Bigraph redex;
 		private LinkedList<Integer> matchedStates;
-
+		
 		// for testing
 		// protected int numOfParts = 0;
 
@@ -590,8 +602,8 @@ public class BigraphAnalyser {
 		protected LinkedList<Integer> compute() {
 			// TODO Auto-generated method stub
 
-			if ((indexEnd - indexStart) > threshold) {
-				return ForkJoinTask.invokeAll(createSubTasks()).stream()
+			if((indexEnd - indexStart) > (threshold+thresholdResidue)) {
+				return ForkJoinTask.invokeAll(createPartitions()).stream()
 						.map(new Function<BigraphMatcher, LinkedList<Integer>>() {
 
 							@Override
@@ -610,8 +622,30 @@ public class BigraphAnalyser {
 							}
 
 						});
-
-			} else {
+			}
+//			if ((indexEnd - indexStart) > threshold) {
+//				return ForkJoinTask.invokeAll(createSubTasks()).stream()
+//						.map(new Function<BigraphMatcher, LinkedList<Integer>>() {
+//
+//							@Override
+//							public LinkedList<Integer> apply(BigraphMatcher arg0) {
+//								// TODO Auto-generated method stub
+//								return arg0.matchedStates;
+//							}
+//
+//						}).reduce(matchedStates, new BinaryOperator<LinkedList<Integer>>() {
+//
+//							@Override
+//							public LinkedList<Integer> apply(LinkedList<Integer> arg0, LinkedList<Integer> arg1) {
+//								// TODO Auto-generated method stub
+//								arg0.addAll(arg1);
+//								return arg0;
+//							}
+//
+//						});
+//
+//			} 
+			else {
 				for (int i = indexStart; i < indexEnd; i++) {
 					if (matcher.match(states.get(i), redex).iterator().hasNext()) {
 						matchedStates.add(i);
@@ -632,6 +666,30 @@ public class BigraphAnalyser {
 			dividedTasks.add(new BigraphMatcher(indexStart, mid, redex));
 			dividedTasks.add(new BigraphMatcher(mid, indexEnd, redex));
 
+			return dividedTasks;
+		}
+		
+		private Collection<BigraphMatcher> createPartitions() {
+			List<BigraphMatcher> dividedTasks = new LinkedList<BigraphMatcher>();
+
+			int index = indexStart;
+			int localParts = (indexEnd - indexStart)/threshold;
+			int i = 0;
+			
+			//create partitions 
+			for(i=0;i<localParts-1;i++) {
+				dividedTasks.add(new BigraphMatcher(index, index+threshold, redex));
+				logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" + index+"->"+(index+threshold)+")");
+				index = index+threshold;
+				
+			}
+			
+			//last partition
+			dividedTasks.add(new BigraphMatcher(index, indexEnd, redex));
+			logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" + index+"->"+indexEnd+")");
+			
+			logger.putMessage("Thread["+threadID+"]>>Number of partitions = " + dividedTasks.size());
+			
 			return dividedTasks;
 		}
 	}
