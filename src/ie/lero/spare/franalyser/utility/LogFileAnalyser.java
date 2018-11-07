@@ -63,7 +63,7 @@ public class LogFileAnalyser {
 		
 		StringBuilder str = new StringBuilder();
 		str.append(outputFolder).append("\n\n");
-		str.append("states\nactivity1-timing, activity2-timing, activity3-timing\n\n");
+		str.append("states\nactivity1-timing; activity2-timing; activity3-timing\n\n");
 		
 		final int ACTIVITY_NUMBER = 3;
 		final int INSTANCES_NUMBER = 5;
@@ -74,12 +74,15 @@ public class LogFileAnalyser {
 			postConditionTiming.clear();
 			actTiming.clear();
 			
+			System.out.println("analysing "+fileName);
+			
 			//read only text files
 			if(!fileName.startsWith("log") || !fileName.endsWith(".txt")) {
+				System.out.println(fileName + " NOT a file");
 				continue;
 			}
 			
-			System.out.println(fileName);
+		
 			fileName = outputFolder + "/" + fileName;
 			
 			String[] lines = FileManipulator.readFileNewLine(fileName);
@@ -131,9 +134,9 @@ public class LogFileAnalyser {
 			str.append(states).append("\n");
 			for (int i = 0; i < actTiming.size(); i = i + ACTIVITY_NUMBER) {
 				for (int j = 0; j < ACTIVITY_NUMBER; j++) {
-					str.append(actTiming.get(i + j)).append(",");
+					str.append(actTiming.get(i + j)).append(";");
 				}
-				str.deleteCharAt(str.lastIndexOf(","));
+				str.deleteCharAt(str.lastIndexOf(";"));
 				str.append("\n");
 			}
 
@@ -154,6 +157,10 @@ public class LogFileAnalyser {
 			writer.write(str.toString());
 
 			writer.close();
+			
+			System.out.println("=========analysis complete=========");
+			System.out.println(str.toString());
+			System.out.println("\noutput file save to: " + outputFolder+"/activity-Time-analysis.txt");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -166,7 +173,16 @@ public class LogFileAnalyser {
 		LogFileAnalyser analyser = new LogFileAnalyser();
 
 		String outputFolderVM16 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-16/log";
+		String outputFolderVM8 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-8/log";
+		String outputFolderVM4 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-4/log";
+		String outputFolderVM2 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-2/log";
+		String outputFolderVMNoThreads = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/No threads/log";
+		
+		String outputFolderUbuntu8 = "D:/Bigrapher data/lero/instantiation data/ubuntu data/CPU-8/log";
+		String outputFolderUbuntu4 = "D:/Bigrapher data/lero/instantiation data/ubuntu data/CPU-4/log";
+		String outputFolderUbuntu2 = "D:/Bigrapher data/lero/instantiation data/ubuntu data/CPU-2/log";
+		String outputFolderUbuntuNoThreads = "D:/Bigrapher data/lero/instantiation data/ubuntu data/No threads/log";
 
-		analyser.extractActivityTiming(outputFolderVM16);
+		analyser.extractActivityTiming(outputFolderUbuntuNoThreads);
 	}
 }
