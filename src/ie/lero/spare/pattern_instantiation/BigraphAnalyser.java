@@ -38,10 +38,10 @@ public class BigraphAnalyser {
 	private boolean isThreading = true;
 
 	// determine if predicates should run in parallel
-	private boolean isPredicateThreading = false;
+	private boolean isPredicateThreading = true;
 
 	// determines how many activities should be threaded
-	private int numberofActivityParallelExecution = 1;
+	private int numberofActivityParallelExecution = 1; //set by the PotentialIncidentInstance class in the instantiator class
 
 	private ExecutorService predicateExecutor = Executors.newCachedThreadPool();
 	/************************/
@@ -177,6 +177,9 @@ public class BigraphAnalyser {
 				if(numberOfPartitions == 0) {
 					numberOfPartitions = 1;
 				}
+				
+				//double the number of threads
+				numberOfPartitions*=2;
 				
 				threshold = (int)Math.floor(states.size()/(1.0*numberOfPartitions));
 				
@@ -679,16 +682,15 @@ public class BigraphAnalyser {
 			//create partitions 
 			for(i=0;i<localParts-1;i++) {
 				dividedTasks.add(new BigraphMatcher(index, index+threshold, redex));
-				logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" + index+"->"+(index+threshold)+")");
+//				logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" + index+"->"+(index+threshold)+")");
 				index = index+threshold;
 				
 			}
 			
 			//last partition
 			dividedTasks.add(new BigraphMatcher(index, indexEnd, redex));
-			logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" + index+"->"+indexEnd+")");
-			
-			logger.putMessage("Thread["+threadID+"]>>Number of partitions = " + dividedTasks.size());
+//			logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" + index+"->"+indexEnd+")");
+//			logger.putMessage("Thread["+threadID+"]>>Number of partitions = " + dividedTasks.size());
 			
 			return dividedTasks;
 		}

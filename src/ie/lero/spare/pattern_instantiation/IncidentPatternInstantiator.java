@@ -906,7 +906,10 @@ public class IncidentPatternInstantiator {
 				// state transitions are updated in the predicates, which can be
 				// accessed through predicateHandler
 				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID);
-				analyser.setNumberofActivityParallelExecution(parallelActivities);
+				
+				int numOfActivities = ModelsHandler.getCurrentIncidentModel()!=null?ModelsHandler.getCurrentIncidentModelActivities().size():1;
+				analyser.setNumberofActivityParallelExecution(numOfActivities);
+				
 				// analyser.setThreshold(matchingThreshold);
 
 				StringBuilder str = new StringBuilder();
