@@ -49,7 +49,7 @@ public class IncidentPatternInstantiator {
 
 	// sets how many activities can be
 	// analysed in parallel
-	private int parallelActivities = 1;
+	private int numberOfparallelActivities = 1;
 
 	private ExecutorService executor;
 	private ForkJoinPool mainPool = new ForkJoinPool();
@@ -916,18 +916,6 @@ public class IncidentPatternInstantiator {
 						systemAssetControls);
 				PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
 
-				// this object identifies states and state transitions that
-				// satisfy the conditions of activities
-				// state transitions are updated in the predicates, which can be
-				// accessed through predicateHandler
-				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID);
-
-				int numOfActivities = ModelsHandler.getCurrentIncidentModel() != null
-						? ModelsHandler.getCurrentIncidentModelActivities().size() : 1;
-				analyser.setNumberofActivityParallelExecution(numOfActivities);
-
-				// analyser.setThreshold(matchingThreshold);
-
 				StringBuilder str = new StringBuilder();
 
 				str.append("[");
@@ -943,10 +931,24 @@ public class IncidentPatternInstantiator {
 				logger.putMessage("Thread[" + threadID + "]>>Mapping asset set :" + str.toString());
 				logger.putMessage("Thread[" + threadID + "]>>Identifying states and their transitions...");
 
-				// identify states that satisfy the pre-/post-conditions of each
-				// activity
-				analyser.analyse();
+				/**
+				 * this object identifies states and state transitions that
+				 * satisfy the conditions of activities state transitions are
+				 * updated in the predicates, which can be accessed through
+				 * predicateHandler
+				 **/
+				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID);
 
+				// set the number of activities to execute in parallel
+				analyser.setNumberofParallelActivity(getNumberOfParallelActivities());
+
+				// analyser.setThreshold(matchingThreshold);
+
+				// identify states that satisfy the pre-/post-conditions of each
+				// activity. Default Execution of analyse will use number of threads equal to the number of
+				// available processes for matching states. To set number of threads use analyse(NumberOfThreads)
+				analyser.analyse();
+				
 				// for GUI
 				if (listener != null) {
 					listener.updateProgress(incrementValue / 3);
@@ -1208,12 +1210,12 @@ public class IncidentPatternInstantiator {
 		this.threadPoolSize = threadPoolSize;
 	}
 
-	public int getParallelActivities() {
-		return parallelActivities;
+	public int getNumberOfParallelActivities() {
+		return numberOfparallelActivities;
 	}
 
-	public void setParallelActivities(int parallelActivities) {
-		this.parallelActivities = parallelActivities;
+	public void setNumberOfParallelActivities(int parallelActivities) {
+		this.numberOfparallelActivities = parallelActivities;
 	}
 
 	// public int getMatchingThreshold() {

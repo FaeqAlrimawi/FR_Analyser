@@ -64,7 +64,7 @@ public class BigraphAnalyser {
 	private int thresholdResidue;
 	private static final int Adjust_Threshold_State_Number = 1000;
 	
-	//2.5%, this is related to having 4 threads available in a system (i.e. CPUs available) 
+	//2.5%, this is related to having 4 threads available in a system (i.e. 4 CPUs available) 
 	private static final double PERCENTAGE__OF_STATES = 0.025; 
 	
 	private static final int DEFAULT_THRESHOLD = 100;
@@ -105,8 +105,8 @@ public class BigraphAnalyser {
 		logger = Logger.getInstance();
 		predicateHandler = predHandler;
 		this.threadID = threadID;
-		mainPool = new ForkJoinPool();
-		threshold = DEFAULT_THRESHOLD;
+//		mainPool = new ForkJoinPool();
+//		threshold = DEFAULT_THRESHOLD;
 		// setParitionSize();
 	}
 
@@ -122,10 +122,10 @@ public class BigraphAnalyser {
 		this.threshold = threshold;
 	}
 
-	public void setNumberofActivityParallelExecution(int numberofActivityParallelExecution) {
+	public void setNumberofParallelActivity(int numberofActivityParallelExecution) {
 		this.numberofActivityParallelExecution = numberofActivityParallelExecution;
 	}
-
+	
 	protected void setThreshold() {
 
 		/**
@@ -225,6 +225,13 @@ public class BigraphAnalyser {
 	}
 
 	public PredicateHandler analyse() {
+		
+		int numberOfThreads = Runtime.getRuntime().availableProcessors();
+		
+		return analyse(numberOfThreads);
+	}
+	
+	public PredicateHandler analyse(int numberOfThreads) {
 
 		try {
 
@@ -235,15 +242,17 @@ public class BigraphAnalyser {
 
 			if (isThreading) {
 
+				mainPool = new ForkJoinPool(numberOfThreads);
+				
 				setThreshold();
 
 				if (isTestingTime) {
 					logger.putMessage("Thread[" + threadID + "]>>BigraphAnalyser>>number of states: " + states.size()
 							+ ", partition size <= threshold [" + threshold + "] ("
 							+ (int) ((threshold * 1.0 / states.size()) * 10000) / 100.0 + "%)"
-							+ ", threshold residue = " + thresholdResidue + ", number of partitions: "
-							+ numberOfPartitions + ", Number of parallel activities = "
-							+ numberofActivityParallelExecution + ", Parallelism for matching (= num of processors): "
+							+ ", number of partitions: "
+							+ numberOfPartitions + ", Number of parallel activities: "
+							+ numberofActivityParallelExecution + ", Parallelism for matching: "
 							+ mainPool.getParallelism());
 				}
 
