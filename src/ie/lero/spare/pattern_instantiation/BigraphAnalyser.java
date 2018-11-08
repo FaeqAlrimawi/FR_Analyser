@@ -146,7 +146,7 @@ public class BigraphAnalyser {
 		while(percentage > PERCENTAGE__OF_STATES && threshold > MINIMUM_THRESHOLD) {
 			
 			//increase number of partitions
-			numberOfPartitions++;
+			numberOfPartitions+=numberOfPartitions;
 			
 			//calcualte new threshold value
 			threshold = (int) Math.floor(states.size() / (1.0 * numberOfPartitions));
@@ -155,6 +155,7 @@ public class BigraphAnalyser {
 			percentage = (threshold/(states.size()*1.0));
 		}
 		
+		}
 		//threshold is zero (because you have a lot of threads, or something went
 		//then threshold is set to a fixed minimum value
 		} else { 
@@ -171,6 +172,7 @@ public class BigraphAnalyser {
 			
 			numberOfPartitions = (int)Math.ceil(states.size()/(threshold*1.0));
 		}
+		
 		// ****to apply this, the bigraph matching functionality should be changed
 		// accordingly (i.e. use createPartitions function)
 		
