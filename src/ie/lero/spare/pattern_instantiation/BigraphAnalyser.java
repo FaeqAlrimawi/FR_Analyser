@@ -248,13 +248,15 @@ public class BigraphAnalyser {
 
 				if (isTestingTime) {
 					logger.putMessage("Thread[" + threadID + "]>>BigraphAnalyser>>number of states: " + states.size()
-							+ ", partition size <= threshold [" + threshold + "] ("
-							+ (int) ((threshold * 1.0 / states.size()) * 10000) / 100.0 + "%)"
-							+ ", number of partitions: "
-							+ numberOfPartitions + ", Number of parallel activities: "
-							+ numberofActivityParallelExecution + ", Parallelism for matching: "
-							+ mainPool.getParallelism());
+							+ ", state percentage for threshold [fixed]:" + PERCENTAGE__OF_STATES*100 + "%"
+							+ ", minimum threshold: " + MINIMUM_THRESHOLD
+							+ ", default threshold: " + DEFAULT_THRESHOLD
+							+ ", calculated threshold: " + threshold + " (" + (int) ((threshold * 1.0 / states.size()) * 10000) / 100.0 + "%)"
+							+ ", number of partitions: " + numberOfPartitions 
+							+ ", Number of parallel activities: " + numberofActivityParallelExecution 
+							+ ", Parallelism for matching: " + mainPool.getParallelism());
 				}
+
 
 				logger.putMessage("Thread[" + threadID + "]>>BigraphAnalyser>>identifying states...");
 

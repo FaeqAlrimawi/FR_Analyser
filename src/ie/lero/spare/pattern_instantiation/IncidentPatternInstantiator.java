@@ -1458,5 +1458,48 @@ public class IncidentPatternInstantiator {
 		System.out.println("Complete...");
 
 	}
+	
+	public static void test100K() {
+		// setting tests
+		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
+
+		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
+
+		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
+		String[] states = new String[2];
+
+		for (int i = 0; i < states.length; i++) {
+
+			states[i] = "/home/faeq/Desktop/lero/lero100K/states" + ((i+1)*10);
+		}
+
+		for (int i = 0; i < states.length; i++) {
+
+			System.out.println(states[i]);
+			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+			ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states[i]);
+
+			// reset
+			ins = null;
+			Logger.setInstanceNull();
+			TransitionSystem.setInstanceNull();
+			ModelsHandler.clearAll();
+			// System.out.println("Waiting 3s...");
+			Runtime.getRuntime().gc();
+			System.out.println("\n\n");
+			// wait 3 seconds
+			try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		}
+
+		System.out.println("Complete...");
+
+	}
+
 
 }

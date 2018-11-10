@@ -250,15 +250,15 @@ public class IncidentPatternExtractor {
 
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
-		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+//		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		// ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 
@@ -301,7 +301,7 @@ public class IncidentPatternExtractor {
 
 		mapPatterns();
 
-		// print found map between activity patterns and actions
+		// print identified map between activity patterns and actions
 		logger.putMessage(getInputPatternMap());
 
 		/**
@@ -402,6 +402,10 @@ public class IncidentPatternExtractor {
 	 */
 	public void updateMatchedPatternsInModel() {
 
+		if(allPatternsMaps == null || allPatternsMaps.isEmpty()) {
+			return;
+		}
+		
 		// calculates the severity level of each maps
 		calculateMapsSeveriy();
 
@@ -581,7 +585,7 @@ public class IncidentPatternExtractor {
 				entityMap.clear();
 				isptrPreMatched = false;
 
-				// compare precondition of the first activity
+				// compare precondition (true(pre), false(post)) of the first activity
 				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
 
 				// if match found
@@ -589,6 +593,7 @@ public class IncidentPatternExtractor {
 
 					entityMaps.add(new HashMap<String, String>(entityMap));
 
+					// compare precondition (false (pre), true (post)) of the first activity
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 
 					if (isptrPostMatched) {
@@ -655,6 +660,7 @@ public class IncidentPatternExtractor {
 
 					currentActivity = next;
 
+					//compare postconditions
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 
 					// if there is a match from one of the activities
@@ -1845,9 +1851,9 @@ public class IncidentPatternExtractor {
 		// setting type name using the classMap
 		// takes the first option (i.e. 0) other options are more abstract
 
-		for (Entry<String, List<String>> entry : classMap.entrySet()) {
-			System.out.println(entry.getKey() + " " + entry.getValue());
-		}
+//		for (Entry<String, List<String>> entry : classMap.entrySet()) {
+//			System.out.println(entry.getKey() + " " + entry.getValue());
+//		}
 		
 		incidentEntityTypeName = getAbstractType(systemAsset);
 
@@ -1995,12 +2001,16 @@ public class IncidentPatternExtractor {
 			//use the level of abstractions map to determine required level
 			Integer levelIndex = classAbstractionLevelMap.get(assetClassName);
 			
-			if(levelIndex != null && levelIndex < abstractionLevels.size()) {
+			if(levelIndex != null && levelIndex > 0 && 
+					levelIndex < abstractionLevels.size()) {
+				
 				type = abstractionLevels.get(levelIndex);
-			//if there's no level specified for the asset class then get the default	
+			
+				//if there's no level specified for the asset class then get the default	
 			} else {
 				type = abstractionLevels.get(DEFAULT_ABSTRACTION_LEVEL);
 			}
+			
 		//if the asset class name is not in the map, then the type of the entity will be the same as the class	
 		} else {
 			type = assetClassName;
@@ -2008,6 +2018,7 @@ public class IncidentPatternExtractor {
 		
 		return type;
 	}
+	
 	protected void updateCrimeScriptData() {
 
 		/**
@@ -2459,9 +2470,12 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("\n=======Abstract Activities========================================\n");
+			str.append("\n=======Abstracted Actions========================================\n");
 		}
 
+		if(abstractedActivities.isEmpty()) {
+			str.append("NONE\n");
+		} else {
 		str.append("[Action sequence removed] ==> [Abstract activity added] [Pattern used]\n");
 
 		for (Entry<Activity, List<Activity>> entry : abstractedActivities.entrySet()) {
@@ -2487,7 +2501,8 @@ public class IncidentPatternExtractor {
 			}
 
 		}
-
+		}
+		
 		if (isDecorated) {
 			str.append("=================================================================");
 		}
