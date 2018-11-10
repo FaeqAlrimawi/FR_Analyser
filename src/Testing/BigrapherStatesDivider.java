@@ -68,9 +68,6 @@ public class BigrapherStatesDivider {
 		System.out.println("Partition size = " + divider);
 		System.out.println("Number of partitions = " + numberOfPartitions);
 		
-		if(true)
-		return;
-		
 		String outputFolder = folderName + "/" + outputFolderName;
 
 		File outputFolderFile = new File(outputFolder);
@@ -166,7 +163,7 @@ public class BigrapherStatesDivider {
 		System.out.println("\n===== Store new partitions");
 		// for each generated digraph create a new transition file and copy
 		// states to their output folder
-		for (int i = 0; i < digraphers.size(); i++) {
+		for (int i = 0; i < digraphers.size()-1; i++) {
 			System.out.print("Partition[" + i+"]: ");
 			storeDigraphAndStates(digraphers.get(i), outputFolders.get(i));
 		}
