@@ -82,9 +82,9 @@ public class IncidentPatternInstantiator {
 	private static Map<String, String> assetControlMap;
 	private static String systemControlMapFileName = "./asset-control map.txt";
 
-	//BRS executor
+	// BRS executor
 	SystemExecutor brsExecutor;
-	
+
 	private void runLogger() {
 
 		logger = Logger.getInstance();
@@ -600,7 +600,7 @@ public class IncidentPatternInstantiator {
 					return;
 				}
 			}
-			
+
 			logger.putMessage(
 					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
 
@@ -608,9 +608,10 @@ public class IncidentPatternInstantiator {
 
 			// create a new transition file with labels
 			logger.putMessage(">>Labelling transition system...");
-			String [] actionNames = brsExecutor!=null?brsExecutor.getActionNames():null;
-			String outputFile = TransitionSystem.getTransitionSystemInstance().createNewLabelledTransitionFile(actionNames);
-			
+			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
+			String outputFile = TransitionSystem.getTransitionSystemInstance()
+					.createNewLabelledTransitionFile(actionNames);
+
 			if (outputFile != null) {
 				logger.putMessage(">>New Labelled transitions is created: " + outputFile);
 			} else {
@@ -652,8 +653,9 @@ public class IncidentPatternInstantiator {
 			// instances.add(executor.submit(incidentInstances[i]));
 			// }
 			/** for testing **/
-//			incidentInstances[0] = new PotentialIncidentInstance(lst.get(0), incidentAssetNames, 0);
-//			instances.add(executor.submit(incidentInstances[0]));
+			// incidentInstances[0] = new PotentialIncidentInstance(lst.get(0),
+			// incidentAssetNames, 0);
+			// instances.add(executor.submit(incidentInstances[0]));
 			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
 			instances.add(executor.submit(incidentInstances[2]));
 
@@ -953,10 +955,12 @@ public class IncidentPatternInstantiator {
 				// analyser.setThreshold(matchingThreshold);
 
 				// identify states that satisfy the pre-/post-conditions of each
-				// activity. Default Execution of analyse will use number of threads equal to the number of
-				// available processes for matching states. To set number of threads use analyse(NumberOfThreads)
+				// activity. Default Execution of analyse will use number of
+				// threads equal to the number of
+				// available processes for matching states. To set number of
+				// threads use analyse(NumberOfThreads)
 				analyser.analyse();
-				
+
 				// for GUI
 				if (listener != null) {
 					listener.updateProgress(incrementValue / 3);
@@ -997,8 +1001,8 @@ public class IncidentPatternInstantiator {
 				// LinkedList<GraphPath> paths =
 				// predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(),
 				// predicateHandler.getFinalActivity());
-//				LinkedList<GraphPath> paths = predicateHandler.getPaths();
-				
+				// LinkedList<GraphPath> paths = predicateHandler.getPaths();
+
 				List<GraphPath> paths = predicateHandler.findTransitions();
 
 				// updated gui
@@ -1454,8 +1458,9 @@ public class IncidentPatternInstantiator {
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
-			System.out.println("\n\n");
 			System.out.println("Complete...");
+			System.out.println("\n\n");
+		
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
@@ -1467,7 +1472,7 @@ public class IncidentPatternInstantiator {
 		}
 
 	}
-	
+
 	public static void test100K() {
 		// setting tests
 		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
@@ -1479,7 +1484,7 @@ public class IncidentPatternInstantiator {
 
 		for (int i = 0; i < states.length; i++) {
 
-			states[i] = "/home/faeq/Desktop/lero/lero100K/states" + ((i+1)*10);
+			states[i] = "/home/faeq/Desktop/lero/lero100K/states" + ((i + 1) * 10);
 		}
 
 		for (int i = 0; i < states.length; i++) {
@@ -1495,8 +1500,9 @@ public class IncidentPatternInstantiator {
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
-			System.out.println("\n\n");
 			System.out.println("Complete...");
+			System.out.println("\n\n");
+	
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
@@ -1507,9 +1513,23 @@ public class IncidentPatternInstantiator {
 
 		}
 
-		
-
 	}
 
+	public static void lero10() {
+
+		// setting tests
+		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
+
+		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
+
+		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
+		String states = "/home/faeq/Desktop/lero/lero10";
+
+		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+		ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states);
+		System.out.println("Complete...");
+		System.out.println("\n\n");
+
+	}
 
 }
