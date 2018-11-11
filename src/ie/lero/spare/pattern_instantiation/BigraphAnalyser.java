@@ -807,8 +807,7 @@ public class BigraphAnalyser {
 			// set result
 			pred.setBigraphStates(statesResults);
 
-			logger.putMessage("Thread[" + threadID + "]>>BigraphAnalyser>>" + pred.getName() + "-states: "
-					+ pred.getBigraphStates());
+			logger.putMessage("Thread[" + threadID + "]>>BigraphAnalyser>>" + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
 
 			if (isTestingTime) {
 				timer.stop();
