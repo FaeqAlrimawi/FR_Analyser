@@ -19,7 +19,7 @@ import java.util.function.Function;
 
 public class GraphPathsAnalyser {
 	
-	private LinkedList<GraphPath> paths;
+	private List<GraphPath> paths;
 	private int topPercent = 10;
 	private HashMap<String, Integer> actionsFrequency; //string is action name, and integer is the frequency
 	private LinkedList<String> commonAssets;
@@ -34,7 +34,9 @@ public class GraphPathsAnalyser {
 	private boolean isAll = true;
 	private double percentageFrequency = 0.5;
 	int precision = 1000000;
-	public GraphPathsAnalyser(LinkedList<GraphPath> paths) {
+	
+	
+	public GraphPathsAnalyser(List<GraphPath> paths) {
 		this.paths = paths;
 	//	allShortestPaths = new LinkedList<Integer>();
 	}
@@ -76,7 +78,7 @@ public class GraphPathsAnalyser {
 		return print();
 	}
 
-	public LinkedList<GraphPath> getPaths() {
+	public List<GraphPath> getPaths() {
 		return paths;
 	}
 

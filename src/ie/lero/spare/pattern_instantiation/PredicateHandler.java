@@ -8,17 +8,28 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.RecursiveTask;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
 import javax.xml.xquery.XQException;
 
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
+import cyberPhysical_Incident.IncidentEntity;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
+import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
+import ie.lero.spare.pattern_instantiation.Mapper.EntityAssetMatcher;
+import ie.lero.spare.pattern_instantiation.Mapper.EntityMatcher;
 
 public class PredicateHandler {
 
@@ -26,6 +37,12 @@ public class PredicateHandler {
 	private HashMap<String, Activity> incidentActivities;
 	private Digraph<String> activitiesGraph;
 	private LinkedList<LinkedList<String>> activitySequences;
+
+	
+	//used for transition generation by the recursive task
+	private List<Integer> preconditionStates;
+	private List<Integer> postconditionStates;
+	private ForkJoinPool mainPool;
 	
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
@@ -102,12 +119,12 @@ public class PredicateHandler {
 
 		try {
 
-			String [] lines = FileManipulator.readFileNewLine(fileName);
-			
-			for(String s : lines) {
+			String[] lines = FileManipulator.readFileNewLine(fileName);
+
+			for (String s : lines) {
 				list.add(s);
 			}
-			
+
 			// determine the last time the keyword ctrl is used as predicates
 			// cannot be defined before ctrl
 			for (int i = 0; i < list.size(); i++) {
@@ -226,7 +243,7 @@ public class PredicateHandler {
 		 * }
 		 */
 
-		return ((IncidentActivity)incidentActivities.get(activityName)).getPredicates();
+		return ((IncidentActivity) incidentActivities.get(activityName)).getPredicates();
 	}
 
 	/*
@@ -275,7 +292,7 @@ public class PredicateHandler {
 
 			for (String res : result) {
 				tmp = res.split("##|!!");
-				act = (IncidentActivity)incidentActivities.get(tmp[0]);
+				act = (IncidentActivity) incidentActivities.get(tmp[0]);
 				/*
 				 * act.setNextActivities(new ArrayList<IncidentActivity>());
 				 * act.setPreviousActivities(new ArrayList<IncidentActivity>());
@@ -303,44 +320,44 @@ public class PredicateHandler {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void updateNextPreviousActivities() {
-	
+
 		List<IncidentActivity> nxtActs = new LinkedList<IncidentActivity>();
 		List<IncidentActivity> preActs = new LinkedList<IncidentActivity>();
-		
-		for(Activity act : incidentActivities.values()) {
-			
-			//update next activities
-			for(Activity nxtAct : act.getNextActivities()) {
-				nxtActs.add((IncidentActivity)incidentActivities.get(nxtAct.getName()));
+
+		for (Activity act : incidentActivities.values()) {
+
+			// update next activities
+			for (Activity nxtAct : act.getNextActivities()) {
+				nxtActs.add((IncidentActivity) incidentActivities.get(nxtAct.getName()));
 			}
-			
+
 			act.getNextActivities().clear();
 			act.getNextActivities().addAll(nxtActs);
 			nxtActs.clear();
-			
-			//update previous activities
-			for(Activity preAct : act.getPreviousActivities()) {
-				preActs.add((IncidentActivity)incidentActivities.get(preAct.getName()));
+
+			// update previous activities
+			for (Activity preAct : act.getPreviousActivities()) {
+				preActs.add((IncidentActivity) incidentActivities.get(preAct.getName()));
 			}
-			
+
 			act.getPreviousActivities().clear();
 			act.getPreviousActivities().addAll(preActs);
 			preActs.clear();
-			
+
 		}
 	}
 
 	public void addActivityPredicate(String activityName, Predicate pred) {
-		((IncidentActivity)incidentActivities.get(activityName)).addPredicate(pred);
+		((IncidentActivity) incidentActivities.get(activityName)).addPredicate(pred);
 		addPredicate(pred);
 	}
 
 	public void addIncidentActivity(Activity activity) {
-		
-		//convert Activity object to IncidentActivity object
-		
+
+		// convert Activity object to IncidentActivity object
+
 		incidentActivities.put(activity.getName(), activity);
 	}
 
@@ -375,7 +392,7 @@ public class PredicateHandler {
 
 	public LinkedList<GraphPath> getPathsBetweenActivities(IncidentActivity sourceActivity,
 			IncidentActivity destinationActivity) {
-	
+
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
 
 		ArrayList<Predicate> preconditions = getPredicates(sourceActivity.getName(), PredicateType.Precondition);
@@ -393,95 +410,122 @@ public class PredicateHandler {
 				post.addPaths(paths);
 			}
 		}
-		
+
 		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
-		
-		//add the first and the last activities
+
+		// add the first and the last activities
 		activities.addFirst(sourceActivity);
 		activities.addLast(destinationActivity);
-		
+
 		boolean isCheckingPrecondition = true;
-		//boolean isCheckingPostcondition = false;
-		
-		//check if each path contains at least one of the satisfied states for each activity
-		//can be parallelised
+		// boolean isCheckingPostcondition = false;
+
+		// check if each path contains at least one of the satisfied states for
+		// each activity
+		// can be parallelised
 		ListIterator<GraphPath> pathsIterator = paths.listIterator();
 		ListIterator<Activity> activitiesIterator = activities.listIterator();
-		
-		if(activities != null) {
-			while(pathsIterator.hasNext()) {
-			
+
+		if (activities != null) {
+			while (pathsIterator.hasNext()) {
+
 				GraphPath path = pathsIterator.next();
 				LinkedList<Integer> states = path.getStateTransitions();
-				
-				int j=0;//first state is for the src and des activities
-				//isSatisfied = true;
+
+				int j = 0;// first state is for the src and des activities
+				// isSatisfied = true;
 				isCheckingPrecondition = true;
-				//isCheckingPostcondition = false;
+				// isCheckingPostcondition = false;
 				activitiesIterator = activities.listIterator();
-				outerLoop:
-					while(activitiesIterator.hasNext()) {
-						IncidentActivity activity = (IncidentActivity)activitiesIterator.next();
-						//get precondition of the activity (assumption: there is only one precondition)
-						Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
-						LinkedList<Integer> preStates = pre.getBigraphStates();
-						
-						//get precondition of the activity (assumption: there is only one precondition)
-						Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
-						LinkedList<Integer> postStates = post.getBigraphStates();
-						
-						//assumption: each predicate should satisfy different state in the transition
-						for(;j<states.size();j++){ //last state is for the src and des activities
-							int state = states.get(j);
-							
-							//if it is the last element and either it is still checking the precondition or the postcondition does not contain the state then remove the path and break
-							//to outerloop
-							if(j == states.size()-1 && (activitiesIterator.hasNext() || //if there are still activities to iterate over
-									isCheckingPrecondition || //or if it is the last activity but it is still checking precondition
-									!postStates.contains(state))) { //or if it is last activity and and the postcondition does not have the state as one of its own
-								pathsIterator.remove();
-								break outerLoop;
-							}
-							
-							//find a match for the precondition
-							if(isCheckingPrecondition) {
-								if(!preStates.contains(state)) {
-									continue;	
-								} else {
-									isCheckingPrecondition = false;
-								}
-	
-							//find a match for the postcondition
+				outerLoop: while (activitiesIterator.hasNext()) {
+					IncidentActivity activity = (IncidentActivity) activitiesIterator.next();
+					// get precondition of the activity (assumption: there is
+					// only one precondition)
+					Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
+					LinkedList<Integer> preStates = pre.getBigraphStates();
+
+					// get precondition of the activity (assumption: there is
+					// only one precondition)
+					Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
+					LinkedList<Integer> postStates = post.getBigraphStates();
+
+					// assumption: each predicate should satisfy different state
+					// in the transition
+					for (; j < states.size(); j++) { // last state is for the
+														// src and des
+														// activities
+						int state = states.get(j);
+
+						// if it is the last element and either it is still
+						// checking the precondition or the postcondition does
+						// not contain the state then remove the path and break
+						// to outerloop
+						if (j == states.size() - 1 && (activitiesIterator.hasNext() || // if
+																						// there
+																						// are
+																						// still
+																						// activities
+																						// to
+																						// iterate
+																						// over
+								isCheckingPrecondition || // or if it is the
+															// last activity but
+															// it is still
+															// checking
+															// precondition
+								!postStates.contains(state))) { // or if it is
+																// last activity
+																// and and the
+																// postcondition
+																// does not have
+																// the state as
+																// one of its
+																// own
+							pathsIterator.remove();
+							break outerLoop;
+						}
+
+						// find a match for the precondition
+						if (isCheckingPrecondition) {
+							if (!preStates.contains(state)) {
+								continue;
 							} else {
-								if(!postStates.contains(state)) {
-									continue;	
-								} else {
-									isCheckingPrecondition = true;
-									break;
-								}	
-							}		
+								isCheckingPrecondition = false;
+							}
+
+							// find a match for the postcondition
+						} else {
+							if (!postStates.contains(state)) {
+								continue;
+							} else {
+								isCheckingPrecondition = true;
+								break;
+							}
 						}
 					}
 				}
 			}
-		
+		}
+
 		return paths;
 	}
 
 	/**
-	 * Returns state transitions between the first and last activities, which pass through all the other activities between the first and the last
+	 * Returns state transitions between the first and last activities, which
+	 * pass through all the other activities between the first and the last
+	 * 
 	 * @return
 	 */
 	public LinkedList<GraphPath> getPaths() {
-		
+
 		Logger logger = Logger.getInstance();
-		
+
 		logger.putMessage("PredicateHandler>>Generating transitions...");
-		IncidentActivity sourceActivity = (IncidentActivity)getInitialActivity();
-		IncidentActivity destinationActivity = (IncidentActivity)getFinalActivity();
-		
+		IncidentActivity sourceActivity = (IncidentActivity) getInitialActivity();
+		IncidentActivity destinationActivity = (IncidentActivity) getFinalActivity();
+
 		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
-		
+
 		ArrayList<Predicate> preconditions = getPredicates(sourceActivity.getName(), PredicateType.Precondition);
 		ArrayList<Predicate> postconditions = getPredicates(destinationActivity.getName(), PredicateType.Postcondition);
 
@@ -497,198 +541,210 @@ public class PredicateHandler {
 				post.addPaths(paths);
 			}
 		}
-		
-		logger.putMessage("PredicateHandler>>Analysing generated transitions ["+paths.size()+"]...");
-		
+
+		logger.putMessage("PredicateHandler>>Analysing generated transitions [" + paths.size() + "]...");
+
 		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
-		
-		//add the first and the last activities
+
+		// add the first and the last activities
 		activities.addFirst(sourceActivity);
 		activities.addLast(destinationActivity);
-		
+
 		boolean isCheckingPrecondition = true;
-		//boolean isCheckingPostcondition = false;
-		
-		//check if each path contains at least one of the satisfied states for each activity
-		//can be parallelised
+		// boolean isCheckingPostcondition = false;
+
+		// check if each path contains at least one of the satisfied states for
+		// each activity
+		// can be parallelised
 		ListIterator<GraphPath> pathsIterator = paths.listIterator();
 		ListIterator<Activity> activitiesIterator = activities.listIterator();
-		
-		if(activities != null) {
-			while(pathsIterator.hasNext()) {
-			
+
+		if (activities != null) {
+			while (pathsIterator.hasNext()) {
+
 				GraphPath path = pathsIterator.next();
 				LinkedList<Integer> states = path.getStateTransitions();
-				
-				int j=0;
-				
+
+				int j = 0;
+
 				isCheckingPrecondition = true;
-				
+
 				activitiesIterator = activities.listIterator();
-				
-				outerLoop:
-					while(activitiesIterator.hasNext()) {
-						IncidentActivity activity = (IncidentActivity)activitiesIterator.next();
-						
-						//get precondition of the activity (assumption: there is only one precondition)
-						Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
-						LinkedList<Integer> preStates = pre.getBigraphStates();
-						
-						//get precondition of the activity (assumption: there is only one postcondition)
-						Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
-						LinkedList<Integer> postStates = post.getBigraphStates();
-						
-						//assumption: each predicate should satisfy different state in the transition
-						for(;j<states.size();j++){ //last state is for the src and des activities
-							int state = states.get(j);
-							
-							//if it is the last element and either it is still checking the precondition or the postcondition does not contain the state then remove the path and break
-							//to outerloop
-							if(j == states.size()-1 && (activitiesIterator.hasNext() || //if there are still activities to iterate over
-									isCheckingPrecondition || //or if it is the last activity but it is still checking precondition
-									!postStates.contains(state))) { //or if it is last activity and and the postcondition does not have the state as one of its own
-								pathsIterator.remove();
-								break outerLoop;
-							}
-							
-							//find a match for the precondition
-							if(isCheckingPrecondition) {
-								if(!preStates.contains(state)) {
-									continue;	
-								} else {
-									isCheckingPrecondition = false;
-								}
-	
-							//find a match for the postcondition
+
+				outerLoop: while (activitiesIterator.hasNext()) {
+					IncidentActivity activity = (IncidentActivity) activitiesIterator.next();
+
+					// get precondition of the activity (assumption: there is
+					// only one precondition)
+					Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
+					LinkedList<Integer> preStates = pre.getBigraphStates();
+
+					// get precondition of the activity (assumption: there is
+					// only one postcondition)
+					Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
+					LinkedList<Integer> postStates = post.getBigraphStates();
+
+					// assumption: each predicate should satisfy different state
+					// in the transition
+					for (; j < states.size(); j++) { // last state is for the
+														// src and des
+														// activities
+						int state = states.get(j);
+
+						// if it is the last element and either it is still
+						// checking the precondition or the postcondition does
+						// not contain the state then remove the path and break
+						// to outerloop
+						if (j == states.size() - 1 && (activitiesIterator.hasNext() || // if
+																						// there
+																						// are
+																						// still
+																						// activities
+																						// to
+																						// iterate
+																						// over
+								isCheckingPrecondition || // or if it is the
+															// last activity but
+															// it is still
+															// checking
+															// precondition
+								!postStates.contains(state))) { // or if it is
+																// last activity
+																// and and the
+																// postcondition
+																// does not have
+																// the state as
+																// one of its
+																// own
+							pathsIterator.remove();
+							break outerLoop;
+						}
+
+						// find a match for the precondition
+						if (isCheckingPrecondition) {
+							if (!preStates.contains(state)) {
+								continue;
 							} else {
-								if(!postStates.contains(state)) {
-									continue;	
-								} else {
-									isCheckingPrecondition = true;
-									break;
-								}	
-							}		
+								isCheckingPrecondition = false;
+							}
+
+							// find a match for the postcondition
+						} else {
+							if (!postStates.contains(state)) {
+								continue;
+							} else {
+								isCheckingPrecondition = true;
+								break;
+							}
 						}
 					}
 				}
 			}
-		
-		logger.putMessage("PredicateHandler>>Analysis is completed... resulted paths number ["+paths.size()+"]");
-		
+		}
+
+		logger.putMessage("PredicateHandler>>Analysis is completed... resulted paths number [" + paths.size() + "]");
+
 		return paths;
 	}
-	
-	//not correct
-	/*public LinkedList<GraphPath> getPathsBetweenActivitiesOriginal(IncidentActivity sourceActivity,
+
+	// not correct
+	/*
+	 * public LinkedList<GraphPath>
+	 * getPathsBetweenActivitiesOriginal(IncidentActivity sourceActivity,
+	 * IncidentActivity destinationActivity) {
+	 * 
+	 * //not done //
+	 * 
+	 * LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
+	 * 
+	 * ArrayList<Predicate> preconditions =
+	 * getPredicates(sourceActivity.getName(), PredicateType.Precondition);
+	 * ArrayList<Predicate> postconditions =
+	 * getPredicates(destinationActivity.getName(),
+	 * PredicateType.Postcondition);
+	 * 
+	 * for (Predicate pre : preconditions) { pre.removeAllPaths(); for
+	 * (Predicate post : postconditions) { // this can be limited to //
+	 * conditions that are // associated with each // other
+	 * post.removeAllPaths(); paths =
+	 * SystemInstanceHandler.getTransitionSystem().getPaths(pre, post);
+	 * pre.addPaths(paths); post.addPaths(paths); } }
+	 * LinkedList<IncidentActivity> middleActivities =
+	 * getMiddleActivities(sourceActivity, destinationActivity);
+	 * 
+	 * LinkedList<Integer> indices = new LinkedList<Integer>(); GraphPath tmp;
+	 * 
+	 * //check if each path contains at least one of the satisfied states for
+	 * each activity for(int i=0;i<paths.size();i++) { if(middleActivities !=
+	 * null) { for(IncidentActivity activity: middleActivities) { tmp =
+	 * paths.get(i); if (!tmp.satisfiesActivity(activity)) {
+	 * //System.out.println("remove path " + tmp.toSimpleString());
+	 * indices.add(i); } } } }
+	 * 
+	 * //if there are paths that do not go through all activities then remove
+	 * them for(int i=0;i<indices.size();i++) {
+	 * paths.remove((int)(indices.get(i))); //this is needed since removing an
+	 * element from the list will shift the indices for(int
+	 * j=i+1;j<indices.size();j++) { int v = indices.get(j)-1; indices.set(j,
+	 * v); } }
+	 * 
+	 * return paths; }
+	 */
+
+	public LinkedList<Activity> getMiddleActivities(IncidentActivity sourceActivity,
 			IncidentActivity destinationActivity) {
-		
-		//not done
-		//
-		
-		LinkedList<GraphPath> paths = new LinkedList<GraphPath>();
-
-		ArrayList<Predicate> preconditions = getPredicates(sourceActivity.getName(), PredicateType.Precondition);
-		ArrayList<Predicate> postconditions = getPredicates(destinationActivity.getName(), PredicateType.Postcondition);
-
-		for (Predicate pre : preconditions) {
-			pre.removeAllPaths();
-			for (Predicate post : postconditions) { // this can be limited to
-													// conditions that are
-													// associated with each
-													// other
-				post.removeAllPaths();
-				paths = SystemInstanceHandler.getTransitionSystem().getPaths(pre, post);
-				pre.addPaths(paths);
-				post.addPaths(paths);
-			}
-		}
-		LinkedList<IncidentActivity> middleActivities = getMiddleActivities(sourceActivity, destinationActivity);
-		
-		LinkedList<Integer> indices = new LinkedList<Integer>();
-		GraphPath tmp;
-		
-		//check if each path contains at least one of the satisfied states for each activity
-		for(int i=0;i<paths.size();i++) {
-			if(middleActivities != null) {
-			for(IncidentActivity activity: middleActivities) {
-				tmp = paths.get(i);
-				if (!tmp.satisfiesActivity(activity)) {
-					//System.out.println("remove path " + tmp.toSimpleString());
-					indices.add(i);
-				}
-			}
-			}
-		}
-
-		//if there are paths that do not go through all activities then remove them
-		for(int i=0;i<indices.size();i++) {
-			paths.remove((int)(indices.get(i)));
-			//this is needed since removing an element from the list will shift the indices
-			for(int j=i+1;j<indices.size();j++) {
-				int v = indices.get(j)-1;
-				indices.set(j, v);
-			}
-		}
-		
-		return paths;
-	}*/
-	
-	public LinkedList<Activity> getMiddleActivities(IncidentActivity sourceActivity, IncidentActivity destinationActivity) {
 		LinkedList<Activity> result = new LinkedList<Activity>();
-		
-		if(sourceActivity.equals(destinationActivity) || sourceActivity.getNextActivities().contains(destinationActivity) ) {
+
+		if (sourceActivity.equals(destinationActivity)
+				|| sourceActivity.getNextActivities().contains(destinationActivity)) {
 			return result;
 		}
-		
+
 		activitySequences.clear();
 		LinkedList<String> visited = new LinkedList<String>();
 		visited.add(sourceActivity.getNextActivities().get(0).getName());
-		
+
 		depthFirst(destinationActivity.getName(), visited);
-		
-		if(activitySequences.size()>0) {
+
+		if (activitySequences.size() > 0) {
 			LinkedList<String> activityNames = activitySequences.get(0);
 			HashMap<String, Activity> acts = getIncidentActivities();
-			
-			for(String name: activityNames) {
-				
+
+			for (String name : activityNames) {
+
 				result.add(acts.get(name));
 			}
-		} 
-		
-		return result;
-	}
-	/*public LinkedList<HashMap<String, LinkedList<GraphPath>>> getPathsForIncident() {
-
-		LinkedList<IncidentActivity> activities = new LinkedList<IncidentActivity>();
-		LinkedList<IncidentActivity> visitedActivities = new LinkedList<IncidentActivity>();
-		IncidentActivity tmp;
-		LinkedList<HashMap<String, LinkedList<GraphPath>>> paths = new LinkedList<HashMap<String, LinkedList<GraphPath>>>();
-
-		IncidentActivity initialActivity = getInitialActivity();
-		activities.add(initialActivity);
-
-		while (!activities.isEmpty()) {
-			tmp = activities.pop(); 
-
-			if (tmp != null) {
-
-				// check if visited before
-				if (visitedActivities.contains(tmp)) {
-					continue;
-				}
-				paths.add(tmp.getIntraInterPaths());
-				for (IncidentActivity act : tmp.getNextActivities()) {
-					activities.add(act);
-				}
-
-				visitedActivities.add(tmp);
-			}
-
 		}
 
-		return paths;
-	}*/
+		return result;
+	}
+	/*
+	 * public LinkedList<HashMap<String, LinkedList<GraphPath>>>
+	 * getPathsForIncident() {
+	 * 
+	 * LinkedList<IncidentActivity> activities = new
+	 * LinkedList<IncidentActivity>(); LinkedList<IncidentActivity>
+	 * visitedActivities = new LinkedList<IncidentActivity>(); IncidentActivity
+	 * tmp; LinkedList<HashMap<String, LinkedList<GraphPath>>> paths = new
+	 * LinkedList<HashMap<String, LinkedList<GraphPath>>>();
+	 * 
+	 * IncidentActivity initialActivity = getInitialActivity();
+	 * activities.add(initialActivity);
+	 * 
+	 * while (!activities.isEmpty()) { tmp = activities.pop();
+	 * 
+	 * if (tmp != null) {
+	 * 
+	 * // check if visited before if (visitedActivities.contains(tmp)) {
+	 * continue; } paths.add(tmp.getIntraInterPaths()); for (IncidentActivity
+	 * act : tmp.getNextActivities()) { activities.add(act); }
+	 * 
+	 * visitedActivities.add(tmp); }
+	 * 
+	 * }
+	 * 
+	 * return paths; }
+	 */
 
 	/*
 	 * public void findAllPossiblePaths() {
@@ -730,7 +786,8 @@ public class PredicateHandler {
 		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
 		Activity tmp;
 
-		//assuming there is only one initial activity. can be extended to multi-initials
+		// assuming there is only one initial activity. can be extended to
+		// multi-initials
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
@@ -741,7 +798,7 @@ public class PredicateHandler {
 			}
 
 			for (Activity act : tmp.getNextActivities()) {
-				IncidentActivity incAct = (IncidentActivity)act;
+				IncidentActivity incAct = (IncidentActivity) act;
 				activitiesGraph.add(tmp.getName(), incAct.getName(), -1);
 				if (!acts.contains(incAct.getName())) {
 					acts.add(incAct);
@@ -763,8 +820,8 @@ public class PredicateHandler {
 				continue;
 			}
 			if (node.equals(endActivity)) {
-				//visited.add(node);
-				//addTransitiontoList(visited);
+				// visited.add(node);
+				// addTransitiontoList(visited);
 				LinkedList<String> newList = new LinkedList<String>();
 				newList.addAll(visited);
 				activitySequences.add(newList);
@@ -773,7 +830,7 @@ public class PredicateHandler {
 			}
 		}
 		for (String node : nodes) {
-			if (visited.contains(node) || node.equals(endActivity) ) {
+			if (visited.contains(node) || node.equals(endActivity)) {
 				continue;
 			}
 			visited.addLast(node);
@@ -781,60 +838,61 @@ public class PredicateHandler {
 			visited.removeLast();
 		}
 	}
-	
-	/*private void addTransitiontoList(List<String> transition, LinkedList<>) {
-		LinkedList<String> newList = new LinkedList<String>();
-		GraphPath path = new GraphPath();
 
-		newList.addAll(transition);
-		activitySequences.add(path);
+	/*
+	 * private void addTransitiontoList(List<String> transition, LinkedList<>) {
+	 * LinkedList<String> newList = new LinkedList<String>(); GraphPath path =
+	 * new GraphPath();
+	 * 
+	 * newList.addAll(transition); activitySequences.add(path);
+	 * 
+	 * }
+	 */
 
-	}
-	*/
-	
-	public LinkedList<LinkedList<String>> getActivitiesSequences(){
+	public LinkedList<LinkedList<String>> getActivitiesSequences() {
 		return getActivitiesSequences(getInitialActivity().getName(), getFinalActivity().getName());
 	}
-	
+
 	public LinkedList<LinkedList<String>> getActivitiesSequences(String initialActivity, String finalActivity) {
 		LinkedList<String> visited = new LinkedList<String>();
 		visited.add(initialActivity);
-		
-		if(activitySequences == null || activitySequences.size() == 0) {
+
+		if (activitySequences == null || activitySequences.size() == 0) {
 			depthFirst(finalActivity, visited);
 		}
-		
+
 		return activitySequences;
 	}
-	
+
 	public boolean areAllSatisfied() {
-		
+
 		IncidentActivity act = null;
-		
-		for(Activity activity : incidentActivities.values()) {
-			act = (IncidentActivity)activity;
-			if(!act.isActivitySatisfied()) {
+
+		for (Activity activity : incidentActivities.values()) {
+			act = (IncidentActivity) activity;
+			if (!act.isActivitySatisfied()) {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	public LinkedList<String> getActivitiesNotSatisfied() {
-		
+
 		LinkedList<String> names = new LinkedList<String>();
 		IncidentActivity act = null;
-		
-		for(Activity activity : incidentActivities.values()) {
-			act = (IncidentActivity)activity;
-			if(!act.isActivitySatisfied()) {
+
+		for (Activity activity : incidentActivities.values()) {
+			act = (IncidentActivity) activity;
+			if (!act.isActivitySatisfied()) {
 				names.add(act.getName());
 			}
 		}
-		
+
 		return names;
 	}
+
 	public void printAll() {
 		LinkedList<Activity> acts = new LinkedList<Activity>();
 		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
@@ -843,7 +901,7 @@ public class PredicateHandler {
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
-			tmp = (IncidentActivity)acts.pop();
+			tmp = (IncidentActivity) acts.pop();
 
 			if (tmp == null || actsVisited.contains(tmp)) {
 				continue;
@@ -851,19 +909,18 @@ public class PredicateHandler {
 
 			System.out.println("Activity name: " + tmp.getName());
 			System.out.println("**Paths from preconditions to postconditions within the activity");
-			/*for(Predicate p : tmp.getPredicates(PredicateType.Precondition)) {
-				System.out.println("predicate name: "+p.getName());
-				for(GraphPath pa : p.getPaths()) {
-					System.out.println(pa);
-				}
-			}*/
-			for(GraphPath p : tmp.getPathsBetweenPredicates()) {
+			/*
+			 * for(Predicate p : tmp.getPredicates(PredicateType.Precondition))
+			 * { System.out.println("predicate name: "+p.getName());
+			 * for(GraphPath pa : p.getPaths()) { System.out.println(pa); } }
+			 */
+			for (GraphPath p : tmp.getPathsBetweenPredicates()) {
 				System.out.println(p);
 			}
 			if (tmp.getNextActivities() != null && tmp.getNextActivities().size() > 0) {
-				
+
 				for (Activity act : tmp.getNextActivities()) {
-					IncidentActivity incAct = (IncidentActivity)act;
+					IncidentActivity incAct = (IncidentActivity) act;
 					System.out.println("**Paths from postconditions of current activity to preconditions of"
 							+ " next activity [" + act.getName() + "] are:");
 					for (GraphPath p : tmp.findPathsToNextActivity(incAct)) {
@@ -872,109 +929,305 @@ public class PredicateHandler {
 							acts.add(incAct);
 						}
 					}
-					
+
 					System.out.println("**Paths from preconditions of current activity to preconditions of next"
 							+ "activity are:");
-					for(GraphPath p : tmp.getPathsToNextActivity(incAct)) {
+					for (GraphPath p : tmp.getPathsToNextActivity(incAct)) {
 						System.out.println(p);
 					}
 				}
-				
-			} 
+
+			}
 			System.out.println();
 
 			actsVisited.add(tmp);
 		}
 	}
-	
+
 	public String getSummary() {
-		
+
 		LinkedList<Activity> acts = new LinkedList<Activity>();
 		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
 		IncidentActivity tmp;
 		StringBuilder res = new StringBuilder();
 		String newLine = "\n";
 		String separator = "###########################";
-		
+
 		updateInterStatesSatisfied();
-		
+
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
-			tmp = (IncidentActivity)acts.pop();
-			
+			tmp = (IncidentActivity) acts.pop();
+
 			if (tmp == null || actsVisited.contains(tmp)) {
 				continue;
 			}
-			
-			//get activity name
+
+			// get activity name
 			res.append(newLine).append(separator).append(newLine).append(">>>Activity name: " + tmp.getName());
-			
+
 			ArrayList<Predicate> pre = tmp.getPredicates(PredicateType.Precondition);
 			ArrayList<Predicate> post = tmp.getPredicates(PredicateType.Postcondition);
-			
-			//get preconditions
-			if(pre != null && !pre.isEmpty()) {
-				res.append(newLine).append(">>>Precondition: ").append(pre.get(0).getName()) //assumption made is that there is only one precondition
-				.append(newLine).append("States matched: ").append(pre.get(0).getBigraphStates())
-				//get states satisfying preconditions to postconditions within the activity, and states that satisfy condiitions between
-				//the post of current activity and the precondition of the next activity
-				.append(newLine).append("States satisfying intra-conditions (i.e. pre-post): ").append(pre.get(0).getStatesIntraSatisfied());
+
+			// get preconditions
+			if (pre != null && !pre.isEmpty()) {
+				res.append(newLine).append(">>>Precondition: ").append(pre.get(0).getName()) // assumption
+																								// made
+																								// is
+																								// that
+																								// there
+																								// is
+																								// only
+																								// one
+																								// precondition
+						.append(newLine).append("States matched: ").append(pre.get(0).getBigraphStates())
+						// get states satisfying preconditions to postconditions
+						// within the activity, and states that satisfy
+						// condiitions between
+						// the post of current activity and the precondition of
+						// the next activity
+						.append(newLine).append("States satisfying intra-conditions (i.e. pre-post): ")
+						.append(pre.get(0).getStatesIntraSatisfied());
 			}
-			
-			//get postcondition
-			if(post != null && !post.isEmpty()) {
-				res.append(newLine).append(">>>Postcondition: ").append(post.get(0).getName()) //assumption made is that there is only one precondition
-				.append(newLine).append("States matched: ").append(post.get(0).getBigraphStates())
-				//get states satisfying preconditions to postconditions within the activity, and states that satisfy condiitions between
-				//the post of current activity and the precondition of the next activity
-				.append(newLine).append("States satisfying intra-conditions (i.e. pre-post): ").append(post.get(0).getStatesIntraSatisfied())
-				.append(newLine).append("States satisfying inter-conditions (i.e. post-pre,next): ").append(post.get(0).getStatesInterSatisfied());
-				}
-			
-	
-			
+
+			// get postcondition
+			if (post != null && !post.isEmpty()) {
+				res.append(newLine).append(">>>Postcondition: ").append(post.get(0).getName()) // assumption
+																								// made
+																								// is
+																								// that
+																								// there
+																								// is
+																								// only
+																								// one
+																								// precondition
+						.append(newLine).append("States matched: ").append(post.get(0).getBigraphStates())
+						// get states satisfying preconditions to postconditions
+						// within the activity, and states that satisfy
+						// condiitions between
+						// the post of current activity and the precondition of
+						// the next activity
+						.append(newLine).append("States satisfying intra-conditions (i.e. pre-post): ")
+						.append(post.get(0).getStatesIntraSatisfied()).append(newLine)
+						.append("States satisfying inter-conditions (i.e. post-pre,next): ")
+						.append(post.get(0).getStatesInterSatisfied());
+			}
+
 			res.append(newLine).append(separator).append(newLine);
 			EList<Activity> next = tmp.getNextActivities();
 			if (next != null && next.size() > 0) {
-				for(Activity activity: next) {
-					IncidentActivity incAct = (IncidentActivity)activity;
-					if(!acts.contains(incAct)) {
+				for (Activity activity : next) {
+					IncidentActivity incAct = (IncidentActivity) activity;
+					if (!acts.contains(incAct)) {
 						acts.add(incAct);
 					}
 				}
 			}
 			actsVisited.add(tmp);
 		}
-		
+
 		return res.toString();
 	}
-	
+
 	public void updateInterStatesSatisfied() {
-		
+
 		LinkedList<Activity> acts = new LinkedList<Activity>();
 		LinkedList<Activity> actsVisited = new LinkedList<Activity>();
 		IncidentActivity tmp;
-		
+
 		acts.add(getInitialActivity());
 
 		while (!acts.isEmpty()) {
-			tmp = (IncidentActivity)acts.pop();
-			
+			tmp = (IncidentActivity) acts.pop();
+
 			if (tmp == null || actsVisited.contains(tmp)) {
 				continue;
 			}
-			
+
 			tmp.findPathsToNextActivities();
-			
+
 			for (Activity act : tmp.getNextActivities()) {
-				IncidentActivity incAct = (IncidentActivity)act;
-				if(!acts.contains(incAct)) {
+				IncidentActivity incAct = (IncidentActivity) act;
+				if (!acts.contains(incAct)) {
 					acts.add(incAct);
 				}
 			}
-			
+
 			actsVisited.add(tmp);
 		}
+	}
+
+	public List<GraphPath> findTransitions() {
+		
+		IncidentActivity sourceActivity = (IncidentActivity) getInitialActivity();
+		IncidentActivity destinationActivity = (IncidentActivity) getFinalActivity();
+
+		ArrayList<Predicate> preconditions = getPredicates(sourceActivity.getName(), PredicateType.Precondition);
+		ArrayList<Predicate> postconditions = getPredicates(destinationActivity.getName(), PredicateType.Postcondition);
+
+		Predicate precondition = preconditions.get(0);//assuming 1 precondition
+		List<Integer> preconditionStates = precondition!=null? precondition.getBigraphStates(): null;
+		
+		Predicate postcondition = postconditions.get(0);//assuming 1 precondition
+		List<Integer> postconditionStates = postcondition!=null? postcondition.getBigraphStates(): null;
+		
+		if(preconditionStates == null || preconditionStates.isEmpty()
+				|| postconditionStates == null || postconditionStates.isEmpty()) {
+			return null;
+		}
+		
+		this.preconditionStates = preconditionStates;
+		this.postconditionStates = postconditionStates;
+		
+		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
+		mainPool = new ForkJoinPool();
+		
+		List<GraphPath> result = mainPool.invoke(preMatcher);
+		
+		mainPool.shutdown();
+		
+		return result;
+		
+	}
+
+	class PreconditionMatcher extends RecursiveTask<List<GraphPath>> {
+
+		private static final long serialVersionUID = 1L;
+		private int indexStart;
+		private int indexEnd;
+		private List<GraphPath> result;
+		
+		// number of states in the precondition on which the division into sub
+		// threads should take place
+		private int preThreshold = 100;
+
+		public PreconditionMatcher(int indexStart, int indexEnd) {
+			this.indexStart = indexStart;
+			this.indexEnd = indexEnd;
+			result = new LinkedList<GraphPath>();
+		}
+		@Override
+		protected List<GraphPath> compute() {
+			if ((indexEnd - indexStart) > preThreshold) {
+				return ForkJoinTask.invokeAll(createSubTasks()).stream()
+						.map(new Function<PreconditionMatcher, List<GraphPath>>() {
+
+							@Override
+							public List<GraphPath> apply(PreconditionMatcher arg0) {
+								// TODO Auto-generated method stub
+								return arg0.result;
+							}
+
+						}).reduce(result, new BinaryOperator<List<GraphPath>>() {
+
+							@Override
+							public List<GraphPath> apply(List<GraphPath> arg0,
+									List<GraphPath> arg1) {
+								// TODO Auto-generated method stub
+								arg0.addAll(arg1);
+								return arg0;
+							}
+
+						});
+
+			} else {
+
+				// do the matching by slicing Assets to match to into different
+				// pieces
+				for (int i = indexStart; i < indexEnd; i++) {
+					int preconditionState = preconditionStates.get(i);
+					List<GraphPath> threadResult = mainPool
+							.invoke(new PostconditionMatcher(0, postconditionStates.size(), preconditionState));
+					result.addAll(threadResult);
+				}
+
+				return result;
+			}
+		}
+
+	protected List<PreconditionMatcher> createSubTasks() {
+			
+			List<PreconditionMatcher> dividedTasks = new LinkedList<PredicateHandler.PreconditionMatcher>();
+			
+			int mid = (indexStart + indexEnd) / 2;
+			
+			dividedTasks.add(new PreconditionMatcher(indexStart, mid));
+			dividedTasks.add(new PreconditionMatcher(mid, indexEnd));
+
+			return dividedTasks;
+		}
+
+	}
+	
+	class PostconditionMatcher extends RecursiveTask<List<GraphPath>> {
+
+		private static final long serialVersionUID = 1L;
+		private int indexStart;
+		private int indexEnd;
+		private int preState;
+		private List<GraphPath> result;
+		
+		// number of states in the precondition on which the division into sub
+		// threads should take place
+		private int postThreshold = 100;
+
+		public PostconditionMatcher(int indexStart, int indexEnd, int preState) {
+			this.indexStart = indexStart;
+			this.indexEnd = indexEnd;
+			this.preState = preState;
+			result = new LinkedList<GraphPath>();
+		}
+		@Override
+		protected List<GraphPath> compute() {
+			if ((indexEnd - indexStart) > postThreshold) {
+				return ForkJoinTask.invokeAll(createSubTasks()).stream()
+						.map(new Function<PostconditionMatcher, List<GraphPath>>() {
+
+							@Override
+							public List<GraphPath> apply(PostconditionMatcher arg0) {
+								// TODO Auto-generated method stub
+								return arg0.result;
+							}
+
+						}).reduce(result, new BinaryOperator<List<GraphPath>>() {
+
+							@Override
+							public List<GraphPath> apply(List<GraphPath> arg0,
+									List<GraphPath> arg1) {
+								// TODO Auto-generated method stub
+								arg0.addAll(arg1);
+								return arg0;
+							}
+
+						});
+
+			} else {
+
+				// do the matching by slicing Assets to match to into different
+				// pieces
+				List<GraphPath> stateResult;
+				for (int i = indexStart; i < indexEnd; i++) {
+					int postconditionState = postconditionStates.get(i);
+					stateResult = TransitionSystem.getTransitionSystemInstance().getPaths(postconditionState, preState);
+					result.addAll(stateResult);
+				}
+
+				return result;
+			}
+		}
+
+	protected List<PostconditionMatcher> createSubTasks() {
+			
+			List<PostconditionMatcher> dividedTasks = new LinkedList<PredicateHandler.PostconditionMatcher>();
+			
+			int mid = (indexStart + indexEnd) / 2;
+			
+			dividedTasks.add(new PostconditionMatcher(indexStart, mid, preState));
+			dividedTasks.add(new PostconditionMatcher(mid, indexEnd, preState));
+
+			return dividedTasks;
+		}
+		
 	}
 }

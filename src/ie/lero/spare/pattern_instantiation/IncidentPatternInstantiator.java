@@ -997,7 +997,9 @@ public class IncidentPatternInstantiator {
 				// LinkedList<GraphPath> paths =
 				// predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(),
 				// predicateHandler.getFinalActivity());
-				LinkedList<GraphPath> paths = predicateHandler.getPaths();
+//				LinkedList<GraphPath> paths = predicateHandler.getPaths();
+				
+				List<GraphPath> paths = predicateHandler.findTransitions();
 
 				// updated gui
 				if (listener != null) {
@@ -1239,12 +1241,12 @@ public class IncidentPatternInstantiator {
 		private String outputFileName;
 		private String[] systemAssetNames;
 		private String[] incidentEntityNames;
-		private LinkedList<GraphPath> paths;
+		private List<GraphPath> paths;
 		private int threadID;
 		// private BlockingQueue<String> msgQ = Logger.getInstance().getMsgQ();
 
 		public InstancesSaver(int threadID, String file, String[] entityNames, String[] astNames,
-				LinkedList<GraphPath> paths) {
+				List<GraphPath> paths) {
 
 			this.threadID = threadID;
 			outputFileName = file;
@@ -1351,10 +1353,10 @@ public class IncidentPatternInstantiator {
 		private int indexStart;
 		private int indexEnd;
 		private static final int THRESHOLD = 100;
-		private LinkedList<GraphPath> paths;
+		private List<GraphPath> paths;
 		private StringBuilder result;
 
-		public GraphPathsToStringConverter(int start, int end, LinkedList<GraphPath> paths) {
+		public GraphPathsToStringConverter(int start, int end, List<GraphPath> paths) {
 			this.paths = paths;
 			this.indexStart = start;
 			this.indexEnd = end;
@@ -1453,6 +1455,7 @@ public class IncidentPatternInstantiator {
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
 			System.out.println("\n\n");
+			System.out.println("Complete...");
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
@@ -1462,8 +1465,6 @@ public class IncidentPatternInstantiator {
 			}
 
 		}
-
-		System.out.println("Complete...");
 
 	}
 	
@@ -1495,6 +1496,7 @@ public class IncidentPatternInstantiator {
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
 			System.out.println("\n\n");
+			System.out.println("Complete...");
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
@@ -1505,7 +1507,7 @@ public class IncidentPatternInstantiator {
 
 		}
 
-		System.out.println("Complete...");
+		
 
 	}
 
