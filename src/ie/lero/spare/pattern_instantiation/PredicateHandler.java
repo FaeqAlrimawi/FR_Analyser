@@ -1209,7 +1209,7 @@ public class PredicateHandler {
 				List<GraphPath> stateResult;
 				for (int i = indexStart; i < indexEnd; i++) {
 					int postconditionState = postconditionStates.get(i);
-					stateResult = TransitionSystem.getTransitionSystemInstance().getPaths(postconditionState, preState);
+					stateResult = TransitionSystem.getTransitionSystemInstance().getPaths(preState, postconditionState);
 					result.addAll(stateResult);
 				}
 

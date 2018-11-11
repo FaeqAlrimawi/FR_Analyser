@@ -293,7 +293,7 @@ public class TransitionSystem {
 		return paths;
 	}
 
-	public LinkedList<GraphPath> getPaths(Integer srcState, Integer desState) {
+	public synchronized LinkedList<GraphPath> getPaths(Integer srcState, Integer desState) {
 		LinkedList<Integer> v = new LinkedList<Integer>();
 		paths = new LinkedList<GraphPath>();
 		predicateSrc = null;

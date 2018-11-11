@@ -549,7 +549,7 @@ public class BigraphAnalyser {
 		pred.setBigraphStates(statesResults);
 
 		logger.putMessage(
-				"Thread[" + threadID + "]>>BigraphAnalyser>>" + pred.getName() + "-states: " + pred.getBigraphStates());
+				"Thread[" + threadID + "]>>BigraphAnalyser>>" + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
 
 		if (isTestingTime) {
 			timer.stop();
