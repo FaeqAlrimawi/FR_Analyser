@@ -82,6 +82,9 @@ public class IncidentPatternInstantiator {
 	private static Map<String, String> assetControlMap;
 	private static String systemControlMapFileName = "./asset-control map.txt";
 
+	//BRS executor
+	SystemExecutor brsExecutor;
+	
 	private void runLogger() {
 
 		logger = Logger.getInstance();
@@ -336,6 +339,7 @@ public class IncidentPatternInstantiator {
 		// create a handler for bigrapher tool
 		BigrapherHandler bigrapherHandler = new BigrapherHandler(BRSFileName, outputFolder);
 
+		brsExecutor = bigrapherHandler;
 		// read states from the output folder then create Bigraph signature and
 		// convert states from JSON objects to Bigraph (from LibBig library)
 		// objects
@@ -596,25 +600,29 @@ public class IncidentPatternInstantiator {
 					return;
 				}
 			}
+			
+			logger.putMessage(
+					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
+
 			/***************/
 
-			// load systemClass-Control map
-			loadAssetControlMap(BRS_file);
-
 			// create a new transition file with labels
-			String outputFile = LabelExtractor.createNewLabelledTransitionFile();
+			logger.putMessage(">>Labelling transition system...");
+			String [] actionNames = brsExecutor!=null?brsExecutor.getActionNames():null;
+			String outputFile = TransitionSystem.getTransitionSystemInstance().createNewLabelledTransitionFile(actionNames);
+			
 			if (outputFile != null) {
 				logger.putMessage(">>New Labelled transitions is created: " + outputFile);
 			} else {
 				logger.putError(">>Failed to create a new labelled transition file");
 			}
 
+			// load systemClass-Control map
+			loadAssetControlMap(BRS_file);
+
 			// create a map of system class to possible controls (which are the
 			// class and its superclasses)
 			// generateAssetControlMap();
-
-			logger.putMessage(
-					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
 
 			// create threads that handle each sequence generated from asset
 			// matching

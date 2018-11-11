@@ -62,7 +62,7 @@ public class JSONTerms {
 	public static final String TRANSITIONS__TARGET = "target";
 	public static final String TRANSITIONS__SOURCE = "source";
 	public static final String TRANSITIONS__PROBABILITY = "probability";
-	public static final String TRANSITIONS__LABEL = "label";
+	public static final String TRANSITIONS__LABEL = "action";
 	
 	
 	

@@ -16,6 +16,7 @@ import org.eclipse.emf.common.util.EList;
 import cyberPhysical_Incident.Activity;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
+import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 
@@ -473,6 +474,9 @@ public class PredicateHandler {
 	 */
 	public LinkedList<GraphPath> getPaths() {
 		
+		Logger logger = Logger.getInstance();
+		
+		logger.putMessage("PredicateHandler>>Generating transitions...");
 		IncidentActivity sourceActivity = (IncidentActivity)getInitialActivity();
 		IncidentActivity destinationActivity = (IncidentActivity)getFinalActivity();
 		
@@ -493,6 +497,8 @@ public class PredicateHandler {
 				post.addPaths(paths);
 			}
 		}
+		
+		logger.putMessage("PredicateHandler>>Analysing generated transitions ["+paths.size()+"]...");
 		
 		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
 		
@@ -566,6 +572,8 @@ public class PredicateHandler {
 					}
 				}
 			}
+		
+		logger.putMessage("PredicateHandler>>Analysis is completed... resulted paths number ["+paths.size()+"]");
 		
 		return paths;
 	}

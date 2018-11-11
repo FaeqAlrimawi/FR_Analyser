@@ -12,5 +12,6 @@ public interface SystemExecutor {
 	public TransitionSystem getTransitionSystem();
 	public Signature getBigraphSignature();
 	public HashMap<Integer, Bigraph> getStates();
+	public String[] getActionNames();
 
 }

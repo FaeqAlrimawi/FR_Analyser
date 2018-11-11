@@ -1,6 +1,7 @@
 package ie.lero.spare.franalyser.utility;
 
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import ie.lero.spare.pattern_instantiation.GraphPath;
+import ie.lero.spare.pattern_instantiation.LabelExtractor;
 import ie.lero.spare.pattern_instantiation.Predicate;
 
 public class TransitionSystem {
@@ -23,7 +25,10 @@ public class TransitionSystem {
 	private LinkedList<GraphPath> paths;
 	private static String fileName;
 	private int numberOfStates;
-
+	
+	//used to label transition system
+	private String [] actionNames; 
+	
 	private TransitionSystem() {
 		transitionGraph = new Digraph<Integer>();
 		numberOfStates = -1;
@@ -33,6 +38,16 @@ public class TransitionSystem {
 //		createDigraph();
 		createDigraphFromJSON();
 	}
+	
+//	public TransitionSystem(Digraph<Integer> digraph) {
+//		transitionGraph = new Digraph<Integer>(digraph);
+//		numberOfStates = -1;
+//
+//		// fileName = BigraphAnalyser.getBigrapherExecutionOutputFolder() +
+//		// "/transitions";
+////		createDigraph();
+//		createDigraphFromJSON();
+//	}
 
 	public static TransitionSystem getTransitionSystemInstance() {
 
@@ -154,7 +169,7 @@ public class TransitionSystem {
 			
 			//label for action
 			objGeneral = tmpObj.get(JSONTerms.TRANSITIONS__LABEL);
-			label = objGeneral!=null? objGeneral.toString() : "";
+			label = objGeneral!=null? objGeneral.toString() : null;
 			
 			//if one of the states is not set to a proper state ( between 0 & Max-States-1)
 			if(st1 == -1 || st2 == -1) {
@@ -395,4 +410,18 @@ public class TransitionSystem {
 		transitionSystem = null;
 	}
 	
+	public void updateDigraphLabels(String[] actionNames) {
+		
+		LabelExtractor.updateDigraphLabels(actionNames);
+	}
+	
+	public String createNewLabelledTransitionFile(String [] actionNames) {
+		
+		LabelExtractor.updateDigraphLabels(actionNames);
+		return LabelExtractor.createNewLabelledTransitionFile();
+	}
+	
+	public void setActionNames(String [] actionNames) {
+		this.actionNames = Arrays.copyOf(actionNames, actionNames.length);
+	}
 }

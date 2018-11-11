@@ -56,6 +56,25 @@ public class Digraph<V> {
 
     private int nr_edges;
 
+    
+    public Digraph() {
+    	
+    }
+    
+    public Digraph(Digraph<V> digraph) {
+    	
+    	String label = null;
+    	double prob = -1;
+    	
+    	for(V srcNode : digraph.getNodes()) {
+    		for(V desNode : digraph.outboundNeighbors(srcNode)) {
+    			label = digraph.getLabel(srcNode, desNode);
+    			prob = digraph.getProbability(srcNode, desNode);
+    			this.add(srcNode, desNode, prob, label);
+    		}
+    	}
+    }
+    
     /**
      * String representation of graph.
      */

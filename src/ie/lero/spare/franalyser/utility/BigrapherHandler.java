@@ -39,6 +39,8 @@ public class BigrapherHandler implements SystemExecutor {
 	private String transitionFileNameJSON = "transitions.json";
 	private Signature bigraphSignature;
 	private static HashMap<Integer, Bigraph> states;
+	private String [] actionNames;
+	
 	/*private ForkJoinPool mainPool;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;*/
@@ -429,13 +431,13 @@ public class BigrapherHandler implements SystemExecutor {
 		createTransitionSystem();
 		
 		//keywords used to identify actions performed in BRS
-		String [] rulesKeywords = {"EnterRoom", "ExitRoom","ConnectIPDevice", "DisconnectIPDevice", "ConnectBusDevice", "DisconnectBusDevice", "SendData"
-									, "DisableHVAC", "EnterRoomWithoutCardReader", "ChangeContextToOutSideWorkingHours", "ChangeContextToWorkingHours"};
+//		String [] actionNames = {"EnterRoom", "ExitRoom","ConnectIPDevice", "DisconnectIPDevice", "ConnectBusDevice", "DisconnectBusDevice", "SendData"
+//									, "DisableHVAC", "EnterRoomWithoutCardReader", "ChangeContextToOutSideWorkingHours", "ChangeContextToWorkingHours"};
 		
 		//update digraph with action labels
-		rulesKeywords = getActionNamesFromBRSFile();
+//		actionNames = getActionNamesFromBRSFile();
 		
-		LabelExtractor.updateDigraphLabels(rulesKeywords);
+//		transitionSystem.updateDigraphLabels(rulesKeywords);
 		
 		return transitionSystem;
 	}
@@ -1067,6 +1069,16 @@ public class BigrapherHandler implements SystemExecutor {
 	public HashMap<Integer, Bigraph> getStates() {
 		// TODO Auto-generated method stub
 		return loadStates();
+	}
+
+	@Override
+	public String[] getActionNames() {
+		
+		if(actionNames == null || actionNames.length == 0) {
+			actionNames = getActionNamesFromBRSFile();
+		}
+		
+		return actionNames;
 	}
 
 /*	class StateLoader extends RecursiveTask<HashMap<Integer, Bigraph>> {

@@ -28,10 +28,12 @@ public class LabelExtractor {
 	// private String transitionFileName = "transitions.txt";
 	// private String predicateFilePath = outputPath+"/pred";
 	// private ArrayList<ReactionRule> reactionRules;
-	private static String rulesKeywordsFileName = "rules_keywords.txt"; // defualt file
-																	// name for
-																	// the
-																	// keywords
+	private static String rulesKeywordsFileName = "actionNames.txt"; // defualt
+																		// file
+																		// name
+																		// for
+																		// the
+																		// keywords
 	private static String outputFileName = "transitions_labelled.json";
 	private static String[] rulesKeywords;
 	private static TransitionSystem transitionSystem = TransitionSystem.getTransitionSystemInstance();
@@ -70,21 +72,21 @@ public class LabelExtractor {
 	 * target state. The Digraph in the TransitionSystem class is updated after
 	 * this with the labels name
 	 */
-	public static Digraph<Integer> updateDigraphLabels(String [] actionNames) {
+	public static Digraph<Integer> updateDigraphLabels(String[] actionNames) {
 
-		if(actionNames == null || actionNames.length  == 0) {
+		if (actionNames == null || actionNames.length == 0) {
 			return null;
 		}
-		
+
 		outputFolder = SystemInstanceHandler.getOutputFolder();
 		transitionSystem = TransitionSystem.getTransitionSystemInstance();
-		
+
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		ArrayList<String> labels = new ArrayList<String>();
 		String label = "";
 
 		rulesKeywords = Arrays.copyOf(actionNames, actionNames.length);
-		
+
 		if (rulesKeywords == null || rulesKeywords.length == 0) {
 			rulesKeywords = FileManipulator.readFile(outputFolder + "/" + rulesKeywordsFileName);
 
@@ -94,13 +96,17 @@ public class LabelExtractor {
 			}
 		}
 
+		//for each src and des states, if they are not labelled then find a label
 		for (Integer stateSrc : digraph.getNodes()) {
-			// System.out.println(stateSrc);
-			// System.out.println(digraph.outboundNeighbors(stateSrc));
 			for (Integer stateDes : digraph.outboundNeighbors(stateSrc)) {
-				label = updateTransitionLabel(stateSrc, stateDes);
-				labels.add(label);
-				digraph.setLabel(stateSrc, stateDes, label);
+
+				label = digraph.getLabel(stateSrc, stateDes);
+
+				if (label == null || label.isEmpty()) {
+					label = updateTransitionLabel(stateSrc, stateDes);
+					labels.add(label);
+					digraph.setLabel(stateSrc, stateDes, label);
+				}
 			}
 		}
 
@@ -192,7 +198,7 @@ public class LabelExtractor {
 		try {
 			r1 = new FileReader(outputFolder + "/" + stateSrc + ".json");
 			r2 = new FileReader(outputFolder + "/" + stateDes + ".json");
-			
+
 			JSONObject src = (JSONObject) parser.parse(r1);
 			JSONObject des = (JSONObject) parser.parse(r2);
 
@@ -247,7 +253,7 @@ public class LabelExtractor {
 			r2.close();
 			src = null;
 			des = null;
-			
+
 			// System.out.println(state.toString());
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -264,7 +270,7 @@ public class LabelExtractor {
 	}
 
 	public static String createNewLabelledTransitionFile() {
-		
+
 		StringBuilder res = new StringBuilder();
 		// ArrayList<Integer> nodes = (ArrayList)
 		// transitionSystem.getDigraph().getNodes();
@@ -276,103 +282,98 @@ public class LabelExtractor {
 		// ").append(digraph.getNumberOfEdges()).append("\r\n");
 
 		File file = new File(newFileName);
-		
-		//if the file is already created then no need to create it again
-		if(file.exists()) {
+
+		// if the file is already created then no need to create it again
+		if (file.exists()) {
 			return newFileName;
 		}
-		
-		//if there is no transition digraph
-		if(transitionSystem == null || transitionSystem.getDigraph() == null) {
+
+		// if there is no transition digraph
+		if (transitionSystem == null || transitionSystem.getDigraph() == null) {
 			return null;
 		}
-		
+
 		JSONParser parser = new JSONParser();
-		
+
 		try {
 
 			JSONObject originalObj = (JSONObject) parser.parse(new FileReader(TransitionSystem.getFileName()));
 
 			String brsType = null;
-			
-			//set brs type (i.e. brs, pbrs, or sbrs)
-			if(originalObj.containsKey(JSONTerms.TRANSITIONS_BRS)) {
+
+			// set brs type (i.e. brs, pbrs, or sbrs)
+			if (originalObj.containsKey(JSONTerms.TRANSITIONS_BRS)) {
 				brsType = JSONTerms.TRANSITIONS_BRS;
-			} else if(originalObj.containsKey(JSONTerms.TRANSITIONS__PROP_BRS)) {
+			} else if (originalObj.containsKey(JSONTerms.TRANSITIONS__PROP_BRS)) {
 				brsType = JSONTerms.TRANSITIONS__PROP_BRS;
-			}else if(originalObj.containsKey(JSONTerms.TRANSITIONS__STOCHASTIC_BRS)) {
+			} else if (originalObj.containsKey(JSONTerms.TRANSITIONS__STOCHASTIC_BRS)) {
 				brsType = JSONTerms.TRANSITIONS__STOCHASTIC_BRS;
 			}
-			
-			//default is brs
-			if(brsType == null || brsType.isEmpty()) {
+
+			// default is brs
+			if (brsType == null || brsType.isEmpty()) {
 				brsType = JSONTerms.TRANSITIONS_BRS;
 			}
-			
+
 			res.append("{\"").append(brsType).append("\": [");
-			
+
 			for (Integer state : transitionSystem.getDigraph().getNodes()) {
 				for (Integer stateDes : digraph.outboundNeighbors(state)) {
 					prob = digraph.getProbability(state, stateDes);
 					label = digraph.getLabel(state, stateDes);
 					if (prob != -1) {
 						if (label != null && !label.isEmpty()) {
-							res.append("{\"source\":").append(state)
-							.append(",\"target\":").append(stateDes)
-							.append(",\"prob\":").append(prob)
-							.append(", \"action\":").append(label)
-							.append("},");
+							res.append("{\"source\":").append(state).append(",\"target\":").append(stateDes)
+									.append(",\"prob\":").append(prob).append(", \"action\":").append(label)
+									.append("},");
 						} else {
-							res.append("{\"source\":").append(state)
-							.append(",\"target\":").append(stateDes)
-							.append(",\"prob\":").append(prob)
-							.append("},");
-//							res.append(state).append(" ").append(stateDes).append(" ").append(prob).append("\r\n");
+							res.append("{\"source\":").append(state).append(",\"target\":").append(stateDes)
+									.append(",\"prob\":").append(prob).append("},");
+							// res.append(state).append("
+							// ").append(stateDes).append("
+							// ").append(prob).append("\r\n");
 						}
 					} else {
 						if (label != null && !label.isEmpty()) {
-							res.append("{\"source\":").append(state)
-							.append(",\"target\":").append(stateDes)
-							.append(", \"action\":").append(label)
-							.append("},");
+							res.append("{\"source\":").append(state).append(",\"target\":").append(stateDes)
+									.append(", \"action\":").append(label).append("},");
 						} else {
-							res.append("{\"source\":").append(state)
-							.append(",\"target\":").append(stateDes)
-							.append("},");
+							res.append("{\"source\":").append(state).append(",\"target\":").append(stateDes)
+									.append("},");
 						}
 					}
 				}
 			}
 
-			//remove last comma
-			res.deleteCharAt(res.length()-1);
-			
-			//close the json object
+			// remove last comma
+			res.deleteCharAt(res.length() - 1);
+
+			// close the json object
 			res.append("]}");
-			
+
 			org.json.JSONObject objLabelled = new org.json.JSONObject(res.toString());
-//			
-//			// write the new file
-//			BufferedWriter writer;
-//
-//			writer = new BufferedWriter(new FileWriter(outputFolder + "/" + newFileName));
-//
-//			writer.write(res.toString());
-//
-//			writer.close();
-			
+			//
+			// // write the new file
+			// BufferedWriter writer;
+			//
+			// writer = new BufferedWriter(new FileWriter(outputFolder + "/" +
+			// newFileName));
+			//
+			// writer.write(res.toString());
+			//
+			// writer.close();
+
 			try (final BufferedWriter writer = Files.newBufferedWriter(file.toPath())) {
 				writer.write(objLabelled.toString(4));
 			}
-			
+
 			return newFileName;
-			
+
 		} catch (Exception e1) { // TODO Auto-generated catch
 			e1.printStackTrace();
 			return null;
 		}
-		
-		
+
 	}
 
 	public String getOutputPath() {
@@ -557,10 +558,10 @@ public class LabelExtractor {
 		// it requires adding controls that identify the action in each reaction
 		// rule
 		// it also requires the Digraph of the transition system created
-//		ex.updateDigraphLabels();
+		// ex.updateDigraphLabels();
 
 		// this creates a new transitions file with the labels
-//		ex.createNewLabelledTransitionFile();
+		// ex.createNewLabelledTransitionFile();
 
 	}
 

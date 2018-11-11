@@ -64,8 +64,8 @@ public class BigraphAnalyser {
 	private int thresholdResidue;
 	private static final int Adjust_Threshold_State_Number = 1000;
 	
-	//2.5%, this is related to having 4 threads available in a system (i.e. 4 CPUs available) 
-	private static final double PERCENTAGE__OF_STATES = 0.025; 
+	//1.25%, this is related to having 2 threads available in a system (i.e. 2 CPUs available) 
+	private static final double PERCENTAGE__OF_STATES = 0.0125; 
 	
 	private static final int DEFAULT_THRESHOLD = 100;
 	private static final int MINIMUM_THRESHOLD = 10;
