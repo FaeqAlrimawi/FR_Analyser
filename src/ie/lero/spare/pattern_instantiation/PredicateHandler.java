@@ -1088,7 +1088,7 @@ public class PredicateHandler {
 
 		transitions = mainPool.invoke(preMatcher);
 
-		analyseTransitions(sourceActivity, destinationActivity);
+//		analyseTransitions(sourceActivity, destinationActivity);
 		
 		mainPool.shutdown();
 
