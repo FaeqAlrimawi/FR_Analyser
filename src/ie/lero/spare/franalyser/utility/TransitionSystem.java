@@ -248,7 +248,7 @@ public class TransitionSystem {
 		return paths;
 	}
 
-	public LinkedList<GraphPath> getPaths(Predicate predSrc, Predicate predDes, boolean useSatisfiedStates) {
+	public synchronized LinkedList<GraphPath> getPaths(Predicate predSrc, Predicate predDes, boolean useSatisfiedStates) {
 		LinkedList<Integer> v = new LinkedList<Integer>();
 		predicateSrc = predSrc;
 		predicateDes = predDes;
@@ -325,6 +325,7 @@ public class TransitionSystem {
 	}
 
 	private void depthFirst(Digraph<Integer> graph, LinkedList<Integer> visited) {
+		
 		List<Integer> nodes = graph.outboundNeighbors(visited.getLast());
 
 		// examine adjacent nodes

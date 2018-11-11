@@ -1001,9 +1001,11 @@ public class IncidentPatternInstantiator {
 				// LinkedList<GraphPath> paths =
 				// predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(),
 				// predicateHandler.getFinalActivity());
-				// LinkedList<GraphPath> paths = predicateHandler.getPaths();
+				 LinkedList<GraphPath> paths = predicateHandler.getPaths();
 
-				List<GraphPath> paths = predicateHandler.findTransitions();
+				//using threading to find transitions. insure that prallelism will not cause problems! 
+				//(might have some issues, more testing is required)
+//				List<GraphPath> paths = predicateHasndler.findTransitions();
 
 				// updated gui
 				if (listener != null) {
