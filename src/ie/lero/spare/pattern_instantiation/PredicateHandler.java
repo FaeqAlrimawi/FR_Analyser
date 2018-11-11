@@ -38,12 +38,14 @@ public class PredicateHandler {
 	private Digraph<String> activitiesGraph;
 	private LinkedList<LinkedList<String>> activitySequences;
 
+	//generated transitions 
+	List<GraphPath> transitions;
 	
-	//used for transition generation by the recursive task
+	// used for transition generation by the recursive task
 	private List<Integer> preconditionStates;
 	private List<Integer> postconditionStates;
 	private ForkJoinPool mainPool;
-	
+
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
 		incidentActivities = new HashMap<String, Activity>();
@@ -1059,36 +1061,124 @@ public class PredicateHandler {
 	}
 
 	public List<GraphPath> findTransitions() {
-		
+
 		IncidentActivity sourceActivity = (IncidentActivity) getInitialActivity();
 		IncidentActivity destinationActivity = (IncidentActivity) getFinalActivity();
 
 		ArrayList<Predicate> preconditions = getPredicates(sourceActivity.getName(), PredicateType.Precondition);
 		ArrayList<Predicate> postconditions = getPredicates(destinationActivity.getName(), PredicateType.Postcondition);
 
-		Predicate precondition = preconditions.get(0);//assuming 1 precondition
-		List<Integer> preconditionStates = precondition!=null? precondition.getBigraphStates(): null;
-		
-		Predicate postcondition = postconditions.get(0);//assuming 1 precondition
-		List<Integer> postconditionStates = postcondition!=null? postcondition.getBigraphStates(): null;
-		
-		if(preconditionStates == null || preconditionStates.isEmpty()
-				|| postconditionStates == null || postconditionStates.isEmpty()) {
+		Predicate precondition = preconditions.get(0);// assuming 1 precondition
+		List<Integer> preconditionStates = precondition != null ? precondition.getBigraphStates() : null;
+
+		Predicate postcondition = postconditions.get(0);// assuming 1
+														// precondition
+		List<Integer> postconditionStates = postcondition != null ? postcondition.getBigraphStates() : null;
+
+		if (preconditionStates == null || preconditionStates.isEmpty() || postconditionStates == null
+				|| postconditionStates.isEmpty()) {
 			return null;
 		}
-		
+
 		this.preconditionStates = preconditionStates;
 		this.postconditionStates = postconditionStates;
-		
+
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
 		mainPool = new ForkJoinPool();
-		
-		List<GraphPath> result = mainPool.invoke(preMatcher);
+
+		transitions = mainPool.invoke(preMatcher);
+
+		analyseTransitions(sourceActivity, destinationActivity);
 		
 		mainPool.shutdown();
-		
-		return result;
-		
+
+		return transitions;
+
+	}
+
+	protected void analyseTransitions(IncidentActivity sourceActivity, IncidentActivity destinationActivity) {
+
+		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
+
+		// add the first and the last activities
+		activities.addFirst(sourceActivity);
+		activities.addLast(destinationActivity);
+
+		boolean isCheckingPrecondition = true;
+		// boolean isCheckingPostcondition = false;
+
+		// check if each path contains at least one of the satisfied states for
+		// each activity
+		// can be parallelised
+		ListIterator<GraphPath> pathsIterator = transitions.listIterator();
+		ListIterator<Activity> activitiesIterator = activities.listIterator();
+
+		if (activities != null) {
+			while (pathsIterator.hasNext()) {
+
+				GraphPath path = pathsIterator.next();
+				LinkedList<Integer> states = path.getStateTransitions();
+
+				int j = 0;
+
+				isCheckingPrecondition = true;
+
+				activitiesIterator = activities.listIterator();
+
+				outerLoop: while (activitiesIterator.hasNext()) {
+					IncidentActivity activity = (IncidentActivity) activitiesIterator.next();
+
+					// get precondition of the activity (assumption: there is
+					// only one precondition)
+					Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
+					LinkedList<Integer> preStates = pre.getBigraphStates();
+
+					// get precondition of the activity (assumption: there is
+					// only one postcondition)
+					Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
+					LinkedList<Integer> postStates = post.getBigraphStates();
+
+					// assumption: each predicate should satisfy different state
+					// in the transition
+					for (; j < states.size(); j++) { // last state is for the
+														// src and des
+														// activities
+						int state = states.get(j);
+
+						// if it is the last element and either it is still
+						// checking the precondition or the postcondition does
+						// not contain the state then remove the path and break
+						// to outerloop if there are still activities to iterate
+						if (j == states.size() - 1 && (activitiesIterator.hasNext() || 
+								// or if it is the last activity but it is still checking precondition														// over
+								isCheckingPrecondition || 
+								// or if it is last activity and and the postcondition does not have the state as one of its own
+								!postStates.contains(state))) {
+							pathsIterator.remove();
+							break outerLoop;
+						}
+
+						// find a match for the precondition
+						if (isCheckingPrecondition) {
+							if (!preStates.contains(state)) {
+								continue;
+							} else {
+								isCheckingPrecondition = false;
+							}
+
+							// find a match for the postcondition
+						} else {
+							if (!postStates.contains(state)) {
+								continue;
+							} else {
+								isCheckingPrecondition = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	class PreconditionMatcher extends RecursiveTask<List<GraphPath>> {
@@ -1097,7 +1187,7 @@ public class PredicateHandler {
 		private int indexStart;
 		private int indexEnd;
 		private List<GraphPath> result;
-		
+
 		// number of states in the precondition on which the division into sub
 		// threads should take place
 		private int preThreshold = 100;
@@ -1107,6 +1197,7 @@ public class PredicateHandler {
 			this.indexEnd = indexEnd;
 			result = new LinkedList<GraphPath>();
 		}
+
 		@Override
 		protected List<GraphPath> compute() {
 			if ((indexEnd - indexStart) > preThreshold) {
@@ -1122,8 +1213,7 @@ public class PredicateHandler {
 						}).reduce(result, new BinaryOperator<List<GraphPath>>() {
 
 							@Override
-							public List<GraphPath> apply(List<GraphPath> arg0,
-									List<GraphPath> arg1) {
+							public List<GraphPath> apply(List<GraphPath> arg0, List<GraphPath> arg1) {
 								// TODO Auto-generated method stub
 								arg0.addAll(arg1);
 								return arg0;
@@ -1146,12 +1236,12 @@ public class PredicateHandler {
 			}
 		}
 
-	protected List<PreconditionMatcher> createSubTasks() {
-			
+		protected List<PreconditionMatcher> createSubTasks() {
+
 			List<PreconditionMatcher> dividedTasks = new LinkedList<PredicateHandler.PreconditionMatcher>();
-			
+
 			int mid = (indexStart + indexEnd) / 2;
-			
+
 			dividedTasks.add(new PreconditionMatcher(indexStart, mid));
 			dividedTasks.add(new PreconditionMatcher(mid, indexEnd));
 
@@ -1159,7 +1249,7 @@ public class PredicateHandler {
 		}
 
 	}
-	
+
 	class PostconditionMatcher extends RecursiveTask<List<GraphPath>> {
 
 		private static final long serialVersionUID = 1L;
@@ -1167,7 +1257,7 @@ public class PredicateHandler {
 		private int indexEnd;
 		private int preState;
 		private List<GraphPath> result;
-		
+
 		// number of states in the precondition on which the division into sub
 		// threads should take place
 		private int postThreshold = 100;
@@ -1178,6 +1268,7 @@ public class PredicateHandler {
 			this.preState = preState;
 			result = new LinkedList<GraphPath>();
 		}
+
 		@Override
 		protected List<GraphPath> compute() {
 			if ((indexEnd - indexStart) > postThreshold) {
@@ -1193,8 +1284,7 @@ public class PredicateHandler {
 						}).reduce(result, new BinaryOperator<List<GraphPath>>() {
 
 							@Override
-							public List<GraphPath> apply(List<GraphPath> arg0,
-									List<GraphPath> arg1) {
+							public List<GraphPath> apply(List<GraphPath> arg0, List<GraphPath> arg1) {
 								// TODO Auto-generated method stub
 								arg0.addAll(arg1);
 								return arg0;
@@ -1217,17 +1307,17 @@ public class PredicateHandler {
 			}
 		}
 
-	protected List<PostconditionMatcher> createSubTasks() {
-			
+		protected List<PostconditionMatcher> createSubTasks() {
+
 			List<PostconditionMatcher> dividedTasks = new LinkedList<PredicateHandler.PostconditionMatcher>();
-			
+
 			int mid = (indexStart + indexEnd) / 2;
-			
+
 			dividedTasks.add(new PostconditionMatcher(indexStart, mid, preState));
 			dividedTasks.add(new PostconditionMatcher(mid, indexEnd, preState));
 
 			return dividedTasks;
 		}
-		
+
 	}
 }

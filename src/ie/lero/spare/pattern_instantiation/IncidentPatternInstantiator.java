@@ -1428,7 +1428,7 @@ public class IncidentPatternInstantiator {
 
 		// test
 		// test();
-
+//		lero10();
 	}
 
 	public static void test() {
@@ -1460,7 +1460,7 @@ public class IncidentPatternInstantiator {
 			Runtime.getRuntime().gc();
 			System.out.println("Complete...");
 			System.out.println("\n\n");
-		
+
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
@@ -1502,7 +1502,7 @@ public class IncidentPatternInstantiator {
 			Runtime.getRuntime().gc();
 			System.out.println("Complete...");
 			System.out.println("\n\n");
-	
+
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
