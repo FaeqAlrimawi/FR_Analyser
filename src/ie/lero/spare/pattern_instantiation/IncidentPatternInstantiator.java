@@ -652,8 +652,8 @@ public class IncidentPatternInstantiator {
 			// instances.add(executor.submit(incidentInstances[i]));
 			// }
 			/** for testing **/
-			incidentInstances[0] = new PotentialIncidentInstance(lst.get(0), incidentAssetNames, 0);
-			instances.add(executor.submit(incidentInstances[0]));
+//			incidentInstances[0] = new PotentialIncidentInstance(lst.get(0), incidentAssetNames, 0);
+//			instances.add(executor.submit(incidentInstances[0]));
 			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
 			instances.add(executor.submit(incidentInstances[2]));
 
