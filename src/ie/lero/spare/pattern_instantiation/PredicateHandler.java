@@ -1437,6 +1437,7 @@ public class PredicateHandler {
 			this.indexStart = startIndex;
 			this.indexEnd  = endIndex;
 			this.activities = activities;
+			transitionsToRemove = new LinkedList<GraphPath>();
 		}
 		
 		@Override
