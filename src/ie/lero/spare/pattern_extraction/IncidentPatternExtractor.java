@@ -250,10 +250,10 @@ public class IncidentPatternExtractor {
 
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
-//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
 //		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 //		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
 //		ModelsHandler.addActivityPattern(collectDataPatternFileName2);

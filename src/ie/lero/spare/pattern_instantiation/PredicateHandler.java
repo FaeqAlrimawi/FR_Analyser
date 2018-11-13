@@ -1083,6 +1083,9 @@ public class PredicateHandler {
 		this.preconditionStates = preconditionStates;
 		this.postconditionStates = postconditionStates;
 
+		//generate nodes neighbor in the digraph to reduce processing time for threads that will be created next
+		TransitionSystem.getTransitionSystemInstance().getDigraph().generateNeighborNodesMap();
+		
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
 		mainPool = new ForkJoinPool();
 
@@ -1187,6 +1190,7 @@ public class PredicateHandler {
 		private int indexStart;
 		private int indexEnd;
 		private List<GraphPath> result;
+	
 
 		// number of states in the precondition on which the division into sub
 		// threads should take place
@@ -1257,7 +1261,10 @@ public class PredicateHandler {
 		private int indexEnd;
 		private int preState;
 		private List<GraphPath> result;
-
+		private List<GraphPath> localResult;
+		private Integer startState;
+		private Integer endState;
+		private Digraph<Integer> transitionDigraph = TransitionSystem.getTransitionSystemInstance().getDigraph();
 		// number of states in the precondition on which the division into sub
 		// threads should take place
 		private int postThreshold = 100;
@@ -1299,7 +1306,7 @@ public class PredicateHandler {
 				List<GraphPath> stateResult;
 				for (int i = indexStart; i < indexEnd; i++) {
 					int postconditionState = postconditionStates.get(i);
-					stateResult = TransitionSystem.getTransitionSystemInstance().getPaths(preState, postconditionState);
+					stateResult = getPaths(preState, postconditionState);
 					result.addAll(stateResult);
 				}
 
@@ -1317,6 +1324,76 @@ public class PredicateHandler {
 			dividedTasks.add(new PostconditionMatcher(mid, indexEnd, preState));
 
 			return dividedTasks;
+		}
+		
+		public List<GraphPath> getPaths(Integer srcState, Integer desState) {
+			LinkedList<Integer> v = new LinkedList<Integer>();
+			localResult = new LinkedList<GraphPath>();
+//			predicateSrc = null;
+//			predicateDes = null;
+			GraphPath tmpG;
+			LinkedList<Integer> tmp;
+
+			// adds the state itself if both the source and the destination states
+			// are the same
+			if (srcState.equals(desState)) {
+				tmpG = new GraphPath();
+				tmpG.setPredicateSrc(null);
+				tmpG.setPredicateDes(null);
+				tmp = new LinkedList<Integer>();
+				tmp.add(srcState);
+				tmp.add(srcState);
+				tmpG.setStateTransitions(tmp);
+				localResult.add(tmpG);
+
+				return localResult;
+			}
+
+			this.startState = srcState;
+			v.add(this.startState);
+			this.endState = desState;
+			depthFirst( v);
+
+			return localResult;
+		}
+
+		private void depthFirst(LinkedList<Integer> visited) {
+			
+			List<Integer> nodes = transitionDigraph.outboundNeighborsForTransitionGeneration(visited.getLast());
+
+			// examine adjacent nodes
+			for (Integer node : nodes) {
+				if (visited.contains(node)) {
+					continue;
+				}
+				if (node.equals(endState)) {
+					visited.add(node);
+					addTransitiontoList(visited);
+					visited.removeLast();
+					break;
+				}
+			}
+			for (Integer node : nodes) {
+				if (visited.contains(node) || node.equals(endState)) {
+					continue;
+				}
+				visited.addLast(node);
+				depthFirst(visited);
+				visited.removeLast();
+			}
+		}
+
+		private void addTransitiontoList(List<Integer> transition) {
+			LinkedList<Integer> newList = new LinkedList<Integer>();
+			GraphPath path = new GraphPath();
+
+			newList.addAll(transition);
+
+//			path.setPredicateSrc(null);
+//			path.setPredicateDes(null);
+			path.setStateTransitions(newList);
+			localResult.add(path);
+
 		}
 
 	}

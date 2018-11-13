@@ -53,6 +53,7 @@ public class Digraph<V> {
      */
 
     private Map<V, List<Edge<V>>> neighbors = new HashMap<V, List<Edge<V>>>();
+    private Map<V, List<V>> neighborNodes = new HashMap<V, List<V>>();
 
     private int nr_edges;
 
@@ -141,6 +142,19 @@ public class Digraph<V> {
         return list;
     }
 
+    public List<V> outboundNeighborsForTransitionGeneration(V vertex) {
+        
+    	return neighborNodes.get(vertex);
+       
+    }
+    
+    public void generateNeighborNodesMap() {
+    	
+    	for(V node : this.getNodes()) {
+    		neighborNodes.put(node, outboundNeighbors(node));
+    	}
+    }
+    
     public List<V> inboundNeighbors(V inboundVertex) {
         List<V> inList = new ArrayList<V>();
         for (V to : neighbors.keySet()) {
