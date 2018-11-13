@@ -1005,7 +1005,7 @@ public class IncidentPatternInstantiator {
 
 				//using threading to find transitions. insure that prallelism will not cause problems! 
 				//(might have some issues, more testing is required)
-				List<GraphPath> paths = predicateHandler.findTransitions();
+				List<GraphPath> paths = predicateHandler.findTransitions(threadID);
 
 				// updated gui
 				if (listener != null) {
@@ -1013,7 +1013,7 @@ public class IncidentPatternInstantiator {
 				}
 
 				// save and analyse generated paths there are any
-				if (paths.size() > 0) {
+				if (paths != null && paths.size() > 0) {
 
 					// create and run an instance saver to store instances to a
 					// file
