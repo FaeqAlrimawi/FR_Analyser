@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -1104,9 +1105,9 @@ public class PredicateHandler {
 
 		TransitionAnalyser analyser = new TransitionAnalyser(0, transitions.size(), activities);
 		// analyseTransitions(sourceActivity, destinationActivity);
-
-		logger.putMessage("Thread[" + threadID
-				+ "]>>PredicateHandler>>Removing from identified transitions ("+transitions.size()+") those that don't contain a state from each activity...");
+		
+		logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>>Removing from identified transitions ("
+				+ transitions.size() + ") those that don't contain a state from each activity...");
 		List<GraphPath> transitionToRemove = mainPool.invoke(analyser);
 
 		if (transitionToRemove != null && !transitionToRemove.isEmpty()) {
@@ -1472,9 +1473,7 @@ public class PredicateHandler {
 
 			} else {
 
-//				for (int i = indexStart; i < indexEnd; i++) {
-					analyseTransitions();
-//				}
+				analyseTransitions();
 			}
 
 			return transitionsToRemove;

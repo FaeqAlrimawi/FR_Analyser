@@ -392,7 +392,7 @@ public class IncidentPatternInstantiator {
 		String NIISystemModel_ubuntu = "/home/faeq/Desktop/NII/NII_ext.cps";
 
 		String systemModelFile = NIISystemModel;
-		String incidentPatternFile = NIIncidentInstance;
+		String incidentPatternFile = NIIgeneratedIncidentPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
