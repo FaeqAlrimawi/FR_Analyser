@@ -391,8 +391,8 @@ public class IncidentPatternInstantiator {
 		String NIISystemModel = "D:/Bigrapher data/NII/NII_ext.cps";
 		String NIISystemModel_ubuntu = "/home/faeq/Desktop/NII/NII_ext.cps";
 
-		String systemModelFile = leroSystemModel;
-		String incidentPatternFile = dataCollectionPattern;
+		String systemModelFile = NIISystemModel;
+		String incidentPatternFile = NIIncidentInstance;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
@@ -647,17 +647,16 @@ public class IncidentPatternInstantiator {
 			memory = runtime.totalMemory() - runtime.freeMemory();
 			logger.putMessage(">>Memory before executing sets: " + memory + "Bytes");
 
-			// for (int i = 0; i < lst.size(); i++) {// adjust the length
-			// incidentInstances[i] = new PotentialIncidentInstance(lst.get(i),
-			// incidentAssetNames, i);
-			// instances.add(executor.submit(incidentInstances[i]));
-			// }
+			for (int i = 0; i < lst.size(); i++) {// adjust the length
+				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
+				instances.add(executor.submit(incidentInstances[i]));
+			}
 			/** for testing **/
-			 incidentInstances[0] = new PotentialIncidentInstance(lst.get(0),
-			 incidentAssetNames, 0);
-			 instances.add(executor.submit(incidentInstances[0]));
-			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
-			instances.add(executor.submit(incidentInstances[2]));
+//			 incidentInstances[0] = new PotentialIncidentInstance(lst.get(0),
+//			 incidentAssetNames, 0);
+//			 instances.add(executor.submit(incidentInstances[0]));
+//			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
+//			instances.add(executor.submit(incidentInstances[2]));
 
 			for (Future<Integer> fut : instances) {
 				if (!fut.isDone()) {
