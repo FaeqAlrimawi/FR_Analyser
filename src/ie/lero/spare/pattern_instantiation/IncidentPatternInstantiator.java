@@ -647,14 +647,14 @@ public class IncidentPatternInstantiator {
 			memory = runtime.totalMemory() - runtime.freeMemory();
 			logger.putMessage(">>Memory before executing sets: " + memory + "Bytes");
 
-			for (int i = 0; i < lst.size(); i++) {// adjust the length
-				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-				instances.add(executor.submit(incidentInstances[i]));
-			}
+//			for (int i = 0; i < lst.size(); i++) {// adjust the length
+//				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
+//				instances.add(executor.submit(incidentInstances[i]));
+//			}
 			/** for testing **/
-//			 incidentInstances[0] = new PotentialIncidentInstance(lst.get(0),
-//			 incidentAssetNames, 0);
-//			 instances.add(executor.submit(incidentInstances[0]));
+			 incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
+			 incidentAssetNames, 1);
+			 instances.add(executor.submit(incidentInstances[1]));
 //			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
 //			instances.add(executor.submit(incidentInstances[2]));
 

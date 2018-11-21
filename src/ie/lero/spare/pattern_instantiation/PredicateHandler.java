@@ -1472,9 +1472,9 @@ public class PredicateHandler {
 
 			} else {
 
-				for (int i = indexStart; i < indexEnd; i++) {
+//				for (int i = indexStart; i < indexEnd; i++) {
 					analyseTransitions();
-				}
+//				}
 			}
 
 			return transitionsToRemove;
