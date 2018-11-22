@@ -1530,13 +1530,18 @@ public class PredicateHandler {
 						// is
 						// only one precondition)
 						Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
-						LinkedList<Integer> preStates = pre.getBigraphStates();
+						LinkedList<Integer> preStates = pre != null ? pre.getBigraphStates() : null;
 
 						// get precondition of the activity (assumption: there
 						// is
 						// only one postcondition)
 						Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
-						LinkedList<Integer> postStates = post.getBigraphStates();
+						LinkedList<Integer> postStates = post != null ? post.getBigraphStates() : null;
+
+						// the activity has no pre or post conditions, then move to the next activity
+						if (pre == null && post == null) {
+							continue;
+						}
 
 						// assumption: each predicate should satisfy different
 						// state
@@ -1557,22 +1562,29 @@ public class PredicateHandler {
 							if (j == states.size() - 1 && (activitiesIterator.hasNext() ||
 							// or if it is the last activity but it is still
 							// checking precondition // over
-									isCheckingPrecondition ||
+									(preStates != null && isCheckingPrecondition) ||
 									// or if it is last activity and and the
 									// postcondition does not have the state as
 									// one of its own
-									!postStates.contains(state))) {
+									(postStates != null && !postStates.contains(state)))) {
 								// pathsIterator.remove();
 								transitionsToRemove.add(path);
 								break outerLoop;
 							}
 
 							// find a match for the precondition
-							if (isCheckingPrecondition) {
+							if (isCheckingPrecondition && preStates != null) {
+								//if no match is found then move to next state in transition
 								if (!preStates.contains(state)) {
 									continue;
+									//else, if a state matches a precondition state, then move to the postcondition, if there's one, if not then break to next activity
 								} else {
-									isCheckingPrecondition = false;
+									if (postStates != null) {
+										isCheckingPrecondition = false;
+									} else {
+										isCheckingPrecondition = true;
+										break;
+									}
 								}
 
 								// find a match for the postcondition
@@ -1591,4 +1603,5 @@ public class PredicateHandler {
 		}
 
 	}
+
 }
