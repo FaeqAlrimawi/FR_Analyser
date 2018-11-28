@@ -296,7 +296,7 @@ public class IncidentPatternExtractor {
 		// =======Abstract Activities====================
 		logger.putMessage("## Extract Activities ##");
 
-		/** 1-Find mapsmatches for all patterns in the incident model **/
+		/** 1-Find map matches for all patterns in the incident model **/
 		logger.putMessage("Map activity patterns to the sequence of actions");
 
 		mapPatterns();
