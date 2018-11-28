@@ -322,7 +322,7 @@ public class BigrapherStatesDivider {
 
 		BigrapherStatesDivider divider = new BigrapherStatesDivider();
 
-		String folderName = "D:/Bigrapher data/lero/lero100K/states/divided_states/states_100003";
+		String folderName = "D:/Bigrapher data/lero/lero100K/states_70000";
 		int dividNumber = 10000;
 
 		divider.divideStates(folderName, dividNumber);

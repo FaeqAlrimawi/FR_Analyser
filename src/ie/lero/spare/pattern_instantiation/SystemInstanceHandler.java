@@ -16,57 +16,58 @@ public class SystemInstanceHandler {
 	private static Signature globalBigraphSignature;
 	private static boolean isDebugging = true;
 	private static String errorSign = "## ";
+	private static Logger logger;
 	
 	public static boolean analyseBRS() {
 		
 		boolean isDone = false;
 //		BlockingQueue<String> msgQ = Logger.getInstance().getMsgQ();
-		Logger logger = Logger.getInstance();
+//		Logger logger = Logger.getInstance();
 
 		if (executor == null) {
-			logger.putError("BRSHandler>> Bigraph System Executor is not set");
+			logger.putError("SystemInstanceHandler>> Bigraph System Executor is not set");
 			isDone = false;
 		} else {
-			logger.putMessage("BRSHandler>> Executing the Bigraphical Reactive System (BRS)...");
+			logger.putMessage("SystemInstanceHandler>> Executing the Bigraphical Reactive System (BRS)...");
 			outputFolder = executor.execute();
 
 			if (outputFolder != null) {
-				logger.putMessage("BRSHandler>> Creating Bigraph Signature...");
+				logger.putMessage("SystemInstanceHandler>> Creating Bigraph Signature...");
 
 				// get the signature
 				globalBigraphSignature = executor.getBigraphSignature();
 
 				if (globalBigraphSignature != null) {
 				} else {
-					logger.putMessage("BRSHandler>> " + errorSign + "Something went wrong creating the Bigraph signature");
+					logger.putMessage("SystemInstanceHandler>> " + errorSign + "Something went wrong creating the Bigraph signature");
 					isDone = false;
 				}
 
-				logger.putMessage("BRSHandler>> Creating Bigraph transition system...");
+				logger.putMessage("SystemInstanceHandler>> Creating Bigraph transition system...");
 				// get the transition system
 				transitionSystem = executor.getTransitionSystem();
 
 				if (transitionSystem != null) {
 				} else {
-					logger.putMessage("BRSHandler>> " + errorSign
+					logger.putMessage("SystemInstanceHandler>> " + errorSign
 							+ "something went wrong while creating the Bigraph transition system");
 					isDone = false;
 				}
 
-				logger.putMessage("BRSHandler>> Loading states...");
+				logger.putMessage("SystemInstanceHandler>> Loading states...");
 				// gete states as Bigraph objects
 				states = executor.getStates();
 
 				if (states != null) {
 				} else {
-					logger.putMessage("BRSHandler>> " + errorSign
+					logger.putMessage("SystemInstanceHandler>> " + errorSign
 							+ "something went wrong while loading the Bigraph system states");
 					isDone = false;
 				}
 
 				isDone = true;
 			} else {
-				logger.putMessage("BRSHandler>> " + errorSign + "something went wrong while executing the BRS");
+				logger.putMessage("SystemInstanceHandler>> " + errorSign + "something went wrong while executing the BRS");
 				isDone = false;
 			}
 		}
@@ -120,6 +121,10 @@ public class SystemInstanceHandler {
 		return analyseSystem(fileName);
 	}*/
 
+	public static void setLogger(Logger logger) {
+		SystemInstanceHandler.logger = logger;
+	}
+	
 	public static String getOutputFolder() {
 		return outputFolder;
 	}

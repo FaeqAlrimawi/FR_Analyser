@@ -87,7 +87,7 @@ public class IncidentPatternInstantiator {
 
 	private void runLogger() {
 
-		logger = Logger.getInstance();
+		logger = new Logger();
 
 		logger.setListener(listener);
 		logger.setPrintToScreen(isPrintToScreen);
@@ -227,8 +227,8 @@ public class IncidentPatternInstantiator {
 			for (int i = 0; i < lst.size(); i++) {// adjust the length
 				if (isPrintToScreen && i >= 100) {
 					isPrintToScreen = false;
-					System.out.println("-... [See log file (" + Logger.getInstance().getLogFolder() + "/"
-							+ Logger.getInstance().getLogFileName() + ") for the rest]");
+					System.out.println("-... [See log file (" + logger.getLogFolder() + "/"
+							+ logger.getLogFileName() + ") for the rest]");
 				}
 				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
 			}
@@ -343,7 +343,7 @@ public class IncidentPatternInstantiator {
 		// read states from the output folder then create Bigraph signature and
 		// convert states from JSON objects to Bigraph (from LibBig library)
 		// objects
-
+		SystemInstanceHandler.setLogger(logger);
 		SystemInstanceHandler.setExecutor(bigrapherHandler);
 
 		return SystemInstanceHandler.analyseBRS();
@@ -655,8 +655,8 @@ public class IncidentPatternInstantiator {
 			 incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
 			 incidentAssetNames, 1);
 			 instances.add(executor.submit(incidentInstances[1]));
-//			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
-//			instances.add(executor.submit(incidentInstances[2]));
+			incidentInstances[0] = new PotentialIncidentInstance(lst.get(0), incidentAssetNames, 0);
+			instances.add(executor.submit(incidentInstances[0]));
 
 			for (Future<Integer> fut : instances) {
 				if (!fut.isDone()) {
@@ -801,7 +801,7 @@ public class IncidentPatternInstantiator {
 
 	}
 
-	protected static void loadAssetControlMap(String systemFileName) {
+	protected void loadAssetControlMap(String systemFileName) {
 
 		assetControlMap = new HashMap<String, String>();
 
@@ -827,14 +827,14 @@ public class IncidentPatternInstantiator {
 
 		}
 
-		Logger.getInstance().putMessage(">>System-Class<->Control map is created.");
+		logger.putMessage(">>System-Class<->Control map is created.");
 		if (!unMatchedControls.isEmpty()) {
-			Logger.getInstance().putMessage(">>Some Controls in the map have no equivalent in (" + systemFileName + "):"
+			logger.putMessage(">>Some Controls in the map have no equivalent in (" + systemFileName + "):"
 					+ Arrays.toString(unMatchedControls.toArray()));
 		}
 	}
 
-	public static Map<String, String> getAssetControlMap() {
+	public Map<String, String> getAssetControlMap() {
 
 		if (assetControlMap == null || assetControlMap.isEmpty()) {
 			loadAssetControlMap(null);
@@ -922,7 +922,7 @@ public class IncidentPatternInstantiator {
 				}
 
 				PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentEntityNames,
-						systemAssetControls);
+						systemAssetControls, assetControlMap, logger);
 				PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
 
 				StringBuilder str = new StringBuilder();
@@ -946,7 +946,10 @@ public class IncidentPatternInstantiator {
 				 * updated in the predicates, which can be accessed through
 				 * predicateHandler
 				 **/
-				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID);
+				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID, logger);
+				
+				//set logger for bigraph analyser
+//				analyser.setLogger(logger);
 
 				// set the number of activities to execute in parallel
 				analyser.setNumberofParallelActivity(getNumberOfParallelActivities());
@@ -1454,7 +1457,7 @@ public class IncidentPatternInstantiator {
 
 			// reset
 			ins = null;
-			Logger.setInstanceNull();
+//			Logger.setInstanceNull();
 			TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
@@ -1496,7 +1499,7 @@ public class IncidentPatternInstantiator {
 
 			// reset
 			ins = null;
-			Logger.setInstanceNull();
+//			Logger.setInstanceNull();
 			TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");

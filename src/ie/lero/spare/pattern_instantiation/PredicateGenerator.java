@@ -31,18 +31,39 @@ public class PredicateGenerator {
 	private String[] incidentAssetNames;
 	// private boolean isDebugging = true;
 	private String[] systemAssetControls;
-
+	private Logger logger;
+	
 	// used to find a map of an asset to a control
 	private Map<String, String> assetControlMap;
 
-	public PredicateGenerator() {
-		predHandler = new PredicateHandler();
+//	public PredicateGenerator() {
+//		
+//		this(null, null);
+//	}
+//	
+//	public PredicateGenerator(Map<String, String> assetControlMap) {
+//
+//		this(assetControlMap, null);
+//	}
+//	
+//	public PredicateGenerator(Map<String, String> assetControlMap, Logger logger) {
+//		predHandler = new PredicateHandler();
+//
+//		this.assetControlMap = assetControlMap;
+////		loadAssetControlMap();
+//		
+//		this.logger = logger;
+//
+//	}
 
-		assetControlMap = IncidentPatternInstantiator.getAssetControlMap();
-//		loadAssetControlMap();
-
+	public void setAssetControlMap(Map<String, String> assetControlMap) {
+		this.assetControlMap = assetControlMap;
 	}
-
+	
+	public void setLogger(Logger logger) {
+		this.logger = logger;
+	}
+	
 //	protected void loadAssetControlMap() {
 //
 //		assetControlMap = new HashMap<String, String>();
@@ -81,11 +102,16 @@ public class PredicateGenerator {
 	 * incidentAssetNames = map.getIncidentEntityNames(); }
 	 */
 
-	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName, String[] systemAssetControl) {
-		this();
+	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName, String[] systemAssetControl
+			, Map<String, String> assetControlMap, Logger logger) {
+//		this();
 		spaceAssetSet = systemAsset;
 		this.incidentAssetNames = incidentAssetName;
 		this.systemAssetControls = systemAssetControl;
+		
+		this.assetControlMap = assetControlMap;
+		this.logger = logger;
+		this.predHandler = new PredicateHandler(logger);
 	}
 
 	private HashMap<String, Activity> createIncidentActivities() {
@@ -315,7 +341,7 @@ public class PredicateGenerator {
 		}
 
 		if (!unMatchedEntityNames.isEmpty()) {
-			Logger.getInstance().putError("PredicateGenerator>>Some entities in condition [" + conditionName
+			logger.putError("PredicateGenerator>>Some entities in condition [" + conditionName
 					+ "] have no map to incident entities:" + Arrays.toString(unMatchedEntityNames.toArray()));
 			return false;
 		}

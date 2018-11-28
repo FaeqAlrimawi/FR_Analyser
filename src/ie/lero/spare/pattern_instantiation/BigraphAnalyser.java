@@ -98,11 +98,16 @@ public class BigraphAnalyser {
 
 	public BigraphAnalyser(PredicateHandler predHandler, int threadID) {
 
+		this(predHandler, threadID, null);
+	}
+	
+	public BigraphAnalyser(PredicateHandler predHandler, int threadID, Logger logger) {
+
 		states = SystemInstanceHandler.getStates();
 		matcher = new Matcher();
 		// bigraphMatcher = new it.uniud.mads.jlibbig.core.std.BigraphMatcher();
 		// msgQ = Logger.getInstance().getMsgQ();
-		logger = Logger.getInstance();
+		this.logger = logger;
 		predicateHandler = predHandler;
 		this.threadID = threadID;
 //		mainPool = new ForkJoinPool();
@@ -229,6 +234,10 @@ public class BigraphAnalyser {
 		int numberOfThreads = Runtime.getRuntime().availableProcessors();
 		
 		return analyse(numberOfThreads);
+	}
+	
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 	
 	public PredicateHandler analyse(int numberOfThreads) {

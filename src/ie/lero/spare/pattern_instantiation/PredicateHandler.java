@@ -38,7 +38,7 @@ public class PredicateHandler {
 	private HashMap<String, Activity> incidentActivities;
 	private Digraph<String> activitiesGraph;
 	private LinkedList<LinkedList<String>> activitySequences;
-
+	private Logger logger;
 	// generated transitions
 	List<GraphPath> transitions;
 
@@ -51,9 +51,20 @@ public class PredicateHandler {
 		predicates = new HashMap<String, Predicate>();
 		incidentActivities = new HashMap<String, Activity>();
 		activitySequences = new LinkedList<LinkedList<String>>();
-
+		logger = null;
 	}
 
+	public PredicateHandler(Logger logger) {
+	this();
+	this.logger = logger;
+	
+	}
+	
+	public void setLogger(Logger logger) {
+		
+		this.logger = logger;
+	}
+	
 	public HashMap<String, Predicate> getPredicates() {
 		return predicates;
 	}
@@ -520,8 +531,6 @@ public class PredicateHandler {
 	 * @return
 	 */
 	public LinkedList<GraphPath> getPaths() {
-
-		Logger logger = Logger.getInstance();
 
 		logger.putMessage("PredicateHandler>>Generating transitions...");
 		IncidentActivity sourceActivity = (IncidentActivity) getInitialActivity();
@@ -1062,8 +1071,6 @@ public class PredicateHandler {
 	}
 
 	public List<GraphPath> findTransitions(int threadID) {
-
-		Logger logger = Logger.getInstance();
 
 		IncidentActivity sourceActivity = (IncidentActivity) getInitialActivity();
 		IncidentActivity destinationActivity = (IncidentActivity) getFinalActivity();

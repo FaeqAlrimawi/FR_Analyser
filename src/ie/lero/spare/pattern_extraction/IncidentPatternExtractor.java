@@ -74,9 +74,9 @@ public class IncidentPatternExtractor {
 
 	// the key is an integer that represents an activity pattern id taken from
 	// the list of activity patterns
-	// and the value is a list where each entry in the list represents a map,
-	// and a map is the sequence of activities (or actions) in the incident
-	// instance
+	// and the value is a list where each entry in the list represents a map to
+	// the sequence of actions (or activities),
+	// A map is the sequence of activities (or actions) in the incident instance
 	// e.g. entry 0,1 refers to the sequence of actions/activities in an
 	// incident model that corresponds to pattern ID [0] and Map ID [1]
 	protected Map<Integer, List<int[]>> allPatternsMaps = new HashMap<Integer, List<int[]>>();
@@ -86,7 +86,7 @@ public class IncidentPatternExtractor {
 	protected int[] patternSeverityLevels;
 
 	// the key is an integer which represents an activity pattern id
-	// the value is a list where each entry refers to a Map id and the activity
+	// the value is a list where each index (position in the list) refers to a Map id and the activity
 	// represents an abstraction for that entry
 	// e.g., entry 0,1 has an abstract activity that corresponds to the sequence
 	// of actions of the same entry (0,1) in the variable allPatternsMaps
@@ -127,14 +127,14 @@ public class IncidentPatternExtractor {
 
 	// maximum abstraction level
 	protected final int MAX_ABSTRACTION_LEVEL = 10;
-	
-	//default abstraction level for all entities
+
+	// default abstraction level for all entities
 	protected final int DEFAULT_ABSTRACTION_LEVEL = 0;
 
 	// Logging
 	protected Logger logger;
 	protected boolean isPrintToScreen = true;
-	protected boolean isSaveLog = true;
+	protected boolean isSaveLog = false;
 	protected String outputFolder;
 
 	private void runLogger() {
@@ -145,7 +145,7 @@ public class IncidentPatternExtractor {
 			outputFolder = ".";
 		}
 
-		logger = Logger.getInstance();
+		logger = new Logger();
 
 		logger.setPrintToScreen(isPrintToScreen);
 		logger.setSaveLog(isSaveLog);
@@ -254,11 +254,11 @@ public class IncidentPatternExtractor {
 		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
 		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-//		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		// ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+		// ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		// ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		// ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 
@@ -402,10 +402,10 @@ public class IncidentPatternExtractor {
 	 */
 	public void updateMatchedPatternsInModel() {
 
-		if(allPatternsMaps == null || allPatternsMaps.isEmpty()) {
+		if (allPatternsMaps == null || allPatternsMaps.isEmpty()) {
 			return;
 		}
-		
+
 		// calculates the severity level of each maps
 		calculateMapsSeveriy();
 
@@ -585,7 +585,8 @@ public class IncidentPatternExtractor {
 				entityMap.clear();
 				isptrPreMatched = false;
 
-				// compare precondition (true(pre), false(post)) of the first activity
+				// compare precondition (true(pre), false(post)) of the first
+				// activity
 				isptrPreMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, true, false);
 
 				// if match found
@@ -593,7 +594,8 @@ public class IncidentPatternExtractor {
 
 					entityMaps.add(new HashMap<String, String>(entityMap));
 
-					// compare precondition (false (pre), true (post)) of the first activity
+					// compare precondition (false (pre), true (post)) of the
+					// first activity
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 
 					if (isptrPostMatched) {
@@ -660,7 +662,7 @@ public class IncidentPatternExtractor {
 
 					currentActivity = next;
 
-					//compare postconditions
+					// compare postconditions
 					isptrPostMatched = comparePatternIncidentActivities(ptrActivity, currentActivity, false, true);
 
 					// if there is a match from one of the activities
@@ -1796,7 +1798,7 @@ public class IncidentPatternExtractor {
 		removedEntities = abstractIncidentModel.removeUnusedEntities();
 
 		entities = abstractIncidentModel.getEntity();
-		
+
 		// create an abstract entity for each instance entity using system
 		// assets
 		for (IncidentEntity entity : entities) {
@@ -1851,10 +1853,10 @@ public class IncidentPatternExtractor {
 		// setting type name using the classMap
 		// takes the first option (i.e. 0) other options are more abstract
 
-//		for (Entry<String, List<String>> entry : classMap.entrySet()) {
-//			System.out.println(entry.getKey() + " " + entry.getValue());
-//		}
-		
+		// for (Entry<String, List<String>> entry : classMap.entrySet()) {
+		// System.out.println(entry.getKey() + " " + entry.getValue());
+		// }
+
 		incidentEntityTypeName = getAbstractType(systemAsset);
 
 		type.setName(incidentEntityTypeName);
@@ -1982,43 +1984,46 @@ public class IncidentPatternExtractor {
 	}
 
 	protected String getAbstractType(environment.Asset systemAsset) {
-		
+
 		String type = "";
-		
+
 		if (classMap == null || classMap.isEmpty()) {
 			classMap = generateAssetClassAbstractionLevels();
 		}
 
-		//get asset class name
+		// get asset class name
 		String assetClassName = systemAsset.getClass().getSimpleName().replace("Impl", "");
-		
-		//get abstraction classes for the asset class (e.g., smart light, computing device)
+
+		// get abstraction classes for the asset class (e.g., smart light,
+		// computing device)
 		List<String> abstractionLevels = classMap.get(assetClassName);
-		
-		//determine which level of abstraction to choose from the list of levels
-		if(abstractionLevels != null && !abstractionLevels.isEmpty()) {
-			
-			//use the level of abstractions map to determine required level
+
+		// determine which level of abstraction to choose from the list of
+		// levels
+		if (abstractionLevels != null && !abstractionLevels.isEmpty()) {
+
+			// use the level of abstractions map to determine required level
 			Integer levelIndex = classAbstractionLevelMap.get(assetClassName);
-			
-			if(levelIndex != null && levelIndex > 0 && 
-					levelIndex < abstractionLevels.size()) {
-				
+
+			if (levelIndex != null && levelIndex > 0 && levelIndex < abstractionLevels.size()) {
+
 				type = abstractionLevels.get(levelIndex);
-			
-				//if there's no level specified for the asset class then get the default	
+
+				// if there's no level specified for the asset class then get
+				// the default
 			} else {
 				type = abstractionLevels.get(DEFAULT_ABSTRACTION_LEVEL);
 			}
-			
-		//if the asset class name is not in the map, then the type of the entity will be the same as the class	
+
+			// if the asset class name is not in the map, then the type of the
+			// entity will be the same as the class
 		} else {
 			type = assetClassName;
 		}
-		
+
 		return type;
 	}
-	
+
 	protected void updateCrimeScriptData() {
 
 		/**
@@ -2062,7 +2067,7 @@ public class IncidentPatternExtractor {
 
 		Map<String, List<String>> classMap = new HashMap<String, List<String>>();
 		Map<String, Integer> defaultAbstractionLevel = new HashMap<String, Integer>();
-		
+
 		String className = null;
 
 		for (Method mthd : packageMethods) {
@@ -2102,8 +2107,8 @@ public class IncidentPatternExtractor {
 
 				// add new entry to the map
 				classMap.put(className, classHierarchy);
-				
-				//default class abstaction is the same class
+
+				// default class abstaction is the same class
 				defaultAbstractionLevel.put(className, DEFAULT_ABSTRACTION_LEVEL);
 
 			} catch (ClassNotFoundException e) {
@@ -2113,11 +2118,11 @@ public class IncidentPatternExtractor {
 			}
 		}
 
-		//set default abstraction level
-		
+		// set default abstraction level
+
 		this.classMap = classMap;
 		this.classAbstractionLevelMap = defaultAbstractionLevel;
-		
+
 		return classMap;
 	}
 
@@ -2329,11 +2334,12 @@ public class IncidentPatternExtractor {
 		} else {
 
 			if (isDecorated) {
-				str.append("\n======= ["+activity.getName()+"] Info=============================================\n");
+				str.append(
+						"\n======= [" + activity.getName() + "] Info=============================================\n");
 			} else {
 				str.append("====== [").append(activity.getName()).append("] ======\n");
 			}
-//			str.append("Name: ").append(activity.getName()).append("\n");
+			// str.append("Name: ").append(activity.getName()).append("\n");
 			str.append("Initiator: ").append(
 					activity.getInitiator() != null ? ((IncidentEntity) activity.getInitiator()).getName() : nullValue)
 					.append("\n");
@@ -2356,7 +2362,6 @@ public class IncidentPatternExtractor {
 			str.append("Type: ").append(activity.getType()).append("\n");
 			str.append("Behaviour: ").append(activity.getBehaviourType()).append("\n");
 
-			
 			if (isDecorated) {
 				str.append("=================================================================");
 			} else {
@@ -2389,10 +2394,8 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		str.append("\n=======Original Model============================================\n");
-		
-		str.append("Activity Sequence:")
-		.append(getIncidentModelActivitySequence(originalIncidentModel))
-		.append("\n\n");
+
+		str.append("Activity Sequence:").append(getIncidentModelActivitySequence(originalIncidentModel)).append("\n\n");
 
 		if (printActivitiesInfo) {
 			Activity orgAct = originalIncidentModel.getInitialActivity();
@@ -2414,13 +2417,11 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		str.append("\n========Abstract Model===========================================\n");
-		
-		str.append("Activity Sequence:")
-		.append(getIncidentModelActivitySequence(abstractIncidentModel))
-		.append("\n\n");
-		
+
+		str.append("Activity Sequence:").append(getIncidentModelActivitySequence(abstractIncidentModel)).append("\n\n");
+
 		if (printActivitiesInfo) {
-		
+
 			Activity orgAct = abstractIncidentModel.getInitialActivity();
 			Activity orgNxt = !orgAct.getNextActivities().isEmpty() ? orgAct.getNextActivities().get(0) : null;
 
@@ -2473,36 +2474,36 @@ public class IncidentPatternExtractor {
 			str.append("\n=======Abstracted Actions========================================\n");
 		}
 
-		if(abstractedActivities.isEmpty()) {
+		if (abstractedActivities.isEmpty()) {
 			str.append("NONE\n");
 		} else {
-		str.append("[Action sequence removed] ==> [Abstract activity added] [Pattern used]\n");
+			str.append("[Action sequence removed] ==> [Abstract activity added] [Pattern used]\n");
 
-		for (Entry<Activity, List<Activity>> entry : abstractedActivities.entrySet()) {
+			for (Entry<Activity, List<Activity>> entry : abstractedActivities.entrySet()) {
 
-			// add actions
-			for (Activity act : entry.getValue()) {
-				str.append(act.getName()).append("->");
-			}
-			str.deleteCharAt(str.lastIndexOf(">"));
-			str.deleteCharAt(str.lastIndexOf("-"));
+				// add actions
+				for (Activity act : entry.getValue()) {
+					str.append(act.getName()).append("->");
+				}
+				str.deleteCharAt(str.lastIndexOf(">"));
+				str.deleteCharAt(str.lastIndexOf("-"));
 
-			// add abstract activity
-			str.append(" ==> ").append(entry.getKey().getName());
+				// add abstract activity
+				str.append(" ==> ").append(entry.getKey().getName());
 
-			// add pattern used
-			loop1: for (Entry<Integer, List<Activity>> lst : potentialAbstractActivities.entrySet()) {
-				for (Activity act : lst.getValue()) {
-					if (act.equals(entry.getKey())) {
-						str.append(" (").append(activityPatterns.get(lst.getKey()).getName()).append(")\n");
-						break loop1;
+				// add pattern used
+				loop1: for (Entry<Integer, List<Activity>> lst : potentialAbstractActivities.entrySet()) {
+					for (Activity act : lst.getValue()) {
+						if (act.equals(entry.getKey())) {
+							str.append(" (").append(activityPatterns.get(lst.getKey()).getName()).append(")\n");
+							break loop1;
+						}
 					}
 				}
-			}
 
+			}
 		}
-		}
-		
+
 		if (isDecorated) {
 			str.append("=================================================================");
 		}

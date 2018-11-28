@@ -26,7 +26,7 @@ public class Logger implements Runnable {
 	// private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy
 	// HH:mm:ss");
 	private DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
-	private static Logger logger = null;
+//	private static Logger logger = null;
 	private Thread thread;
 	public static final int MSG_INFO = 0;
 	public static final int MSG_ERROR = 1;
@@ -37,7 +37,8 @@ public class Logger implements Runnable {
 	private static String terminatingStringWithDelimiter = terminatingString + msgTypeDelimiter + MSG_INFO;
 
 	private static final String SEPARATOR = "*=========================================================================================================*";
-	private Logger() {
+	
+	public Logger() {
 
 		timeNow = LocalDateTime.now();
 		// set log file name
@@ -46,15 +47,23 @@ public class Logger implements Runnable {
 		
 		// createLogFile();
 	}
-
-	public static Logger getInstance() {
-
-		if (logger == null) {
-			logger = new Logger();
-		}
-
-		return logger;
+	
+	public Logger(String fileName) {
+		
+		// set log file name
+		logFileName = fileName;
+		
+		// createLogFile();
 	}
+
+//	public static Logger getInstance() {
+//
+//		if (logger == null) {
+//			logger = new Logger();
+//		}
+//
+//		return logger;
+//	}
 
 	public BufferedWriter createLogFile() {
 
@@ -101,7 +110,7 @@ public class Logger implements Runnable {
 
 		try {
 
-			String msg = (String) logger.msgQ.take();
+			String msg = (String) this.msgQ.take();
 			
 			// terminating message ends wirting and closes the file
 			while (!msg.equals(Logger.terminatingStringWithDelimiter)) {
@@ -275,8 +284,8 @@ public class Logger implements Runnable {
 		thread.start();
 	}
 	
-	public static void setInstanceNull() {
-		
-		logger = null;
-	}
+//	public static void setInstanceNull() {
+//		
+//		logger = null;
+//	}
 }
