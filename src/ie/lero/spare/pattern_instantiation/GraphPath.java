@@ -10,13 +10,19 @@ public class GraphPath {
 
 	private Predicate predicateSrc;
 	private Predicate predicateDes;
-	LinkedList<Integer> stateTransitions;
+	private LinkedList<Integer> stateTransitions;
+	private SystemInstanceHandler systemHandler;
+	private TransitionSystem transitionSystem;
+	
 	
 	public GraphPath() {
 		stateTransitions = new LinkedList<Integer>();
+		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		transitionSystem = systemHandler.getTransitionSystem();
 	}
 	
 	public GraphPath(Predicate predSrc, Predicate predDes, LinkedList<Integer> transition) {
+		this();
 		predicateSrc = predSrc;
 		predicateDes = predDes;
 		stateTransitions = transition;
@@ -62,12 +68,12 @@ public class GraphPath {
 		//e.g., pre1_Precondition_activity1:post1_Postcondition_activity1=0,1,2
 		res.append(predicateSrc.getBigraphPredicateName()).append(":");
 		res.append(predicateDes.getBigraphPredicateName()).append("=");
-		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+//		TransitionSystem t = transitionSystem.getTransitionSystemInstance();
 		String label;
 		
 		for(int i=0;i<stateTransitions.size();i++) {
 			if(i<stateTransitions.size()-1) {
-				if((label = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1))) != null) {
+				if((label = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i+1))) != null) {
 					res.append(stateTransitions.get(i)).append("-["+label+"]>");
 				} else {
 					res.append(stateTransitions.get(i)).append("->");
@@ -101,12 +107,12 @@ public class GraphPath {
 	public String toPrettyString() {
 		
 		StringBuilder res = new StringBuilder();
-		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+//		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
 		String label;
 		
 		for(int i=0;i<stateTransitions.size();i++) {
 			if(i<stateTransitions.size()-1) {
-				if((label = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1))) != null) {
+				if((label = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i+1))) != null) {
 					res.append(stateTransitions.get(i)).append("=["+label+"]=>");
 				} else {
 					res.append(stateTransitions.get(i)).append("==>");
@@ -121,7 +127,7 @@ public class GraphPath {
 	
 	public String toJSON() {
 		StringBuilder res = new StringBuilder();
-		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+//		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
 		String action;
 		
 		res.append("\"transitions\":[");
@@ -135,7 +141,7 @@ public class GraphPath {
 		}
 		
 		for(int i=0;i<stateTransitions.size()-1;i++) {
-			action = t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1));
+			action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i+1));
 			res.append("{\"source\":").append(stateTransitions.get(i)).append(",")
 			.append("\"target\":").append(stateTransitions.get(i+1)).append(",")
 			.append("\"action\":\"").append(action).append("\"},");
@@ -343,10 +349,10 @@ public class GraphPath {
 	public LinkedList<String> getPathActions(){
 		
 		LinkedList<String> actions = new LinkedList<String>();
-		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+//		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
 		
 		for(int i=0;i<stateTransitions.size()-1;i++){
-			actions.add(t.getLabel(stateTransitions.get(i), stateTransitions.get(i+1)));
+			actions.add(transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i+1)));
 		}
 		
 		return actions;
@@ -355,13 +361,13 @@ public class GraphPath {
 	public double getPathProbability() {
 		
 		double prob = -1;
-		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
+//		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
 		
 		if(stateTransitions.size()>1) {
-			prob = t.getProbability(stateTransitions.get(0), stateTransitions.get(1));
+			prob = transitionSystem.getProbability(stateTransitions.get(0), stateTransitions.get(1));
 		}
 		for(int i=2;i<stateTransitions.size()-1;i++){
-			prob *= t.getProbability(stateTransitions.get(i), stateTransitions.get(i+1));
+			prob *= transitionSystem.getProbability(stateTransitions.get(i), stateTransitions.get(i+1));
 		}
 		
 		return prob;

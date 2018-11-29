@@ -16,26 +16,30 @@ import ie.lero.spare.pattern_instantiation.Predicate;
 
 public class TransitionSystem {
 
-	private static TransitionSystem transitionSystem = null;
-	private static Digraph<Integer> transitionGraph;
+//	private TransitionSystem transitionSystem = null;
+	private Digraph<Integer> transitionGraph;
 	private Integer startState;
 	private Integer endState;
 	private Predicate predicateDes;
 	private Predicate predicateSrc;
 	private LinkedList<GraphPath> paths;
-	private static String fileName;
+	private String fileName;
 	private int numberOfStates;
 	
 	//used to label transition system
 	private String [] actionNames; 
 	
-	private TransitionSystem() {
+	public TransitionSystem() {
 		transitionGraph = new Digraph<Integer>();
 		numberOfStates = -1;
-
-		// fileName = BigraphAnalyser.getBigrapherExecutionOutputFolder() +
-		// "/transitions";
-//		createDigraph();
+		
+//		createDigraphFromJSON();
+	}
+	
+	public TransitionSystem(String fileName) {
+		transitionGraph = new Digraph<Integer>();
+		numberOfStates = -1;
+		this.fileName = fileName;
 		createDigraphFromJSON();
 	}
 	
@@ -49,17 +53,17 @@ public class TransitionSystem {
 //		createDigraphFromJSON();
 //	}
 
-	public static TransitionSystem getTransitionSystemInstance() {
-
-		if (transitionSystem != null) {
-			return transitionSystem;
-		}
-
-		transitionSystem = new TransitionSystem();
-
-		return transitionSystem;
-
-	}
+//	public TransitionSystem getTransitionSystemInstance() {
+//
+//		if (transitionSystem != null) {
+//			return transitionSystem;
+//		}
+//
+//		transitionSystem = new TransitionSystem();
+//
+//		return transitionSystem;
+//
+//	}
 
 	private void createDigraph() {
 
@@ -363,12 +367,12 @@ public class TransitionSystem {
 
 	}
 
-	public static void setFileName(String fileName) {
-		TransitionSystem.fileName = fileName;
-		transitionSystem = null;
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+		
 	}
 
-	public static String getFileName() {
+	public String getFileName() {
 		return fileName;
 	}
 	
@@ -398,28 +402,30 @@ public class TransitionSystem {
 		return transitionGraph.toString();
 	}
 	
-	public static void main(String[]args) {
+//	public static void main(String[]args) {
+//	
+//		TransitionSystem.setFileName("D:/Bigrapher data/scenario1/states_100/transitions.json");
+//		TransitionSystem tra = TransitionSystem.getTransitionSystemInstance();
+//		
+//		System.out.println(tra.getDigraph().toString());
+//		
+//	}
 	
-		TransitionSystem.setFileName("D:/Bigrapher data/scenario1/states_100/transitions.json");
-		TransitionSystem tra = TransitionSystem.getTransitionSystemInstance();
-		
-		System.out.println(tra.getDigraph().toString());
-		
-	}
-	
-	public static void setInstanceNull() {
-		transitionSystem = null;
-	}
-	
+//	public static void setInstanceNull() {
+//		transitionSystem = null;
+//	}
+//	
 	public void updateDigraphLabels(String[] actionNames) {
 		
-		LabelExtractor.updateDigraphLabels(actionNames);
+		LabelExtractor ext = new LabelExtractor();
+		ext.updateDigraphLabels(actionNames);
 	}
 	
 	public String createNewLabelledTransitionFile(String [] actionNames) {
 		
-		LabelExtractor.updateDigraphLabels(actionNames);
-		return LabelExtractor.createNewLabelledTransitionFile();
+		LabelExtractor ext = new LabelExtractor();
+		ext.updateDigraphLabels(actionNames);
+		return ext.createNewLabelledTransitionFile();
 	}
 	
 	public void setActionNames(String [] actionNames) {

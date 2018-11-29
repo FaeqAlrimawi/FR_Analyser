@@ -68,6 +68,10 @@ public class IncidentPatternInstantiator {
 	// indication
 	private boolean isSystemInitialised = false;
 
+	//system handler
+	private SystemInstanceHandler systemHandler;
+	private TransitionSystem transitionSystem;
+	
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
@@ -248,7 +252,7 @@ public class IncidentPatternInstantiator {
 			}
 
 			logger.putMessage(
-					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
+					">>Number of States= " + transitionSystem.getNumberOfStates());
 			// logger.putMessage(">>State Transitions:");
 			// logger.putMessage(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 
@@ -336,18 +340,25 @@ public class IncidentPatternInstantiator {
 	 */
 	private boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
 
+		systemHandler =  new SystemInstanceHandler();
 		// create a handler for bigrapher tool
-		BigrapherHandler bigrapherHandler = new BigrapherHandler(BRSFileName, outputFolder);
+		brsExecutor = new BigrapherHandler(BRSFileName, outputFolder);
 
-		brsExecutor = bigrapherHandler;
 		// read states from the output folder then create Bigraph signature and
 		// convert states from JSON objects to Bigraph (from LibBig library)
 		// objects
-		SystemInstanceHandler.setLogger(logger);
-		SystemInstanceHandler.setExecutor(bigrapherHandler);
+		systemHandler.setLogger(logger);
+		systemHandler.setExecutor(brsExecutor);
 
-		return SystemInstanceHandler.analyseBRS();
-
+		boolean isDone = systemHandler.analyseBRS();
+		
+		if(isDone) {
+			transitionSystem = systemHandler.getTransitionSystem();	
+			//add to the list of system handlers for other objects to access
+			SystemHandlers.addSystemHandler(systemHandler);
+		}
+		
+		return isDone;
 	}
 
 	private void executeStealScenario() {
@@ -602,15 +613,14 @@ public class IncidentPatternInstantiator {
 			}
 
 			logger.putMessage(
-					">>Number of States= " + TransitionSystem.getTransitionSystemInstance().getNumberOfStates());
+					">>Number of States= " + transitionSystem.getNumberOfStates());
 
 			/***************/
 
 			// create a new transition file with labels
 			logger.putMessage(">>Labelling transition system...");
 			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
-			String outputFile = TransitionSystem.getTransitionSystemInstance()
-					.createNewLabelledTransitionFile(actionNames);
+			String outputFile = transitionSystem.createNewLabelledTransitionFile(actionNames);
 
 			if (outputFile != null) {
 				logger.putMessage(">>New Labelled transitions is created: " + outputFile);
@@ -806,7 +816,7 @@ public class IncidentPatternInstantiator {
 		assetControlMap = new HashMap<String, String>();
 
 		List<String> unMatchedControls = new LinkedList<String>();
-		Signature signature = SystemInstanceHandler.getGlobalBigraphSignature();
+		Signature signature = systemHandler.getGlobalBigraphSignature();
 
 		String[] lines = FileManipulator.readFileNewLine(systemControlMapFileName);
 
@@ -889,7 +899,7 @@ public class IncidentPatternInstantiator {
 
 			// default output
 			setOutputFileName(outputFolder + "/output/" + threadID + "_"
-					+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json");
+					+ transitionSystem.getNumberOfStates() + ".json");
 		}
 
 		public PotentialIncidentInstance(String[] sa, String[] ia, int id, String outputFileName) {
@@ -1036,7 +1046,7 @@ public class IncidentPatternInstantiator {
 					// save analysis result
 					String jsonStr = pathsAnalyser.convertToJSONStr();
 					String analyseFileName = outputFolder + "/output/" + threadID + "_analysis_"
-							+ TransitionSystem.getTransitionSystemInstance().getNumberOfStates() + ".json";
+							+ transitionSystem.getNumberOfStates() + ".json";
 					File threadFile = new File(analyseFileName);
 
 					JSONObject obj = new JSONObject(jsonStr);
@@ -1124,7 +1134,7 @@ public class IncidentPatternInstantiator {
 			// hold the controls that have don't exist in the .big file
 			List<String> unMatchedControls = new LinkedList<String>();
 
-			Signature sig = SystemInstanceHandler.getGlobalBigraphSignature();
+			Signature sig = systemHandler.getGlobalBigraphSignature();
 
 			boolean isSuccessful = true;
 
@@ -1458,7 +1468,7 @@ public class IncidentPatternInstantiator {
 			// reset
 			ins = null;
 //			Logger.setInstanceNull();
-			TransitionSystem.setInstanceNull();
+//			TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
@@ -1500,7 +1510,7 @@ public class IncidentPatternInstantiator {
 			// reset
 			ins = null;
 //			Logger.setInstanceNull();
-			TransitionSystem.setInstanceNull();
+//			TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();

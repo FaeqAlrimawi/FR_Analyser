@@ -18,50 +18,54 @@ import org.json.simple.parser.ParseException;
 
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
+import ie.lero.spare.franalyser.utility.FileNames;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
 public class LabelExtractor {
 
 	// private String[] predicatesFileLines;
-	private static String outputFolder = SystemInstanceHandler.getOutputFolder();
+	private String outputFolder;
 	// private String transitionFileName = "transitions.txt";
 	// private String predicateFilePath = outputPath+"/pred";
 	// private ArrayList<ReactionRule> reactionRules;
-	private static String rulesKeywordsFileName = "actionNames.txt"; // defualt
-																		// file
-																		// name
-																		// for
-																		// the
-																		// keywords
-	private static String outputFileName = "transitions_labelled.json";
-	private static String[] rulesKeywords;
-	private static TransitionSystem transitionSystem = TransitionSystem.getTransitionSystemInstance();
+	private String rulesKeywordsFileName = FileNames.bigraphActionsFile;
+	private String outputFileName = FileNames.labelledTransitionFile;
+	private String[] rulesKeywords;
+	private TransitionSystem transitionSystem;
+	private SystemInstanceHandler systemHandler;
 
 	public LabelExtractor() {
-		// reactionRules = new ArrayList<ReactionRule>();
-		// TransitionSystem.setFileName(outputPath + "/" + transitionFileName);
 
-		// transitionSystem = TransitionSystem.getTransitionSystemInstance();
+		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		transitionSystem = systemHandler.getTransitionSystem();
+
+		outputFolder = systemHandler.getOutputFolder();
+
+	}
+
+	public LabelExtractor(SystemInstanceHandler sysHandler) {
+
+		systemHandler = sysHandler;
+		transitionSystem = systemHandler.getTransitionSystem();
+
+		outputFolder = systemHandler.getOutputFolder();
+
 	}
 
 	public LabelExtractor(String keywordsFileName) {
-		// reactionRules = new ArrayList<ReactionRule>();
+		this();
 		this.rulesKeywordsFileName = keywordsFileName;
-		// TransitionSystem.setFileName(outputPath + "/" +
-		// this.transitionFileName);
-		// transitionSystem = TransitionSystem.getTransitionSystemInstance();
 	}
 
 	public LabelExtractor(String[] keywords) {
-		// reactionRules = new ArrayList<ReactionRule>();
+
+		this();
 
 		if (keywords != null && keywords.length > 0) {
 			this.rulesKeywords = Arrays.copyOf(keywords, keywords.length);
 		}
-		// TransitionSystem.setFileName(outputPath + "/" +
-		// this.transitionFileName);
-		// transitionSystem = TransitionSystem.getTransitionSystemInstance();
+
 	}
 
 	/**
@@ -72,14 +76,14 @@ public class LabelExtractor {
 	 * target state. The Digraph in the TransitionSystem class is updated after
 	 * this with the labels name
 	 */
-	public static Digraph<Integer> updateDigraphLabels(String[] actionNames) {
+	public Digraph<Integer> updateDigraphLabels(String[] actionNames) {
 
 		if (actionNames == null || actionNames.length == 0) {
 			return null;
 		}
 
-		outputFolder = SystemInstanceHandler.getOutputFolder();
-		transitionSystem = TransitionSystem.getTransitionSystemInstance();
+//		outputFolder = SystemInstanceHandler.getOutputFolder();
+//		transitionSystem = TransitionSystem.getTransitionSystemInstance();
 
 		Digraph<Integer> digraph = transitionSystem.getDigraph();
 		ArrayList<String> labels = new ArrayList<String>();
@@ -96,7 +100,8 @@ public class LabelExtractor {
 			}
 		}
 
-		//for each src and des states, if they are not labelled then find a label
+		// for each src and des states, if they are not labelled then find a
+		// label
 		for (Integer stateSrc : digraph.getNodes()) {
 			for (Integer stateDes : digraph.outboundNeighbors(stateSrc)) {
 
@@ -182,7 +187,7 @@ public class LabelExtractor {
 	 * return label; }
 	 */
 
-	public static String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
+	public String updateTransitionLabel(Integer stateSrc, Integer stateDes) {
 
 		JSONParser parser = new JSONParser();
 		String tmp;
@@ -269,7 +274,7 @@ public class LabelExtractor {
 		return label;
 	}
 
-	public static String createNewLabelledTransitionFile() {
+	public String createNewLabelledTransitionFile() {
 
 		StringBuilder res = new StringBuilder();
 		// ArrayList<Integer> nodes = (ArrayList)
@@ -297,7 +302,7 @@ public class LabelExtractor {
 
 		try {
 
-			JSONObject originalObj = (JSONObject) parser.parse(new FileReader(TransitionSystem.getFileName()));
+			JSONObject originalObj = (JSONObject) parser.parse(new FileReader(transitionSystem.getFileName()));
 
 			String brsType = null;
 
@@ -380,7 +385,7 @@ public class LabelExtractor {
 		return outputFolder;
 	}
 
-	public static void setOutputPath(String outputPath) {
+	public void setOutputPath(String outputPath) {
 		outputFolder = outputPath;
 	}
 
@@ -388,15 +393,15 @@ public class LabelExtractor {
 		return rulesKeywordsFileName;
 	}
 
-	public static void setRulesKeywordsFileName(String rulesKeywordsFileNm) {
+	public void setRulesKeywordsFileName(String rulesKeywordsFileNm) {
 		rulesKeywordsFileName = rulesKeywordsFileNm;
 	}
 
-	public static String[] getRulesKeywords() {
+	public String[] getRulesKeywords() {
 		return rulesKeywords;
 	}
 
-	public static void setRulesKeywords(String[] rulesKeywrds) {
+	public void setRulesKeywords(String[] rulesKeywrds) {
 		rulesKeywords = rulesKeywrds;
 	}
 

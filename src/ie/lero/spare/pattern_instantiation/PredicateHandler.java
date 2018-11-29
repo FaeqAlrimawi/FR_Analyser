@@ -4,33 +4,27 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
 import javax.xml.xquery.XQException;
 
 import org.eclipse.emf.common.util.EList;
 
 import cyberPhysical_Incident.Activity;
-import cyberPhysical_Incident.IncidentEntity;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
-import ie.lero.spare.pattern_instantiation.Mapper.EntityAssetMatcher;
-import ie.lero.spare.pattern_instantiation.Mapper.EntityMatcher;
 
 public class PredicateHandler {
 
@@ -47,24 +41,35 @@ public class PredicateHandler {
 	private List<Integer> postconditionStates;
 	private ForkJoinPool mainPool;
 
+	private SystemInstanceHandler systemHandler;
+	private TransitionSystem transitionSystem;
+
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
 		incidentActivities = new HashMap<String, Activity>();
 		activitySequences = new LinkedList<LinkedList<String>>();
 		logger = null;
+		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		transitionSystem = systemHandler.getTransitionSystem();
 	}
 
 	public PredicateHandler(Logger logger) {
-	this();
-	this.logger = logger;
-	
+		this();
+		this.logger = logger;
+
 	}
-	
+
+	public PredicateHandler(SystemInstanceHandler sysHandler) {
+		this();
+		systemHandler = sysHandler;
+		transitionSystem = systemHandler.getTransitionSystem();
+	}
+
 	public void setLogger(Logger logger) {
-		
+
 		this.logger = logger;
 	}
-	
+
 	public HashMap<String, Predicate> getPredicates() {
 		return predicates;
 	}
@@ -419,7 +424,7 @@ public class PredicateHandler {
 													// associated with each
 													// other
 				post.removeAllPaths();
-				paths = SystemInstanceHandler.getTransitionSystem().getPaths(pre, post);
+				paths = transitionSystem.getPaths(pre, post);
 				pre.addPaths(paths);
 				post.addPaths(paths);
 			}
@@ -548,7 +553,7 @@ public class PredicateHandler {
 													// associated with each
 													// other
 				post.removeAllPaths();
-				paths = SystemInstanceHandler.getTransitionSystem().getPaths(pre, post);
+				paths = transitionSystem.getPaths(pre, post);
 				pre.addPaths(paths);
 				post.addPaths(paths);
 			}
@@ -1096,7 +1101,7 @@ public class PredicateHandler {
 		// generate nodes neighbor in the digraph to reduce processing time for
 		// threads that will be created next
 		logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>>Generating neighbor nodes in the Digraph...");
-		TransitionSystem.getTransitionSystemInstance().getDigraph().generateNeighborNodesMap();
+		transitionSystem.getDigraph().generateNeighborNodesMap();
 
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
 
@@ -1112,7 +1117,7 @@ public class PredicateHandler {
 
 		TransitionAnalyser analyser = new TransitionAnalyser(0, transitions.size(), activities);
 		// analyseTransitions(sourceActivity, destinationActivity);
-		
+
 		logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>>Removing from identified transitions ("
 				+ transitions.size() + ") those that don't contain a state from each activity...");
 		List<GraphPath> transitionToRemove = mainPool.invoke(analyser);
@@ -1131,93 +1136,97 @@ public class PredicateHandler {
 
 	}
 
-//	protected void analyseTransitions(IncidentActivity sourceActivity, IncidentActivity destinationActivity) {
-//
-//		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
-//
-//		// add the first and the last activities
-//		activities.addFirst(sourceActivity);
-//		activities.addLast(destinationActivity);
-//
-//		boolean isCheckingPrecondition = true;
-//		// boolean isCheckingPostcondition = false;
-//
-//		// check if each path contains at least one of the satisfied states for
-//		// each activity
-//		// can be parallelised
-//		ListIterator<GraphPath> pathsIterator = transitions.listIterator();
-//		ListIterator<Activity> activitiesIterator = activities.listIterator();
-//
-//		if (activities != null) {
-//			while (pathsIterator.hasNext()) {
-//
-//				GraphPath path = pathsIterator.next();
-//				LinkedList<Integer> states = path.getStateTransitions();
-//
-//				int j = 0;
-//
-//				isCheckingPrecondition = true;
-//
-//				activitiesIterator = activities.listIterator();
-//
-//				outerLoop: while (activitiesIterator.hasNext()) {
-//					IncidentActivity activity = (IncidentActivity) activitiesIterator.next();
-//
-//					// get precondition of the activity (assumption: there is
-//					// only one precondition)
-//					Predicate pre = activity.getPredicates(PredicateType.Precondition).get(0);
-//					LinkedList<Integer> preStates = pre.getBigraphStates();
-//
-//					// get precondition of the activity (assumption: there is
-//					// only one postcondition)
-//					Predicate post = activity.getPredicates(PredicateType.Postcondition).get(0);
-//					LinkedList<Integer> postStates = post.getBigraphStates();
-//
-//					// assumption: each predicate should satisfy different state
-//					// in the transition
-//					for (; j < states.size(); j++) { // last state is for the
-//														// src and des
-//														// activities
-//						int state = states.get(j);
-//
-//						// if it is the last element and either it is still
-//						// checking the precondition or the postcondition does
-//						// not contain the state then remove the path and break
-//						// to outerloop if there are still activities to iterate
-//						if (j == states.size() - 1 && (activitiesIterator.hasNext() ||
-//						// or if it is the last activity but it is still
-//						// checking precondition // over
-//								isCheckingPrecondition ||
-//								// or if it is last activity and and the
-//								// postcondition does not have the state as one
-//								// of its own
-//								!postStates.contains(state))) {
-//							pathsIterator.remove();
-//							break outerLoop;
-//						}
-//
-//						// find a match for the precondition
-//						if (isCheckingPrecondition) {
-//							if (!preStates.contains(state)) {
-//								continue;
-//							} else {
-//								isCheckingPrecondition = false;
-//							}
-//
-//							// find a match for the postcondition
-//						} else {
-//							if (!postStates.contains(state)) {
-//								continue;
-//							} else {
-//								isCheckingPrecondition = true;
-//								break;
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
+	// protected void analyseTransitions(IncidentActivity sourceActivity,
+	// IncidentActivity destinationActivity) {
+	//
+	// LinkedList<Activity> activities = getMiddleActivities(sourceActivity,
+	// destinationActivity);
+	//
+	// // add the first and the last activities
+	// activities.addFirst(sourceActivity);
+	// activities.addLast(destinationActivity);
+	//
+	// boolean isCheckingPrecondition = true;
+	// // boolean isCheckingPostcondition = false;
+	//
+	// // check if each path contains at least one of the satisfied states for
+	// // each activity
+	// // can be parallelised
+	// ListIterator<GraphPath> pathsIterator = transitions.listIterator();
+	// ListIterator<Activity> activitiesIterator = activities.listIterator();
+	//
+	// if (activities != null) {
+	// while (pathsIterator.hasNext()) {
+	//
+	// GraphPath path = pathsIterator.next();
+	// LinkedList<Integer> states = path.getStateTransitions();
+	//
+	// int j = 0;
+	//
+	// isCheckingPrecondition = true;
+	//
+	// activitiesIterator = activities.listIterator();
+	//
+	// outerLoop: while (activitiesIterator.hasNext()) {
+	// IncidentActivity activity = (IncidentActivity) activitiesIterator.next();
+	//
+	// // get precondition of the activity (assumption: there is
+	// // only one precondition)
+	// Predicate pre =
+	// activity.getPredicates(PredicateType.Precondition).get(0);
+	// LinkedList<Integer> preStates = pre.getBigraphStates();
+	//
+	// // get precondition of the activity (assumption: there is
+	// // only one postcondition)
+	// Predicate post =
+	// activity.getPredicates(PredicateType.Postcondition).get(0);
+	// LinkedList<Integer> postStates = post.getBigraphStates();
+	//
+	// // assumption: each predicate should satisfy different state
+	// // in the transition
+	// for (; j < states.size(); j++) { // last state is for the
+	// // src and des
+	// // activities
+	// int state = states.get(j);
+	//
+	// // if it is the last element and either it is still
+	// // checking the precondition or the postcondition does
+	// // not contain the state then remove the path and break
+	// // to outerloop if there are still activities to iterate
+	// if (j == states.size() - 1 && (activitiesIterator.hasNext() ||
+	// // or if it is the last activity but it is still
+	// // checking precondition // over
+	// isCheckingPrecondition ||
+	// // or if it is last activity and and the
+	// // postcondition does not have the state as one
+	// // of its own
+	// !postStates.contains(state))) {
+	// pathsIterator.remove();
+	// break outerLoop;
+	// }
+	//
+	// // find a match for the precondition
+	// if (isCheckingPrecondition) {
+	// if (!preStates.contains(state)) {
+	// continue;
+	// } else {
+	// isCheckingPrecondition = false;
+	// }
+	//
+	// // find a match for the postcondition
+	// } else {
+	// if (!postStates.contains(state)) {
+	// continue;
+	// } else {
+	// isCheckingPrecondition = true;
+	// break;
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
+	// }
 
 	class PreconditionMatcher extends RecursiveTask<List<GraphPath>> {
 
@@ -1298,7 +1307,7 @@ public class PredicateHandler {
 		private List<GraphPath> localResult;
 		private Integer startState;
 		private Integer endState;
-		private Digraph<Integer> transitionDigraph = TransitionSystem.getTransitionSystemInstance().getDigraph();
+		private Digraph<Integer> transitionDigraph = transitionSystem.getDigraph();
 		// number of states in the precondition on which the division into sub
 		// threads should take place
 		private int postThreshold = 2;
@@ -1538,17 +1547,18 @@ public class PredicateHandler {
 						// only one precondition)
 						List<Predicate> preCons = activity.getPredicates(PredicateType.Precondition);
 						List<Predicate> postCons = activity.getPredicates(PredicateType.Postcondition);
-						
-						Predicate pre = (preCons != null && !preCons.isEmpty())? preCons.get(0):null;
+
+						Predicate pre = (preCons != null && !preCons.isEmpty()) ? preCons.get(0) : null;
 						LinkedList<Integer> preStates = pre != null ? pre.getBigraphStates() : null;
 
 						// get precondition of the activity (assumption: there
 						// is
 						// only one postcondition)
-						Predicate post = (postCons != null && !postCons.isEmpty())? postCons.get(0):null;
+						Predicate post = (postCons != null && !postCons.isEmpty()) ? postCons.get(0) : null;
 						LinkedList<Integer> postStates = post != null ? post.getBigraphStates() : null;
 
-						// the activity has no pre or post conditions, then move to the next activity
+						// the activity has no pre or post conditions, then move
+						// to the next activity
 						if (pre == null && post == null) {
 							continue;
 						}
@@ -1584,10 +1594,14 @@ public class PredicateHandler {
 
 							// find a match for the precondition
 							if (isCheckingPrecondition && preStates != null) {
-								//if no match is found then move to next state in transition
+								// if no match is found then move to next state
+								// in transition
 								if (!preStates.contains(state)) {
 									continue;
-									//else, if a state matches a precondition state, then move to the postcondition, if there's one, if not then break to next activity
+									// else, if a state matches a precondition
+									// state, then move to the postcondition, if
+									// there's one, if not then break to next
+									// activity
 								} else {
 									if (postStates != null) {
 										isCheckingPrecondition = false;

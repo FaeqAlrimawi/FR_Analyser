@@ -70,6 +70,9 @@ public class BigraphAnalyser {
 	private static final int DEFAULT_THRESHOLD = 100;
 	private static final int MINIMUM_THRESHOLD = 10;
 	
+	//system handler (current one)
+	private SystemInstanceHandler systemHandler;
+	
 	// using forkjoin threading for dividing the matching process of states to a
 	// condition
 	private ForkJoinPool mainPool;
@@ -103,7 +106,13 @@ public class BigraphAnalyser {
 	
 	public BigraphAnalyser(PredicateHandler predHandler, int threadID, Logger logger) {
 
-		states = SystemInstanceHandler.getStates();
+		this(predHandler, threadID, logger, SystemHandlers.getCurrentSystemHandler());
+	}
+	
+	public BigraphAnalyser(PredicateHandler predHandler, int threadID, Logger logger, SystemInstanceHandler sysHandler) {
+
+		systemHandler = sysHandler;
+		states = systemHandler.getStates();
 		matcher = new Matcher();
 		// bigraphMatcher = new it.uniud.mads.jlibbig.core.std.BigraphMatcher();
 		// msgQ = Logger.getInstance().getMsgQ();
@@ -604,7 +613,7 @@ public class BigraphAnalyser {
 													// associated with each
 													// other
 				post.removeAllPaths();
-				paths = SystemInstanceHandler.getTransitionSystem().getPaths(pre, post);
+				paths = systemHandler.getTransitionSystem().getPaths(pre, post);
 				pre.addPaths(paths);
 				post.addPaths(paths);
 			}

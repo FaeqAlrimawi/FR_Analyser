@@ -40,7 +40,7 @@ public class BigrapherHandler implements SystemExecutor {
 	private Signature bigraphSignature;
 	private static HashMap<Integer, Bigraph> states;
 	private String [] actionNames;
-	
+
 	/*private ForkJoinPool mainPool;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;*/
@@ -255,8 +255,10 @@ public class BigrapherHandler implements SystemExecutor {
 	public TransitionSystem createTransitionSystem() {
 		if (transitionSystem == null) {
 			if (outputFolder != null) {
-				TransitionSystem.setFileName(outputFolder + "/" + transitionFileNameJSON);
-				transitionSystem = TransitionSystem.getTransitionSystemInstance();
+//				TransitionSystem.setFileName(outputFolder + "/" + transitionFileNameJSON);
+//				transitionSystem = TransitionSystem.getTransitionSystemInstance();
+				String fileName = outputFolder + "/" + FileNames.transitionFile;
+				transitionSystem = new TransitionSystem(fileName);
 			}
 		}
 

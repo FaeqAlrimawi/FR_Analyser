@@ -17,12 +17,14 @@ public class IncidentActivity extends ActivityImpl {
 	private ArrayList<Predicate> predicates;
 	private HashMap<String, LinkedList<GraphPath>> pathsToNextActivities;
 	// other attributes (e.g., initiator) can be added later
-
+	private SystemInstanceHandler systemHandler;
+	private TransitionSystem transitionSystem;
+	
 	public IncidentActivity() {
-//		previousActivities = new ArrayList<IncidentActivity>();
-//		nextActivities = new ArrayList<IncidentActivity>();
 		predicates = new ArrayList<Predicate>();
 		pathsToNextActivities = new HashMap<String, LinkedList<GraphPath>>();
+		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		transitionSystem = systemHandler.getTransitionSystem();
 	}
 
 	public IncidentActivity(String name) {
@@ -34,6 +36,17 @@ public class IncidentActivity extends ActivityImpl {
 		super(activity);
 		predicates = new ArrayList<Predicate>();
 		pathsToNextActivities = new HashMap<String, LinkedList<GraphPath>>();
+		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		transitionSystem = systemHandler.getTransitionSystem();
+		
+	}
+	
+	public IncidentActivity(Activity activity, SystemInstanceHandler sysHandler) {
+		super(activity);
+		predicates = new ArrayList<Predicate>();
+		pathsToNextActivities = new HashMap<String, LinkedList<GraphPath>>();
+		systemHandler = sysHandler;
+		transitionSystem = systemHandler.getTransitionSystem();
 		
 	}
 
@@ -227,7 +240,7 @@ public class IncidentActivity extends ActivityImpl {
 			for (Activity act : getNextActivities()) {
 				IncidentActivity incAct = (IncidentActivity)act;
 				for (Predicate predNext : incAct.getPredicates(PredicateType.Precondition)) {
-					tmp = TransitionSystem.getTransitionSystemInstance().getPaths(predCurrent, predNext, true);
+					tmp = transitionSystem.getPaths(predCurrent, predNext, true);
 					paths.addAll(tmp);
 				}
 
@@ -251,7 +264,7 @@ public class IncidentActivity extends ActivityImpl {
 		//for all postconditions of current activity find all paths to preconditions of next activity
 		for (Predicate predCurrent : getPredicates(PredicateType.Postcondition)) {
 				for (Predicate predNext : nextActivity.getPredicates(PredicateType.Precondition)) {
-					tmp = TransitionSystem.getTransitionSystemInstance().getPaths(predCurrent, predNext, true);
+					tmp = transitionSystem.getPaths(predCurrent, predNext, true);
 					paths.addAll(tmp);
 				}
 
@@ -289,7 +302,7 @@ public class IncidentActivity extends ActivityImpl {
 		//for all postconditions of previous activity find all paths to preconditions of current activity
 		for (Predicate predPrevious : preActivity.getPredicates(PredicateType.Postcondition)) {
 				for (Predicate predCurrent : getPredicates(PredicateType.Precondition)) {
-					tmp = TransitionSystem.getTransitionSystemInstance().getPaths(predPrevious, predCurrent, true);
+					tmp = transitionSystem.getPaths(predPrevious, predCurrent, true);
 					paths.addAll(tmp);
 				}
 
@@ -313,7 +326,7 @@ public class IncidentActivity extends ActivityImpl {
 			for (Activity act : getNextActivities()) {
 				IncidentActivity incAct = (IncidentActivity)act;
 				for (Predicate predNext : incAct.getPredicates(PredicateType.Precondition)) {
-					tmp = TransitionSystem.getTransitionSystemInstance().getPaths(predCurrent, predNext);
+					tmp = transitionSystem.getPaths(predCurrent, predNext);
 					if (tmp.isEmpty()) {
 						return false;
 					}
@@ -339,7 +352,7 @@ public class IncidentActivity extends ActivityImpl {
 		//for all postconditions of current activity find all paths to preconditions of next activity
 		for (Predicate predCurrent : getPredicates(PredicateType.Postcondition)) {
 				for (Predicate predNext : nextActivity.getPredicates(PredicateType.Precondition)) {
-					tmp = TransitionSystem.getTransitionSystemInstance().getPaths(predCurrent, predNext);
+					tmp = transitionSystem.getPaths(predCurrent, predNext);
 					if (tmp.isEmpty()) {
 						return false;
 					}

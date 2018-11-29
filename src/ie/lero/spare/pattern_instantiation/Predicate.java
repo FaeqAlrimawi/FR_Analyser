@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import cyberPhysical_Incident.Activity;
 import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.JSONTerms;
-import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -37,6 +36,7 @@ public class Predicate {
 	private LinkedList<Integer> statesInterSatisfied;
 	private boolean isDebugging = true;
 	private int numOfRoots;
+	private SystemInstanceHandler systemHandler;
 	
 	public Predicate(){
 		predicateType = PredicateType.Precondition;
@@ -45,6 +45,12 @@ public class Predicate {
 		statesIntraSatisfied = new LinkedList<Integer>();
 		statesInterSatisfied = new LinkedList<Integer>();
 		paths = new LinkedList<GraphPath>();
+		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		}
+	
+	public Predicate(SystemInstanceHandler sysHandler){
+		this();
+		systemHandler = sysHandler;
 		}
 
 	public PredicateType getPredicateType() {
@@ -333,7 +339,7 @@ public class Predicate {
 		}
 
 		/////build Bigraph object
-		BigraphBuilder biBuilder = new BigraphBuilder(SystemInstanceHandler.getGlobalBigraphSignature());
+		BigraphBuilder biBuilder = new BigraphBuilder(systemHandler.getGlobalBigraphSignature());
 		
 		//create roots for the bigraph
 		for(int i=0;i<numOfRoots;i++) {
@@ -354,7 +360,7 @@ public class Predicate {
 		for(BigraphNode n : nodes.values()) {
 			
 			//create bigraph outernames
-			arity = SystemInstanceHandler.getGlobalBigraphSignature().getByName(n.getControl()).getArity();
+			arity = systemHandler.getGlobalBigraphSignature().getByName(n.getControl()).getArity();
 			names = n.getOuterNamesObjects();
 			difference = names.size() - arity;
 			//if the node has more outernames than that in the signature and knowledge is partial, then only add outernames equal to the arity
@@ -558,7 +564,7 @@ public class Predicate {
 		return true;
 	}
 
-	private static Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
+	private	 Node createNode(BigraphNode node, BigraphBuilder biBuilder, LinkedList<Root> libBigRoots, 
 			HashMap<String, OuterName> outerNames, HashMap<String, Node> nodes) {
 		
 		LinkedList<Handle> names = new LinkedList<Handle>();
@@ -566,7 +572,7 @@ public class Predicate {
 		// find the difference between the outernames (i.e. connections) of the
 		// node and the outernames defined for that node in the signature
 		int difference = node.getOuterNames().size()
-				- SystemInstanceHandler.getGlobalBigraphSignature().getByName(node.getControl()).getArity();
+				- systemHandler.getGlobalBigraphSignature().getByName(node.getControl()).getArity();
 
 		// if knowledge is partial for the node,
 		if (node.isKnowledgePartial()) {
