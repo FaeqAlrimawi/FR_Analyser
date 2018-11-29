@@ -37,6 +37,7 @@ public class Predicate {
 	private boolean isDebugging = true;
 	private int numOfRoots;
 	private SystemInstanceHandler systemHandler;
+	private String incidentDocument;
 	
 	public Predicate(){
 		predicateType = PredicateType.Precondition;
@@ -48,9 +49,10 @@ public class Predicate {
 		systemHandler = SystemHandlers.getCurrentSystemHandler();
 		}
 	
-	public Predicate(SystemInstanceHandler sysHandler){
+	public Predicate(SystemInstanceHandler sysHandler, String incidentDoc){
 		this();
 		systemHandler = sysHandler;
+		incidentDocument = incidentDoc;
 		}
 
 	public PredicateType getPredicateType() {
@@ -493,7 +495,7 @@ public class Predicate {
 				}		
 				//update knowledge about the connections for that node
 				try {
-					node.setKnowledgePartial(XqueryExecuter.isKnowledgePartial(node.getIncidentAssetName()));
+					node.setKnowledgePartial(XqueryExecuter.isKnowledgePartial(node.getIncidentAssetName(), incidentDocument));
 				} catch (FileNotFoundException | XQException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

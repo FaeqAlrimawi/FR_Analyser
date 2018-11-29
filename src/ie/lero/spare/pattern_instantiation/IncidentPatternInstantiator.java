@@ -28,6 +28,7 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
+import cyberPhysical_Incident.IncidentDiagram;
 import environment.CyberPhysicalSystemPackage;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
@@ -68,6 +69,18 @@ public class IncidentPatternInstantiator {
 	// indication
 	private boolean isSystemInitialised = false;
 
+	//incident model file
+	private String incidentModelFile;
+	
+	//incident model
+	IncidentDiagram incidentModel;
+	
+	//system model file
+	private String systemModelFile;
+	
+	//system model
+	EnvironmentDiagram systemModel;
+	
 	// system handler
 	private SystemInstanceHandler systemHandler;
 	private TransitionSystem transitionSystem;
@@ -83,8 +96,8 @@ public class IncidentPatternInstantiator {
 	// used to hold the map between system classes and controls
 	// key is the system class while the value is a Control (which should be
 	// found in the .big file provided when analysing an incidnet pattern)
-	private static Map<String, String> assetControlMap;
-	private static String systemControlMapFileName = "./asset-control map.txt";
+	private Map<String, String> assetControlMap;
+	private String systemControlMapFileName = "./asset-control map.txt";
 
 	// BRS executor
 	SystemExecutor brsExecutor;
@@ -158,8 +171,8 @@ public class IncidentPatternInstantiator {
 
 			runLogger();
 
-			XqueryExecuter.SPACE_DOC = systemModelFile;
-			XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
+//			XqueryExecuter.SPACE_DOC = systemModelFile;
+//			XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
 
 			// add the models to the ModelsHandler class (which can be used by
 			// other objects like the Mapper to
@@ -401,11 +414,12 @@ public class IncidentPatternInstantiator {
 		String NIISystemModel = "D:/Bigrapher data/NII/NII_ext.cps";
 		String NIISystemModel_ubuntu = "/home/faeq/Desktop/NII/NII_ext.cps";
 
-		String systemModelFile = NIISystemModel;
-		String incidentPatternFile = NIIgeneratedIncidentPattern;
+		String systemModelFile = leroSystemModel;
+		String incidentPatternFile = dataCollectionPattern;
 
 		executeScenario(incidentPatternFile, systemModelFile);
 	}
+
 
 	private void executeScenarioFromConsole() {
 
@@ -442,8 +456,9 @@ public class IncidentPatternInstantiator {
 		// set the model file paths for the xquery as it is used by other
 		// objects (e.g., predicate generator) to retrieve some data such as
 		// controls of system assets
-		XqueryExecuter.SPACE_DOC = systemModelFile;
-		XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
+		this.systemModelFile = systemModelFile;
+		this.incidentModelFile = incidentPatternFile;
+		
 
 		try {
 
@@ -489,8 +504,8 @@ public class IncidentPatternInstantiator {
 			// add the models to the ModelsHandler class (which can be used by
 			// other objects like the Mapper to
 			// access the models
-			ModelsHandler.addIncidentModel(incidentPatternFile);
-			ModelsHandler.addSystemModel(systemModelFile);
+			incidentModel = ModelsHandler.addIncidentModel(incidentPatternFile);
+			systemModel = ModelsHandler.addSystemModel(systemModelFile);
 
 			// IncidentDiagram incident =
 			// ModelsHandler.getCurrentIncidentModel();
@@ -512,7 +527,7 @@ public class IncidentPatternInstantiator {
 			 * // strict criteria is applied) AssetMap am =
 			 * m.findMatchesUsingXquery(xqueryFilePath);
 			 **/
-			AssetMap am = m.findMatches();
+			AssetMap am = m.findMatches(incidentModel, systemModel);
 
 			// if there are incident assets with no matches from space model
 			// then exit
@@ -539,7 +554,7 @@ public class IncidentPatternInstantiator {
 			// relationships between entities in the incident pattern are
 			// considered when generating sequences
 			boolean isStrict = true;
-			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict);
+			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict, incidentModel, systemModel);
 
 			// checks if there are sequences generated or not. if not, then
 			// execution is terminated
@@ -618,9 +633,10 @@ public class IncidentPatternInstantiator {
 			// create a new transition file with labels
 			logger.putMessage(">>Labelling transition system...");
 			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
-//			String outputFile = transitionSystem.createNewLabelledTransitionFile(actionNames);
+			// String outputFile =
+			// transitionSystem.createNewLabelledTransitionFile(actionNames);
 			String outputFile = createNewLabelledTransitionFile(actionNames);
-			
+
 			if (outputFile != null) {
 				logger.putMessage(">>New Labelled transitions is created: " + outputFile);
 			} else {
@@ -938,8 +954,8 @@ public class IncidentPatternInstantiator {
 				}
 
 				PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentEntityNames,
-						systemAssetControls, assetControlMap, logger, systemHandler);
-				PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
+						systemAssetControls, assetControlMap, logger, systemHandler, incidentModelFile);
+				PredicateHandler predicateHandler = predicateGenerator.generatePredicates(incidentModel);
 
 				StringBuilder str = new StringBuilder();
 
@@ -1130,7 +1146,7 @@ public class IncidentPatternInstantiator {
 
 		protected boolean updateAssetControls() {
 
-			EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+//			EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
 
 			environment.Asset tmpAst;
 
@@ -1438,9 +1454,9 @@ public class IncidentPatternInstantiator {
 	public static void main(String[] args) {
 
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
-		// ins.executeExample();
-
+		
 		ins.executeLeroScenario();
+		
 		// ins.generateAssetControlMap();
 		// ins.executeScenarioFromConsole();
 		// ins.executeScenario1();

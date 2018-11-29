@@ -7,12 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import org.json.JSONObject;
-
 
 public class FileManipulator {
 	
-	public static boolean openFolder(String folderName) {
+	public synchronized static boolean openFolder(String folderName) {
 		boolean isOpened = false;
 		
 		Runtime run = Runtime.getRuntime();
@@ -51,7 +49,7 @@ public class FileManipulator {
 	    return isOpened;
 	}
 	
-	public static boolean openFile(String fileName) {
+	public synchronized static boolean openFile(String fileName) {
 		boolean isOpened = false;
 		
 		Runtime run = Runtime.getRuntime();
@@ -90,7 +88,7 @@ public class FileManipulator {
 	    return isOpened;
 	}
 	
-	public static String[] readFile(String fileName) {
+	public synchronized static String[] readFile(String fileName) {
 		StringBuilder result = new StringBuilder();
 		  
 		    String tmp;
@@ -112,7 +110,7 @@ public class FileManipulator {
 		return result.toString().split(";");
 	}
 	
-	public static String[] readFileNewLine(String fileName) {
+	public synchronized static String[] readFileNewLine(String fileName) {
 		StringBuilder result = new StringBuilder();
 		  
 		    String tmp;

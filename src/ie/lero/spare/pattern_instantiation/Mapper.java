@@ -40,7 +40,9 @@ public class Mapper {
 	private LinkedList<IncidentEntity> incidentEntities;
 	private int incidentEntitiesThreshold = 10;
 	private int systemAssetsThreshold = 100;
-
+	private IncidentDiagram incidentModel;
+	private EnvironmentDiagram systemModel;
+	
 	public Mapper() {
 
 		mainPool = new ForkJoinPool();
@@ -51,57 +53,57 @@ public class Mapper {
 	 * public Mapper(String xqueryFilePath) { this(); this.xqueryFilePath =
 	 * xqueryFilePath; }
 	 */
-	public AssetMap findMatchesUsingXquery(String xqueryFilePath) {
-
-		String res = null;
-		HashMap<String, List<String>> result = null;
-
-		try {
-			res = XqueryExecuter.executeQueryFromFile(xqueryFilePath);
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if (res == null) {
-			return null;
-		}
-
-		// removes the tags <>
-		res = res.substring(res.indexOf('>') + 1, res.lastIndexOf('<'));
-
-		result = new HashMap<String, List<String>>();
-
-		String[] incidentAssetsandMatches = res.split(" ");
-		String[] incidentAssetNames = new String[incidentAssetsandMatches.length];
-		String[][] matches = new String[incidentAssetsandMatches.length][];
-		String[] tmp;
-		String[] tmp2;
-		AssetMap map = new AssetMap();
-		int i = 0;
-
-		for (i = 0; i < incidentAssetsandMatches.length; i++) {
-			tmp = incidentAssetsandMatches[i].split(":");
-			if (tmp.length > 1) // if there are matches for the incident asset
-				tmp2 = tmp[1].split("-"); // tmp[1] contains the space asset
-											// matched to an incident asset
-			else {
-				tmp2 = new String[1]; // if there are no matches create one
-										// empty string [""]
-				tmp2[0] = null;
-			}
-
-			incidentAssetNames[i] = tmp[0]; // tmp[0] contains the incident
-											// asset name
-			matches[i] = tmp2;
-
-			result.put(incidentAssetNames[i], Arrays.asList(matches[i]));
-		}
-
-		map.setMatchedSystemAssets(result);
-
-		return map;
-	}
+//	public AssetMap findMatchesUsingXquery(String xqueryFilePath) {
+//
+//		String res = null;
+//		HashMap<String, List<String>> result = null;
+//
+//		try {
+//			res = XqueryExecuter.executeQueryFromFile(xqueryFilePath);
+//		} catch (FileNotFoundException | XQException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		if (res == null) {
+//			return null;
+//		}
+//
+//		// removes the tags <>
+//		res = res.substring(res.indexOf('>') + 1, res.lastIndexOf('<'));
+//
+//		result = new HashMap<String, List<String>>();
+//
+//		String[] incidentAssetsandMatches = res.split(" ");
+//		String[] incidentAssetNames = new String[incidentAssetsandMatches.length];
+//		String[][] matches = new String[incidentAssetsandMatches.length][];
+//		String[] tmp;
+//		String[] tmp2;
+//		AssetMap map = new AssetMap();
+//		int i = 0;
+//
+//		for (i = 0; i < incidentAssetsandMatches.length; i++) {
+//			tmp = incidentAssetsandMatches[i].split(":");
+//			if (tmp.length > 1) // if there are matches for the incident asset
+//				tmp2 = tmp[1].split("-"); // tmp[1] contains the space asset
+//											// matched to an incident asset
+//			else {
+//				tmp2 = new String[1]; // if there are no matches create one
+//										// empty string [""]
+//				tmp2[0] = null;
+//			}
+//
+//			incidentAssetNames[i] = tmp[0]; // tmp[0] contains the incident
+//											// asset name
+//			matches[i] = tmp2;
+//
+//			result.put(incidentAssetNames[i], Arrays.asList(matches[i]));
+//		}
+//
+//		map.setMatchedSystemAssets(result);
+//
+//		return map;
+//	}
 
 	/**
 	 * Finds All system assets that match each incident entity. The matching is
@@ -120,21 +122,19 @@ public class Mapper {
 	 *            system model file path
 	 * @return
 	 */
-	public AssetMap findMatches() {
-
-		// read models
-		// incident pattern
-		IncidentDiagram incidentPattern = ModelsHandler.getCurrentIncidentModel();
-		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
-
-		if (systemModel == null || incidentPattern == null) {
+	public AssetMap findMatches(IncidentDiagram incidentModel, EnvironmentDiagram systemModel) {
+		
+		if (systemModel == null || incidentModel == null) {
 			return null;
 		}
 
+		this.systemModel = systemModel;
+		this.incidentModel = incidentModel;
+		
 		systemAssets = systemModel.getAsset();
 		incidentEntities = new LinkedList<IncidentEntity>();
 
-		incidentEntities.addAll(incidentPattern.getEntity());
+		incidentEntities.addAll(incidentModel.getEntity());
 		// incidentEntities.addAll(incidentPattern.getAsset());
 		// incidentEntities.addAll(incidentPattern.getActor());
 		// incidentEntities.addAll(incidentPattern.getResource());
@@ -149,6 +149,14 @@ public class Mapper {
 		map.setMatchedSystemAssets(result);
 
 		return map;
+	}
+
+	public AssetMap findMatches() {
+
+		IncidentDiagram incidentPattern = ModelsHandler.getCurrentIncidentModel();
+		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+		return findMatches(incidentPattern, systemModel);
+
 	}
 
 	/*
@@ -367,11 +375,11 @@ public class Mapper {
 					continue;// ignored
 				}
 
-				if(containedEntity.getMobility() == Mobility.MOVABLE
+				if (containedEntity.getMobility() == Mobility.MOVABLE
 						|| containedEntity.getMobility() == Mobility.UNKNOWN) {
-				continue;	
+					continue;
 				}
-				
+
 				// if contained entity mobility is movable then it is also
 				// ignored
 				// too loose

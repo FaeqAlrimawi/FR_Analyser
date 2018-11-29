@@ -70,7 +70,7 @@ public class BigraphAnalyser {
 	private static final int DEFAULT_THRESHOLD = 100;
 	private static final int MINIMUM_THRESHOLD = 10;
 	
-	//system handler (current one)
+	//system handler
 	private SystemInstanceHandler systemHandler;
 	
 	// using forkjoin threading for dividing the matching process of states to a
@@ -368,12 +368,12 @@ public class BigraphAnalyser {
 	public PredicateHandler identifyRelevantStatesWithThreading() {
 
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
-
+		
 		try {
 
 			int cnt = 0;
 			for (int i = 0; i < activitiesName.size(); i++) {
-
+				
 				identifyRelevantStatesWithThreading(activitiesName.get(i));
 
 				// used to determine when to stop parallelism of activities and

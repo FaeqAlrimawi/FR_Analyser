@@ -27,13 +27,13 @@ public class ModelsHandler {
 		return incidentModels;
 	}
 
-	public static IncidentDiagram loadIncidentModel(String filePath) {
+	public synchronized static IncidentDiagram loadIncidentModel(String filePath) {
 
 		return IncidentModelHandler.loadIncidentFromFile(filePath);
 
 	}
 
-	public static IncidentDiagram getIncidentModel(String filePath) {
+	public synchronized static IncidentDiagram getIncidentModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -51,7 +51,7 @@ public class ModelsHandler {
 		return model;
 	}
 
-	public static IncidentDiagram addIncidentModel(String filePath) {
+	public synchronized  static IncidentDiagram addIncidentModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -70,7 +70,7 @@ public class ModelsHandler {
 
 	}
 
-	public static IncidentDiagram removeIncidentModel(String filePath) {
+	public synchronized static IncidentDiagram removeIncidentModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -80,11 +80,11 @@ public class ModelsHandler {
 
 	}
 
-	public static void setIncidentModels(Map<String, IncidentDiagram> newIncidentModels) {
+	public synchronized static void setIncidentModels(Map<String, IncidentDiagram> newIncidentModels) {
 		incidentModels = newIncidentModels;
 	}
 
-	public static String saveIncidentModel(IncidentDiagram incidentModel) {
+	public synchronized  static String saveIncidentModel(IncidentDiagram incidentModel) {
 
 		String incidentModelName;
 
@@ -104,7 +104,7 @@ public class ModelsHandler {
 		return saveIncidentModel(incidentModel, incidentModelName);
 	}
 
-	public static String saveIncidentModel(IncidentDiagram incidentModel, String filePath) {
+	public synchronized  static String saveIncidentModel(IncidentDiagram incidentModel, String filePath) {
 
 		try {
 			boolean isSaved = IncidentModelHandler.SaveIncidentToFile(incidentModel, filePath);
@@ -121,7 +121,7 @@ public class ModelsHandler {
 		return null;
 	}
 
-	public static IncidentDiagram cloneIncidentModel(IncidentDiagram incidentModel) {
+	public synchronized static IncidentDiagram cloneIncidentModel(IncidentDiagram incidentModel) {
 
 		try {
 
@@ -149,11 +149,11 @@ public class ModelsHandler {
 
 	}
 
-	public static Map<String, EnvironmentDiagram> getSystemModels() {
+	public synchronized  static Map<String, EnvironmentDiagram> getSystemModels() {
 		return systemModels;
 	}
 
-	public static EnvironmentDiagram getSystemModel(String filePath) {
+	public synchronized  static EnvironmentDiagram getSystemModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -171,7 +171,7 @@ public class ModelsHandler {
 		return model;
 	}
 
-	public static EnvironmentDiagram addSystemModel(String filePath) {
+	public synchronized  static EnvironmentDiagram addSystemModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -190,7 +190,7 @@ public class ModelsHandler {
 
 	}
 
-	public static EnvironmentDiagram removeSystemModel(String filePath) {
+	public synchronized  static EnvironmentDiagram removeSystemModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -200,7 +200,7 @@ public class ModelsHandler {
 
 	}
 
-	public static boolean saveSystemModel(EnvironmentDiagram systemModel) {
+	public synchronized static boolean saveSystemModel(EnvironmentDiagram systemModel) {
 
 		try {
 
@@ -212,7 +212,7 @@ public class ModelsHandler {
 		}
 	}
 
-	public static boolean saveSystemModel(EnvironmentDiagram systemModel, String filePath) {
+	public synchronized static boolean saveSystemModel(EnvironmentDiagram systemModel, String filePath) {
 
 		try {
 
@@ -224,11 +224,11 @@ public class ModelsHandler {
 		}
 	}
 
-	public static Map<String, ActivityPattern> getActivityPatterns() {
+	public synchronized static Map<String, ActivityPattern> getActivityPatterns() {
 		return activityPatterns;
 	}
 
-	public static ActivityPattern getActivityPattern(String filePath) {
+	public synchronized static ActivityPattern getActivityPattern(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -246,7 +246,7 @@ public class ModelsHandler {
 		return pattern;
 	}
 
-	public static ActivityPattern addActivityPattern(String filePath) {
+	public synchronized static ActivityPattern addActivityPattern(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -267,7 +267,7 @@ public class ModelsHandler {
 
 	}
 
-	public static ActivityPattern removeActivityPattern(String filePath) {
+	public synchronized static ActivityPattern removeActivityPattern(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -277,7 +277,7 @@ public class ModelsHandler {
 
 	}
 
-	public static void setActivityPatterns(Map<String, ActivityPattern> activityPatterns) {
+	public synchronized static void setActivityPatterns(Map<String, ActivityPattern> activityPatterns) {
 		ModelsHandler.activityPatterns = activityPatterns;
 	}
 
@@ -285,7 +285,7 @@ public class ModelsHandler {
 		ModelsHandler.systemModels = systemModels;
 	}
 
-	public static IncidentDiagram getCurrentIncidentModel() {
+	public synchronized static IncidentDiagram getCurrentIncidentModel() {
 		return currentIncidentModel;
 	}
 
@@ -297,6 +297,15 @@ public class ModelsHandler {
 
 		return currentIncidentModel.getActivity();
 	}
+	
+	public synchronized static List<Activity> getIncidentModelActivities(IncidentDiagram incidentModel) {
+
+		if (incidentModel == null) {
+			return null;
+		}
+
+		return incidentModel.getActivity();
+	}
 
 	public synchronized static IncidentEntity getCurrentIncidentModelEntity(String entityName) {
 
@@ -307,28 +316,36 @@ public class ModelsHandler {
 		return currentIncidentModel.getEntity(entityName);
 	}
 
+	public synchronized static IncidentEntity getIncidentModelEntity(IncidentDiagram incidentModel, String entityName) {
+
+		if (incidentModel == null) {
+			return null;
+		}
+
+		return incidentModel.getEntity(entityName);
+	}
 	
-	public static void setCurrentIncidentModel(IncidentDiagram currentIncidentModel) {
+	public synchronized  static void setCurrentIncidentModel(IncidentDiagram currentIncidentModel) {
 		ModelsHandler.currentIncidentModel = currentIncidentModel;
 	}
 
-	public static EnvironmentDiagram getCurrentSystemModel() {
+	public synchronized  static EnvironmentDiagram getCurrentSystemModel() {
 		return currentSystemModel;
 	}
 
-	public static ActivityPattern getCurrentActivityPattern() {
+	public synchronized static ActivityPattern getCurrentActivityPattern() {
 		return currentActivityPattern;
 	}
 
-	public static void setCurrentSystemModel(EnvironmentDiagram currentSystemModel) {
+	public synchronized static void setCurrentSystemModel(EnvironmentDiagram currentSystemModel) {
 		ModelsHandler.currentSystemModel = currentSystemModel;
 	}
 
-	public static void setCurrentActivityPattern(ActivityPattern newCurrentActivityPattern) {
+	public synchronized static void setCurrentActivityPattern(ActivityPattern newCurrentActivityPattern) {
 		ModelsHandler.currentActivityPattern = newCurrentActivityPattern;
 	}
 	
-	public static void clearAll() {
+	public synchronized static void clearAll() {
 		currentActivityPattern = null;
 		currentIncidentModel = null;
 		currentSystemModel = null;

@@ -23,7 +23,8 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 	private String previous = null;
 	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 	private List<int[]> entitiesRules = AssetMap.rulesList;
-
+	private EnvironmentDiagram systemModel;
+	
 	// used to refine the matching to the incident entities
 	public static boolean isStrict = false;
 
@@ -33,6 +34,16 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 
 		this.sets = copySets(sets);
 		this.arrayConstructor = arrayConstructor;
+	}
+
+	public CartesianIterator(String[][] sets, IntFunction<String[]> arrayConstructor, EnvironmentDiagram sysModel) {
+		Objects.requireNonNull(sets);
+		Objects.requireNonNull(arrayConstructor);
+
+		this.sets = copySets(sets);
+		this.arrayConstructor = arrayConstructor;
+
+		systemModel = sysModel;
 	}
 
 	private static <T> String[][] copySets(String[][] sets) {
@@ -168,7 +179,7 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 
 	protected List<int[]> createIncidentEntitiesRules(List<String> assetSet) {
 
-		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
+//		EnvironmentDiagram systemModel = ModelsHandler.getCurrentSystemModel();
 
 		List<environment.Asset> assets = new LinkedList<environment.Asset>();
 		int rulesNum = AssetMap.rulesNum;

@@ -43,6 +43,7 @@ public class PredicateHandler {
 
 	private SystemInstanceHandler systemHandler;
 	private TransitionSystem transitionSystem;
+	private String incidentDocument;
 
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
@@ -50,7 +51,7 @@ public class PredicateHandler {
 		activitySequences = new LinkedList<LinkedList<String>>();
 		logger = null;
 		systemHandler = SystemHandlers.getCurrentSystemHandler();
-		transitionSystem = systemHandler!=null?systemHandler.getTransitionSystem():null;
+		transitionSystem = systemHandler != null ? systemHandler.getTransitionSystem() : null;
 	}
 
 	public PredicateHandler(Logger logger) {
@@ -58,12 +59,13 @@ public class PredicateHandler {
 		this.logger = logger;
 
 	}
-	
-	public PredicateHandler(Logger logger, SystemInstanceHandler sysHandler) {
+
+	public PredicateHandler(Logger logger, SystemInstanceHandler sysHandler, String incidentDoc) {
 		this();
 		this.logger = logger;
 		systemHandler = sysHandler;
 		transitionSystem = systemHandler.getTransitionSystem();
+		incidentDocument = incidentDoc;
 	}
 
 	public PredicateHandler(SystemInstanceHandler sysHandler) {
@@ -314,7 +316,7 @@ public class PredicateHandler {
 		IncidentActivity act;
 
 		try {
-			result = XqueryExecuter.returnNextPreviousActivities();
+			result = XqueryExecuter.returnNextPreviousActivities(incidentDocument);
 
 			for (String res : result) {
 				tmp = res.split("##|!!");

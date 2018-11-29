@@ -33,6 +33,7 @@ public class PredicateGenerator {
 	private String[] systemAssetControls;
 	private Logger logger;
 	private SystemInstanceHandler systemHandler;
+	private String incidentDocument;
 	
 	// used to find a map of an asset to a control
 	private Map<String, String> assetControlMap;
@@ -104,7 +105,7 @@ public class PredicateGenerator {
 	 */
 
 	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName, String[] systemAssetControl
-			, Map<String, String> assetControlMap, Logger logger, SystemInstanceHandler systemHandler) {
+			, Map<String, String> assetControlMap, Logger logger, SystemInstanceHandler systemHandler, String incidentDoc) {
 //		this();
 		spaceAssetSet = systemAsset;
 		this.incidentAssetNames = incidentAssetName;
@@ -113,12 +114,13 @@ public class PredicateGenerator {
 		this.assetControlMap = assetControlMap;
 		this.logger = logger;
 		this.systemHandler = systemHandler;
-		this.predHandler = new PredicateHandler(logger, systemHandler);
+		this.predHandler = new PredicateHandler(logger, systemHandler, incidentDoc);
+		incidentDocument = incidentDoc;
 	}
 
-	private HashMap<String, Activity> createIncidentActivities() {
+	private HashMap<String, Activity> createIncidentActivities(IncidentDiagram incidentModel) {
 
-		List<Activity> activities = ModelsHandler.getCurrentIncidentModelActivities();
+		List<Activity> activities = ModelsHandler.getIncidentModelActivities(incidentModel);
 
 		for (Activity act : activities) {
 
@@ -132,43 +134,43 @@ public class PredicateGenerator {
 		return predHandler.getIncidentActivities();
 	}
 
-	private HashMap<String, Activity> createIncidentActivitiesUsingXquery() {
-		String[] tmp;
-		String[] nextPreviousActivities;
-		IncidentActivity activity;
+//	private HashMap<String, Activity> createIncidentActivitiesUsingXquery() {
+//		String[] tmp;
+//		String[] nextPreviousActivities;
+//		IncidentActivity activity;
+//
+//		try {
+//			nextPreviousActivities = XqueryExecuter.returnNextPreviousActivities();
+//
+//			if (nextPreviousActivities != null) {
+//				for (String res : nextPreviousActivities) {
+//					tmp = res.split("##"); // first is activity name, 2nd is
+//											// next activities, 3rd previous
+//											// activities
+//					activity = new IncidentActivity(tmp[0]);
+//					predHandler.addIncidentActivity(activity);
+//				}
+//			}
+//
+//			predHandler.updateNextPreviousActivitiesUsingXquery();
+//			predHandler.createActivitiesDigraph();
+//
+//		} catch (FileNotFoundException | XQException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		return predHandler.getIncidentActivities();
+//	}
 
-		try {
-			nextPreviousActivities = XqueryExecuter.returnNextPreviousActivities();
-
-			if (nextPreviousActivities != null) {
-				for (String res : nextPreviousActivities) {
-					tmp = res.split("##"); // first is activity name, 2nd is
-											// next activities, 3rd previous
-											// activities
-					activity = new IncidentActivity(tmp[0]);
-					predHandler.addIncidentActivity(activity);
-				}
-			}
-
-			predHandler.updateNextPreviousActivitiesUsingXquery();
-			predHandler.createActivitiesDigraph();
-
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return predHandler.getIncidentActivities();
-	}
-
-	public PredicateHandler generatePredicates() {
+	public PredicateHandler generatePredicates(IncidentDiagram incidentModel) {
 
 		PredicateType[] types = { PredicateType.Precondition, PredicateType.Postcondition };
 
 		try {
 
 			// create activties of the incident
-			HashMap<String, Activity> activities = createIncidentActivities();
+			HashMap<String, Activity> activities = createIncidentActivities(incidentModel);
 
 			// get controls for the asset set from the system file
 			// systemAssetControls =
@@ -183,15 +185,15 @@ public class PredicateGenerator {
 			// postcondition
 			for (String activity : activities.keySet()) {
 				for (PredicateType type : types) {
-					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type);
-
+					JSONObject condition = XqueryExecuter.getBigraphConditions(activity, type, incidentDocument);
+					
 					// if there is no condition returend then skip creating a
 					// predicate for it
 					if (condition == null || condition.isNull(JSONTerms.ENTITY)) {
 						continue;
 					}
 
-					Predicate p = new Predicate(systemHandler);
+					Predicate p = new Predicate(systemHandler, incidentDocument);
 					p.setIncidentActivity(activities.get(activity));
 					p.setPredicateType(type);
 					p.setName(activity + "_" + type.toString()); // e.g., name =

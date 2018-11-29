@@ -17,6 +17,7 @@ import cyberPhysical_Incident.ConnectionState;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Mobility;
+import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.CartesianIterator;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
@@ -279,44 +280,44 @@ public class AssetMap {
 		return names;
 	}
 
-	public String getIncidentAssetInfo(String assetName) {
-		String info = "";
-		String query = XqueryExecuter.NS_DECELERATION + "doc(\"" + XqueryExecuter.INCIDENT_DOC + "\")//"
-				+ XqueryExecuter.INCIDENT_ROOT_ELEMENT + "/asset[@name=\"" + assetName + "\"]";
+//	public String getIncidentAssetInfo(String assetName) {
+//		String info = "";
+//		String query = XqueryExecuter.NS_DECELERATION + "doc(\"" + XqueryExecuter.INCIDENT_DOC + "\")//"
+//				+ XqueryExecuter.INCIDENT_ROOT_ELEMENT + "/asset[@name=\"" + assetName + "\"]";
+//
+//		try {
+//			info = XqueryExecuter.executeQuery(query);
+//		} catch (FileNotFoundException | XQException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		return info;
+//	}
 
-		try {
-			info = XqueryExecuter.executeQuery(query);
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return info;
-	}
-
-	public String getIncidentAssetInfo(String[] assetNames) {
-		String info = "";
-		StringBuilder names = new StringBuilder("(");
-
-		for (String e : assetNames) {
-			names.append("\"").append(e).append("\",");
-		}
-		names.deleteCharAt(names.length() - 1);
-		names.append(")");
-
-		System.out.println(names.toString());
-		String query = XqueryExecuter.NS_DECELERATION + "doc(\"" + XqueryExecuter.INCIDENT_DOC + "\")//"
-				+ XqueryExecuter.INCIDENT_ROOT_ELEMENT + "/asset[@name=" + names.toString() + "]";
-
-		try {
-			info = XqueryExecuter.executeQuery(query);
-		} catch (FileNotFoundException | XQException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return info;
-	}
+//	public String getIncidentAssetInfo(String[] assetNames) {
+//		String info = "";
+//		StringBuilder names = new StringBuilder("(");
+//
+//		for (String e : assetNames) {
+//			names.append("\"").append(e).append("\",");
+//		}
+//		names.deleteCharAt(names.length() - 1);
+//		names.append(")");
+//
+//		System.out.println(names.toString());
+//		String query = XqueryExecuter.NS_DECELERATION + "doc(\"" + XqueryExecuter.INCIDENT_DOC + "\")//"
+//				+ XqueryExecuter.INCIDENT_ROOT_ELEMENT + "/asset[@name=" + names.toString() + "]";
+//
+//		try {
+//			info = XqueryExecuter.executeQuery(query);
+//		} catch (FileNotFoundException | XQException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//
+//		return info;
+//	}
 
 	/**
 	 * Returns a random unique sequence of system assets
@@ -366,8 +367,14 @@ public class AssetMap {
 	 */
 
 	private void createIncidentEntitiesRules() {
-
+	
 		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
+			createIncidentEntitiesRules(incidentModel);
+	}
+	
+	private void createIncidentEntitiesRules(IncidentDiagram incidentModel) {
+
+//		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
 
 		List<IncidentEntity> generalEntities = new LinkedList<IncidentEntity>();
 
@@ -484,6 +491,30 @@ public class AssetMap {
 		return uniqueCombinations;
 	}
 
+	public LinkedList<String[]> generateUniqueCombinations(boolean isStrict, IncidentDiagram incidentModel, EnvironmentDiagram sysModel) {
+
+		String[][] systemAssetMatches = getDoubleArrayOfMatches();
+		
+		createIncidentEntitiesRules(incidentModel);
+		
+		setCriteriaStrict(isStrict);
+		
+		CartesianIterator<String> it = new CartesianIterator<String>(systemAssetMatches, String[]::new, sysModel);
+
+		
+		uniqueCombinations = new LinkedList<String[]>();
+
+		LinkedList<LinkedList<String>> res = it.iterateElements();
+
+		for (LinkedList<String> lst : res) {
+			// if(!containsDuplicate(s)) {
+			uniqueCombinations.add(lst.toArray(new String[0]));
+			// }
+		}
+
+		return uniqueCombinations;
+	}
+	
 	private String[][] getDoubleArrayOfMatches() {
 
 		String[][] systemAssetMatches = new String[matchedSystemAssets.keySet().size()][];

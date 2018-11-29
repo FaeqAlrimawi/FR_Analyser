@@ -38,7 +38,7 @@ public class BigrapherHandler implements SystemExecutor {
 	private String transitionFileName = "transitions.txt";
 	private String transitionFileNameJSON = "transitions.json";
 	private Signature bigraphSignature;
-	private static HashMap<Integer, Bigraph> states;
+	private HashMap<Integer, Bigraph> states;
 	private String [] actionNames;
 
 	/*private ForkJoinPool mainPool;
