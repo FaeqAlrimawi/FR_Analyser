@@ -32,6 +32,7 @@ public class PredicateGenerator {
 	// private boolean isDebugging = true;
 	private String[] systemAssetControls;
 	private Logger logger;
+	private SystemInstanceHandler systemHandler;
 	
 	// used to find a map of an asset to a control
 	private Map<String, String> assetControlMap;
@@ -103,7 +104,7 @@ public class PredicateGenerator {
 	 */
 
 	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName, String[] systemAssetControl
-			, Map<String, String> assetControlMap, Logger logger) {
+			, Map<String, String> assetControlMap, Logger logger, SystemInstanceHandler systemHandler) {
 //		this();
 		spaceAssetSet = systemAsset;
 		this.incidentAssetNames = incidentAssetName;
@@ -111,7 +112,8 @@ public class PredicateGenerator {
 		
 		this.assetControlMap = assetControlMap;
 		this.logger = logger;
-		this.predHandler = new PredicateHandler(logger);
+		this.systemHandler = systemHandler;
+		this.predHandler = new PredicateHandler(logger, systemHandler);
 	}
 
 	private HashMap<String, Activity> createIncidentActivities() {
@@ -120,7 +122,7 @@ public class PredicateGenerator {
 
 		for (Activity act : activities) {
 
-			predHandler.addIncidentActivity(new IncidentActivity(act));
+			predHandler.addIncidentActivity(new IncidentActivity(act, systemHandler));
 		}
 
 		predHandler.updateNextPreviousActivities();
@@ -189,7 +191,7 @@ public class PredicateGenerator {
 						continue;
 					}
 
-					Predicate p = new Predicate();
+					Predicate p = new Predicate(systemHandler);
 					p.setIncidentActivity(activities.get(activity));
 					p.setPredicateType(type);
 					p.setName(activity + "_" + type.toString()); // e.g., name =

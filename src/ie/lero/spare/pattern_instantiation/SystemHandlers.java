@@ -47,12 +47,13 @@ public class SystemHandlers {
 		return id;
 	}
 	
-	public static void setCurrentSystemHandler(SystemInstanceHandler sysHandler) {
+	public synchronized static void setCurrentSystemHandler(SystemInstanceHandler sysHandler) {
 		currentSystemHandler = sysHandler;
 	}
 	
 	public static SystemInstanceHandler getCurrentSystemHandler() {
-		return currentSystemHandler;
+//		return currentSystemHandler;
+		return null;
 	}
 	
 	public synchronized static SystemInstanceHandler getSystemHandler(long id) {

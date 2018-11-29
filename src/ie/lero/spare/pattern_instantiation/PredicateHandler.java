@@ -50,13 +50,20 @@ public class PredicateHandler {
 		activitySequences = new LinkedList<LinkedList<String>>();
 		logger = null;
 		systemHandler = SystemHandlers.getCurrentSystemHandler();
-		transitionSystem = systemHandler.getTransitionSystem();
+		transitionSystem = systemHandler!=null?systemHandler.getTransitionSystem():null;
 	}
 
 	public PredicateHandler(Logger logger) {
 		this();
 		this.logger = logger;
 
+	}
+	
+	public PredicateHandler(Logger logger, SystemInstanceHandler sysHandler) {
+		this();
+		this.logger = logger;
+		systemHandler = sysHandler;
+		transitionSystem = systemHandler.getTransitionSystem();
 	}
 
 	public PredicateHandler(SystemInstanceHandler sysHandler) {
@@ -1381,7 +1388,7 @@ public class PredicateHandler {
 			// states
 			// are the same
 			if (srcState.equals(desState)) {
-				tmpG = new GraphPath();
+				tmpG = new GraphPath(transitionSystem);
 				tmpG.setPredicateSrc(null);
 				tmpG.setPredicateDes(null);
 				tmp = new LinkedList<Integer>();
@@ -1429,7 +1436,7 @@ public class PredicateHandler {
 
 		private void addTransitiontoList(List<Integer> transition) {
 			LinkedList<Integer> newList = new LinkedList<Integer>();
-			GraphPath path = new GraphPath();
+			GraphPath path = new GraphPath(transitionSystem);
 
 			newList.addAll(transition);
 

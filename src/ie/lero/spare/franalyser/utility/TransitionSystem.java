@@ -226,7 +226,7 @@ public class TransitionSystem {
 				this.endState = endState;
 
 				if (startState.compareTo(endState) == 0) {
-					tmpG = new GraphPath();
+					tmpG = new GraphPath(this);
 					tmpG.setPredicateSrc(predicateSrc);
 					predicateSrc.addIntraSatisfiedState(startState);
 					tmpG.setPredicateDes(predicateDes);
@@ -269,7 +269,7 @@ public class TransitionSystem {
 				this.endState = endState;
 
 				if (startState.compareTo(endState) == 0) {
-					tmpG = new GraphPath();
+					tmpG = new GraphPath(this);
 					tmpG.setPredicateSrc(predicateSrc);
 					predicateSrc.addInterSatisfiedState(startState);
 					tmpG.setPredicateDes(predicateDes);
@@ -308,7 +308,7 @@ public class TransitionSystem {
 		// adds the state itself if both the source and the destination states
 		// are the same
 		if (srcState.equals(desState)) {
-			tmpG = new GraphPath();
+			tmpG = new GraphPath(this);
 			tmpG.setPredicateSrc(null);
 			tmpG.setPredicateDes(null);
 			tmp = new LinkedList<Integer>();
@@ -356,7 +356,7 @@ public class TransitionSystem {
 
 	private void addTransitiontoList(List<Integer> transition) {
 		LinkedList<Integer> newList = new LinkedList<Integer>();
-		GraphPath path = new GraphPath();
+		GraphPath path = new GraphPath(this);
 
 		newList.addAll(transition);
 
@@ -415,18 +415,18 @@ public class TransitionSystem {
 //		transitionSystem = null;
 //	}
 //	
-	public void updateDigraphLabels(String[] actionNames) {
-		
-		LabelExtractor ext = new LabelExtractor();
-		ext.updateDigraphLabels(actionNames);
-	}
+//	public void updateDigraphLabels(String[] actionNames) {
+//		
+//		LabelExtractor ext = new LabelExtractor();
+//		ext.updateDigraphLabels(actionNames);
+//	}
 	
-	public String createNewLabelledTransitionFile(String [] actionNames) {
-		
-		LabelExtractor ext = new LabelExtractor();
-		ext.updateDigraphLabels(actionNames);
-		return ext.createNewLabelledTransitionFile();
-	}
+//	public String createNewLabelledTransitionFile(String [] actionNames) {
+//		
+//		LabelExtractor ext = new LabelExtractor();
+//		ext.updateDigraphLabels(actionNames);
+//		return ext.createNewLabelledTransitionFile();
+//	}
 	
 	public void setActionNames(String [] actionNames) {
 		this.actionNames = Arrays.copyOf(actionNames, actionNames.length);

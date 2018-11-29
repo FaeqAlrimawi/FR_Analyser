@@ -18,7 +18,14 @@ public class GraphPath {
 	public GraphPath() {
 		stateTransitions = new LinkedList<Integer>();
 		systemHandler = SystemHandlers.getCurrentSystemHandler();
-		transitionSystem = systemHandler.getTransitionSystem();
+		transitionSystem = systemHandler!=null?systemHandler.getTransitionSystem():null;
+	}
+	
+	public GraphPath(TransitionSystem transitionSystem) {
+		stateTransitions = new LinkedList<Integer>();
+//		systemHandler = sysHandler;
+		transitionSystem = systemHandler!=null?systemHandler.getTransitionSystem():null;
+		this.transitionSystem = transitionSystem;
 	}
 	
 	public GraphPath(Predicate predSrc, Predicate predDes, LinkedList<Integer> transition) {

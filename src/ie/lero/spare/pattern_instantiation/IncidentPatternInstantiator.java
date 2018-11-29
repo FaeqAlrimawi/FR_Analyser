@@ -68,10 +68,10 @@ public class IncidentPatternInstantiator {
 	// indication
 	private boolean isSystemInitialised = false;
 
-	//system handler
+	// system handler
 	private SystemInstanceHandler systemHandler;
 	private TransitionSystem transitionSystem;
-	
+
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
@@ -231,8 +231,8 @@ public class IncidentPatternInstantiator {
 			for (int i = 0; i < lst.size(); i++) {// adjust the length
 				if (isPrintToScreen && i >= 100) {
 					isPrintToScreen = false;
-					System.out.println("-... [See log file (" + logger.getLogFolder() + "/"
-							+ logger.getLogFileName() + ") for the rest]");
+					System.out.println("-... [See log file (" + logger.getLogFolder() + "/" + logger.getLogFileName()
+							+ ") for the rest]");
 				}
 				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
 			}
@@ -251,8 +251,7 @@ public class IncidentPatternInstantiator {
 				logger.putMessage(">>Initialisation was NOT completed successfully. Execution is terminated");
 			}
 
-			logger.putMessage(
-					">>Number of States= " + transitionSystem.getNumberOfStates());
+			logger.putMessage(">>Number of States= " + transitionSystem.getNumberOfStates());
 			// logger.putMessage(">>State Transitions:");
 			// logger.putMessage(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
 
@@ -340,7 +339,7 @@ public class IncidentPatternInstantiator {
 	 */
 	private boolean initialiseBigraphSystem(String BRSFileName, String outputFolder) {
 
-		systemHandler =  new SystemInstanceHandler();
+		systemHandler = new SystemInstanceHandler();
 		// create a handler for bigrapher tool
 		brsExecutor = new BigrapherHandler(BRSFileName, outputFolder);
 
@@ -351,13 +350,13 @@ public class IncidentPatternInstantiator {
 		systemHandler.setExecutor(brsExecutor);
 
 		boolean isDone = systemHandler.analyseBRS();
-		
-		if(isDone) {
-			transitionSystem = systemHandler.getTransitionSystem();	
-			//add to the list of system handlers for other objects to access
+
+		if (isDone) {
+			transitionSystem = systemHandler.getTransitionSystem();
+			// add to the list of system handlers for other objects to access
 			SystemHandlers.addSystemHandler(systemHandler);
 		}
-		
+
 		return isDone;
 	}
 
@@ -612,16 +611,16 @@ public class IncidentPatternInstantiator {
 				}
 			}
 
-			logger.putMessage(
-					">>Number of States= " + transitionSystem.getNumberOfStates());
+			logger.putMessage(">>Number of States= " + transitionSystem.getNumberOfStates());
 
 			/***************/
 
 			// create a new transition file with labels
 			logger.putMessage(">>Labelling transition system...");
 			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
-			String outputFile = transitionSystem.createNewLabelledTransitionFile(actionNames);
-
+//			String outputFile = transitionSystem.createNewLabelledTransitionFile(actionNames);
+			String outputFile = createNewLabelledTransitionFile(actionNames);
+			
 			if (outputFile != null) {
 				logger.putMessage(">>New Labelled transitions is created: " + outputFile);
 			} else {
@@ -657,14 +656,14 @@ public class IncidentPatternInstantiator {
 			memory = runtime.totalMemory() - runtime.freeMemory();
 			logger.putMessage(">>Memory before executing sets: " + memory + "Bytes");
 
-//			for (int i = 0; i < lst.size(); i++) {// adjust the length
-//				incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
-//				instances.add(executor.submit(incidentInstances[i]));
-//			}
+			// for (int i = 0; i < lst.size(); i++) {// adjust the length
+			// incidentInstances[i] = new PotentialIncidentInstance(lst.get(i),
+			// incidentAssetNames, i);
+			// instances.add(executor.submit(incidentInstances[i]));
+			// }
 			/** for testing **/
-			 incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
-			 incidentAssetNames, 1);
-			 instances.add(executor.submit(incidentInstances[1]));
+			incidentInstances[1] = new PotentialIncidentInstance(lst.get(1), incidentAssetNames, 1);
+			instances.add(executor.submit(incidentInstances[1]));
 			incidentInstances[0] = new PotentialIncidentInstance(lst.get(0), incidentAssetNames, 0);
 			instances.add(executor.submit(incidentInstances[0]));
 
@@ -718,6 +717,13 @@ public class IncidentPatternInstantiator {
 			}
 		}
 
+	}
+
+	public String createNewLabelledTransitionFile(String[] actionNames) {
+
+		LabelExtractor ext = new LabelExtractor(systemHandler);
+		ext.updateDigraphLabels(actionNames);
+		return ext.createNewLabelledTransitionFile();
 	}
 
 	public void generateAssetControlMap() {
@@ -898,8 +904,8 @@ public class IncidentPatternInstantiator {
 			threadID = id;
 
 			// default output
-			setOutputFileName(outputFolder + "/output/" + threadID + "_"
-					+ transitionSystem.getNumberOfStates() + ".json");
+			setOutputFileName(
+					outputFolder + "/output/" + threadID + "_" + transitionSystem.getNumberOfStates() + ".json");
 		}
 
 		public PotentialIncidentInstance(String[] sa, String[] ia, int id, String outputFileName) {
@@ -932,7 +938,7 @@ public class IncidentPatternInstantiator {
 				}
 
 				PredicateGenerator predicateGenerator = new PredicateGenerator(systemAssetNames, incidentEntityNames,
-						systemAssetControls, assetControlMap, logger);
+						systemAssetControls, assetControlMap, logger, systemHandler);
 				PredicateHandler predicateHandler = predicateGenerator.generatePredicates();
 
 				StringBuilder str = new StringBuilder();
@@ -956,10 +962,10 @@ public class IncidentPatternInstantiator {
 				 * updated in the predicates, which can be accessed through
 				 * predicateHandler
 				 **/
-				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID, logger);
-				
-				//set logger for bigraph analyser
-//				analyser.setLogger(logger);
+				BigraphAnalyser analyser = new BigraphAnalyser(predicateHandler, threadID, logger, systemHandler);
+
+				// set logger for bigraph analyser
+				// analyser.setLogger(logger);
 
 				// set the number of activities to execute in parallel
 				analyser.setNumberofParallelActivity(getNumberOfParallelActivities());
@@ -1013,10 +1019,11 @@ public class IncidentPatternInstantiator {
 				// LinkedList<GraphPath> paths =
 				// predicateHandler.getPathsBetweenActivities(predicateHandler.getInitialActivity(),
 				// predicateHandler.getFinalActivity());
-//				 LinkedList<GraphPath> paths = predicateHandler.getPaths();
+				// LinkedList<GraphPath> paths = predicateHandler.getPaths();
 
-				//using threading to find transitions. insure that prallelism will not cause problems! 
-				//(might have some issues, more testing is required)
+				// using threading to find transitions. insure that prallelism
+				// will not cause problems!
+				// (might have some issues, more testing is required)
 				List<GraphPath> paths = predicateHandler.findTransitions(threadID);
 
 				// updated gui
@@ -1442,7 +1449,7 @@ public class IncidentPatternInstantiator {
 
 		// test
 		// test();
-//		lero10();
+		// lero10();
 	}
 
 	public static void test() {
@@ -1467,8 +1474,8 @@ public class IncidentPatternInstantiator {
 
 			// reset
 			ins = null;
-//			Logger.setInstanceNull();
-//			TransitionSystem.setInstanceNull();
+			// Logger.setInstanceNull();
+			// TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
@@ -1509,8 +1516,8 @@ public class IncidentPatternInstantiator {
 
 			// reset
 			ins = null;
-//			Logger.setInstanceNull();
-//			TransitionSystem.setInstanceNull();
+			// Logger.setInstanceNull();
+			// TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
