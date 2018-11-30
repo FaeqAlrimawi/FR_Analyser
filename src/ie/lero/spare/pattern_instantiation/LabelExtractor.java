@@ -37,7 +37,7 @@ public class LabelExtractor {
 
 	public LabelExtractor() {
 
-		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = systemHandler.getTransitionSystem();
 
 		outputFolder = systemHandler.getOutputFolder();

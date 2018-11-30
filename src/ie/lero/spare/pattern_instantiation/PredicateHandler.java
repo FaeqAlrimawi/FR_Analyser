@@ -50,7 +50,7 @@ public class PredicateHandler {
 		incidentActivities = new HashMap<String, Activity>();
 		activitySequences = new LinkedList<LinkedList<String>>();
 		logger = null;
-		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = systemHandler != null ? systemHandler.getTransitionSystem() : null;
 	}
 

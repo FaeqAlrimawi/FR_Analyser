@@ -23,7 +23,7 @@ public class IncidentActivity extends ActivityImpl {
 	public IncidentActivity() {
 		predicates = new ArrayList<Predicate>();
 		pathsToNextActivities = new HashMap<String, LinkedList<GraphPath>>();
-		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = systemHandler.getTransitionSystem();
 	}
 
@@ -36,7 +36,7 @@ public class IncidentActivity extends ActivityImpl {
 		super(activity);
 		predicates = new ArrayList<Predicate>();
 		pathsToNextActivities = new HashMap<String, LinkedList<GraphPath>>();
-		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = systemHandler.getTransitionSystem();
 		
 	}

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-public class SystemHandlers {
+public class SystemsHandler {
 
 	private static Map<Long, SystemInstanceHandler> systemHandlers = new HashMap<Long, SystemInstanceHandler>();
 	private static SystemInstanceHandler currentSystemHandler;

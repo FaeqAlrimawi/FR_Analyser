@@ -17,7 +17,7 @@ public class GraphPath {
 	
 	public GraphPath() {
 		stateTransitions = new LinkedList<Integer>();
-		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = systemHandler!=null?systemHandler.getTransitionSystem():null;
 	}
 	

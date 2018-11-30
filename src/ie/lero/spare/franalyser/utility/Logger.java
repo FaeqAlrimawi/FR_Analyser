@@ -38,6 +38,7 @@ public class Logger implements Runnable {
 
 	private static final String SEPARATOR = "*=========================================================================================================*";
 	
+	public static final String SEPARATOR_BTW_INSTANCES = ">>";
 	public Logger() {
 
 		timeNow = LocalDateTime.now();

@@ -46,7 +46,7 @@ public class Predicate {
 		statesIntraSatisfied = new LinkedList<Integer>();
 		statesInterSatisfied = new LinkedList<Integer>();
 		paths = new LinkedList<GraphPath>();
-		systemHandler = SystemHandlers.getCurrentSystemHandler();
+		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		}
 	
 	public Predicate(SystemInstanceHandler sysHandler, String incidentDoc){
