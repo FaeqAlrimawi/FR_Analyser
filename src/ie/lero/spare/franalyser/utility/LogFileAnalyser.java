@@ -231,7 +231,7 @@ public class LogFileAnalyser {
 		String outputFolderUbuntu2 = "D:/Bigrapher data/lero/instantiation data/ubuntu data/CPU-2/log";
 		String outputFolderUbuntuNoThreads = "D:/Bigrapher data/lero/instantiation data/ubuntu data/No threads/log";
 
-		String outputFolderVM32 = "D:/Bigrapher data/lero/lero100K/log/previous-no threading for transition generation";
+		String outputFolderVM32 = "D:/Bigrapher data/lero/lero100K/log";
 
 		int numOfActivities = 3;
 
