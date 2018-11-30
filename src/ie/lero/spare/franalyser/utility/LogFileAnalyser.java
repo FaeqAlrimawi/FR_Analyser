@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import ie.lero.spare.pattern_instantiation.BigraphAnalyser;
+
 public class LogFileAnalyser {
 
 	String statesString = "Number of States=";
@@ -14,7 +16,8 @@ public class LogFileAnalyser {
 	String noTransitionsGenerated = "NO potential incident instances";
 	String transitionsIdentified = "Removing from identified transitions";
 
-	// int numberOfActivities = 4;
+	String analysisFile = "analysisResult.txt";
+	
 	List<String> preConditionStatements = new LinkedList<String>();
 	List<String> postConditionStatements = new LinkedList<String>();
 
@@ -24,8 +27,10 @@ public class LogFileAnalyser {
 		String postStmt = "";
 
 		for (int i = 1; i <= numOfActivities; i++) {
-			preStmt = "BigraphAnalyser>>Condition [activity" + i + "_Precondition] matching time:";
-			postStmt = "BigraphAnalyser>>Condition [activity" + i + "_Postcondition] matching time:";
+			preStmt = BigraphAnalyser.BIGRAPH_ANALYSER_NAME + Logger.SEPARATOR_BTW_INSTANCES + "Condition [activity" + i
+					+ "_Precondition] matching time:";
+			postStmt = BigraphAnalyser.BIGRAPH_ANALYSER_NAME + Logger.SEPARATOR_BTW_INSTANCES + "Condition [activity"
+					+ i + "_Postcondition] matching time:";
 
 			preConditionStatements.add(preStmt);
 			postConditionStatements.add(postStmt);
@@ -36,7 +41,7 @@ public class LogFileAnalyser {
 	// determined to be the longer timing of between the precondition and
 	// postcondition of an activity (parallelism is used for the conditions).
 	// currently it looks for three activities
-	protected void extractActivityTiming(String logFileName, int numOfActivities) {
+	protected void extractActivityInformation(String logFileName, int numOfActivities) {
 
 		String[] fileNames = null;
 		String outputFolder = "";
@@ -73,8 +78,8 @@ public class LogFileAnalyser {
 		String states = "unknown";
 
 		StringBuilder str = new StringBuilder();
-		str.append(outputFolder).append("\n\n");
-		str.append("states\nThread[i]:activity1-timing;activity2-timing;activity3-timing;;[numberOfTransitions]\n\n");
+		str.append("analysed: ["+outputFolder+"]").append("\n\n");
+		str.append("[Log file analysed]\nstates\nThread[i]:activity1-timing;activity2-timing;activity3-timing;;[numberOfTransitions]\n\n");
 
 		for (String fileName : fileNames) {
 
@@ -83,14 +88,17 @@ public class LogFileAnalyser {
 			instance.clear();
 			instanceTransitions.clear();
 
-			System.out.println("analysing " + fileName);
-
+			System.out.println( "analysing [" + fileName +"]");
+			
 			// read only text files
 			if (!fileName.startsWith("log") || !fileName.endsWith(".txt")) {
-				System.out.println(fileName + " NOT a log file");
+				System.out.println("["+fileName + "] NOT a log file. Skipping...");
+//				str.append("["+fileName + "] NOT a log file\n\n");
 				continue;
 			}
 
+			str.append("[" + fileName +"]").append("\n");
+			
 			fileName = outputFolder + "/" + fileName;
 
 			String[] lines = FileManipulator.readFileNewLine(fileName);
@@ -111,7 +119,7 @@ public class LogFileAnalyser {
 				if (index < instanceTransitions.size()) {
 					str.append(";[").append(instanceTransitions.get(index)).append("]");
 				}
-				// str.deleteCharAt(str.lastIndexOf(";"));
+	
 				index++;
 				str.append("\n");
 			}
@@ -121,17 +129,18 @@ public class LogFileAnalyser {
 
 		try {
 
-			FileWriter analysisFile = new FileWriter(outputFolder + "/activity-Time-analysis.txt");
+			FileWriter anaFile = new FileWriter(outputFolder + "/"+analysisFile);
 
-			BufferedWriter writer = new BufferedWriter(analysisFile);
+			BufferedWriter writer = new BufferedWriter(anaFile);
 
 			writer.write(str.toString());
 
 			writer.close();
 
-			System.out.println("=========analysis complete=========");
+			System.out.println("################# Analysis Complete #################\n");
+			System.out.println("## "+analysisFile + " content:");
 			System.out.println(str.toString());
-			System.out.println("\noutput file save to: " + outputFolder + "/activity-Time-analysis.txt");
+			System.out.println("\n## Output file saved to: " + outputFolder + "/"+analysisFile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -195,7 +204,7 @@ public class LogFileAnalyser {
 				}
 
 				// get instance (or thread) name
-				String tmp = line.split(":")[4].trim().split(">>")[0].trim();
+				String tmp = line.split(":")[4].trim().split(Logger.SEPARATOR_BTW_INSTANCES)[0].trim();
 				instance.add(tmp);
 
 				preTiming = 0;
@@ -222,10 +231,12 @@ public class LogFileAnalyser {
 		String outputFolderUbuntu2 = "D:/Bigrapher data/lero/instantiation data/ubuntu data/CPU-2/log";
 		String outputFolderUbuntuNoThreads = "D:/Bigrapher data/lero/instantiation data/ubuntu data/No threads/log";
 
-		String outputFolderVM32 = "D:/Bigrapher data/lero/lero100K/log";
+		String outputFolderVM32 = "D:/Bigrapher data/lero/lero100K/log/previous-no threading for transition generation";
 
 		int numOfActivities = 3;
 
-		analyser.extractActivityTiming(outputFolderVM32, numOfActivities);
+		//extracts number of states, activity timing, and number of transitions generated (if any)
+		//output is saved into a txt file named "analysisResult.txt"
+		analyser.extractActivityInformation(outputFolderVM32, numOfActivities);
 	}
 }

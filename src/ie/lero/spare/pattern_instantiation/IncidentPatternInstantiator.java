@@ -375,33 +375,7 @@ public class IncidentPatternInstantiator {
 		return isDone;
 	}
 
-	private void executeStealScenario() {
-
-		String BRS_file = "etc/steal_scenario/research_centre_system.big";
-		String BRS_outputFolder = "etc/steal_scenario/research_centre_output_500";
-		String systemModelFile = "etc/steal_scenario/research_centre_model.cps";
-		String incidentPatternFile = "etc/steal_scenario/incidentInstance_steal.cpi";
-
-		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
-	}
-
-	private void executeScenario1() {
-
-		String BRS_file = "etc/scenario1/research_centre_system.big";
-		String BRS_outputFolder = "etc/scenario1/research_centre_output_10000";
-		String systemModelFile = "etc/scenario1/research_centre_model.cps";
-		String incidentPatternFile = "etc/scenario1/interruption_incident-pattern.cpi";
-
-		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder);
-	}
-
 	private void executeLeroScenario() {
-
-		// String BRS_file = "D:/Bigrapher data/scenario2/lero_BRS.big";
-		// String BRS_outputFolder = "D:/Bigrapher data/scenario2/output-10000";
-		// String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
-		// String dataCollectionPattern =
-		// "/home/faeq/Desktop/lero/dataCollection_incident-pattern.cpi";
 
 		String interruptionPattern = "D:/Bigrapher data/incident patterns/infectWithMalware-pattern.cpi";
 		String dataCollectionPattern = "D:/Bigrapher data/incident patterns/collectData-pattern.cpi";
@@ -503,21 +477,6 @@ public class IncidentPatternInstantiator {
 			incidentModel = ModelsHandler.addIncidentModel(incidentPatternFile);
 			systemModel = ModelsHandler.addSystemModel(systemModelFile);
 
-			// IncidentDiagram incident =
-			// ModelsHandler.getCurrentIncidentModel();
-			// EnvironmentDiagram system =
-			// ModelsHandler.getCurrentSystemModel();
-			//
-			// //initialise activities
-			// incident.getActivity();
-			// //initialise incident entity list
-			// incident.getEntity();
-			// //initialise incident entity map
-			// incident.getEntity("dummy");
-			//
-			// //initialise assets list
-			// system.getAsset("dummy");
-
 			/**
 			 * finding matches also can be accomplished using Xquery (but more
 			 * // strict criteria is applied) AssetMap am =
@@ -568,44 +527,6 @@ public class IncidentPatternInstantiator {
 				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
 			}
 
-			// // boolean oldIsPrintToScreen = isPrintToScreen;
-			//
-			// // print the sets only if there are less than 200. Else, print a
-			// 100
-			// // but save the rest to a file
-			// int maxNum = 200;
-			//
-			// if (isSaveLog && lst.size() > maxNum) {
-			// if (isPrintToScreen) {
-			// System.out.println("*See log file (" +
-			// Logger.getInstance().getLogFolder() + "/"
-			// + Logger.getInstance().getLogFileName() + ") for All generated
-			// sets]");
-			// }
-			//
-			// int index = 0;
-			//
-			// for (; index < 20; index++) {
-			// logger.putMessage("-Set[" + index + "]: " +
-			// Arrays.toString(lst.get(index)));
-			// }
-			//
-			// logger.setPrintToScreen(false);
-			// for (; index < lst.size(); index++) {
-			// logger.putMessage("-Set[" + index + "]: " +
-			// Arrays.toString(lst.get(index)));
-			// }
-			// logger.setPrintToScreen(true);
-			//
-			// } else {
-			// for (int i = 0; i < lst.size(); i++) {
-			// logger.putMessage("-Set[" + i + "]: " +
-			// Arrays.toString(lst.get(i)));
-			// }
-			// }
-			//
-			// // isPrintToScreen = oldIsPrintToScreen;
-
 			/** Initialise system **/
 			if (!isSystemInitialised) {
 				logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES+
@@ -628,9 +549,9 @@ public class IncidentPatternInstantiator {
 
 			// create a new transition file with labels
 			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES+"Labelling transition system...");
+			
 			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
-			// String outputFile =
-			// transitionSystem.createNewLabelledTransitionFile(actionNames);
+			
 			String outputFile = createNewLabelledTransitionFile(actionNames);
 
 			if (outputFile != null) {
@@ -641,10 +562,6 @@ public class IncidentPatternInstantiator {
 
 			// load systemClass-Control map
 			loadAssetControlMap(BRS_file);
-
-			// create a map of system class to possible controls (which are the
-			// class and its superclasses)
-			// generateAssetControlMap();
 
 			// create threads that handle each sequence generated from asset
 			// matching

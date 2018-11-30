@@ -1,6 +1,7 @@
 package ie.lero.spare.pattern_instantiation;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,13 +25,11 @@ import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.PotentialIncidentInstance;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
-import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class BigraphAnalyser {
 
 	private PredicateHandler predicateHandler;
 	private LinkedList<GraphPath> paths;
-	// private boolean isDebugging = true;
 	private HashMap<Integer, Bigraph> states;
 	private Matcher matcher;
 
@@ -50,8 +49,6 @@ public class BigraphAnalyser {
 	private ExecutorService predicateExecutor = Executors.newCachedThreadPool();
 	/************************/
 
-	// private int minimumPartitionSize = 1;
-	// private BlockingQueue<String> msgQ;
 	private int threadID;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;
@@ -80,10 +77,10 @@ public class BigraphAnalyser {
 
 	private boolean isTestingTime = true;
 
-	private StopWatch timer = new StopWatch();
+//	private StopWatch timer = new StopWatch();
 
 	private String bigraphAnalyserInstanceName;
-	public static final String BIGRAPH_ANALYSER_NAME = "Bigraph-Analyser";
+	public static final String BIGRAPH_ANALYSER_NAME = "BigraphAnalyser";
 
 	protected int numberOfPartitions = 0;
 
@@ -97,7 +94,7 @@ public class BigraphAnalyser {
 
 	public BigraphAnalyser(PredicateHandler predHandler) {
 		this(predHandler, -1);
-		// predicateHandler = predHandler;
+		
 	}
 
 	public BigraphAnalyser(PredicateHandler predHandler, int threadID) {
@@ -251,11 +248,8 @@ public class BigraphAnalyser {
 
 		try {
 
-			StopWatch timer = new StopWatch();
-
-			// start time
-			timer.start();
-
+			long startTime = Calendar.getInstance().getTimeInMillis();
+			
 			if (isThreading) {
 
 				mainPool = new ForkJoinPool(numberOfThreads);
@@ -306,8 +300,10 @@ public class BigraphAnalyser {
 
 			if (isTestingTime) {
 				// averageTime /=numberOfConditions;
-				timer.stop();
-				long totalTime = timer.getEllapsedMillis();
+				long endTime = Calendar.getInstance().getTimeInMillis();
+				
+				long totalTime = endTime - startTime;
+				
 				int maxHours = (int) (totalTime / 3600000) % 60;
 				int maxMins = (int) (totalTime / 60000) % 60;
 				int maxSecs = (int) (totalTime / 1000) % 60;
@@ -519,9 +515,10 @@ public class BigraphAnalyser {
 
 		boolean areStatesIdentified = false;
 
+		long startTime = 0;
+		
 		if (isTestingTime) {
-			timer.reset();
-			timer.start();
+			startTime = Calendar.getInstance().getTimeInMillis();
 		}
 
 		if (pred == null) {
@@ -537,28 +534,13 @@ public class BigraphAnalyser {
 		// divide the states array for mult-threading
 		LinkedList<Integer> statesResults;
 
-		// if (isThreading) {
-		//
-		// // use the ForkJoin to multi-thread the matching. The states are
-		// // divided in half as long as its size above THRESHOLD set in the
-		// // ForkJoin class extended here
-		// statesResults = mainPool.invoke(new BigraphMatcher(0, states.size(),
-		// redex));
-		//
-		// }
-		// // this else can be removed as the fork class can decide to create
-		// only
-		// // 1 task if size is less than threshold
-		// else {
+		
 		statesResults = new LinkedList<Integer>();
 
 		for (int i = 0; i < states.size(); i++) {
 			if (matcher.match(states.get(i), redex).iterator().hasNext()) {
 				statesResults.add(i);
 			}
-
-			// }
-
 		}
 
 		// set bigraph states in the conditions
@@ -568,9 +550,9 @@ public class BigraphAnalyser {
 				 + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
 
 		if (isTestingTime) {
-			timer.stop();
+			long endTime = Calendar.getInstance().getTimeInMillis();
 
-			long timePassed = timer.getEllapsedMillis();
+			long timePassed = startTime - endTime;
 
 			int hours = (int) (timePassed / 3600000) % 60;
 			int mins = (int) (timePassed / 60000) % 60;
@@ -754,12 +736,9 @@ public class BigraphAnalyser {
 		@Override
 		public Integer call() throws Exception {
 
-			StopWatch timer = null;
-
+			long startTime = 0;
 			if (isTestingTime) {
-				timer = new StopWatch();
-				// timer.reset();
-				timer.start();
+				startTime = Calendar.getInstance().getTimeInMillis();
 			}
 
 			if (pred == null) {
@@ -798,9 +777,9 @@ public class BigraphAnalyser {
 			logger.putMessage(bigraphAnalyserInstanceName+"BigraphAnalyser>>" + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
 
 			if (isTestingTime) {
-				timer.stop();
+				long endTime = Calendar.getInstance().getTimeInMillis();
 
-				long timePassed = timer.getEllapsedMillis();
+				long timePassed = endTime - startTime;
 
 				int hours = (int) (timePassed / 3600000) % 60;
 				int mins = (int) (timePassed / 60000) % 60;
@@ -932,12 +911,10 @@ public class BigraphAnalyser {
 		@Override
 		public Integer call() throws Exception {
 
-			StopWatch timer = null;
-
+			long startTime =0;
+			
 			if (isTestingTime) {
-				timer = new StopWatch();
-				// timer.reset();
-				timer.start();
+				startTime = Calendar.getInstance().getTimeInMillis();
 			}
 
 			LinkedList<Bigraph> bigraphs = new LinkedList<Bigraph>();
@@ -958,17 +935,6 @@ public class BigraphAnalyser {
 			BigraphMatcherArray bigraphMatcherArray = new BigraphMatcherArray(0, states.size(), bigraphs);
 			statesResults = mainPool.invoke(bigraphMatcherArray);
 
-			// this else can be removed as the fork class can decide to create
-			// only 1 task if size is less than threshold
-			// else {
-			// statesResults = new LinkedList<Integer>();
-			// for (int i = 0; i < states.size(); i++) {
-			// if (matcher.match(states.get(i), redex).iterator().hasNext()) {
-			// statesResults.add(i);
-			// }
-			// }
-			// }
-
 			StringBuilder str = new StringBuilder();
 
 			// set result
@@ -985,9 +951,9 @@ public class BigraphAnalyser {
 			}
 
 			if (isTestingTime) {
-				timer.stop();
+				long endTime = Calendar.getInstance().getTimeInMillis();
 
-				long timePassed = timer.getEllapsedMillis();
+				long timePassed = endTime - startTime;
 
 				int hours = (int) (timePassed / 3600000) % 60;
 				int mins = (int) (timePassed / 60000) % 60;
@@ -998,7 +964,7 @@ public class BigraphAnalyser {
 				logger.putMessage(bigraphAnalyserInstanceName+
 						"Conditions [" + str.toString() + "] matching time: "
 								+ timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
-				// averageTime += timePassed;
+		
 				numberOfConditions++;
 
 			}
