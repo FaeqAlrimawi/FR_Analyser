@@ -80,7 +80,7 @@ public class BigraphAnalyser {
 //	private StopWatch timer = new StopWatch();
 
 	private String bigraphAnalyserInstanceName;
-	public static final String BIGRAPH_ANALYSER_NAME = "BigraphAnalyser";
+	public static final String BIGRAPH_ANALYSER_NAME = "Bigraph-Analyser";
 
 	protected int numberOfPartitions = 0;
 

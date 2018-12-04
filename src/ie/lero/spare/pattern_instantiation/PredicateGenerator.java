@@ -36,7 +36,7 @@ public class PredicateGenerator {
 	private String incidentDocument;
 	
 	// used to find a map of an asset to a control
-	private Map<String, String> assetControlMap;
+	private Map<String, List<String>> assetControlMap;
 
 //	public PredicateGenerator() {
 //		
@@ -58,7 +58,7 @@ public class PredicateGenerator {
 //
 //	}
 
-	public void setAssetControlMap(Map<String, String> assetControlMap) {
+	public void setAssetControlMap(Map<String, List<String>> assetControlMap) {
 		this.assetControlMap = assetControlMap;
 	}
 	
@@ -105,7 +105,7 @@ public class PredicateGenerator {
 	 */
 
 	public PredicateGenerator(String[] systemAsset, String[] incidentAssetName, String[] systemAssetControl
-			, Map<String, String> assetControlMap, Logger logger, SystemInstanceHandler systemHandler, String incidentDoc) {
+			, Map<String, List<String>> assetControlMap, Logger logger, SystemInstanceHandler systemHandler, String incidentDoc) {
 //		this();
 		spaceAssetSet = systemAsset;
 		this.incidentAssetNames = incidentAssetName;

@@ -29,8 +29,8 @@ public class LabelExtractor {
 	// private String transitionFileName = "transitions.txt";
 	// private String predicateFilePath = outputPath+"/pred";
 	// private ArrayList<ReactionRule> reactionRules;
-	private String rulesKeywordsFileName = FileNames.bigraphActionsFile;
-	private String outputFileName = FileNames.labelledTransitionFile;
+	private String rulesKeywordsFileName = FileNames.BIGRAPH_ACTIONS;
+	private String outputFileName = FileNames.LABELLED_TRANSITIONS;
 	private String[] rulesKeywords;
 	private TransitionSystem transitionSystem;
 	private SystemInstanceHandler systemHandler;

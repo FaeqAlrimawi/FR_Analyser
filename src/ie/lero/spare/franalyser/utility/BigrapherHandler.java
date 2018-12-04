@@ -257,7 +257,7 @@ public class BigrapherHandler implements SystemExecutor {
 			if (outputFolder != null) {
 //				TransitionSystem.setFileName(outputFolder + "/" + transitionFileNameJSON);
 //				transitionSystem = TransitionSystem.getTransitionSystemInstance();
-				String fileName = outputFolder + "/" + FileNames.transitionFile;
+				String fileName = outputFolder + "/" + FileNames.TRANSITIONS;
 				transitionSystem = new TransitionSystem(fileName);
 			}
 		}
