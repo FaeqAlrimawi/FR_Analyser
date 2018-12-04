@@ -26,6 +26,7 @@ import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
+import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.PotentialIncidentInstance;
 
 public class PredicateHandler {
 
@@ -48,6 +49,8 @@ public class PredicateHandler {
 	
 	private List<Predicate> bottelNecksStatesInOrder = new LinkedList<Predicate>(); 
 	private int bottleNeckNumber = 1;
+	private String instanceName;
+	public static final String INSTANCE_NAME_GLOBAL = "Predicate-Handler";
 	
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
@@ -56,6 +59,7 @@ public class PredicateHandler {
 		logger = null;
 		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = systemHandler != null ? systemHandler.getTransitionSystem() : null;
+		
 	}
 
 	public PredicateHandler(Logger logger) {
@@ -1090,8 +1094,11 @@ public class PredicateHandler {
 
 	public List<GraphPath> findTransitions(int threadID) {
 
-		//identify bottlenecks in the states
-		identifyBottleNecks();
+		instanceName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME+"["+threadID+"]"+Logger.SEPARATOR_BTW_INSTANCES+PredicateHandler.INSTANCE_NAME_GLOBAL+Logger.SEPARATOR_BTW_INSTANCES;
+		
+		//identify bottlenecks in the states...not done
+//		identifyBottleNecks();
+		
 		IncidentActivity sourceActivity = (IncidentActivity) getInitialActivity();
 		IncidentActivity destinationActivity = (IncidentActivity) getFinalActivity();
 
@@ -1115,14 +1122,14 @@ public class PredicateHandler {
 
 		// generate nodes neighbor in the digraph to reduce processing time for
 		// threads that will be created next
-		logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>>Generating neighbor nodes in the Digraph...");
+		logger.putMessage(instanceName+"Generating neighbor nodes in the Digraph...");
 		transitionSystem.getDigraph().generateNeighborNodesMap();
 
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
 
 		mainPool = new ForkJoinPool();
 
-		logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>>Identifying transitions...");
+		logger.putMessage(instanceName+"Identifying transitions...");
 		transitions = mainPool.invoke(preMatcher);
 
 		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
@@ -1133,16 +1140,16 @@ public class PredicateHandler {
 		TransitionAnalyser analyser = new TransitionAnalyser(0, transitions.size(), activities);
 		// analyseTransitions(sourceActivity, destinationActivity);
 
-		logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>>Removing from identified transitions ("
+		logger.putMessage(instanceName+"PredicateHandler>>Removing from identified transitions ("
 				+ transitions.size() + ") those that don't contain a state from each activity...");
 		List<GraphPath> transitionToRemove = mainPool.invoke(analyser);
 
 		if (transitionToRemove != null && !transitionToRemove.isEmpty()) {
 			transitions.removeAll(transitionToRemove);
-			logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>> [" + transitionToRemove.size()
-					+ "] transitions removed. Total generated transitions is [" + (transitions.size()-transitionToRemove.size())+"]");
+			logger.putMessage(instanceName+"PredicateHandler>> [" + transitionToRemove.size()
+					+ "] transitions removed. Total generated transitions is [" + transitions.size()+"]");
 		} else {
-			logger.putMessage("Thread[" + threadID + "]>>PredicateHandler>> [0] transitions removed. Total generated transitions is [" + transitions.size()+"]");
+			logger.putMessage(instanceName+"PredicateHandler>> [0] transitions removed. Total generated transitions is [" + transitions.size()+"]");
 		}
 
 		mainPool.shutdown();

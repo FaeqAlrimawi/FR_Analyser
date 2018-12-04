@@ -19,7 +19,7 @@ public class LogFileAnalyser {
 	String removeTransitionsNone = "None Removed";
 
 	String analysisFile = "analysisResult.txt";
-	
+
 	List<String> preConditionStatements = new LinkedList<String>();
 	List<String> postConditionStatements = new LinkedList<String>();
 
@@ -43,7 +43,7 @@ public class LogFileAnalyser {
 	// determined to be the longer timing of between the precondition and
 	// postcondition of an activity (parallelism is used for the conditions).
 	// currently it looks for three activities
-	protected void extractActivityInformation(String logFileName, int numOfActivities) {
+	protected void extractActivityInformation(String logFileName, int numOfActivities,  boolean identifyInstancesNames, boolean getTransitions) {
 
 		String[] fileNames = null;
 		String outputFolder = "";
@@ -111,17 +111,20 @@ public class LogFileAnalyser {
 			str.append(states).append("\n");
 			for (int i = 0; i < actTiming.size(); i = i + numOfActivities) {
 				// name
+				if(identifyInstancesNames) {
 				str.append(instance.get(i)).append(":");
-
+				}
+				
 				for (int j = 0; j < numOfActivities; j++) {
 					str.append(actTiming.get(i + j)).append(";");
 				}
 
+				if(getTransitions) {
 				// transitions
 				if (index < instanceTransitions.size()) {
 					str.append(";[").append(instanceTransitions.get(index)).append("]");
 				}
-	
+				}
 				index++;
 				str.append("\n");
 			}
@@ -157,7 +160,7 @@ public class LogFileAnalyser {
 		long preTiming = 0;
 		long postTiming = 0;
 		long numOfTransitions = 0;
-		
+
 		for (String line : logLines) {
 
 			// get states numbers
@@ -170,18 +173,18 @@ public class LogFileAnalyser {
 			if (line.contains(noTransitionsGenerated)) {
 				instanceTransitions.add((long) 0);
 				continue;
-			}  
-			
-			if(line.contains(removeTransitionsStmt)) {
+			}
+
+			if (line.contains(removeTransitionsStmt)) {
 				String tmp = line.split("\\(")[1].split("\\)")[0];
 				numOfTransitions = Long.parseLong(tmp);
-				
+
 			}
-			
-			if(line.contains(removeTransitionsNone)) {
+
+			if (line.contains(removeTransitionsNone)) {
 				instanceTransitions.add(numOfTransitions);
 			}
-			
+
 			// get transitions number if any
 			if (line.contains(transitionsIdentified)) {
 				String tmp = line.split(Logger.SEPARATOR_BTW_INSTANCES)[2].split(" ")[1];
@@ -233,7 +236,7 @@ public class LogFileAnalyser {
 	public static void main(String[] args) {
 
 		LogFileAnalyser analyser = new LogFileAnalyser();
-		
+
 		String outputFolderVM32 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-32/log";
 		String outputFolderVM16 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-16/log";
 		String outputFolderVM8 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-8/log";
@@ -250,8 +253,12 @@ public class LogFileAnalyser {
 
 		int numOfActivities = 3;
 
-		//extracts number of states, activity timing, and number of transitions generated (if any)
-		//output is saved into a txt file named "analysisResult.txt"
-		analyser.extractActivityInformation(outputFolderVM32, numOfActivities);
+		// extracts number of states, activity timing, and number of transitions
+		// generated (if any)
+		// output is saved into a txt file named "analysisResult.txt"
+		
+		boolean isDefineInstanceName = false;
+		boolean isDefineTransitions = false;
+		analyser.extractActivityInformation(outputFolderVM32, numOfActivities, isDefineInstanceName, isDefineTransitions);
 	}
 }

@@ -591,9 +591,9 @@ public class IncidentPatternInstantiator {
 			// instances.add(executor.submit(incidentInstances[i]));
 			// }
 			/** for testing **/
-			// incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
-			// incidentAssetNames, 1);
-			// instances.add(executor.submit(incidentInstances[1]));
+			 incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
+			 incidentAssetNames, 1);
+			 instances.add(executor.submit(incidentInstances[1]));
 			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
 			instances.add(executor.submit(incidentInstances[2]));
 
@@ -1340,7 +1340,7 @@ public class IncidentPatternInstantiator {
 
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
-//		ins.executeLeroScenario();
+		ins.executeLeroScenario();
 
 		// ins.generateAssetControlMap();
 		// ins.executeScenarioFromConsole();
@@ -1349,7 +1349,7 @@ public class IncidentPatternInstantiator {
 		// ins.test1();
 
 		// test
-		 test();
+//		 test();
 		// lero10();
 	}
 
