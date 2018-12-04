@@ -1372,8 +1372,7 @@ public class IncidentPatternInstantiator {
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
 		ins.executeLeroScenario();
-
-		// ins.generateAssetControlMap();
+		
 		// ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
