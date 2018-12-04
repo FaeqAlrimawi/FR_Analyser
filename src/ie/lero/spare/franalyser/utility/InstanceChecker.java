@@ -1,4 +1,4 @@
-package Testing;
+package ie.lero.spare.franalyser.utility;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -12,8 +12,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-
-import ie.lero.spare.franalyser.utility.JSONTerms;
 
 public class InstanceChecker {
 
@@ -153,6 +151,7 @@ public class InstanceChecker {
 		String VMCPU2 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-2/output";
 		String VMnoThreads = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/No threads/output";
 		
+		String VMCPU32_100K = "D:/Bigrapher data/lero/lero100K/output";
 		//ubuntu
 //		ins.checkIfCorrect(ubuntuCPU8);//checked
 //		ins.checkIfCorrect(ubuntuCPU4);//checked
@@ -165,7 +164,7 @@ public class InstanceChecker {
 //		ins.checkIfCorrect(VMCPU4);//checked
 //		ins.checkIfCorrect(VMnoThreads);//checked
 		
-		
+		ins.checkIfCorrect(VMCPU32_100K);
 		
 	}
 

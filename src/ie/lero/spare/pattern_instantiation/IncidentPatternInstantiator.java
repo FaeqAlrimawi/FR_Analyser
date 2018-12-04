@@ -594,8 +594,8 @@ public class IncidentPatternInstantiator {
 			// incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
 			// incidentAssetNames, 1);
 			// instances.add(executor.submit(incidentInstances[1]));
-			incidentInstances[0] = new PotentialIncidentInstance(lst.get(0), incidentAssetNames, 0);
-			instances.add(executor.submit(incidentInstances[0]));
+			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
+			instances.add(executor.submit(incidentInstances[2]));
 
 			for (Future<Integer> fut : instances) {
 				if (!fut.isDone()) {
@@ -933,40 +933,40 @@ public class IncidentPatternInstantiator {
 				// save and analyse generated paths there are any
 				if (paths != null && paths.size() > 0) {
 
-					// create and run an instance saver to store instances to a
-					// file
-					InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames,
-							systemAssetNames, paths);
-					mainPool.submit(saver);
-
-					logger.putMessage(instanceName + "Analysing [" + paths.size()
-							+ "] of generated potential incident instances...");
-
-					/** Analyse generated transitions **/
-					// create an analysis object for the identified paths
-					pathsAnalyser = new GraphPathsAnalyser(paths);
-					String result = pathsAnalyser.analyse();
-
-					logger.putMessage(result);
-
-					// save analysis result
-					String jsonStr = pathsAnalyser.convertToJSONStr();
-					String analyseFileName = outputFolder + "/output/" + threadID + "_analysis_"
-							+ transitionSystem.getNumberOfStates() + ".json";
-					File threadFile = new File(analyseFileName);
-
-					JSONObject obj = new JSONObject(jsonStr);
-
-					if (!threadFile.exists()) {
-						threadFile.createNewFile();
-					}
-
-					// write paths to a file
-					try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
-						writer.write(obj.toString(4));
-					}
-
-					logger.putMessage(instanceName + "Analysis result is stored in:" + analyseFileName);
+//					// create and run an instance saver to store instances to a
+//					// file
+//					InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames,
+//							systemAssetNames, paths);
+//					mainPool.submit(saver);
+//
+//					logger.putMessage(instanceName + "Analysing [" + paths.size()
+//							+ "] of generated potential incident instances...");
+//
+//					/** Analyse generated transitions **/
+//					// create an analysis object for the identified paths
+//					pathsAnalyser = new GraphPathsAnalyser(paths);
+//					String result = pathsAnalyser.analyse();
+//
+//					logger.putMessage(result);
+//
+//					// save analysis result
+//					String jsonStr = pathsAnalyser.convertToJSONStr();
+//					String analyseFileName = outputFolder + "/output/" + threadID + "_analysis_"
+//							+ transitionSystem.getNumberOfStates() + ".json";
+//					File threadFile = new File(analyseFileName);
+//
+//					JSONObject obj = new JSONObject(jsonStr);
+//
+//					if (!threadFile.exists()) {
+//						threadFile.createNewFile();
+//					}
+//
+//					// write paths to a file
+//					try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
+//						writer.write(obj.toString(4));
+//					}
+//
+//					logger.putMessage(instanceName + "Analysis result is stored in:" + analyseFileName);
 					/**********************/
 
 				} else {
@@ -1340,7 +1340,7 @@ public class IncidentPatternInstantiator {
 
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
-		ins.executeLeroScenario();
+//		ins.executeLeroScenario();
 
 		// ins.generateAssetControlMap();
 		// ins.executeScenarioFromConsole();
@@ -1349,7 +1349,7 @@ public class IncidentPatternInstantiator {
 		// ins.test1();
 
 		// test
-		// test();
+		 test();
 		// lero10();
 	}
 
@@ -1360,18 +1360,25 @@ public class IncidentPatternInstantiator {
 		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
 
 		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
+		
+		String interruptionPatternWin = "D:/Bigrapher data/incident patterns/collectData-pattern.cpi";
+
+		String leroSystemModelWin = "D:/Bigrapher data/lero/lero.cps";
+
+		String BRS_fileWin = "D:/Bigrapher data/lero/lero.big";
+		
 		String[] states = new String[10];
 
 		for (int i = 0; i < states.length; i++) {
 
-			states[i] = "/home/faeq/Desktop/lero/lero" + (i + 1);
+			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
 		}
 
 		for (int i = 0; i < states.length; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
-			ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states[i]);
+			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);
 
 			// reset
 			ins = null;

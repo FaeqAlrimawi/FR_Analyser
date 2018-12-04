@@ -14,7 +14,9 @@ public class LogFileAnalyser {
 	String statesString = "Number of States=";
 
 	String noTransitionsGenerated = "NO potential incident instances";
-	String transitionsIdentified = "Removing from identified transitions";
+	String transitionsIdentified = "transitions removed.";
+	String removeTransitionsStmt = "Removing from identified transitions";
+	String removeTransitionsNone = "None Removed";
 
 	String analysisFile = "analysisResult.txt";
 	
@@ -154,7 +156,8 @@ public class LogFileAnalyser {
 		String states = "";
 		long preTiming = 0;
 		long postTiming = 0;
-
+		long numOfTransitions = 0;
+		
 		for (String line : logLines) {
 
 			// get states numbers
@@ -167,12 +170,23 @@ public class LogFileAnalyser {
 			if (line.contains(noTransitionsGenerated)) {
 				instanceTransitions.add((long) 0);
 				continue;
+			}  
+			
+			if(line.contains(removeTransitionsStmt)) {
+				String tmp = line.split("\\(")[1].split("\\)")[0];
+				numOfTransitions = Long.parseLong(tmp);
+				
 			}
-
+			
+			if(line.contains(removeTransitionsNone)) {
+				instanceTransitions.add(numOfTransitions);
+			}
+			
 			// get transitions number if any
 			if (line.contains(transitionsIdentified)) {
-				String tmp = line.split("\\(")[1].split("\\)")[0];
-				instanceTransitions.add(Long.parseLong(tmp));
+				String tmp = line.split(Logger.SEPARATOR_BTW_INSTANCES)[2].split(" ")[1];
+				numOfTransitions -= Long.parseLong(tmp);
+				instanceTransitions.add(numOfTransitions);
 				continue;
 			}
 
@@ -219,7 +233,8 @@ public class LogFileAnalyser {
 	public static void main(String[] args) {
 
 		LogFileAnalyser analyser = new LogFileAnalyser();
-
+		
+		String outputFolderVM32 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-32/log";
 		String outputFolderVM16 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-16/log";
 		String outputFolderVM8 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-8/log";
 		String outputFolderVM4 = "D:/Bigrapher data/lero/instantiation data/VM ubuntu data/CPU-4/log";
@@ -231,7 +246,7 @@ public class LogFileAnalyser {
 		String outputFolderUbuntu2 = "D:/Bigrapher data/lero/instantiation data/ubuntu data/CPU-2/log";
 		String outputFolderUbuntuNoThreads = "D:/Bigrapher data/lero/instantiation data/ubuntu data/No threads/log";
 
-		String outputFolderVM32 = "D:/Bigrapher data/lero/lero100K/log";
+		String outputFolderVM32_100k = "D:/Bigrapher data/lero/lero100K/log";
 
 		int numOfActivities = 3;
 

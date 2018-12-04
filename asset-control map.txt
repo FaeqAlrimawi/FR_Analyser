@@ -40,7 +40,7 @@ File PacketPayload
 DigitalNetwork IPNetwork
 IPNetwork IPNetwork
 BusNetwork BusNetwork
-DigitalAsset TrafficData
+DigitalAsset Data
 KNX BusConnection
 X10 BusConnection
 BusConnection BusConnection
