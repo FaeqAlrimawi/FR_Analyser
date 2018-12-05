@@ -117,13 +117,13 @@ public class IncidentPatternExtractor {
 	/** Entity abstraction parameters **/
 	// key is class name and the list of strings are the names of its
 	// superclasses
-	Map<String, List<String>> classMap;
+	protected Map<String, List<String>> classMap;
 
 	// Map of abstraction level for each class name in the classMap
 	// key is string class (should be one of the names in the classMap variable)
 	// and value is the index of class name available in the list of class names
 	// on the classMap variable
-	Map<String, Integer> classAbstractionLevelMap;
+	protected Map<String, Integer> classAbstractionLevelMap;
 
 	// maximum abstraction level
 	protected final int MAX_ABSTRACTION_LEVEL = 10;
@@ -137,6 +137,9 @@ public class IncidentPatternExtractor {
 	protected boolean isSaveLog = false;
 	protected String outputFolder;
 
+	protected static final String STARTER_MARKER = "$";
+	protected static final String SEPARATOR = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+	
 	private void runLogger() {
 
 		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
@@ -228,14 +231,14 @@ public class IncidentPatternExtractor {
 
 		// print incident instance file name, if available
 		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
-			logger.putMessage("Incident instance file:" + originalIncidentFilePath);
+			logger.putMessage("Incident instance file: [" + originalIncidentFilePath + "]");
 		} else {
 
 		}
 
 		// print system file name, if available
 		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
-			logger.putMessage("System file:" + systemFilePath);
+			logger.putMessage("System file: [" + systemFilePath + "]");
 		}
 
 		// create a copy
@@ -270,7 +273,7 @@ public class IncidentPatternExtractor {
 			activityPatterns.add(ptr);
 		}
 
-		logger.putMessage("Activity patterns loaded: " + ptrs.keySet());
+//		logger.putMessage("Activity patterns loaded: " + ptrs.keySet());
 
 		/**
 		 * =======Create Abstract Incident Model=========================== The
@@ -288,28 +291,25 @@ public class IncidentPatternExtractor {
 		 **/
 
 		// =======Abstract CrimeScript===================
-		logger.putMessage("## Extract CrimeScript information ##");
+		logger.putMessage("Abstracting CrimeScript data...");
 
-		logger.putMessage("create abstract CrimeScript entity from original");
+//		logger.putMessage("Create abstract CrimeScript entity from original");
 		updateCrimeScriptData();
 
 		// =======Abstract Activities====================
-		logger.putMessage("## Extract Activities ##");
+		logger.putMessage("Abstracting Activities...");
 
 		/** 1-Find map matches for all patterns in the incident model **/
-		logger.putMessage("Map activity patterns to the sequence of actions");
+		logger.putMessage("Mapping activity patterns to the sequence of actions...");
 
 		mapPatterns();
-
-		// print identified map between activity patterns and actions
-		logger.putMessage(getInputPatternMap());
 
 		/**
 		 * 2-Take best solution found and apply it (i.e. add new abstract
 		 * activities to the incident model while removing the corresponding
 		 * ones based on the patterns used)
 		 **/
-		logger.putMessage("Create abstract activity sequence");
+		logger.putMessage("Creating abstract activity sequence...");
 
 		updateMatchedPatternsInModel();
 
@@ -320,19 +320,21 @@ public class IncidentPatternExtractor {
 		abstractUnmatchedActivities(); // *maybe not needed, currently no effect
 
 		// =======Abstract entities====================
-		logger.putMessage("## Extract Incident Entities ##");
+		logger.putMessage("Abstracting Incident Entities...");
 
 		// remove unused entities after abstracting activities, then use the
 		// system model
 		// to create
-		logger.putMessage("Generate abstract assets of the assets that correspond to incident entities");
+		logger.putMessage("Generating abstract assets for assets in the incident instance...");
 
 		abstractEntities();
 
 		/** ================================================================ **/
 
 		// =======Print results========================
-		logger.putMessage("## Results ##");
+		logger.putSeparator();
+
+		logger.putMessage("Printing results...");
 
 		// prints details of each activity if true
 		boolean printActivityDetails = true;
@@ -340,6 +342,10 @@ public class IncidentPatternExtractor {
 		// prints decoration (e.g., "=====Some Title=============") if true
 		boolean isDecorated = true;
 
+
+		// print identified map between activity patterns and actions
+		logger.putMessage(getInputPatternMap());
+		
 		// print original incident model
 		logger.putMessage(getOriginalIncidentModel(printActivityDetails));
 
@@ -2183,7 +2189,7 @@ public class IncidentPatternExtractor {
 			}
 		}
 
-		str.append("\n=======Solutions Summary=========================================\n");
+		str.append(STARTER_MARKER).append("Solutions Summary:\n");
 
 		// =======some statistics
 		str.append("-Number of Solutions found:").append(allSolutions.size()).append("\n")
@@ -2200,7 +2206,7 @@ public class IncidentPatternExtractor {
 			str.append("\n");
 		}
 
-		str.append("=================================================================");
+		str.append(SEPARATOR);
 
 		return str.toString();
 	}
@@ -2246,7 +2252,7 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("\n=======Optimal Solution===========================================\n");
+		str.append(STARTER_MARKER).append("Optimal Solution:\n");
 		// print maps
 		str.append("Maps:");
 		for (int i = 0; i < optimalSolution.size(); i++) {
@@ -2272,7 +2278,7 @@ public class IncidentPatternExtractor {
 		// print each solution severity sum
 		str.append("severity:").append(optimalSolutionSeverity).append("\n");
 
-		str.append("=================================================================");
+		str.append(SEPARATOR);
 
 		return str.toString();
 	}
@@ -2281,11 +2287,11 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("\n=======Input Patterns Maps=======================================\n");
+		str.append(STARTER_MARKER).append("Input Patterns Maps:\n");
 
 		for (Entry<Integer, List<int[]>> entry : allPatternsMaps.entrySet()) {
 
-			str.append("Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("]: ");
+			str.append("-Pattern[").append(activityPatterns.get(entry.getKey()).getName()).append("]: ");
 
 			if (entry.getValue().size() > 0) {
 				for (int i = 0; i < entry.getValue().size(); i++) {
@@ -2315,11 +2321,11 @@ public class IncidentPatternExtractor {
 
 		if (unmappedPatterns.size() > 0) {
 			for (ActivityPattern ptr : unmappedPatterns) {
-				str.append("Pattern[").append(ptr.getName()).append("]: None\n");
+				str.append("-Pattern[").append(ptr.getName()).append("]: None\n");
 			}
 		}
 
-		str.append("=================================================================");
+		str.append(SEPARATOR);
 
 		return str.toString();
 	}
@@ -2334,12 +2340,11 @@ public class IncidentPatternExtractor {
 		} else {
 
 			if (isDecorated) {
-				str.append(
-						"\n======= [" + activity.getName() + "] Info=============================================\n");
+				str.append(STARTER_MARKER).append(
+						"[" + activity.getName() + "] Info:\n");
 			} else {
-				str.append("====== [").append(activity.getName()).append("] ======\n");
+				str.append("== (").append(activity.getName()).append(") \n");
 			}
-			// str.append("Name: ").append(activity.getName()).append("\n");
 			str.append("Initiator: ").append(
 					activity.getInitiator() != null ? ((IncidentEntity) activity.getInitiator()).getName() : nullValue)
 					.append("\n");
@@ -2363,10 +2368,11 @@ public class IncidentPatternExtractor {
 			str.append("Behaviour: ").append(activity.getBehaviourType()).append("\n");
 
 			if (isDecorated) {
-				str.append("=================================================================");
-			} else {
-				str.append("===========================").append("\n");
+				str.append(SEPARATOR);
 			}
+//			else {
+//				str.append("\n");
+//			}
 
 		}
 
@@ -2393,9 +2399,9 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("\n=======Original Model============================================\n");
+		str.append(STARTER_MARKER).append("Original Model:\n");
 
-		str.append("Activity Sequence:").append(getIncidentModelActivitySequence(originalIncidentModel)).append("\n\n");
+		str.append("\n*Activity Sequence:").append(getIncidentModelActivitySequence(originalIncidentModel)).append("\n\n");
 
 		if (printActivitiesInfo) {
 			Activity orgAct = originalIncidentModel.getInitialActivity();
@@ -2407,7 +2413,7 @@ public class IncidentPatternExtractor {
 			}
 		}
 
-		str.append("=================================================================");
+		str.append(SEPARATOR);
 
 		return str.toString();
 	}
@@ -2416,9 +2422,9 @@ public class IncidentPatternExtractor {
 
 		StringBuilder str = new StringBuilder();
 
-		str.append("\n========Abstract Model===========================================\n");
+		str.append(STARTER_MARKER).append("Abstract Model:\n");
 
-		str.append("Activity Sequence:").append(getIncidentModelActivitySequence(abstractIncidentModel)).append("\n\n");
+		str.append("\n*Activity Sequence:").append(getIncidentModelActivitySequence(abstractIncidentModel)).append("\n\n");
 
 		if (printActivitiesInfo) {
 
@@ -2431,7 +2437,7 @@ public class IncidentPatternExtractor {
 			}
 		}
 
-		str.append("=================================================================");
+		str.append(SEPARATOR);
 
 		return str.toString();
 	}
@@ -2441,7 +2447,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("\n=======Removed Entities==========================================\n");
+			str.append(STARTER_MARKER).append("Removed Entities:\n");
 		} else {
 			str.append("Removed Entities: ");
 		}
@@ -2459,7 +2465,7 @@ public class IncidentPatternExtractor {
 		}
 
 		if (isDecorated) {
-			str.append("=================================================================");
+			str.append(SEPARATOR);
 		}
 
 		return str.toString();
@@ -2471,7 +2477,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("\n=======Abstracted Actions========================================\n");
+			str.append(STARTER_MARKER).append("Abstracted Actions:\n");
 		}
 
 		if (abstractedActivities.isEmpty()) {
@@ -2505,7 +2511,7 @@ public class IncidentPatternExtractor {
 		}
 
 		if (isDecorated) {
-			str.append("=================================================================");
+			str.append(SEPARATOR);
 		}
 
 		return str.toString();
@@ -2516,7 +2522,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("\n=======Unabstracrted Entities====================================\n");
+			str.append(STARTER_MARKER).append("Unabstracrted Entities:\n");
 		}
 
 		if (unAbstractedEntities.size() > 0) {
@@ -2532,7 +2538,7 @@ public class IncidentPatternExtractor {
 		}
 
 		if (isDecorated) {
-			str.append("=================================================================");
+			str.append(SEPARATOR);
 		}
 
 		return str.toString();
@@ -2543,7 +2549,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("\n=======Concrete-Abstract Entities Map============================\n");
+			str.append(STARTER_MARKER).append("Concrete-Abstract Entities Map:\n");
 		}
 
 		if (entitiesConcreteAbstractMap.size() > 0) {
@@ -2557,7 +2563,7 @@ public class IncidentPatternExtractor {
 		}
 
 		if (isDecorated) {
-			str.append("=================================================================");
+			str.append(SEPARATOR);
 		}
 
 		return str.toString();
@@ -2569,7 +2575,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("\n=======Concrete-Abstract Connections Map=========================\n");
+			str.append(STARTER_MARKER).append("Concrete-Abstract Connections Map:\n");
 		}
 
 		if (connectionsConcreteAbstractMap.size() > 0) {
@@ -2583,7 +2589,7 @@ public class IncidentPatternExtractor {
 		}
 
 		if (isDecorated) {
-			str.append("=================================================================");
+			str.append(SEPARATOR);
 		}
 
 		return str.toString();
@@ -2595,7 +2601,7 @@ public class IncidentPatternExtractor {
 		StringBuilder str = new StringBuilder();
 
 		if (isDecorated) {
-			str.append("\n=======Unmapped Patterns=============================================\n");
+			str.append(STARTER_MARKER).append("Unmapped Patterns\n");
 		}
 
 		str.append("# of unmapped patterns = ").append(unmappedPatterns.size()).append("\n");
@@ -2611,7 +2617,7 @@ public class IncidentPatternExtractor {
 		}
 
 		if (isDecorated) {
-			str.append("=================================================================");
+			str.append(SEPARATOR);
 		}
 
 		return str.toString();

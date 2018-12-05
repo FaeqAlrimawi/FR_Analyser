@@ -1384,6 +1384,7 @@ public class IncidentPatternInstantiator {
 	}
 
 	public static void test() {
+		
 		// setting tests
 		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
 
