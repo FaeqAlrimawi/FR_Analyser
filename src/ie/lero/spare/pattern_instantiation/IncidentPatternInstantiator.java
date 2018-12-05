@@ -89,7 +89,7 @@ public class IncidentPatternInstantiator {
 	// Logging
 	private Logger logger;
 	private boolean isPrintToScreen = true;
-	private boolean isSaveLog = false;
+	private boolean isSaveLog = true;
 	// private boolean dummy = true;
 
 	private String outputFolder = ".";
@@ -1371,7 +1371,7 @@ public class IncidentPatternInstantiator {
 
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
-		ins.executeLeroScenario();
+//		ins.executeLeroScenario();
 		
 		// ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
@@ -1379,8 +1379,8 @@ public class IncidentPatternInstantiator {
 		// ins.test1();
 
 		// test
-		// test();
-		// lero10();
+		 test();
+//		 lero10();
 	}
 
 	public static void test() {
@@ -1405,7 +1405,7 @@ public class IncidentPatternInstantiator {
 			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
 		}
 
-		for (int i = 0; i < states.length; i++) {
+		for (int i = 9; i < states.length; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();

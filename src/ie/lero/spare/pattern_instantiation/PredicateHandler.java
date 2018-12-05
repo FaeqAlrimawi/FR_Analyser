@@ -4,14 +4,17 @@ import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
@@ -46,12 +49,12 @@ public class PredicateHandler {
 	private SystemInstanceHandler systemHandler;
 	private TransitionSystem transitionSystem;
 	private String incidentDocument;
-	
-	private List<Predicate> bottelNecksStatesInOrder = new LinkedList<Predicate>(); 
+
+	private List<Predicate> bottelNecksStatesInOrder = new LinkedList<Predicate>();
 	private int bottleNeckNumber = 1;
 	private String instanceName;
 	public static final String INSTANCE_NAME_GLOBAL = "Predicate-Handler";
-	
+
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
 		incidentActivities = new HashMap<String, Activity>();
@@ -59,7 +62,7 @@ public class PredicateHandler {
 		logger = null;
 		systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = systemHandler != null ? systemHandler.getTransitionSystem() : null;
-		
+
 	}
 
 	public PredicateHandler(Logger logger) {
@@ -1094,11 +1097,15 @@ public class PredicateHandler {
 
 	public List<GraphPath> findTransitions(int threadID) {
 
-		instanceName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME+"["+threadID+"]"+Logger.SEPARATOR_BTW_INSTANCES+PredicateHandler.INSTANCE_NAME_GLOBAL+Logger.SEPARATOR_BTW_INSTANCES;
+		long startTime = Calendar.getInstance().getTimeInMillis();
 		
-		//identify bottlenecks in the states...not done
-//		identifyBottleNecks();
-		
+		instanceName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
+				+ Logger.SEPARATOR_BTW_INSTANCES + PredicateHandler.INSTANCE_NAME_GLOBAL
+				+ Logger.SEPARATOR_BTW_INSTANCES;
+
+		// identify bottlenecks in the states...not done
+		// identifyBottleNecks();
+
 		IncidentActivity sourceActivity = (IncidentActivity) getInitialActivity();
 		IncidentActivity destinationActivity = (IncidentActivity) getFinalActivity();
 
@@ -1122,14 +1129,14 @@ public class PredicateHandler {
 
 		// generate nodes neighbor in the digraph to reduce processing time for
 		// threads that will be created next
-		logger.putMessage(instanceName+"Generating neighbor nodes in the Digraph...");
+		logger.putMessage(instanceName + "Generating neighbor nodes in the Digraph...");
 		transitionSystem.getDigraph().generateNeighborNodesMap();
 
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
 
 		mainPool = new ForkJoinPool();
 
-		logger.putMessage(instanceName+"Identifying transitions...");
+		logger.putMessage(instanceName + "Identifying transitions...");
 		transitions = mainPool.invoke(preMatcher);
 
 		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
@@ -1140,32 +1147,54 @@ public class PredicateHandler {
 		TransitionAnalyser analyser = new TransitionAnalyser(0, transitions.size(), activities);
 		// analyseTransitions(sourceActivity, destinationActivity);
 
-		logger.putMessage(instanceName+"PredicateHandler>>Removing from identified transitions ("
-				+ transitions.size() + ") those that don't contain a state from each activity...");
-		List<GraphPath> transitionToRemove = mainPool.invoke(analyser);
+		logger.putMessage(instanceName + "Removing from identified transitions (" + transitions.size()
+				+ ") those that don't contain a state from each activity...");
+		List<GraphPath> transitionsToRemove = mainPool.invoke(analyser);
 
-		if (transitionToRemove != null && !transitionToRemove.isEmpty()) {
-			transitions.removeAll(transitionToRemove);
-			logger.putMessage(instanceName+"PredicateHandler>> [" + transitionToRemove.size()
-					+ "] transitions removed. Total generated transitions is [" + transitions.size()+"]");
+		int numOfTransitionsRemoved;
+		
+		if (transitionsToRemove != null && !transitionsToRemove.isEmpty()) {
+			transitions.removeAll(transitionsToRemove);
+			numOfTransitionsRemoved = transitions.size();
 		} else {
-			logger.putMessage(instanceName+"PredicateHandler>> [0] transitions removed. Total generated transitions is [" + transitions.size()+"]");
+			numOfTransitionsRemoved = 0;
 		}
 
+		logger.putMessage(instanceName + "(" + numOfTransitionsRemoved
+		+ ") transitions removed. Total generated transitions is (" + transitions.size() + ")");
+		
 		mainPool.shutdown();
 
+		try {
+			mainPool.awaitTermination(7, TimeUnit.DAYS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		long endTime = Calendar.getInstance().getTimeInMillis();
+		
+		long duration = endTime - startTime;
+
+		int secMils2 = (int) duration % 1000;
+		int hours2 = (int) (duration / 3600000) % 60;
+		int mins2 = (int) (duration / 60000) % 60;
+		int secs2 = (int) (duration / 1000) % 60;
+
+		// execution time
+		logger.putMessage(instanceName+" Transitions identification time: " + duration + "ms [" + hours2 + "h:" + mins2 + "m:" + secs2 + "s:"
+				+ secMils2 + "ms]");
+		
 		return transitions;
 
 	}
 
 	protected void identifyBottleNecks() {
-		
+
 		bottelNecksStatesInOrder.clear();
-		
+
 		List<Predicate> bottleNeckPredicates = new LinkedList<Predicate>();
-		
-		
-		
+
 	}
 	// protected void analyseTransitions(IncidentActivity sourceActivity,
 	// IncidentActivity destinationActivity) {
@@ -1268,7 +1297,7 @@ public class PredicateHandler {
 
 		// number of states in the precondition on which the division into sub
 		// threads should take place
-		private int preThreshold = 10;
+		private int preThreshold = 100;
 
 		public PreconditionMatcher(int indexStart, int indexEnd) {
 			this.indexStart = indexStart;
@@ -1303,13 +1332,31 @@ public class PredicateHandler {
 
 				// do the matching by slicing Assets to match to into different
 				// pieces
+				List<ForkJoinTask<List<GraphPath>>> postCons = new LinkedList<ForkJoinTask<List<GraphPath>>>();
+
 				for (int i = indexStart; i < indexEnd; i++) {
 					int preconditionState = preconditionStates.get(i);
-					List<GraphPath> threadResult = mainPool
-							.invoke(new PostconditionMatcher(0, postconditionStates.size(), preconditionState));
-					result.addAll(threadResult);
+					// List<GraphPath> threadResult = mainPool
+					// .invoke(new PostconditionMatcher(0,
+					// postconditionStates.size(), preconditionState));
+					// PostconditionMatcher tmp = new PostconditionMatcher(0,
+					// postconditionStates.size(), preconditionState);
+					// postCons.add(tmp);
+					postCons.add(mainPool
+							.submit(new PostconditionMatcher(0, postconditionStates.size(), preconditionState)));
 				}
 
+				for (ForkJoinTask<List<GraphPath>> task : postCons) {
+
+					try {
+						result.addAll(task.get());
+					} catch (InterruptedException | ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+
+				}
+				// result.addAll(threadResult);
 				return result;
 			}
 		}
@@ -1341,7 +1388,7 @@ public class PredicateHandler {
 		private Digraph<Integer> transitionDigraph = transitionSystem.getDigraph();
 		// number of states in the precondition on which the division into sub
 		// threads should take place
-		private int postThreshold = 2;
+		private int postThreshold = 100;
 
 		public PostconditionMatcher(int indexStart, int indexEnd, int preState) {
 			this.indexStart = indexStart;
@@ -1437,35 +1484,35 @@ public class PredicateHandler {
 			List<Integer> nodes = transitionDigraph.outboundNeighborsForTransitionGeneration(visited.getLast());
 
 			// examine adjacent nodes
-//			for (Integer node : nodes) {
-//				if (visited.contains(node)) {
-//					continue;
-//				}
-//				if (node.equals(endState)) {
-//					visited.add(node);
-//					addTransitiontoList(visited);
-//					visited.removeLast();
-//					break;
-//				}
-//			}
-			
+			// for (Integer node : nodes) {
+			// if (visited.contains(node)) {
+			// continue;
+			// }
+			// if (node.equals(endState)) {
+			// visited.add(node);
+			// addTransitiontoList(visited);
+			// visited.removeLast();
+			// break;
+			// }
+			// }
+
 			for (Integer node : nodes) {
-				
-//				if (visited.contains(node) || node.equals(endState)) {
-//					continue;
-//				}
-				
+
+				// if (visited.contains(node) || node.equals(endState)) {
+				// continue;
+				// }
+
 				if (visited.contains(node)) {
 					continue;
 				}
-				
+
 				if (node.equals(endState)) {
 					visited.add(node);
 					addTransitiontoList(visited);
 					visited.removeLast();
 					continue;
 				}
-				
+
 				visited.addLast(node);
 				depthFirst(visited);
 				visited.removeLast();
@@ -1489,20 +1536,19 @@ public class PredicateHandler {
 
 	class DepthFirstSearcher implements Callable<GraphPath> {
 
-		 public DepthFirstSearcher(Integer start, Integer endState) {
-			
-			 
+		public DepthFirstSearcher(Integer start, Integer endState) {
+
 		}
+
 		@Override
 		public GraphPath call() throws Exception {
 			// TODO Auto-generated method stub
-			
+
 			return null;
 		}
 
-	
-		
 	}
+
 	class TransitionAnalyser extends RecursiveTask<List<GraphPath>> {
 
 		private static final long serialVersionUID = 1L;
