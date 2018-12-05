@@ -6,15 +6,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import bsh.Console;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiationListener;
 
 public class Logger implements Runnable {
 
-	// private BlockingQueue msgQ;
 	private boolean isPrintToScreen = true;
 	private boolean isSaveLog = false;
 	private IncidentPatternInstantiationListener listener;
@@ -23,48 +27,52 @@ public class Logger implements Runnable {
 	private BlockingQueue<String> msgQ = new ArrayBlockingQueue<String>(4000);
 	private BufferedWriter bufferWriter;
 	private LocalDateTime timeNow;
-	// private DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy
-	// HH:mm:ss");
+
 	private DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
-//	private static Logger logger = null;
+
 	private Thread thread;
 	public static final int MSG_INFO = 0;
 	public static final int MSG_ERROR = 1;
 	public static final int MSG_WARNING = 2;
 	private static String msgTypeDelimiter = "&&";
-	
+
 	private static String terminatingString = "LoggingDone";
 	private static String terminatingStringWithDelimiter = terminatingString + msgTypeDelimiter + MSG_INFO;
 
+	private static final int DAY = 86400000;
 	private static final String SEPARATOR = "*=========================================================================================================*";
-	
+
+	// private ScheduledExecutorService scheduledExecutor =
+	// Executors.newSingleThreadScheduledExecutor();
+
 	public static final String SEPARATOR_BTW_INSTANCES = ">>";
+
 	public Logger() {
 
 		timeNow = LocalDateTime.now();
 		// set log file name
 		logFileName = "log" + timeNow.getHour() + timeNow.getMinute() + timeNow.getSecond() + "_"
 				+ timeNow.toLocalDate() + ".txt";
-		
-		// createLogFile();
-	}
-	
-	public Logger(String fileName) {
-		
-		// set log file name
-		logFileName = fileName;
-		
+
 		// createLogFile();
 	}
 
-//	public static Logger getInstance() {
-//
-//		if (logger == null) {
-//			logger = new Logger();
-//		}
-//
-//		return logger;
-//	}
+	public Logger(String fileName) {
+
+		// set log file name
+		logFileName = fileName;
+
+		// createLogFile();
+	}
+
+	// public static Logger getInstance() {
+	//
+	// if (logger == null) {
+	// logger = new Logger();
+	// }
+	//
+	// return logger;
+	// }
 
 	public BufferedWriter createLogFile() {
 
@@ -111,16 +119,26 @@ public class Logger implements Runnable {
 
 		try {
 
+			// schedule a task to change format of timing after one day
+			new Timer().schedule(new TimerTask() {
+
+				@Override
+				public void run() {
+
+					dtfTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+				}
+			}, DAY);
+
 			String msg = (String) this.msgQ.take();
-			
+
 			// terminating message ends wirting and closes the file
 			while (!msg.equals(Logger.terminatingStringWithDelimiter)) {
-				
+
 				if (isSaveLog || isPrintToScreen) {
-					
+
 					print(msg);
-					
-					//next msg
+
+					// next msg
 					msg = msgQ.take();
 				} else {
 					msgQ.take();
@@ -159,12 +177,12 @@ public class Logger implements Runnable {
 		case MSG_INFO:
 			if (isPrintToScreen) {
 				System.out.println(msg);
-				
+
 			}
 			break;
 		case MSG_WARNING:
 			if (isPrintToScreen) {
-				System.out.println("[Warning] "+ msg);
+				System.out.println("[Warning] " + msg);
 			}
 			break;
 		case MSG_ERROR:
@@ -243,7 +261,7 @@ public class Logger implements Runnable {
 		putMessage(msg, MSG_INFO);
 
 	}
-	
+
 	public synchronized void putError(String msg) {
 
 		putMessage(msg, MSG_ERROR);
@@ -255,13 +273,13 @@ public class Logger implements Runnable {
 		putMessage(msg, MSG_WARNING);
 
 	}
-	
+
 	public void putSeparator() {
 
 		putMessage(SEPARATOR);
 
 	}
-	
+
 	public synchronized void putMessage(String msg, int msgType) {
 		try {
 
@@ -284,9 +302,9 @@ public class Logger implements Runnable {
 		thread = new Thread(this);
 		thread.start();
 	}
-	
-//	public static void setInstanceNull() {
-//		
-//		logger = null;
-//	}
+
+	// public static void setInstanceNull() {
+	//
+	// logger = null;
+	// }
 }

@@ -2,6 +2,7 @@ package ie.lero.spare.pattern_extraction;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,7 +45,7 @@ import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
-import it.uniud.mads.jlibbig.core.util.StopWatch;
+
 
 public class IncidentPatternExtractor {
 
@@ -223,22 +224,20 @@ public class IncidentPatternExtractor {
 		runLogger();
 
 		// start timing
-		StopWatch timer = new StopWatch();
-
-		timer.start();
+		long startTime = Calendar.getInstance().getTimeInMillis();
 
 		logger.putMessage("#####################Incident Pattern Extraction#####################");
 
 		// print incident instance file name, if available
 		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
-			logger.putMessage("Incident instance file: [" + originalIncidentFilePath + "]");
+			logger.putMessage("*Incident instance file: [" + originalIncidentFilePath + "]");
 		} else {
 
 		}
 
 		// print system file name, if available
 		if (originalIncidentFilePath != null && !originalIncidentFilePath.isEmpty()) {
-			logger.putMessage("System file: [" + systemFilePath + "]");
+			logger.putMessage("*System file: [" + systemFilePath + "]");
 		}
 
 		// create a copy
@@ -339,7 +338,7 @@ public class IncidentPatternExtractor {
 		// prints details of each activity if true
 		boolean printActivityDetails = true;
 
-		// prints decoration (e.g., "=====Some Title=============") if true
+		// prints separator
 		boolean isDecorated = true;
 
 
@@ -382,9 +381,9 @@ public class IncidentPatternExtractor {
 		ModelsHandler.saveIncidentModel(abstractIncidentModel, abstractModelFilePath);
 		logger.putMessage("Extracted incident model is saved to:" + abstractModelFilePath);
 
-		timer.stop();
-
-		long timePassed = timer.getEllapsedMillis();
+		long endTime = Calendar.getInstance().getTimeInMillis();
+		
+		long timePassed = endTime - startTime;
 
 		int secMils = (int) timePassed % 1000;
 		int hours = (int) (timePassed / 3600000) % 60;
