@@ -652,6 +652,8 @@ public class IncidentPatternInstantiator {
 		} finally {
 			if (logger != null) {
 				logger.terminateLogging();
+				executor.shutdownNow();
+				mainPool.shutdownNow();
 			}
 		}
 
