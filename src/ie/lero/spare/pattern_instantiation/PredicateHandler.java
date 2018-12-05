@@ -1170,6 +1170,7 @@ public class PredicateHandler {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			mainPool.shutdownNow();
 		}
 		
 		long endTime = Calendar.getInstance().getTimeInMillis();
@@ -1189,13 +1190,13 @@ public class PredicateHandler {
 
 	}
 
-	protected void identifyBottleNecks() {
-
-		bottelNecksStatesInOrder.clear();
-
-		List<Predicate> bottleNeckPredicates = new LinkedList<Predicate>();
-
-	}
+//	protected void identifyBottleNecks() {
+//
+//		bottelNecksStatesInOrder.clear();
+//
+//		List<Predicate> bottleNeckPredicates = new LinkedList<Predicate>();
+//
+//	}
 	// protected void analyseTransitions(IncidentActivity sourceActivity,
 	// IncidentActivity destinationActivity) {
 	//

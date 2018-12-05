@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import ie.lero.spare.franalyser.utility.TransitionSystem;
+
 public class GraphPathsAnalyser {
 	
 	private List<GraphPath> paths;
@@ -34,11 +36,12 @@ public class GraphPathsAnalyser {
 	private boolean isAll = true;
 	private double percentageFrequency = 0.5;
 	int precision = 1000000;
+	private TransitionSystem transitionSystem;
 	
 	
-	public GraphPathsAnalyser(List<GraphPath> paths) {
+	public GraphPathsAnalyser(List<GraphPath> paths, TransitionSystem transSys) {
 		this.paths = paths;
-	//	allShortestPaths = new LinkedList<Integer>();
+		transitionSystem = transSys;
 	}
 	
 	public String analyse() {
@@ -125,7 +128,7 @@ public class GraphPathsAnalyser {
 		int cnt;
 		
 		for(GraphPath path : paths) {
-			actions = path.getPathActions();
+			actions = path.getPathActions(transitionSystem);
 			for(String action : actions) {
 				//if the action exists in the hashmap, then add one to its counter
 				if(actionsFrequency.containsKey(action)) {
@@ -272,7 +275,7 @@ public class GraphPathsAnalyser {
 		System.out.println("actions with >= 0.8 : "+ actions);
 		
 		for(int i=0;i< paths.size();i++) {
-			pathActions = paths.get(i).getPathActions();
+			pathActions = paths.get(i).getPathActions(transitionSystem);
 			
 			//if the path contains all common actions then the path is considered a top one
 			if(pathActions.containsAll(actions)) {
@@ -734,7 +737,7 @@ public String convertToJSONStr() {
 				int cnt = 0;
 				
 				for(int i=indexStart;i<indexEnd;i++) {
-					actions = paths.get(i).getPathActions();
+					actions = paths.get(i).getPathActions(transitionSystem);
 					for(String action : actions) {
 						//if the action exists in the hashmap, then add one to its counter
 						if(actionsFrequency.containsKey(action)) {
@@ -856,7 +859,7 @@ public String convertToJSONStr() {
 				//has exactly the specified actions in any order
 				if(isExact) {
 					for(int i=indexStart;i< indexEnd;i++) {
-						pathActions = paths.get(i).getPathActions();
+						pathActions = paths.get(i).getPathActions(transitionSystem);
 						
 						if(pathActions.size() != actions.size()) {
 							continue;
@@ -870,7 +873,7 @@ public String convertToJSONStr() {
 					//contains the given action (could have more actions
 				} else {
 				for(int i=indexStart;i< indexEnd;i++) {
-					pathActions = paths.get(i).getPathActions();
+					pathActions = paths.get(i).getPathActions(transitionSystem);
 					
 					//if the path contains all common actions then the path is considered a top one
 					if(pathActions.containsAll(actions)) {

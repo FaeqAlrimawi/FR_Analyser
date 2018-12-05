@@ -353,7 +353,7 @@ public class GraphPath {
 		return false;
 	}
 	
-	public LinkedList<String> getPathActions(){
+	public LinkedList<String> getPathActions(TransitionSystem transitionSystem){
 		
 		LinkedList<String> actions = new LinkedList<String>();
 //		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();

@@ -959,7 +959,7 @@ public class IncidentPatternInstantiator {
 					//
 					// /** Analyse generated transitions **/
 					// // create an analysis object for the identified paths
-					// pathsAnalyser = new GraphPathsAnalyser(paths);
+//					 pathsAnalyser = new GraphPathsAnalyser(paths, transitionSystem);
 					// String result = pathsAnalyser.analyse();
 					//
 					// logger.putMessage(result);
@@ -1210,7 +1210,7 @@ public class IncidentPatternInstantiator {
 			systemAssetNames = astNames;
 			this.paths = paths;
 
-			instanceSaverName += PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
+			instanceSaverName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
 					+ Logger.SEPARATOR_BTW_INSTANCES + instanceSaverNameGLobal + Logger.SEPARATOR_BTW_INSTANCES;
 
 		}
@@ -1407,7 +1407,7 @@ public class IncidentPatternInstantiator {
 			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
 		}
 
-		for (int i = 9; i < states.length; i++) {
+		for (int i = 0; i < 1; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
@@ -1422,7 +1422,7 @@ public class IncidentPatternInstantiator {
 			Runtime.getRuntime().gc();
 			System.out.println("Complete...");
 			System.out.println("\n\n");
-
+			
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);

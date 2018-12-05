@@ -331,6 +331,8 @@ public class BigraphAnalyser {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			predicateExecutor.shutdownNow();
+			mainPool.shutdownNow();
 		}
 
 		return predicateHandler;
@@ -774,7 +776,7 @@ public class BigraphAnalyser {
 			// set result
 			pred.setBigraphStates(statesResults);
 
-			logger.putMessage(bigraphAnalyserInstanceName+"BigraphAnalyser>>" + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
+			logger.putMessage(bigraphAnalyserInstanceName + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
 
 			if (isTestingTime) {
 				long endTime = Calendar.getInstance().getTimeInMillis();
