@@ -1414,7 +1414,7 @@ public class IncidentPatternInstantiator {
 		}
 
 //		states[0] ="/D:/Bigrapher data/lero/lero100";
-		for (int i = 9; i < states.length; i++) {
+		for (int i = 3; i < 4; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();

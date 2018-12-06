@@ -1138,39 +1138,39 @@ public class PredicateHandler {
 		logger.putMessage(instanceName + "Generating neighbor nodes in the Digraph...");
 		transitionSystem.getDigraph().generateNeighborNodesMap();
 
-		logger.putMessage(instanceName + "Identifying intra transitions between precondition states...");
-
-		// identify transitions between states of precondition
-		preconditionStatesWithTransitions = findIntraStatesTransitions(preconditionStates);
-
-		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
-
-		logger.putMessage(instanceName + "Identifying transitions...");
-		transitions = mainPool.invoke(preMatcher);
-
 		LinkedList<Activity> activities = getMiddleActivities(sourceActivity, destinationActivity);
 
 		activities.addFirst(sourceActivity);
 		activities.addLast(destinationActivity);
 
-		TransitionAnalyser analyser = new TransitionAnalyser(0, transitions.size(), activities);
-		// analyseTransitions(sourceActivity, destinationActivity);
+		
+//		logger.putMessage(instanceName + "Identifying intra transitions between precondition states...");
+//		// identify transitions between states of precondition
+//		preconditionStatesWithTransitions = findIntraStatesTransitions(preconditionStates);
 
-		logger.putMessage(instanceName + "Removing from identified transitions (" + transitions.size()
-				+ ") those that don't contain a state from each activity...");
-		List<GraphPath> transitionsToRemove = mainPool.invoke(analyser);
+		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size(), activities);
 
-		int numOfTransitionsRemoved;
+		logger.putMessage(instanceName + "Identifying transitions...");
+		transitions = mainPool.invoke(preMatcher);
 
-		if (transitionsToRemove != null && !transitionsToRemove.isEmpty()) {
-			transitions.removeAll(transitionsToRemove);
-			numOfTransitionsRemoved = transitions.size();
-		} else {
-			numOfTransitionsRemoved = 0;
-		}
-
-		logger.putMessage(instanceName + "(" + numOfTransitionsRemoved
-				+ ") transitions removed. Total generated transitions is (" + transitions.size() + ")");
+//		TransitionAnalyser analyser = new TransitionAnalyser(0, transitions.size(), activities);
+//		// analyseTransitions(sourceActivity, destinationActivity);
+//
+//		logger.putMessage(instanceName + "Removing from identified transitions (" + transitions.size()
+//				+ ") those that don't contain a state from each activity...");
+//		List<GraphPath> transitionsToRemove = mainPool.invoke(analyser);
+//
+//		int numOfTransitionsRemoved;
+//
+//		if (transitionsToRemove != null && !transitionsToRemove.isEmpty()) {
+//			transitions.removeAll(transitionsToRemove);
+//			numOfTransitionsRemoved = transitionsToRemove.size();
+//		} else {
+//			numOfTransitionsRemoved = 0;
+//		}
+//
+//		logger.putMessage(instanceName + "(" + numOfTransitionsRemoved
+//				+ ") transitions removed. Total generated transitions is (" + transitions.size() + ")");
 
 		mainPool.shutdown();
 
@@ -1195,10 +1195,10 @@ public class PredicateHandler {
 		logger.putMessage(instanceName + " Transitions identification time: " + duration + "ms [" + hours2 + "h:"
 				+ mins2 + "m:" + secs2 + "s:" + secMils2 + "ms]");
 
-		preconditionStatesWithTransitions.clear();
+		preconditionStatesWithTransitions = null;
 		this.preconditionStates = null;
 		this.postconditionStates = null;
-		
+
 		return transitions;
 
 	}
@@ -1214,8 +1214,8 @@ public class PredicateHandler {
 
 		Map<Integer, List<Integer>> result = mainPool.invoke(condIdentifier);
 
-		logger.putMessage(instanceName + "# of preconditions states with intra transitions = " + result.size() + ". Total states = "
-				+ conStates.size());
+		logger.putMessage(instanceName + "# of preconditions states with intra transitions = " + result.size()
+				+ ". Total states = " + conStates.size());
 
 		return result;
 	}
@@ -1235,10 +1235,11 @@ public class PredicateHandler {
 		int indexEnd;
 		public static final int THRESHOLD = 100;
 		private Map<Integer, List<Integer>> result;
-//		private int startState;
-//		private int endState;
-//		private Digraph<Integer> transitionDigraph = transitionSystem.getDigraph();
-//		private boolean hasTransition = false;
+		// private int startState;
+		// private int endState;
+		// private Digraph<Integer> transitionDigraph =
+		// transitionSystem.getDigraph();
+		// private boolean hasTransition = false;
 
 		public ConditionIntraIntraTransitionsIdentifier(List<Integer> states, int startIndex, int endIndex) {
 			this.states = states;
@@ -1304,7 +1305,7 @@ public class PredicateHandler {
 						if (res != null && !res.isEmpty()) {
 							result.put(states.get(j), res);
 						}
-						
+
 						ind++;
 					} catch (InterruptedException | ExecutionException e) {
 						// TODO Auto-generated catch block
@@ -1318,92 +1319,94 @@ public class PredicateHandler {
 
 		}
 
-//		protected boolean hasATransition(Integer srcState, Integer desState) {
-//
-//			hasTransition = false;
-//
-//			LinkedList<Integer> v = new LinkedList<Integer>();
-//			this.startState = srcState;
-//			v.add(srcState);
-//			this.endState = desState;
-//
-//			// search for a transition
-//			depthFirst(v);
-//
-//			// add desState to srcState
-//			if (hasTransition) {
-//				if (result.containsKey(startState)) {
-//					result.get(startState).add(endState);
-//				}
-//				// create a new entry for the src state
-//				else {
-//					List<Integer> tmp = new LinkedList<Integer>();
-//					tmp.add(endState);
-//					result.put(startState, tmp);
-//				}
-//
-//				// remove first and last since they are the targets
-//				v.removeFirst();
-//				v.removeLast();
-//
-//			} else {
-//				// just remove the srcState
-//				v.removeFirst();
-//
-//			}
-//
-//			if (!v.isEmpty()) {
-//				if (!result.containsKey(startState)) {
-//					List<Integer> tmp = new LinkedList<Integer>();
-//					result.put(startState, tmp);
-//				}
-//			}
-//
-//			for (Integer node : v) {
-//				// then add desState to srcState list of states
-//				int index = states.indexOf(node);
-//
-//				// node is not part of the states
-//				if (index == -1) {
-//					continue;
-//				}
-//
-//				List<Integer> tmp1 = result.get(startState);
-//				if (!tmp1.contains(node)) {
-//					tmp1.add(node);
-//				}
-//			}
-//
-//			return hasTransition;
-//
-//		}
-//
-//		private void depthFirst(LinkedList<Integer> visited) {
-//
-//			List<Integer> nodes = transitionDigraph.outboundNeighborsForTransitionGeneration(visited.getLast());
-//
-//			for (Integer node : nodes) {
-//
-//				if (visited.contains(node)) {
-//					continue;
-//				}
-//
-//				if (node.equals(endState)) {
-//					visited.addLast(node);
-//					hasTransition = true;
-//					// visited.removeLast();
-//					return;
-//				}
-//
-//				visited.addLast(node);
-//				depthFirst(visited);
-//				// visited.removeLast();
-//
-//				if (hasTransition) {
-//					return;
-//				}
-//			}
-//		}
+		// protected boolean hasATransition(Integer srcState, Integer desState)
+		// {
+		//
+		// hasTransition = false;
+		//
+		// LinkedList<Integer> v = new LinkedList<Integer>();
+		// this.startState = srcState;
+		// v.add(srcState);
+		// this.endState = desState;
+		//
+		// // search for a transition
+		// depthFirst(v);
+		//
+		// // add desState to srcState
+		// if (hasTransition) {
+		// if (result.containsKey(startState)) {
+		// result.get(startState).add(endState);
+		// }
+		// // create a new entry for the src state
+		// else {
+		// List<Integer> tmp = new LinkedList<Integer>();
+		// tmp.add(endState);
+		// result.put(startState, tmp);
+		// }
+		//
+		// // remove first and last since they are the targets
+		// v.removeFirst();
+		// v.removeLast();
+		//
+		// } else {
+		// // just remove the srcState
+		// v.removeFirst();
+		//
+		// }
+		//
+		// if (!v.isEmpty()) {
+		// if (!result.containsKey(startState)) {
+		// List<Integer> tmp = new LinkedList<Integer>();
+		// result.put(startState, tmp);
+		// }
+		// }
+		//
+		// for (Integer node : v) {
+		// // then add desState to srcState list of states
+		// int index = states.indexOf(node);
+		//
+		// // node is not part of the states
+		// if (index == -1) {
+		// continue;
+		// }
+		//
+		// List<Integer> tmp1 = result.get(startState);
+		// if (!tmp1.contains(node)) {
+		// tmp1.add(node);
+		// }
+		// }
+		//
+		// return hasTransition;
+		//
+		// }
+		//
+		// private void depthFirst(LinkedList<Integer> visited) {
+		//
+		// List<Integer> nodes =
+		// transitionDigraph.outboundNeighborsForTransitionGeneration(visited.getLast());
+		//
+		// for (Integer node : nodes) {
+		//
+		// if (visited.contains(node)) {
+		// continue;
+		// }
+		//
+		// if (node.equals(endState)) {
+		// visited.addLast(node);
+		// hasTransition = true;
+		// // visited.removeLast();
+		// return;
+		// }
+		//
+		// visited.addLast(node);
+		// depthFirst(visited);
+		// // visited.removeLast();
+		//
+		// if (hasTransition) {
+		// return;
+		// }
+		// }
+		// }
 
 		protected List<ConditionIntraIntraTransitionsIdentifier> createSubTasks() {
 
@@ -1427,7 +1430,7 @@ public class PredicateHandler {
 		int indexEnd;
 		public static final int THRESHOLD = 100;
 		private List<Integer> result;
-//		private int startState;
+		// private int startState;
 		private int endState;
 		private Digraph<Integer> transitionDigraph = transitionSystem.getDigraph();
 		private boolean hasTransition = false;
@@ -1496,7 +1499,7 @@ public class PredicateHandler {
 			hasTransition = false;
 
 			LinkedList<Integer> v = new LinkedList<Integer>();
-//			this.startState = srcState;
+			// this.startState = srcState;
 			v.add(srcState);
 			this.endState = desState;
 
@@ -1581,15 +1584,18 @@ public class PredicateHandler {
 		private int indexStart;
 		private int indexEnd;
 		private List<GraphPath> result;
-
+		private List<Activity> activities;
+		
 		// number of states in the precondition on which the division into sub
 		// threads should take place
 		private int preThreshold = 100;
 
-		public PreconditionMatcher(int indexStart, int indexEnd) {
+		public PreconditionMatcher(int indexStart, int indexEnd, List<Activity> acts) {
 			this.indexStart = indexStart;
 			this.indexEnd = indexEnd;
 			result = new LinkedList<GraphPath>();
+			
+			activities = acts;
 		}
 
 		@Override
@@ -1630,7 +1636,7 @@ public class PredicateHandler {
 					// postconditionStates.size(), preconditionState);
 					// postCons.add(tmp);
 					postCons.add(mainPool
-							.submit(new PostconditionMatcher(0, postconditionStates.size(), preconditionState)));
+							.submit(new PostconditionMatcher(0, postconditionStates.size(), preconditionState, activities)));
 				}
 
 				for (ForkJoinTask<List<GraphPath>> task : postCons) {
@@ -1654,8 +1660,8 @@ public class PredicateHandler {
 
 			int mid = (indexStart + indexEnd) / 2;
 
-			dividedTasks.add(new PreconditionMatcher(indexStart, mid));
-			dividedTasks.add(new PreconditionMatcher(mid, indexEnd));
+			dividedTasks.add(new PreconditionMatcher(indexStart, mid, activities));
+			dividedTasks.add(new PreconditionMatcher(mid, indexEnd, activities));
 
 			return dividedTasks;
 		}
@@ -1677,14 +1683,18 @@ public class PredicateHandler {
 		// threads should take place
 		private int postThreshold = 100;
 		private List<Integer> preIntraState;
+		private boolean hasTransition = false;
+		private Integer endIntraState;
+		private List<Activity> activities;
 		
-		public PostconditionMatcher(int indexStart, int indexEnd, int preState) {
+		public PostconditionMatcher(int indexStart, int indexEnd, int preState, List<Activity> acts) {
 			this.indexStart = indexStart;
 			this.indexEnd = indexEnd;
 			this.preState = preState;
 			result = new LinkedList<GraphPath>();
-			
-			preIntraState = preconditionStatesWithTransitions.get(preState);
+
+			preIntraState = new LinkedList<Integer>();
+			activities = acts;
 		}
 
 		@Override
@@ -1731,8 +1741,8 @@ public class PredicateHandler {
 
 			int mid = (indexStart + indexEnd) / 2;
 
-			dividedTasks.add(new PostconditionMatcher(indexStart, mid, preState));
-			dividedTasks.add(new PostconditionMatcher(mid, indexEnd, preState));
+			dividedTasks.add(new PostconditionMatcher(indexStart, mid, preState, activities));
+			dividedTasks.add(new PostconditionMatcher(mid, indexEnd, preState, activities));
 
 			return dividedTasks;
 		}
@@ -1803,8 +1813,9 @@ public class PredicateHandler {
 					continue;
 				}
 
-				//if the node is a state that the srcState has a transition to, then skip
-				if(preIntraState.contains(node)) {
+				// if the node is a state that the srcState has a transition to,
+				// then skip
+				if (hasNodeIntraTransition(node)) {
 					continue;
 				}
 				
@@ -1815,6 +1826,12 @@ public class PredicateHandler {
 		}
 
 		private void addTransitiontoList(List<Integer> transition) {
+			
+			//if the transition does not contain states from the other activities, then it is ignored
+			if(!analyseTransition(transition)) {
+				return;
+			}
+			
 			LinkedList<Integer> newList = new LinkedList<Integer>();
 			GraphPath path = new GraphPath(transitionSystem);
 
@@ -1825,6 +1842,193 @@ public class PredicateHandler {
 			path.setStateTransitions(newList);
 			localResult.add(path);
 
+		}
+
+		private boolean hasNodeIntraTransition(Integer node) {
+
+			
+			int index = preconditionStates.indexOf(node);
+
+			//if node is not in the precondition states then it is not checked
+			// i.e. a node should be a precondition state
+			if (index == -1) {
+				return false;
+			}
+			
+			// check if node is in the intra state list. if yes return true. no,
+			// look for it
+			if (preIntraState.contains(node)) {
+				return true;
+
+				// try to find if node has a transition to the preocndition
+				// soruce state
+			}
+
+			return hasATransition(startState, node);
+
+		}
+
+		protected boolean hasATransition(Integer srcState, Integer desState) {
+
+			hasTransition = false;
+
+			LinkedList<Integer> v = new LinkedList<Integer>();
+			// this.startState = srcState;
+			v.add(srcState);
+			this.endIntraState = desState;
+
+			// search for a transition
+			checkForTransition(v);
+
+			// add desState to srcState
+			if (hasTransition) {
+				preIntraState.add(desState);
+
+				// remove first and last since they are the targets
+				v.removeFirst();
+				v.removeLast();
+
+			} else {
+				// just remove the srcState
+				v.removeFirst();
+
+			}
+
+			for (Integer node : v) {
+
+				if (!preIntraState.contains(node)) {
+					preIntraState.add(node);
+				}
+			}
+
+			return hasTransition;
+
+		}
+
+		private void checkForTransition(LinkedList<Integer> visited) {
+
+			List<Integer> nodes = transitionDigraph.outboundNeighborsForTransitionGeneration(visited.getLast());
+
+			for (Integer node : nodes) {
+
+				if (visited.contains(node)) {
+					continue;
+				}
+
+				if (node.equals(endIntraState)) {
+					visited.addLast(node);
+					hasTransition = true;
+					return;
+				}
+
+				visited.addLast(node);
+				checkForTransition(visited);
+
+				if (hasTransition) {
+					return;
+				}
+			}
+		}
+
+		protected boolean analyseTransition(List<Integer> states) {
+
+			boolean isCheckingPrecondition = true;
+	
+			ListIterator<Activity> activitiesIterator = activities.listIterator();
+
+			if (activities != null) {
+			
+					int j = 0;
+
+					isCheckingPrecondition = true;
+
+					activitiesIterator = activities.listIterator();
+
+					outerLoop: while (activitiesIterator.hasNext()) {
+						IncidentActivity activity = (IncidentActivity) activitiesIterator.next();
+
+						// get precondition of the activity (assumption: there
+						// is
+						// only one precondition)
+						List<Predicate> preCons = activity.getPredicates(PredicateType.Precondition);
+						List<Predicate> postCons = activity.getPredicates(PredicateType.Postcondition);
+
+						Predicate pre = (preCons != null && !preCons.isEmpty()) ? preCons.get(0) : null;
+						LinkedList<Integer> preStates = pre != null ? pre.getBigraphStates() : null;
+
+						// get precondition of the activity (assumption: there
+						// is
+						// only one postcondition)
+						Predicate post = (postCons != null && !postCons.isEmpty()) ? postCons.get(0) : null;
+						LinkedList<Integer> postStates = post != null ? post.getBigraphStates() : null;
+
+						// the activity has no pre or post conditions, then move
+						// to the next activity
+						if (pre == null && post == null) {
+							continue;
+						}
+
+						// assumption: each predicate should satisfy different
+						// state
+						// in the transition
+						for (; j < states.size(); j++) { // last state is for
+															// the
+															// src and des
+															// activities
+							int state = states.get(j);
+
+							// if it is the last element and either it is still
+							// checking the precondition or the postcondition
+							// does
+							// not contain the state then remove the path and
+							// break
+							// to outerloop if there are still activities to
+							// iterate
+							if (j == states.size() - 1 && (activitiesIterator.hasNext() ||
+							// or if it is the last activity but it is still
+							// checking precondition // over
+									(preStates != null && isCheckingPrecondition) ||
+									// or if it is last activity and and the
+									// postcondition does not have the state as
+									// one of its own
+									(postStates != null && !postStates.contains(state)))) {
+								return false;
+//								break outerLoop;
+							}
+
+							// find a match for the precondition
+							if (isCheckingPrecondition && preStates != null) {
+								// if no match is found then move to next state
+								// in transition
+								if (!preStates.contains(state)) {
+									continue;
+									// else, if a state matches a precondition
+									// state, then move to the postcondition, if
+									// there's one, if not then break to next
+									// activity
+								} else {
+									if (postStates != null) {
+										isCheckingPrecondition = false;
+									} else {
+										isCheckingPrecondition = true;
+										break;
+									}
+								}
+
+								// find a match for the postcondition
+							} else {
+								if (!postStates.contains(state)) {
+									continue;
+								} else {
+									isCheckingPrecondition = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+			
+			return true;
 		}
 
 	}
