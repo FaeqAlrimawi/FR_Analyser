@@ -1103,10 +1103,10 @@ public class PredicateHandler {
 
 		long startTime = Calendar.getInstance().getTimeInMillis();
 
-		//create thread pool
+		// create thread pool
 		mainPool = new ForkJoinPool();
-		
-		//create instance name
+
+		// create instance name
 		instanceName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
 				+ Logger.SEPARATOR_BTW_INSTANCES + PredicateHandler.INSTANCE_NAME_GLOBAL
 				+ Logger.SEPARATOR_BTW_INSTANCES;
@@ -1120,14 +1120,9 @@ public class PredicateHandler {
 		Predicate precondition = preconditions.get(0);// assuming 1 precondition
 		List<Integer> preconditionStates = precondition != null ? precondition.getBigraphStates() : null;
 
-
-		logger.putMessage(instanceName+"Identifying intra transitions between precondition states...");
-		
-		//identify transitions between states of precondition
-		preconditionStatesWithTransitions = findIntraStatesTransitions(preconditionStates);
-
 		Predicate postcondition = postconditions.get(0);// assuming 1
-														// precondition
+
+		// posytcondition
 		List<Integer> postconditionStates = postcondition != null ? postcondition.getBigraphStates() : null;
 
 		if (preconditionStates == null || preconditionStates.isEmpty() || postconditionStates == null
@@ -1143,9 +1138,12 @@ public class PredicateHandler {
 		logger.putMessage(instanceName + "Generating neighbor nodes in the Digraph...");
 		transitionSystem.getDigraph().generateNeighborNodesMap();
 
-		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
+		logger.putMessage(instanceName + "Identifying intra transitions between precondition states...");
 
-		
+		// identify transitions between states of precondition
+		preconditionStatesWithTransitions = findIntraStatesTransitions(preconditionStates);
+
+		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size());
 
 		logger.putMessage(instanceName + "Identifying transitions...");
 		transitions = mainPool.invoke(preMatcher);
@@ -1202,15 +1200,23 @@ public class PredicateHandler {
 	}
 
 	protected Map<Integer, List<Integer>> findIntraStatesTransitions(List<Integer> conStates) {
-		
-		if(conStates == null || conStates.isEmpty()) {
+
+		if (conStates == null || conStates.isEmpty()) {
 			return null;
 		}
-		
-		ConditionIntraTransitionsIdentifier condIdentifier = new ConditionIntraTransitionsIdentifier(conStates, 0, conStates.size());
-		
+
+		ConditionIntraTransitionsIdentifier condIdentifier = new ConditionIntraTransitionsIdentifier(conStates, 0,
+				conStates.size());
+
 		Map<Integer, List<Integer>> result = mainPool.invoke(condIdentifier);
-		
+
+		logger.putMessage(instanceName + "Printing intra transitions identification...");
+		logger.putMessage(instanceName + "# of states with intra transitions = " + result.size() + ". Total states = "
+				+ conStates.size());
+		for (Entry<Integer, List<Integer>> entry : result.entrySet()) {
+			logger.putMessage(instanceName + "S[" + entry.getKey() + "]: " + entry.getValue());
+		}
+
 		return result;
 	}
 
@@ -1233,15 +1239,14 @@ public class PredicateHandler {
 		private int endState;
 		private Digraph<Integer> transitionDigraph = transitionSystem.getDigraph();
 		private boolean hasTransition = false;
-		
+
 		public ConditionIntraTransitionsIdentifier(List<Integer> states, int startIndex, int endIndex) {
 			this.states = states;
 			indexStart = startIndex;
 			indexEnd = endIndex;
 			result = new HashMap<Integer, List<Integer>>();
 		}
-		
-		
+
 		@Override
 		protected Map<Integer, List<Integer>> compute() {
 			if ((indexEnd - indexStart) > THRESHOLD) {
@@ -1257,14 +1262,16 @@ public class PredicateHandler {
 						}).reduce(result, new BinaryOperator<Map<Integer, List<Integer>>>() {
 
 							@Override
-							public Map<Integer, List<Integer>> apply(Map<Integer, List<Integer>> arg0, Map<Integer, List<Integer>> arg1) {
+							public Map<Integer, List<Integer>> apply(Map<Integer, List<Integer>> arg0,
+									Map<Integer, List<Integer>> arg1) {
 								// TODO Auto-generated method stub
-								for(Entry<Integer, List<Integer>> entry1 : arg1.entrySet()) {
-									//if arg0 has this entry then add whatever list to the exisitng list
-									if(arg0.containsKey(entry1.getKey())) {
+								for (Entry<Integer, List<Integer>> entry1 : arg1.entrySet()) {
+									// if arg0 has this entry then add whatever
+									// list to the exisitng list
+									if (arg0.containsKey(entry1.getKey())) {
 										arg0.get(entry1.getKey()).addAll(entry1.getValue());
 									}
-									//else add a new entry
+									// else add a new entry
 									else {
 										arg0.put(entry1.getKey(), entry1.getValue());
 									}
@@ -1275,62 +1282,111 @@ public class PredicateHandler {
 						});
 
 			} else {
-	
-				//check if there are transitions
-				for(int i=indexStart; i<indexEnd-1;i++) {
-				
-					for(int j=indexStart;j<indexEnd;j++) {
-						
-						
-						//skip if its the same state
-						if(i==j) {
+
+				// check if there are transitions
+				for (int i = indexStart; i < indexEnd; i++) {
+
+					for (int j = indexStart; j < indexEnd; j++) {
+
+						// skip if its the same state
+						if (i == j) {
 							continue;
 						}
-						
+
 						hasTransition = false;
+						
 						Integer srcState = states.get(i);
 						Integer desState = states.get(j);
-						
-						//check if the src node already had identified the des node
-						//to be done!
-						
-						//if there's a transition
-						if(hasATransition(srcState, desState)) {
-							
-							//then add desState to srcState list of states
-							if(result.containsKey(srcState)) {
-								result.get(srcState).add(desState);
-							} 
-							
-							//create a new entry for the src state
-							else {
-								List<Integer> tmp = new LinkedList<Integer>();
-								tmp.add(desState);
-								result.put(srcState, tmp);
+
+						// check if the srcState already had identified the
+						// desState
+						if (result.containsKey(srcState)) {
+							if (result.get(srcState).contains(desState)) {
+								continue;
 							}
-							
 						}
+
+						//tries to find a transition from src to des
+						hasATransition(srcState, desState);
+		
 					}
-					
+
 				}
-				
+
 				return result;
 			}
 
 		}
-		
+
 		protected boolean hasATransition(Integer srcState, Integer desState) {
-			
+
 			LinkedList<Integer> v = new LinkedList<Integer>();
 			this.startState = srcState;
 			v.add(srcState);
 			this.endState = desState;
 			depthFirst(v);
-			
+
+			// add desState to srcState
+			if (hasTransition) {
+				if (result.containsKey(startState)) {
+					result.get(startState).add(endState);
+				}
+				// create a new entry for the src state
+				else {
+					List<Integer> tmp = new LinkedList<Integer>();
+					tmp.add(endState);
+					result.put(startState, tmp);
+				}
+
+				// remove first and last since they are the targets
+				v.removeFirst();
+				v.removeLast();
+			} else {
+				// just remove the srcState
+				v.removeFirst();
+			}
+
+			// look at the identified transition in visited to update other
+			// states within the index size [indexStart, indexEnd)
+			// check if this node is one of the states that needs to be
+			// checked
+			for (Integer node : v) {
+
+				int index = states.indexOf(node);
+
+				// if this node is one of the states, then add it to the
+				// result
+				if (index >= indexStart && index < indexEnd) {
+
+					// then add desState to srcState list of states
+					if (result.containsKey(startState)) {
+						result.get(startState).add(node);
+					}
+					// create a new entry for the src state
+					else {
+						List<Integer> tmp = new LinkedList<Integer>();
+						tmp.add(node);
+						result.put(startState, tmp);
+					}
+
+					if (hasTransition) {
+						// add desState as a transition state for the node
+						if (result.containsKey(node)) {
+							result.get(node).add(endState);
+						}
+						// create a new entry for the src state
+						else {
+							List<Integer> tmp = new LinkedList<Integer>();
+							tmp.add(endState);
+							result.put(node, tmp);
+						}
+					}
+				}
+			}
+
 			return hasTransition;
 
 		}
-		
 
 		private void depthFirst(LinkedList<Integer> visited) {
 
@@ -1342,35 +1398,23 @@ public class PredicateHandler {
 					continue;
 				}
 
-				//check if this node is one of the states that needs to be check
-				int index = states.indexOf(node);
-				
-				//if this node is one of the states, then add it to the result
-				if(index >= indexStart && index < indexEnd) {
-					//then add desState to srcState list of states
-					if(result.containsKey(startState)) {
-						result.get(startState).add(node);
-					} 
-					
-					//create a new entry for the src state
-					else {
-						List<Integer> tmp = new LinkedList<Integer>();
-						tmp.add(node);
-						result.put(startState, tmp);
-					}
-				}
-				
 				if (node.equals(endState)) {
+					visited.addLast(node);
 					hasTransition = true;
-					continue;
+					// visited.removeLast();
+					return;
 				}
 
 				visited.addLast(node);
 				depthFirst(visited);
-				visited.removeLast();
+				// visited.removeLast();
+
+				if (hasTransition) {
+					return;
+				}
 			}
 		}
-		
+
 		protected List<ConditionIntraTransitionsIdentifier> createSubTasks() {
 
 			List<ConditionIntraTransitionsIdentifier> dividedTasks = new LinkedList<ConditionIntraTransitionsIdentifier>();
