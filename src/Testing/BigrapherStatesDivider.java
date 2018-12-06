@@ -54,6 +54,9 @@ public class BigrapherStatesDivider {
 		int numberOfStates = transitionsDigraph.getNumberOfNodes();
 		System.out.println("Number of states: " + numberOfStates);
 		System.out.println("Number of transitions: " + transitionsDigraph.getNumberOfEdges());
+if(true) {
+	return;
+}
 
 		// create partitions based on the given divider. limits of transitions
 		// between [startIndex and endIndex)
@@ -322,7 +325,7 @@ public class BigrapherStatesDivider {
 
 		BigrapherStatesDivider divider = new BigrapherStatesDivider();
 
-		String folderName = "D:/Bigrapher data/lero/lero1";
+		String folderName = "D:/Bigrapher data/lero/lero100K/states_70000";
 		int dividNumber = 10000;
 
 		divider.divideStates(folderName, dividNumber);

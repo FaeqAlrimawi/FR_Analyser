@@ -1292,7 +1292,10 @@ public class IncidentPatternInstantiator {
 				logger.putMessage(instanceSaverName + "Instances are stored in file: " + threadFile.getAbsolutePath());
 
 				obj = null;
-
+				result = null;
+				
+				Runtime.getRuntime().gc();
+				
 				return 1;
 
 			} catch (IOException e) {
