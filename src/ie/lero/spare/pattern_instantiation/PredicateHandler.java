@@ -1205,6 +1205,11 @@ public class PredicateHandler {
 			return null;
 		}
 
+		// List<Integer> test = new LinkedList<Integer>();
+
+		// test.add(390);
+		// test.add(23);
+		//
 		ConditionIntraTransitionsIdentifier condIdentifier = new ConditionIntraTransitionsIdentifier(conStates, 0,
 				conStates.size());
 
@@ -1227,7 +1232,7 @@ public class PredicateHandler {
 	 * @author Faeq
 	 *
 	 */
-	class ConditionIntraTransitionsIdentifier extends RecursiveTask<Map<Integer, List<Integer>>> {
+	class ConditionIntraIntraTransitionsIdentifier extends RecursiveTask<Map<Integer, List<Integer>>> {
 
 		private static final long serialVersionUID = 1L;
 		List<Integer> states;
@@ -1283,32 +1288,27 @@ public class PredicateHandler {
 
 			} else {
 
-				// check if there are transitions
-				for (int i = indexStart; i < indexEnd; i++) {
+				for(int j = indexStart;j<indexEnd;j++) {
 
-					for (int j = indexStart; j < indexEnd; j++) {
+					Integer state = states.get(j);
 
-						// skip if its the same state
-						if (i == j) {
+					for (int i = 0; i < states.size(); i++) {
+
+						Integer desState = states.get(i);
+
+						if (state == desState) {
 							continue;
 						}
 
-						hasTransition = false;
-						
-						Integer srcState = states.get(i);
-						Integer desState = states.get(j);
-
 						// check if the srcState already had identified the
 						// desState
-						if (result.containsKey(srcState)) {
-							if (result.get(srcState).contains(desState)) {
+						if (result.containsKey(state)) {
+							if (result.get(state).contains(desState)) {
 								continue;
 							}
 						}
-
-						//tries to find a transition from src to des
-						hasATransition(srcState, desState);
-		
+						// tries to find a transition from src to des
+						hasATransition(state, desState);
 					}
 
 				}
@@ -1320,10 +1320,14 @@ public class PredicateHandler {
 
 		protected boolean hasATransition(Integer srcState, Integer desState) {
 
+			hasTransition = false;
+
 			LinkedList<Integer> v = new LinkedList<Integer>();
 			this.startState = srcState;
 			v.add(srcState);
 			this.endState = desState;
+
+			// search for a transition
 			depthFirst(v);
 
 			// add desState to srcState
@@ -1341,46 +1345,25 @@ public class PredicateHandler {
 				// remove first and last since they are the targets
 				v.removeFirst();
 				v.removeLast();
+
 			} else {
 				// just remove the srcState
 				v.removeFirst();
+
 			}
 
-			// look at the identified transition in visited to update other
-			// states within the index size [indexStart, indexEnd)
-			// check if this node is one of the states that needs to be
-			// checked
+			if (!v.isEmpty()) {
+				if (!result.containsKey(startState)) {
+					List<Integer> tmp = new LinkedList<Integer>();
+					result.put(startState, tmp);
+				}
+			}
+
 			for (Integer node : v) {
-
-				int index = states.indexOf(node);
-
-				// if this node is one of the states, then add it to the
-				// result
-				if (index >= indexStart && index < indexEnd) {
-
-					// then add desState to srcState list of states
-					if (result.containsKey(startState)) {
-						result.get(startState).add(node);
-					}
-					// create a new entry for the src state
-					else {
-						List<Integer> tmp = new LinkedList<Integer>();
-						tmp.add(node);
-						result.put(startState, tmp);
-					}
-
-					if (hasTransition) {
-						// add desState as a transition state for the node
-						if (result.containsKey(node)) {
-							result.get(node).add(endState);
-						}
-						// create a new entry for the src state
-						else {
-							List<Integer> tmp = new LinkedList<Integer>();
-							tmp.add(endState);
-							result.put(node, tmp);
-						}
-					}
+				// then add desState to srcState list of states
+				List<Integer> tmp1 = result.get(startState);
+				if (!tmp1.contains(node)) {
+					tmp1.add(node);
 				}
 			}
 
@@ -1429,6 +1412,8 @@ public class PredicateHandler {
 
 	}
 
+	
+	class ConditionIntraIntraTransitionsIdentifier
 	class PreconditionMatcher extends RecursiveTask<List<GraphPath>> {
 
 		private static final long serialVersionUID = 1L;

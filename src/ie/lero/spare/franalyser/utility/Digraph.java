@@ -150,7 +150,7 @@ public class Digraph<V> {
     
     public void generateNeighborNodesMap() {
     	
-    	for(V node : this.getNodes()) {
+    	for(V node : getNodes()) {
     		neighborNodes.put(node, outboundNeighbors(node));
     	}
     }
