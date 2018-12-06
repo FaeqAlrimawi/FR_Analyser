@@ -78,7 +78,7 @@ public class GraphPathsAnalyser {
 			e.printStackTrace();
 		}
 		
-		return print();
+		return "";//print();
 	}
 
 	public List<GraphPath> getPaths() {

@@ -1748,46 +1748,44 @@ public class PredicateHandler {
 					visited.add(node);
 					
 					//identified transition satisfies other activities conditions
-					if(conditionIndex >= orderedConditions.size()) {
+//					if(conditionIndex >= orderedConditions.size()) {
 						addTransitiontoList(visited);	
-					}
+//					}
 	
 					visited.removeLast();
-					
-//					conditionIndex--;
 					
 					continue;
 				}
 
 				// if the node is a state that the srcState has a transition to,
 				// then skip
-				if (hasNodeIntraTransition(node)) {
+				if (isNodeIntraTransition(node)) {
 					continue;
 				}
 
 				//check if node satisfies current condition
-				if(conditionIndex < orderedConditions.size()) {
-				Predicate tmp  = orderedConditions.get(conditionIndex);
-				if(tmp == null) {
-					//there's no condition to check
-					conditionIndex++;
-				} else {
-					if(tmp.getBigraphStates().contains(node)) {
-						conditionIndex++;
-						nodeHistory.add(node);
-					}
-				}
-				}
+//				if(conditionIndex < orderedConditions.size()) {
+//				Predicate tmp  = orderedConditions.get(conditionIndex);
+//				if(tmp == null) {
+//					//there's no condition to check
+//					conditionIndex++;
+//				} else {
+//					if(tmp.getBigraphStates().contains(node)) {
+//						conditionIndex++;
+//						nodeHistory.add(node);
+//					}
+//				}
+//				}
 				
 				visited.addLast(node);
 				depthFirst(visited);
 				
-				Integer tmpState = visited.removeLast();
+				visited.removeLast();
 				
-				if(!nodeHistory.isEmpty() && nodeHistory.getLast().equals(tmpState)) {
-					conditionIndex--;
-					nodeHistory.removeLast();
-				}
+//				if(!nodeHistory.isEmpty() && nodeHistory.getLast().equals(tmpState)) {
+//					conditionIndex--;
+//					nodeHistory.removeLast();
+//				}
 				
 			}
 		}
@@ -1796,9 +1794,9 @@ public class PredicateHandler {
 
 			// if the transition does not contain states from the other
 			// activities, then it is ignored
-//			if (!analyseTransition(transition)) {
-//				return;
-//			}
+			if (!analyseTransition(transition)) {
+				return;
+			}
 
 			LinkedList<Integer> newList = new LinkedList<Integer>();
 			GraphPath path = new GraphPath(transitionSystem);
@@ -1812,7 +1810,7 @@ public class PredicateHandler {
 
 		}
 
-		private boolean hasNodeIntraTransition(Integer node) {
+		private boolean isNodeIntraTransition(Integer node) {
 
 			int index = preconditionStates.indexOf(node);
 
