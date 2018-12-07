@@ -380,7 +380,7 @@ public class BigraphAnalyser {
 				if ((cnt % numberofActivityParallelExecution == 0) || (i == activitiesName.size() - 1)) {
 					for (int j = 0; j < predicateResults.size(); j++) {
 						Future<Integer> future = predicateResults.get(j);
-						if (!future.isDone()) {
+						if (future != null && !future.isDone()) {
 							future.get();
 						}
 
@@ -418,7 +418,7 @@ public class BigraphAnalyser {
 				if ((cnt % numberofActivityParallelExecution == 0) || (i == activitiesName.size() - 1)) {
 					for (int j = 0; j < predicateResults.size(); j++) {
 						Future<Integer> future = predicateResults.get(j);
-						if (!future.isDone()) {
+						if (future!= null && !future.isDone()) {
 							future.get();
 						}
 
@@ -776,7 +776,7 @@ public class BigraphAnalyser {
 			// set result
 			pred.setBigraphStates(statesResults);
 
-			logger.putMessage(bigraphAnalyserInstanceName + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
+			logger.putMessage(bigraphAnalyserInstanceName + pred.getName() + "-states ("+pred.getBigraphStates().size()+")");
 
 			if (isTestingTime) {
 				long endTime = Calendar.getInstance().getTimeInMillis();

@@ -94,6 +94,7 @@ public class IncidentPatternInstantiator {
 
 	private String outputFolder = ".";
 
+	
 	// used to hold the map between system classes and controls
 	// key is the system class while the value are Controls (which should be
 	// found in the .big file provided when analysing an incident pattern)
@@ -609,7 +610,7 @@ public class IncidentPatternInstantiator {
 			instances.add(executor.submit(incidentInstances[2]));
 
 			for (Future<Integer> fut : instances) {
-				if (!fut.isDone()) {
+				if (fut!=null && !fut.isDone()) {
 					fut.get();
 				}
 			}
@@ -1377,7 +1378,7 @@ public class IncidentPatternInstantiator {
 
 	public static void main(String[] args) {
 
-		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+//		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
 //		ins.executeLeroScenario();
 		
@@ -1389,6 +1390,7 @@ public class IncidentPatternInstantiator {
 		// test
 		 test();
 //		 lero10();
+//		 test100K();
 	}
 
 	public static void test() {
@@ -1414,14 +1416,14 @@ public class IncidentPatternInstantiator {
 		}
 
 //		states[0] ="/D:/Bigrapher data/lero/lero100";
-		for (int i = 3; i < 4; i++) {
+		for (int i = 9; i < 10; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);
 
 			// reset
-			ins = null;
+//			ins = null;
 			// Logger.setInstanceNull();
 			// TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
@@ -1450,7 +1452,7 @@ public class IncidentPatternInstantiator {
 		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
 
 		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
-		String[] states = new String[2];
+		String[] states = new String[10];
 
 		for (int i = 0; i < states.length; i++) {
 

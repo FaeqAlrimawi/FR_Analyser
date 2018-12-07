@@ -62,6 +62,8 @@ public class PredicateHandler {
 
 	private List<Predicate> orderedConditions;
 	
+	private int maxLevel = 2;
+	
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
 		incidentActivities = new HashMap<String, Activity>();
@@ -1237,6 +1239,8 @@ public class PredicateHandler {
 			return null;
 		}
 
+		logger.putMessage(instanceName + "Finding precondition intra transitions...");
+		
 		ConditionIntraIntraTransitionsIdentifier condIdentifier = new ConditionIntraIntraTransitionsIdentifier(
 				conStates, 0, conStates.size());
 
@@ -1431,28 +1435,38 @@ public class PredicateHandler {
 
 			hasTransition = false;
 
-			LinkedList<Integer> v = new LinkedList<Integer>();
+			LinkedList<Integer> v ;//= new LinkedList<Integer>();
 			// this.startState = srcState;
-			v.add(srcState);
+//			v.add(srcState);
 			this.endState = desState;
 
 			// search for a transition
-			depthFirst(v);
+//			depthFirst(v);
+			
+			v = checkForTransitionBFS(srcState, endState);
 
-			// add desState to srcState
-			if (hasTransition) {
-				result.add(desState);
-
-				// remove first and last since they are the targets
-				v.removeFirst();
-				v.removeLast();
-
-			} else {
-				// just remove the srcState
-				v.removeFirst();
-
+			if(v == null) {
+				return false;
 			}
+			
+//			// add desState to srcState
+//			if (hasTransition) {
+//				result.add(desState);
+//
+//				// remove first and last since they are the targets
+//				v.removeFirst();
+//				v.removeLast();
+//
+//			} else {
+//				// just remove the srcState
+//				v.removeFirst();
+//
+//			}
 
+			//remove src state
+			v.removeFirst();
+			
+			
 			for (Integer node : v) {
 
 				// then add desState to srcState list of states
@@ -1497,6 +1511,42 @@ public class PredicateHandler {
 			}
 		}
 
+	private LinkedList<Integer> checkForTransitionBFS(Integer srcState, Integer endState) {
+
+			
+			LinkedList<Integer> queue = new LinkedList<Integer>();
+			LinkedList<Integer> visited = new LinkedList<Integer>();
+			
+			queue.add(srcState);
+			visited.add(srcState);
+			
+			int cnt = 0;
+			while(!queue.isEmpty() && cnt < maxLevel) {
+				
+				Integer state = queue.removeFirst();
+				
+				List<Integer> states = transitionDigraph.outboundNeighborsForTransitionGeneration(state);
+				
+				for(Integer neighborState : states) {
+					
+					if(!visited.contains(neighborState)) {
+						queue.add(neighborState);	
+						visited.add(neighborState);
+					}
+					
+					//check if it the endState
+					if(neighborState.equals(endState)) {
+						hasTransition = true;
+						return visited;
+					}
+				}
+				
+				cnt++;
+			}
+			
+			return null;
+		}
+	
 		protected List<ConditionIntraIntraTransitionsIdentifierVertical> createSubTasks() {
 
 			List<ConditionIntraIntraTransitionsIdentifierVertical> dividedTasks = new LinkedList<ConditionIntraIntraTransitionsIdentifierVertical>();
