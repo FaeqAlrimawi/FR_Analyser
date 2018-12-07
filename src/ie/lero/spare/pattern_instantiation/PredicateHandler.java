@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -1150,8 +1151,8 @@ public class PredicateHandler {
 		// logger.putMessage(instanceName + "Identifying intra transitions
 		// between precondition states...");
 		// // identify transitions between states of precondition
-		// preconditionStatesWithTransitions =
-		// findIntraStatesTransitions(preconditionStates);
+		 preconditionStatesWithTransitions =
+		 findIntraStatesTransitions(preconditionStates);
 
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size(), activities);
 
@@ -1188,6 +1189,7 @@ public class PredicateHandler {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
 			mainPool.shutdownNow();
 		}
 
@@ -1617,8 +1619,8 @@ public class PredicateHandler {
 		private boolean hasTransition = false;
 		private Integer endIntraState;
 		private List<Activity> activities;
-		private int conditionIndex = 0;
-		private LinkedList<Integer> nodeHistory;
+//		private int conditionIndex = 0;
+//		private LinkedList<Integer> nodeHistory;
 		
 		public PostconditionMatcher(int indexStart, int indexEnd, int preState, List<Activity> acts) {
 			this.indexStart = indexStart;
@@ -1628,7 +1630,7 @@ public class PredicateHandler {
 
 			preIntraState = new LinkedList<Integer>();
 			activities = acts;
-			nodeHistory = new LinkedList<Integer>();
+//			nodeHistory = new LinkedList<Integer>();
 		}
 
 		@Override
@@ -1709,8 +1711,8 @@ public class PredicateHandler {
 			v.add(this.startState);
 			this.endState = desState;
 			
-			conditionIndex = 0;
-			nodeHistory.clear();
+//			conditionIndex = 0;
+//			nodeHistory.clear();
 			
 			depthFirst(v);
 
@@ -1757,12 +1759,20 @@ public class PredicateHandler {
 					continue;
 				}
 
+				/**Check if current node has a transition to the start node
+				 * 
+				 */
 				// if the node is a state that the srcState has a transition to,
 				// then skip
-				if (isNodeIntraTransition(node)) {
+//				if (isNodeIntraTransition(node)) {
+//					continue;
+//				}
+
+				List<Integer> tmp  =preconditionStatesWithTransitions.get(startState);
+				if(tmp != null && tmp.contains(node)) {
 					continue;
 				}
-
+				
 				//check if node satisfies current condition
 //				if(conditionIndex < orderedConditions.size()) {
 //				Predicate tmp  = orderedConditions.get(conditionIndex);
@@ -1776,6 +1786,7 @@ public class PredicateHandler {
 //					}
 //				}
 //				}
+				/*****************************/
 				
 				visited.addLast(node);
 				depthFirst(visited);
@@ -1825,8 +1836,6 @@ public class PredicateHandler {
 			if (preIntraState.contains(node)) {
 				return true;
 
-				// try to find if node has a transition to the preocndition
-				// soruce state
 			}
 
 			return hasATransition(startState, node);
@@ -1843,7 +1852,8 @@ public class PredicateHandler {
 			this.endIntraState = desState;
 
 			// search for a transition
-			checkForTransition(v);
+			checkForTransition(v); //DFS
+//			v = checkForTransitionBFS(srcState, desState); //BFS
 
 			// add desState to srcState
 			if (hasTransition) {
@@ -1894,6 +1904,40 @@ public class PredicateHandler {
 				}
 			}
 		}
+		
+		private LinkedList<Integer> checkForTransitionBFS(Integer srcState, Integer endState) {
+
+			
+			LinkedList<Integer> queue = new LinkedList<Integer>();
+			LinkedList<Integer> visited = new LinkedList<Integer>();
+			
+			queue.add(srcState);
+			visited.add(srcState);
+			
+			while(!queue.isEmpty()) {
+				
+				Integer state = queue.removeFirst();
+				
+				List<Integer> states = transitionDigraph.outboundNeighborsForTransitionGeneration(state);
+				
+				for(Integer neighborState : states) {
+					
+					if(!visited.contains(neighborState)) {
+						queue.add(neighborState);	
+						visited.add(neighborState);
+					}
+					
+					//check if it the endState
+					if(neighborState.equals(endState)) {
+						hasTransition = true;
+						return visited;
+					}
+				}
+			}
+			
+			return null;
+		}
+
 
 		protected boolean analyseTransition(List<Integer> states) {
 

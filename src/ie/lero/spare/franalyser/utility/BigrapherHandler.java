@@ -521,6 +521,8 @@ public class BigrapherHandler implements SystemExecutor {
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
+		} finally {
 			pool.shutdownNow();
 		}
 		

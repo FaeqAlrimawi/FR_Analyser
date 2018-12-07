@@ -65,4 +65,10 @@ public class SystemsHandler {
 		systemHandlers.remove(id);
 	}
 	
+	public static void clearAll() {
+		systemHandlers.clear();
+		systemHandlers = null;
+		currentSystemHandler = null;
+	}
+	
 }

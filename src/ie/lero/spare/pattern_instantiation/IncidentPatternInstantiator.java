@@ -1414,7 +1414,7 @@ public class IncidentPatternInstantiator {
 		}
 
 //		states[0] ="/D:/Bigrapher data/lero/lero100";
-		for (int i = 0; i < 1; i++) {
+		for (int i = 3; i < 4; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
@@ -1425,6 +1425,7 @@ public class IncidentPatternInstantiator {
 			// Logger.setInstanceNull();
 			// TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
+			SystemsHandler.clearAll();
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
 			System.out.println("Complete...");
