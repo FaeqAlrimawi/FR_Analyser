@@ -1410,13 +1410,13 @@ public class IncidentPatternInstantiator {
 
 		String[] states = new String[10];
 
-		for (int i = 0; i < states.length; i++) {
+		for (int i = 0; i <states.length; i++) {
 
 			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
 		}
 
 //		states[0] ="/D:/Bigrapher data/lero/lero100";
-		for (int i = 9; i < 10; i++) {
+		for (int i = 3; i < 4; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();

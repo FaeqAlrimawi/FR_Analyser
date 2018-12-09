@@ -348,7 +348,7 @@ public class BigraphAnalyser {
 		this.predicateHandler = predicateHandler;
 	}
 
-	public PredicateHandler identifyRelevantStates() {
+	protected PredicateHandler identifyRelevantStates() {
 
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
 
@@ -361,7 +361,7 @@ public class BigraphAnalyser {
 		return predicateHandler;
 	}
 
-	public PredicateHandler identifyRelevantStatesWithThreading() {
+	protected PredicateHandler identifyRelevantStatesWithThreading() {
 
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
 		
@@ -399,7 +399,7 @@ public class BigraphAnalyser {
 		return predicateHandler;
 	}
 
-	public PredicateHandler identifyRelevantStatesWithThreadingArray() {
+	protected PredicateHandler identifyRelevantStatesWithThreadingArray() {
 
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
 
@@ -444,7 +444,7 @@ public class BigraphAnalyser {
 	 * @param activityName
 	 * @return
 	 */
-	public void identifyRelevantStates(String activityName) {
+	protected void identifyRelevantStates(String activityName) {
 
 		ArrayList<Predicate> preds = predicateHandler.getActivityPredicates(activityName);
 
@@ -460,7 +460,7 @@ public class BigraphAnalyser {
 
 	}
 
-	public void identifyRelevantStatesWithThreading(String activityName) {
+	protected void identifyRelevantStatesWithThreading(String activityName) {
 
 		ArrayList<Predicate> preds = predicateHandler.getActivityPredicates(activityName);
 
@@ -497,7 +497,7 @@ public class BigraphAnalyser {
 
 	}
 
-	public void identifyRelevantStatesWithThreadingArray(String activityName) {
+	protected void identifyRelevantStatesWithThreadingArray(String activityName) {
 
 		ArrayList<Predicate> preds = predicateHandler.getActivityPredicates(activityName);
 

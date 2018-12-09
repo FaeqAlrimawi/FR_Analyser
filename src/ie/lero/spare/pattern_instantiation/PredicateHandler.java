@@ -62,7 +62,9 @@ public class PredicateHandler {
 
 	private List<Predicate> orderedConditions;
 	
-	private int maxLevel = 2;
+	//sets the number of levels that the analysis for precondition intra transition identification should happne
+	//it could be adapted based on the max level avaialble in the transition digraph
+	private int maxLevel = 3;
 	
 	public PredicateHandler() {
 		predicates = new HashMap<String, Predicate>();
@@ -1153,8 +1155,8 @@ public class PredicateHandler {
 		// logger.putMessage(instanceName + "Identifying intra transitions
 		// between precondition states...");
 		// // identify transitions between states of precondition
-		 preconditionStatesWithTransitions =
-		 findIntraStatesTransitions(preconditionStates);
+//		 preconditionStatesWithTransitions =
+//		 findIntraStatesTransitions(preconditionStates);
 
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size(), activities);
 
@@ -1818,10 +1820,10 @@ public class PredicateHandler {
 //					continue;
 //				}
 
-				List<Integer> tmp  =preconditionStatesWithTransitions.get(startState);
-				if(tmp != null && tmp.contains(node)) {
-					continue;
-				}
+//				List<Integer> tmp  =preconditionStatesWithTransitions.get(startState);
+//				if(tmp != null && tmp.contains(node)) {
+//					continue;
+//				}
 				
 				//check if node satisfies current condition
 //				if(conditionIndex < orderedConditions.size()) {
