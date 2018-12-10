@@ -958,7 +958,7 @@ public class IncidentPatternInstantiator {
 //					 mainPool.submit(saver);
 					
 					for(GraphPath path : paths) {
-						logger.putMessage(path.toPrettyString());
+						logger.putMessage(path.toPrettyString(transitionSystem));
 					}
 					//
 					// logger.putMessage(instanceName + "Analysing [" +

@@ -111,7 +111,7 @@ public class GraphPath {
 		return res.toString();
 	}
 	
-	public String toPrettyString() {
+	public String toPrettyString(TransitionSystem transitionSystem) {
 		
 		StringBuilder res = new StringBuilder();
 //		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();

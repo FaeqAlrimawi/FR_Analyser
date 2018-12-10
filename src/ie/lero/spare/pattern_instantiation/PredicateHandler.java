@@ -1740,24 +1740,24 @@ public class PredicateHandler {
 			localResult = new LinkedList<GraphPath>();
 			// predicateSrc = null;
 			// predicateDes = null;
-			GraphPath tmpG;
-			LinkedList<Integer> tmp;
+//			GraphPath tmpG;
+//			LinkedList<Integer> tmp;
 
 			// adds the state itself if both the source and the destination
 			// states
 			// are the same
-			if (srcState.equals(desState)) {
-				tmpG = new GraphPath(transitionSystem);
-				tmpG.setPredicateSrc(null);
-				tmpG.setPredicateDes(null);
-				tmp = new LinkedList<Integer>();
-				tmp.add(srcState);
-				tmp.add(srcState);
-				tmpG.setStateTransitions(tmp);
-				localResult.add(tmpG);
-
-				return localResult;
-			}
+//			if (srcState.equals(desState)) {
+//				tmpG = new GraphPath(transitionSystem);
+//				tmpG.setPredicateSrc(null);
+//				tmpG.setPredicateDes(null);
+//				tmp = new LinkedList<Integer>();
+//				tmp.add(srcState);
+//				tmp.add(srcState);
+//				tmpG.setStateTransitions(tmp);
+//				localResult.add(tmpG);
+//
+//				return localResult;
+//			}
 
 			this.startState = srcState;
 			v.add(this.startState);

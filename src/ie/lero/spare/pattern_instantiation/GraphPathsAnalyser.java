@@ -46,7 +46,7 @@ public class GraphPathsAnalyser {
 												// further subdivided into halfs
 	private boolean isAll = true;
 	private double percentageFrequency = 0.5;
-	int precision = 1000000;
+	private static final int PRECISION = 1000000;
 	private TransitionSystem transitionSystem;
 
 	private int totalNumberOfActions = 0;
@@ -89,15 +89,15 @@ public class GraphPathsAnalyser {
 		// getLongestPaths();
 
 		// sets the percentage of the frequency that the actio
-		percentageFrequency = 0.9;
+		percentageFrequency = 0.5;
 
 		// set operation to perform (>=,>,<=,<,==,!=)
-		AnalyserOperation operation = AnalyserOperation.GTE;
+		AnalyserOperation operation = AnalyserOperation.LTE;
 
 		// sets if all/most/any actions in the path has the sepcified frequency
 		// in
 		// percentageFrequency variable
-		ActionsToSatisfy actionsToSatisfy = ActionsToSatisfy.ALL;
+		ActionsToSatisfy actionsToSatisfy = ActionsToSatisfy.ANY;
 
 		getTopPaths(percentageFrequency, operation, actionsToSatisfy);
 
@@ -283,9 +283,9 @@ public class GraphPathsAnalyser {
 
 		// LinkedList<String> actions = new LinkedList<String>();
 
-		logger.putMessage(instanceName + "Generating actions frequencey...");
 		// if actions frequency are not calculated then calculate them
 		if (actionsFrequency == null || actionsFrequency.isEmpty()) {
+			logger.putMessage(instanceName + "Generating actions frequencey...");
 			actionsFrequency = mainPool.invoke(new ActionsFrequencyAnalyser(0, paths.size()));
 		}
 
@@ -296,7 +296,7 @@ public class GraphPathsAnalyser {
 
 		logger.putMessage(instanceName + "Total number of actions = " + totalNumberOfActions);
 		logger.putMessage(instanceName + "Total number of transitions = " + totalNumberOfTransitions);
-		
+
 		for (Entry<String, List<Integer>> entry : actionsFrequency.entrySet()) {
 			logger.putMessage(instanceName + "action [" + entry.getKey() + "] actions-freq = "
 					+ entry.getValue().get(ACTIONS_FREQ) + ", trans-freq = " + entry.getValue().get(TRANSITIONS_FREQ));
@@ -322,15 +322,6 @@ public class GraphPathsAnalyser {
 				instanceName + "# of top transitions = " + topPaths.size() + ". These are: " + topPaths.toString());
 
 		// return topPaths;
-	}
-
-	private void analyseTopPaths(List<String> actions, ActionsToSatisfy actionsToSatisfy) {
-
-		// TBD (search transitions that have specified actions)
-
-		// topPaths = mainPool.invoke(new TopPathsAnalyser(0, paths.size(),
-		// actions, actionsToSatisfy));
-
 	}
 
 	// protected int getNumberOfActions() {
@@ -493,15 +484,9 @@ public class GraphPathsAnalyser {
 	}
 
 	private void analyseLongestPaths() {
-		// longestPaths = new LinkedList<Integer>();
-
-		// if(paths == null || paths.size() == 0) {
-		// return shortestPaths;
-		// }
-
+		
 		longestPaths = mainPool.invoke(new PathsAnalyserParallelism(0, paths.size(), PathsAnalyserParallelism.LONGEST));
 
-		// return longestPaths;
 	}
 
 	private LinkedList<Integer> getLongestPathsOriginal() {
@@ -1129,9 +1114,13 @@ public class GraphPathsAnalyser {
 						continue Outer_Loop;
 					}
 
-					double perc = actionsFrequency.get(action).get(TRANSITIONS_FREQ) / (totalNumberOfTransitions * 1.0);
+					int actionsFreq = actionsFrequency.get(action).get(TRANSITIONS_FREQ);
 
-					if (!compare(perc, operation, percentage)) {
+					int perc = (int) (((double) actionsFreq / (double) totalNumberOfTransitions) * (double) PRECISION);
+
+					int modefiedPercentage = (int) ((percentage) * (double) PRECISION);
+
+					if (!compare(perc, operation, modefiedPercentage)) {
 						continue Outer_Loop;
 					}
 
@@ -1166,9 +1155,13 @@ public class GraphPathsAnalyser {
 						continue Outer_Loop;
 					}
 
-					double perc = actionsFrequency.get(action).get(TRANSITIONS_FREQ) / (totalNumberOfTransitions * 1.0);
+					int actionsFreq = actionsFrequency.get(action).get(TRANSITIONS_FREQ);
 
-					if (compare(perc, operation, percentage)) {
+					int perc = (int) (((double) actionsFreq / (double) totalNumberOfTransitions) * (double) PRECISION);
+
+					int modefiedPercentage = (int) ((percentage) * (double) PRECISION);
+
+					if (compare(perc, operation, modefiedPercentage)) {
 						numSatisfied++;
 
 						if (numSatisfied >= most) {
@@ -1203,9 +1196,13 @@ public class GraphPathsAnalyser {
 						continue Outer_Loop;
 					}
 
-					double perc = actionsFrequency.get(action).get(TRANSITIONS_FREQ) / (totalNumberOfTransitions * 1.0);
+					int actionsFreq = actionsFrequency.get(action).get(TRANSITIONS_FREQ);
 
-					if (compare(perc, operation, percentage)) {
+					int perc = (int) (((double) actionsFreq / (double) totalNumberOfTransitions) * (double) PRECISION);
+
+					int modefiedPercentage = (int) ((percentage) * (double) PRECISION);
+
+					if (compare(perc, operation, modefiedPercentage)) {
 						isTopPath = true;
 						break;
 					}
@@ -1220,18 +1217,19 @@ public class GraphPathsAnalyser {
 
 		}
 
-		private boolean compare(double actionPercentage, AnalyserOperation operation, double specifiedPercentage) {
+		private boolean compare(int actionPercentage, AnalyserOperation operation, int specifiedPercentage) {
 
 			switch (operation) {
 			case GTE:
 				if (actionPercentage >= specifiedPercentage) {
 					return true;
 				}
+				break;
 			case GT:
 				if (actionPercentage > specifiedPercentage) {
 					return true;
 				}
-
+				break;
 			case LTE:
 				if (actionPercentage <= specifiedPercentage) {
 					return true;
@@ -1251,6 +1249,7 @@ public class GraphPathsAnalyser {
 				if (actionPercentage != specifiedPercentage) {
 					return true;
 				}
+				break;
 			default: // greater than or equal
 				if (actionPercentage >= specifiedPercentage) {
 					return true;

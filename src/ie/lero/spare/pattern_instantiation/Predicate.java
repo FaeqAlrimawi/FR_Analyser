@@ -13,6 +13,7 @@ import cyberPhysical_Incident.Activity;
 import ie.lero.spare.franalyser.utility.BigraphNode;
 import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.PredicateType;
+import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.franalyser.utility.XqueryExecuter;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.BigraphBuilder;
@@ -214,9 +215,9 @@ public class Predicate {
 		res.append("\nPaths Satisfying: ");
 		for(GraphPath path : paths) {
 			if(predicateType == PredicateType.Precondition) {
-				res.append(path.getPredicateDes().getBigraphPredicateName()).append(":").append(path.toPrettyString()).append("\n");
+				res.append(path.getPredicateDes().getBigraphPredicateName()).append(":").append(path.toPrettyString(systemHandler.getTransitionSystem())).append("\n");
 			} else {
-				res.append(path.getPredicateSrc().getBigraphPredicateName()).append(":").append(path.toPrettyString()).append("\n");
+				res.append(path.getPredicateSrc().getBigraphPredicateName()).append(":").append(path.toPrettyString(systemHandler.getTransitionSystem())).append("\n");
 			}
 			
 		}
