@@ -89,15 +89,15 @@ public class GraphPathsAnalyser {
 		// getLongestPaths();
 
 		// sets the percentage of the frequency that the actio
-		percentageFrequency = 0.5;
+		percentageFrequency = 0.9;
 
 		// set operation to perform (>=,>,<=,<,==,!=)
-		AnalyserOperation operation = AnalyserOperation.LTE;
+		AnalyserOperation operation = AnalyserOperation.GTE;
 
 		// sets if all/most/any actions in the path has the sepcified frequency
 		// in
 		// percentageFrequency variable
-		ActionsToSatisfy actionsToSatisfy = ActionsToSatisfy.ANY;
+		ActionsToSatisfy actionsToSatisfy = ActionsToSatisfy.ALL;
 
 		getTopPaths(percentageFrequency, operation, actionsToSatisfy);
 
@@ -193,39 +193,39 @@ public class GraphPathsAnalyser {
 	// return actionsFrequency;
 	// }
 
-	private Map<String, Integer> sortByComparator(HashMap<String, Integer> unsortMap, final boolean order) {
+//	private Map<String, Integer> sortByComparator(HashMap<String, Integer> unsortMap, final boolean order) {
+//
+//		List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(unsortMap.entrySet());
+//
+//		// Sorting the list based on values
+//		Collections.sort(list, new Comparator<Entry<String, Integer>>() {
+//			public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
+//				if (order) {
+//					// System.out.println(o1.getValue()+" "+o2.getValue());
+//					return o1.getValue().compareTo(o2.getValue());
+//				} else {
+//					return o2.getValue().compareTo(o1.getValue());
+//
+//				}
+//			}
+//		});
+//
+//		// Maintaining insertion order with the help of LinkedList
+//		Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+//		for (Entry<String, Integer> entry : list) {
+//
+//			sortedMap.put(entry.getKey(), entry.getValue());
+//		}
+//
+//		return sortedMap;
+//	}
 
-		List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(unsortMap.entrySet());
-
-		// Sorting the list based on values
-		Collections.sort(list, new Comparator<Entry<String, Integer>>() {
-			public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
-				if (order) {
-					// System.out.println(o1.getValue()+" "+o2.getValue());
-					return o1.getValue().compareTo(o2.getValue());
-				} else {
-					return o2.getValue().compareTo(o1.getValue());
-
-				}
-			}
-		});
-
-		// Maintaining insertion order with the help of LinkedList
-		Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
-		for (Entry<String, Integer> entry : list) {
-
-			sortedMap.put(entry.getKey(), entry.getValue());
-		}
-
-		return sortedMap;
-	}
-
-	private LinkedList<String> getCommonAssets() {
-
-		// to be implemented
-		//
-		return commonAssets;
-	}
+//	private LinkedList<String> getCommonAssets() {
+//
+//		// to be implemented
+//		//
+//		return commonAssets;
+//	}
 
 	/**
 	 * Returns all paths that contain the given actions
@@ -281,8 +281,6 @@ public class GraphPathsAnalyser {
 	private void analyseTopPaths(double actionsFrequencyPercentage, AnalyserOperation operation,
 			ActionsToSatisfy actionsToSatisfy) {
 
-		// LinkedList<String> actions = new LinkedList<String>();
-
 		// if actions frequency are not calculated then calculate them
 		if (actionsFrequency == null || actionsFrequency.isEmpty()) {
 			logger.putMessage(instanceName + "Generating actions frequencey...");
@@ -290,9 +288,6 @@ public class GraphPathsAnalyser {
 		}
 
 		totalNumberOfTransitions = paths.size();
-
-		// int num = getNumberOfActions();
-		// Map<String, List<Integer>> freqs = getActionsFrequencyIterative();
 
 		logger.putMessage(instanceName + "Total number of actions = " + totalNumberOfActions);
 		logger.putMessage(instanceName + "Total number of transitions = " + totalNumberOfTransitions);
@@ -302,26 +297,17 @@ public class GraphPathsAnalyser {
 					+ entry.getValue().get(ACTIONS_FREQ) + ", trans-freq = " + entry.getValue().get(TRANSITIONS_FREQ));
 		}
 
-		// total number of actions is set when actions frequency is analysed
-
-		// find actions with percentage >= given percentage
-		// for(Entry<String, Integer> set: actionsFrequency.entrySet()) {
-		// if((double)set.getValue()/(double)numOfPaths >=
-		// actionsFrequencyPercentage) {
-		// actions.add(set.getKey());
-		// }
-		// }
-
+		//analyse transitions
 		logger.putMessage(instanceName + "Analysing top transitions based on percentage (" + actionsFrequencyPercentage
 				+ "), operation (" + operation.toString() + "), actionsToSatisfy (" + actionsToSatisfy.toString()
 				+ ")");
+		
 		topPaths = mainPool.invoke(
 				new TopActionsAnalyser(0, paths.size(), actionsFrequencyPercentage, operation, actionsToSatisfy));
 
 		logger.putMessage(
-				instanceName + "# of top transitions = " + topPaths.size() + ". These are: " + topPaths.toString());
+				instanceName + "# of top transitions = " + topPaths.size());
 
-		// return topPaths;
 	}
 
 	// protected int getNumberOfActions() {
@@ -534,13 +520,12 @@ public class GraphPathsAnalyser {
 		// get common paths
 		if (actionsFrequency != null) {
 			str.append(newLine).append("-Actions Frequency: [");
-			int size = paths.size();
-			// for(Entry<String, Integer> freq : actionsFrequency.entrySet()) {
-			// double perc =
-			// ((int)(((double)freq.getValue()/(double)size)*precision)/precision)*100.0;
-			// str.append(freq.getKey()).append("=").append(freq.getValue()).append("
-			// (").append(perc).append("%), ");
-			// }
+
+			 for(Entry<String, List<Integer>> freq : actionsFrequency.entrySet()) {
+			 double perc =
+			 ((int)(((double)freq.getValue().get(TRANSITIONS_FREQ)/(double)totalNumberOfTransitions)*(PRECISION*1.0))/(PRECISION*1.0))*100.0;
+			 str.append(freq.getKey()).append("=").append(freq.getValue()).append("(").append(perc).append("%), ");
+			 }
 
 			// removes the last comma and space
 			str.replace(str.length() - 2, str.length(), "");
@@ -589,16 +574,15 @@ public class GraphPathsAnalyser {
 		// get common paths
 		if (actionsFrequency != null) {
 			str.append("\"actions_frequency\": [");
-			int size = paths.size();
-			// for(Entry<String, Integer> freq : actionsFrequency.entrySet()) {
-			// double perc =
-			// (int)(((double)freq.getValue()/(double)size)*precision)/(precision*1.0);
-			// str.append("{")
-			// .append("\"action\":").append(freq.getKey()).append(",")
-			// .append("\"frequency\":").append(freq.getValue()).append(",")
-			// .append("\"precentage\":").append(perc)
-			// .append("},");
-			// }
+			 for(Entry<String, List<Integer>> freq : actionsFrequency.entrySet()) {
+			 double perc =
+			 (int)(((double)freq.getValue().get(TRANSITIONS_FREQ)/(double)totalNumberOfTransitions)*(PRECISION*1.0))/(PRECISION*1.0);
+			 str.append("{")
+			 .append("\"action\":").append(freq.getKey()).append(",")
+			 .append("\"frequency\":").append(freq.getValue()).append(",")
+			 .append("\"precentage\":").append(perc)
+			 .append("},");
+			 }
 
 			if (actionsFrequency.size() > 0) {
 				str.deleteCharAt(str.length() - 1);// remove comma
@@ -915,20 +899,8 @@ public class GraphPathsAnalyser {
 					}
 				}
 
-				// set the total number of actions
-				// int numOfActions = 0;
-
-				// for(Integer numAction : actionsFrequency.values()) {
-				// numOfActions+= numAction;
-				// }
-
 				// add the number of actions found
 				increaseNumberOfTotalActions(numOfActions);
-
-				// sort the map from the most frequent to the least
-				// actionsFrequency =
-				// (HashMap<String,Integer>)sortByComparator(actionsFrequency,
-				// false);
 
 				return actionsFrequency;
 			}
@@ -1052,48 +1024,7 @@ public class GraphPathsAnalyser {
 					satisfyAll();
 
 				}
-				// all actions in a transition should satisfy the operation
-				// if (isExact) {
-				// Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
-				//
-				// LinkedList<String> pathActions =
-				// paths.get(i).getPathActions(transitionSystem);
-				// boolean isTopPath = false;
-				// for (String action : pathActions) {
-				//
-				// // probably can be removed as all transitions
-				// // actions should be in the actions frequency map
-				// if (!actionsFrequency.containsKey(action)) {
-				//
-				// continue Outer_Loop;
-				// }
-				//
-				// double perc =
-				// actionsFrequency.get(action).get(TRANSITIONS_FREQ)
-				// / (totalNumberOfTransitions * 1.0);
-				//
-				// if(!compare(perc, operation, percentage)) {
-				// continue Outer_Loop;
-				// }
-				//
-				// }
-				//
-				// topPaths.add(i);
-				// }
-				//
-				// }
-				// //if only at least one action
-				// else {
-				// for (int i = indexStart; i < indexEnd; i++) {
-				// LinkedList<String> pathActions =
-				// paths.get(i).getPathActions(transitionSystem);
-				//
-				// if (pathActions.containsAll(actions)) {
-				// topPaths.add(i);
-				// }
-				// }
-				// }
-
+			
 				return topPaths;
 
 			}
@@ -1101,6 +1032,8 @@ public class GraphPathsAnalyser {
 		}
 
 		private void satisfyAll() {
+			
+			//all actions in a transition should satisfy the operation (i.e. actions_freq OP specified_freq is true)
 			Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
 
 				LinkedList<String> pathActions = paths.get(i).getPathActions(transitionSystem);
