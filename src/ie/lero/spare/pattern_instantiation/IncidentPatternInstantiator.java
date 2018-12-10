@@ -615,6 +615,15 @@ public class IncidentPatternInstantiator {
 				}
 			}
 
+			mainPool.shutdown();
+
+			// if it returns false then maximum waiting time is reached
+			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
+				logger.putError(Logger.SEPARATOR_BTW_INSTANCES
+						+ "Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " "
+						+ timeUnit + "]");
+			}
+			
 			// no more tasks will be added so it will execute the submitted ones
 			// and then terminate
 			executor.shutdown();
@@ -624,15 +633,6 @@ public class IncidentPatternInstantiator {
 				logger.putError(
 						Logger.SEPARATOR_BTW_INSTANCES + "Time out! tasks took more than specified maximum time ["
 								+ maxWaitingTime + " " + timeUnit + "]");
-			}
-
-			mainPool.shutdown();
-
-			// if it returns false then maximum waiting time is reached
-			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
-				logger.putError(Logger.SEPARATOR_BTW_INSTANCES
-						+ "Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " "
-						+ timeUnit + "]");
 			}
 
 			// calculate execution time
@@ -952,10 +952,10 @@ public class IncidentPatternInstantiator {
 					// // create and run an instance saver to store instances to
 					// a
 					// // file
-					// InstancesSaver saver = new InstancesSaver(threadID,
-					// outputFileName, incidentEntityNames,
-					// systemAssetNames, paths);
-					// mainPool.submit(saver);
+					 InstancesSaver saver = new InstancesSaver(threadID,
+					 outputFileName, incidentEntityNames,
+					 systemAssetNames, paths);
+					 mainPool.submit(saver);
 					//
 					// logger.putMessage(instanceName + "Analysing [" +
 					// paths.size()
@@ -963,8 +963,8 @@ public class IncidentPatternInstantiator {
 					//
 					// /** Analyse generated transitions **/
 					// // create an analysis object for the identified paths
-//					 pathsAnalyser = new GraphPathsAnalyser(paths, transitionSystem);
-					// String result = pathsAnalyser.analyse();
+					 pathsAnalyser = new GraphPathsAnalyser(paths, transitionSystem, threadID, logger);
+					 String result = pathsAnalyser.analyse();
 					//
 					// logger.putMessage(result);
 					//
@@ -1416,7 +1416,7 @@ public class IncidentPatternInstantiator {
 		}
 
 //		states[0] ="/D:/Bigrapher data/lero/lero100";
-		for (int i = 3; i < 4; i++) {
+		for (int i = 1; i < 2; i++) {
 
 			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
