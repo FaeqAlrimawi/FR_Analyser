@@ -952,10 +952,14 @@ public class IncidentPatternInstantiator {
 					// // create and run an instance saver to store instances to
 					// a
 					// // file
-					 InstancesSaver saver = new InstancesSaver(threadID,
-					 outputFileName, incidentEntityNames,
-					 systemAssetNames, paths);
-					 mainPool.submit(saver);
+//					 InstancesSaver saver = new InstancesSaver(threadID,
+//					 outputFileName, incidentEntityNames,
+//					 systemAssetNames, paths);
+//					 mainPool.submit(saver);
+					
+					for(GraphPath path : paths) {
+						logger.putMessage(path.toPrettyString());
+					}
 					//
 					// logger.putMessage(instanceName + "Analysing [" +
 					// paths.size()
