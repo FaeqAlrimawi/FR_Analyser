@@ -560,18 +560,18 @@ public class IncidentPatternInstantiator {
 			/***************/
 
 			// create a new transition file with labels
-//			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Labelling transition system...");
+			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Labelling transition system...");
+
+			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
+
+			String outputFile = createNewLabelledTransitionFile(actionNames);
 //
-//			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
-//
-////			String outputFile = createNewLabelledTransitionFile(actionNames);
-//
-//			if (outputFile != null) {
-//				logger.putMessage(
-//						Logger.SEPARATOR_BTW_INSTANCES + "New Labelled transitions is created: " + outputFile);
-//			} else {
-//				logger.putError(Logger.SEPARATOR_BTW_INSTANCES + "Failed to create a new labelled transition file");
-//			}
+			if (outputFile != null) {
+				logger.putMessage(
+						Logger.SEPARATOR_BTW_INSTANCES + "New Labelled transitions is created: " + outputFile);
+			} else {
+				logger.putError(Logger.SEPARATOR_BTW_INSTANCES + "Failed to create a new labelled transition file");
+			}
 
 			// load systemClass-Control map
 			loadAssetControlMap(BRS_file);
