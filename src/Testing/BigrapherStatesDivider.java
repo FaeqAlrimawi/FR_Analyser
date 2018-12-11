@@ -54,9 +54,7 @@ public class BigrapherStatesDivider {
 		int numberOfStates = transitionsDigraph.getNumberOfNodes();
 		System.out.println("Number of states: " + numberOfStates);
 		System.out.println("Number of transitions: " + transitionsDigraph.getNumberOfEdges());
-if(true) {
-	return;
-}
+
 
 		// create partitions based on the given divider. limits of transitions
 		// between [startIndex and endIndex)
@@ -67,10 +65,10 @@ if(true) {
 					"No partitioning is needed since the given divider is greater than the number of original states");
 			return;
 		}
-		
+
 		System.out.println("Partition size = " + divider);
 		System.out.println("Number of partitions = " + numberOfPartitions);
-		
+
 		String outputFolder = folderName + "/" + outputFolderName;
 
 		File outputFolderFile = new File(outputFolder);
@@ -111,7 +109,7 @@ if(true) {
 		String label = "";
 
 		System.out.println("\n===== Create Transition digraphs for each partition");
-		
+
 		for (Integer srcState : transitionsDigraph.getNodes()) {
 
 			// for all destination states for the source state
@@ -162,12 +160,12 @@ if(true) {
 		}
 
 		System.out.println("Done");
-		
+
 		System.out.println("\n===== Store new partitions");
 		// for each generated digraph create a new transition file and copy
 		// states to their output folder
-		for (int i = 0; i < digraphers.size()-1; i++) {
-			System.out.print("Partition[" + i+"]: ");
+		for (int i = 0; i < digraphers.size() - 1; i++) {
+			System.out.print("Partition[" + i + "]: ");
 			storeDigraphAndStates(digraphers.get(i), outputFolders.get(i));
 		}
 
@@ -325,7 +323,7 @@ if(true) {
 
 		BigrapherStatesDivider divider = new BigrapherStatesDivider();
 
-		String folderName = "D:/Bigrapher data/lero/lero100K/states_70000";
+		String folderName = "D:/Bigrapher data/lero/lero100K/states_10000";
 		int dividNumber = 10000;
 
 		divider.divideStates(folderName, dividNumber);

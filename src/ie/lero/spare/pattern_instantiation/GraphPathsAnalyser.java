@@ -41,16 +41,21 @@ public class GraphPathsAnalyser {
 	private ForkJoinPool mainPool;
 	private int maxWaitingTime = 24;
 	private TimeUnit timeUnit = TimeUnit.HOURS;
-	private final static int THRESHOLD = 100; // threshold for the number of
-												// states on which task is
-												// further subdivided into halfs
-	private boolean isAll = true;
-	private double percentageFrequency = 0.5;
+	
+	// threshold for the number of states on which task is further subdivided into halfs
+	private final static int THRESHOLD = 100;
+	
+	
+	private double percentageFrequency;
+	
+	//used to convert double into integer for comparison, and also for printing in % format
 	private static final int PRECISION = 1000000;
 	private TransitionSystem transitionSystem;
 
-	private int totalNumberOfActions = 0;
-	private int totalNumberOfTransitions = 0;
+	private int totalNumberOfActions;
+	private int totalNumberOfTransitions;
+	
+	//used to idenfity 'Most' actions to satisfy
 	private static final double ACTION_SATISFACTION_FACTOR = 0.5;
 
 	private Logger logger;
@@ -85,7 +90,7 @@ public class GraphPathsAnalyser {
 
 		// parallelism based functionalities
 		//
-		// getShortestPaths();
+		 getShortestPaths();
 		// getLongestPaths();
 
 		// sets the percentage of the frequency that the actio
@@ -292,10 +297,10 @@ public class GraphPathsAnalyser {
 		logger.putMessage(instanceName + "Total number of actions = " + totalNumberOfActions);
 		logger.putMessage(instanceName + "Total number of transitions = " + totalNumberOfTransitions);
 
-		for (Entry<String, List<Integer>> entry : actionsFrequency.entrySet()) {
-			logger.putMessage(instanceName + "action [" + entry.getKey() + "] actions-freq = "
-					+ entry.getValue().get(ACTIONS_FREQ) + ", trans-freq = " + entry.getValue().get(TRANSITIONS_FREQ));
-		}
+//		for (Entry<String, List<Integer>> entry : actionsFrequency.entrySet()) {
+//			logger.putMessage(instanceName + "action [" + entry.getKey() + "] actions-freq = "
+//					+ entry.getValue().get(ACTIONS_FREQ) + ", trans-freq = " + entry.getValue().get(TRANSITIONS_FREQ));
+//		}
 
 		//analyse transitions
 		logger.putMessage(instanceName + "Analysing top transitions based on percentage (" + actionsFrequencyPercentage
@@ -415,10 +420,17 @@ public class GraphPathsAnalyser {
 		// return shortestPaths;
 		// }
 
+		logger.putMessage(instanceName+"Identifiying shortest transitions...");
+		
 		shortestPaths = mainPool
 				.invoke(new PathsAnalyserParallelism(0, paths.size(), PathsAnalyserParallelism.SHORTEST));
 
-		// return shortestPaths;
+		if(shortestPaths!=null && !shortestPaths.isEmpty()) {
+			logger.putMessage(instanceName+"# of identified shortest transitions = " + shortestPaths.size());	
+		} else {
+			logger.putMessage(instanceName+"# of identified shortest transitions = 0");
+		}
+		
 	}
 
 	/**

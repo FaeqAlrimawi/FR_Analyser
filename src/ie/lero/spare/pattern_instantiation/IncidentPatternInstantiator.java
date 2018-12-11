@@ -781,7 +781,7 @@ public class IncidentPatternInstantiator {
 //		// Calculate the used memory
 //		long memory = runtime.totalMemory() - runtime.freeMemory();
 
-		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory before: " + memory + "Bytes");
+//		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory before: " + memory + "Bytes");
 
 		if (mainPool != null && !mainPool.isShutdown()) {
 			mainPool.shutdownNow();
