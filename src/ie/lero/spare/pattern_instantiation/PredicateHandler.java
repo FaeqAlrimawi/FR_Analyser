@@ -1152,11 +1152,10 @@ public class PredicateHandler {
 		activities.addFirst(sourceActivity);
 		activities.addLast(destinationActivity);
 
-		// logger.putMessage(instanceName + "Identifying intra transitions
-		// between precondition states...");
-		// // identify transitions between states of precondition
-//		 preconditionStatesWithTransitions =
-//		 findIntraStatesTransitions(preconditionStates);
+		 logger.putMessage(instanceName + "Identifying intra transitions between precondition states...");
+		 // identify transitions between states of precondition
+		 preconditionStatesWithTransitions =
+		 findIntraStatesTransitions(preconditionStates);
 
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size(), activities);
 
@@ -1820,10 +1819,10 @@ public class PredicateHandler {
 //					continue;
 //				}
 
-//				List<Integer> tmp  =preconditionStatesWithTransitions.get(startState);
-//				if(tmp != null && tmp.contains(node)) {
-//					continue;
-//				}
+				List<Integer> tmp  =preconditionStatesWithTransitions.get(startState);
+				if(tmp != null && tmp.contains(node)) {
+					continue;
+				}
 				
 				//check if node satisfies current condition
 //				if(conditionIndex < orderedConditions.size()) {

@@ -37,7 +37,8 @@ public class Logger implements Runnable {
 
 	private static final int DAY = 86400000;
 	private static final String SEPARATOR = "*=========================================================================================================*";
-
+	private Timer timer;
+	
 	// private ScheduledExecutorService scheduledExecutor =
 	// Executors.newSingleThreadScheduledExecutor();
 
@@ -116,7 +117,8 @@ public class Logger implements Runnable {
 		try {
 
 			// schedule a task to change format of timing after one day
-			new Timer().schedule(new TimerTask() {
+			timer = new Timer();
+			timer.schedule(new TimerTask() {
 
 				@Override
 				public void run() {
@@ -291,6 +293,9 @@ public class Logger implements Runnable {
 
 		putMessage(Logger.terminatingString);
 
+		if(timer!=null ) {
+			timer.cancel();
+		}
 	}
 
 	public void start() {

@@ -1,5 +1,7 @@
 package ie.lero.spare.pattern_instantiation;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -60,9 +62,9 @@ public class SystemsHandler {
 		return systemHandlers.get(id);
 	}
 	
-	public synchronized static void removeSystemHandler(long id) {
+	public synchronized static SystemInstanceHandler removeSystemHandler(long id) {
 		
-		systemHandlers.remove(id);
+		return systemHandlers.remove(id);
 	}
 	
 	public static void clearAll() {

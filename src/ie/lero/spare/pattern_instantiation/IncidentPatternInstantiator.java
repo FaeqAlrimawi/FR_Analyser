@@ -29,6 +29,7 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
+import choco.cp.model.preprocessor.ModelDetectorFactory;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.CyberPhysicalSystemPackage;
 import environment.EnvironmentDiagram;
@@ -39,6 +40,7 @@ import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.Signature;
+import it.uniud.mads.jlibbig.core.std.Bigraph;
 //import it.uniud.mads.jlibbig.core.util.StopWatch;
 
 public class IncidentPatternInstantiator {
@@ -94,7 +96,6 @@ public class IncidentPatternInstantiator {
 
 	private String outputFolder = ".";
 
-	
 	// used to hold the map between system classes and controls
 	// key is the system class while the value are Controls (which should be
 	// found in the .big file provided when analysing an incident pattern)
@@ -551,9 +552,8 @@ public class IncidentPatternInstantiator {
 				}
 			}
 
-//			logger.putMessage(transitionSystem.getDigraph().toString());
-			
-			
+			// logger.putMessage(transitionSystem.getDigraph().toString());
+
 			logger.putMessage(
 					Logger.SEPARATOR_BTW_INSTANCES + "Number of States= " + transitionSystem.getNumberOfStates());
 
@@ -565,7 +565,7 @@ public class IncidentPatternInstantiator {
 			String[] actionNames = brsExecutor != null ? brsExecutor.getActionNames() : null;
 
 			String outputFile = createNewLabelledTransitionFile(actionNames);
-//
+			//
 			if (outputFile != null) {
 				logger.putMessage(
 						Logger.SEPARATOR_BTW_INSTANCES + "New Labelled transitions is created: " + outputFile);
@@ -604,26 +604,18 @@ public class IncidentPatternInstantiator {
 			// instances.add(executor.submit(incidentInstances[i]));
 			// }
 			/** for testing **/
-//			incidentInstances[1] = new PotentialIncidentInstance(lst.get(1), incidentAssetNames, 1);
-//			instances.add(executor.submit(incidentInstances[1]));
+			// incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
+			// incidentAssetNames, 1);
+			// instances.add(executor.submit(incidentInstances[1]));
 			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
 			instances.add(executor.submit(incidentInstances[2]));
 
-			for (Future<Integer> fut : instances) {
-				if (fut!=null && !fut.isDone()) {
-					fut.get();
-				}
-			}
+			// for (Future<Integer> fut : instances) {
+			// if (fut != null && !fut.isDone()) {
+			// fut.get();
+			// }
+			// }
 
-			mainPool.shutdown();
-
-			// if it returns false then maximum waiting time is reached
-			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
-				logger.putError(Logger.SEPARATOR_BTW_INSTANCES
-						+ "Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " "
-						+ timeUnit + "]");
-			}
-			
 			// no more tasks will be added so it will execute the submitted ones
 			// and then terminate
 			executor.shutdown();
@@ -633,6 +625,15 @@ public class IncidentPatternInstantiator {
 				logger.putError(
 						Logger.SEPARATOR_BTW_INSTANCES + "Time out! tasks took more than specified maximum time ["
 								+ maxWaitingTime + " " + timeUnit + "]");
+			}
+
+			mainPool.shutdown();
+
+			// if it returns false then maximum waiting time is reached
+			if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
+				logger.putError(Logger.SEPARATOR_BTW_INSTANCES
+						+ "Time out! saving instances took more than specified maximum time [" + maxWaitingTime + " "
+						+ timeUnit + "]");
 			}
 
 			// calculate execution time
@@ -651,14 +652,24 @@ public class IncidentPatternInstantiator {
 			logger.putMessage("Execution time: " + duration + "ms [" + hours2 + "h:" + mins2 + "m:" + secs2 + "s:"
 					+ secMils2 + "ms]");
 
-		} catch (InterruptedException | ExecutionException e) {
+			//clear models and system states
+			clearData();
+
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
 			if (logger != null) {
 				logger.terminateLogging();
+			}
+
+			if (executor != null && !executor.isShutdown()) {
 				executor.shutdownNow();
+			}
+
+			if (mainPool != null && !mainPool.isShutdown()) {
 				mainPool.shutdownNow();
 			}
+
 		}
 
 	}
@@ -761,6 +772,51 @@ public class IncidentPatternInstantiator {
 
 	}
 
+	protected void clearData() {
+
+//		// Run the garbage collector
+//		Runtime runtime = Runtime.getRuntime();
+//
+//		runtime.gc();
+//		// Calculate the used memory
+//		long memory = runtime.totalMemory() - runtime.freeMemory();
+
+		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory before: " + memory + "Bytes");
+
+		if (mainPool != null && !mainPool.isShutdown()) {
+			mainPool.shutdownNow();
+		}
+
+		if (executor != null && !executor.isShutdown()) {
+			executor.shutdownNow();
+		}
+
+		// clear system data
+		Map<Integer, Bigraph> tmp = systemHandler.getStates();
+		if (tmp != null) {
+			tmp.clear();
+			tmp = null;
+		}
+
+		SystemsHandler.removeSystemHandler(systemHandler.getSysID());
+
+		systemHandler = null;
+		transitionSystem = null;
+
+		// remove models
+		ModelsHandler.removeIncidentModel(incidentModelFile);
+		ModelsHandler.removeSystemModel(systemModelFile);
+
+		systemModel = null;
+		incidentModel = null;
+
+//		runtime.gc();
+//		memory = runtime.totalMemory() - runtime.freeMemory();
+//
+//		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory after: " + memory + "Bytes");
+
+	}
+
 	protected void loadAssetControlMap(String systemFileName) {
 
 		assetControlMap = new HashMap<String, List<String>>();
@@ -790,8 +846,9 @@ public class IncidentPatternInstantiator {
 
 		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "SystemClass<->Control map is created.");
 		if (!unMatchedControls.isEmpty()) {
-			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Some Primariy Controls in the map have no equivalent in ("
-					+ systemFileName + "):" + Arrays.toString(unMatchedControls.toArray()));
+			logger.putMessage(
+					Logger.SEPARATOR_BTW_INSTANCES + "Some Primariy Controls in the map have no equivalent in ("
+							+ systemFileName + "):" + Arrays.toString(unMatchedControls.toArray()));
 		}
 	}
 
@@ -952,14 +1009,13 @@ public class IncidentPatternInstantiator {
 					// // create and run an instance saver to store instances to
 					// a
 					// // file
-//					 InstancesSaver saver = new InstancesSaver(threadID,
-//					 outputFileName, incidentEntityNames,
-//					 systemAssetNames, paths);
-//					 mainPool.submit(saver);
-					
-					for(GraphPath path : paths) {
-						logger.putMessage(path.toPrettyString(transitionSystem));
-					}
+					InstancesSaver saver = new InstancesSaver(threadID, outputFileName, incidentEntityNames,
+							systemAssetNames, paths);
+					mainPool.submit(saver);
+
+					// for(GraphPath path : paths) {
+					// logger.putMessage(path.toPrettyString(transitionSystem));
+					// }
 					//
 					// logger.putMessage(instanceName + "Analysing [" +
 					// paths.size()
@@ -967,8 +1023,8 @@ public class IncidentPatternInstantiator {
 					//
 					// /** Analyse generated transitions **/
 					// // create an analysis object for the identified paths
-					 pathsAnalyser = new GraphPathsAnalyser(paths, transitionSystem, threadID, logger);
-					 String result = pathsAnalyser.analyse();
+					pathsAnalyser = new GraphPathsAnalyser(paths, transitionSystem, threadID, logger);
+					String result = pathsAnalyser.analyse();
 					//
 					// logger.putMessage(result);
 					//
@@ -1023,14 +1079,6 @@ public class IncidentPatternInstantiator {
 
 				logger.putMessage(instanceName + "Finished Successfully");
 
-				// print separator
-				logger.putSeparator();
-
-				if (listener != null) {
-					listener.updateProgress(incrementValue / 3 + incrementValue % 3);
-					listener.updateResult(threadID, pathsAnalyser, getOutputFileName(), strTime);
-				}
-
 				// memory used
 				Runtime runtime = Runtime.getRuntime();
 
@@ -1040,6 +1088,14 @@ public class IncidentPatternInstantiator {
 				long memory = runtime.totalMemory() - runtime.freeMemory();
 
 				logger.putMessage(instanceName + "Used memory: " + memory + "Bytes");
+
+				// print separator
+				logger.putSeparator();
+
+				if (listener != null) {
+					listener.updateProgress(incrementValue / 3 + incrementValue % 3);
+					listener.updateResult(threadID, pathsAnalyser, getOutputFileName(), strTime);
+				}
 
 				return 0;
 
@@ -1115,12 +1171,14 @@ public class IncidentPatternInstantiator {
 				isSuccessful = false;
 			}
 
-//			if (!unMatchedAssets.isEmpty()) {
-//				logger.putError(instanceName + "Some Controls of asset Classes in (" + systemControlMapFileName
-//						+ ") have no equivalent in the .big file. Asset Classes with no control matches:"
-//						+ Arrays.toString(unMatchedAssets.toArray()));
-//				isSuccessful = false;
-//			}
+			// if (!unMatchedAssets.isEmpty()) {
+			// logger.putError(instanceName + "Some Controls of asset Classes in
+			// (" + systemControlMapFileName
+			// + ") have no equivalent in the .big file. Asset Classes with no
+			// control matches:"
+			// + Arrays.toString(unMatchedAssets.toArray()));
+			// isSuccessful = false;
+			// }
 
 			return isSuccessful;
 		}
@@ -1208,6 +1266,7 @@ public class IncidentPatternInstantiator {
 		private int threadID;
 		public static final String instanceSaverNameGLobal = "InstanceSaver";
 		private String instanceSaverName;
+		// private ForkJoinPool mainPool;
 
 		public InstancesSaver(int threadID, String file, String[] entityNames, String[] astNames,
 				List<GraphPath> paths) {
@@ -1221,6 +1280,7 @@ public class IncidentPatternInstantiator {
 			instanceSaverName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
 					+ Logger.SEPARATOR_BTW_INSTANCES + instanceSaverNameGLobal + Logger.SEPARATOR_BTW_INSTANCES;
 
+			// mainPool = new ForkJoinPool();
 		}
 
 		@Override
@@ -1273,7 +1333,8 @@ public class IncidentPatternInstantiator {
 				String result = mainPool.invoke(new GraphPathsToStringConverter(0, size, paths));
 
 				// System.out.println("result string generated");
-				logger.putMessage(instanceSaverName + "JSON string is generated");
+				// logger.putMessage(instanceSaverName + "JSON string is
+				// generated");
 				jsonStr.append(result);
 
 				// remove the last comma at the end of the string
@@ -1283,7 +1344,8 @@ public class IncidentPatternInstantiator {
 
 				JSONObject obj = new JSONObject(jsonStr.toString());
 
-				logger.putMessage(instanceSaverName + "JSON Object is created");
+				// logger.putMessage(instanceSaverName + "JSON Object is
+				// created");
 
 				if (!threadFile.exists()) {
 					threadFile.createNewFile();
@@ -1301,9 +1363,18 @@ public class IncidentPatternInstantiator {
 
 				obj = null;
 				result = null;
-				
+
 				Runtime.getRuntime().gc();
-				
+
+				// mainPool.shutdown();
+				//
+				// // if it returns false then maximum waiting time is reached
+				// if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
+				// logger.putMessage("Time out! saving instances took more than
+				// specified maximum time ["
+				// + maxWaitingTime + " " + timeUnit + "]");
+				// }
+
 				return 1;
 
 			} catch (IOException e) {
@@ -1360,7 +1431,8 @@ public class IncidentPatternInstantiator {
 			} else {
 
 				for (int i = indexStart; i < indexEnd; i++) {
-					result.append("{\"instance_id\":").append(i).append(",").append(paths.get(i).toJSON()).append("}");
+					result.append("{\"instance_id\":").append(i).append(",")
+							.append(paths.get(i).toJSON(transitionSystem)).append("}");
 					result.append(",");
 				}
 				return result.toString();
@@ -1382,23 +1454,23 @@ public class IncidentPatternInstantiator {
 
 	public static void main(String[] args) {
 
-//		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+		// IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 
-//		ins.executeLeroScenario();
-		
+		// ins.executeLeroScenario();
+
 		// ins.executeScenarioFromConsole();
 		// ins.executeScenario1();
 		// ins.executeStealScenario();
 		// ins.test1();
 
 		// test
-		 test();
-//		 lero10();
-//		 test100K();
+		test();
+		// lero10();
+		// test100K();
 	}
 
 	public static void test() {
-		
+
 		// setting tests
 		String interruptionPattern = "/home/faeq/Desktop/lero/int.cpi";
 
@@ -1414,29 +1486,24 @@ public class IncidentPatternInstantiator {
 
 		String[] states = new String[10];
 
-		for (int i = 0; i <states.length; i++) {
+		for (int i = 0; i < states.length; i++) {
 
 			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
 		}
 
-//		states[0] ="/D:/Bigrapher data/lero/lero100";
-		for (int i = 1; i < 2; i++) {
+		// states[0] ="/D:/Bigrapher data/lero/lero100";
+		for (int i = 0; i < 1; i++) {
 
-			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);
 
 			// reset
-//			ins = null;
-			// Logger.setInstanceNull();
-			// TransitionSystem.setInstanceNull();
-			ModelsHandler.clearAll();
-			SystemsHandler.clearAll();
+
 			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
 			System.out.println("Complete...");
 			System.out.println("\n\n");
-			
+
 			// wait 3 seconds
 			try {
 				Thread.sleep(3000);
@@ -1457,25 +1524,23 @@ public class IncidentPatternInstantiator {
 
 		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
 		String[] states = new String[10];
+		String mainStatesFolder = "/home/faeq/Desktop/lero/lero100K/states";
 
 		for (int i = 0; i < states.length; i++) {
 
-			states[i] = "/home/faeq/Desktop/lero/lero100K/states" + ((i + 1) * 10);
-		}
+			String statesFolder = mainStatesFolder + ((i + 1) * 10);
 
-		for (int i = 0; i < states.length; i++) {
-
-			System.out.println(states[i]);
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
-			ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states[i]);
+			ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, statesFolder);
 
 			// reset
 			ins = null;
-			// Logger.setInstanceNull();
-			// TransitionSystem.setInstanceNull();
 			ModelsHandler.clearAll();
-			// System.out.println("Waiting 3s...");
+			SystemsHandler.clearAll();
+
+			// clear memory
 			Runtime.getRuntime().gc();
+
 			System.out.println("Complete...");
 			System.out.println("\n\n");
 

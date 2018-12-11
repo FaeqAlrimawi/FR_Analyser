@@ -132,7 +132,7 @@ public class GraphPath {
 		return res.toString();
 	}
 	
-	public String toJSON() {
+	public String toJSON(TransitionSystem transitionSystem) {
 		StringBuilder res = new StringBuilder();
 //		TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
 		String action;

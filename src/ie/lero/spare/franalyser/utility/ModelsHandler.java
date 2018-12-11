@@ -1,6 +1,8 @@
 package ie.lero.spare.franalyser.utility;
 
 import java.io.File;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,25 @@ public class ModelsHandler {
 	private static EnvironmentDiagram currentSystemModel;
 	private static Map<String, ActivityPattern> activityPatterns = new HashMap<String, ActivityPattern>();
 	private static ActivityPattern currentActivityPattern;
+	private static String encryption = "SHA-256";
+
+	protected static String getEncryption(String name) {
+
+		MessageDigest messageDigest;
+		try {
+			messageDigest = MessageDigest.getInstance(encryption);
+			messageDigest.update(name.getBytes());
+			String encryptedString = new String(messageDigest.digest());
+
+			return encryptedString;
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+
+	}
 
 	public static Map<String, IncidentDiagram> getIncidentModels() {
 		return incidentModels;
@@ -41,7 +62,7 @@ public class ModelsHandler {
 
 		IncidentDiagram model = null;
 
-		model = incidentModels.get(filePath);
+		model = incidentModels.get(getEncryption(filePath));
 
 		// if model is not loaded then load it and save it in the map
 		if (model == null) {
@@ -51,7 +72,7 @@ public class ModelsHandler {
 		return model;
 	}
 
-	public synchronized  static IncidentDiagram addIncidentModel(String filePath) {
+	public synchronized static IncidentDiagram addIncidentModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -60,7 +81,8 @@ public class ModelsHandler {
 		IncidentDiagram model = null;
 
 		model = loadIncidentModel(filePath);
-		incidentModels.put(filePath, model);
+
+		incidentModels.put(getEncryption(filePath), model);
 
 		if (incidentModels.size() == 1) {
 			currentIncidentModel = model;
@@ -76,7 +98,7 @@ public class ModelsHandler {
 			return null;
 		}
 
-		return incidentModels.remove(filePath);
+		return incidentModels.remove(getEncryption(filePath));
 
 	}
 
@@ -84,7 +106,7 @@ public class ModelsHandler {
 		incidentModels = newIncidentModels;
 	}
 
-	public synchronized  static String saveIncidentModel(IncidentDiagram incidentModel) {
+	public synchronized static String saveIncidentModel(IncidentDiagram incidentModel) {
 
 		String incidentModelName;
 
@@ -104,7 +126,7 @@ public class ModelsHandler {
 		return saveIncidentModel(incidentModel, incidentModelName);
 	}
 
-	public synchronized  static String saveIncidentModel(IncidentDiagram incidentModel, String filePath) {
+	public synchronized static String saveIncidentModel(IncidentDiagram incidentModel, String filePath) {
 
 		try {
 			boolean isSaved = IncidentModelHandler.SaveIncidentToFile(incidentModel, filePath);
@@ -149,11 +171,11 @@ public class ModelsHandler {
 
 	}
 
-	public synchronized  static Map<String, EnvironmentDiagram> getSystemModels() {
+	public synchronized static Map<String, EnvironmentDiagram> getSystemModels() {
 		return systemModels;
 	}
 
-	public synchronized  static EnvironmentDiagram getSystemModel(String filePath) {
+	public synchronized static EnvironmentDiagram getSystemModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -161,7 +183,7 @@ public class ModelsHandler {
 
 		EnvironmentDiagram model = null;
 
-		model = systemModels.get(filePath);
+		model = systemModels.get(getEncryption(filePath));
 
 		// if model is not loaded then load it and save it in the map
 		if (model == null) {
@@ -171,7 +193,7 @@ public class ModelsHandler {
 		return model;
 	}
 
-	public synchronized  static EnvironmentDiagram addSystemModel(String filePath) {
+	public synchronized static EnvironmentDiagram addSystemModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
@@ -180,7 +202,8 @@ public class ModelsHandler {
 		EnvironmentDiagram model = null;
 
 		model = SystemModelHandler.loadSystemFromFile(filePath);
-		systemModels.put(filePath, model);
+
+		systemModels.put(getEncryption(filePath), model);
 
 		if (systemModels.size() == 1) {
 			currentSystemModel = model;
@@ -190,13 +213,13 @@ public class ModelsHandler {
 
 	}
 
-	public synchronized  static EnvironmentDiagram removeSystemModel(String filePath) {
+	public synchronized static EnvironmentDiagram removeSystemModel(String filePath) {
 
 		if (filePath == null) {
 			return null;
 		}
 
-		return systemModels.remove(filePath);
+		return systemModels.remove(getEncryption(filePath));
 
 	}
 
@@ -236,7 +259,7 @@ public class ModelsHandler {
 
 		ActivityPattern pattern = null;
 
-		pattern = activityPatterns.get(filePath);
+		pattern = activityPatterns.get(getEncryption(filePath));
 
 		// if model is not loaded then load it and save it in the map
 		if (pattern == null) {
@@ -254,10 +277,9 @@ public class ModelsHandler {
 
 		ActivityPattern pattern = null;
 
-		Random rand = new Random();
-
 		pattern = ActivityPatternModelHandler.loadActivityPatternFromFile(filePath);
-		activityPatterns.put(filePath + rand.nextInt(1000), pattern);
+		
+		activityPatterns.put(getEncryption(filePath), pattern);
 
 		if (activityPatterns.size() == 1) {
 			currentActivityPattern = pattern;
@@ -273,7 +295,7 @@ public class ModelsHandler {
 			return null;
 		}
 
-		return activityPatterns.remove(filePath);
+		return activityPatterns.remove(getEncryption(filePath));
 
 	}
 
@@ -297,7 +319,7 @@ public class ModelsHandler {
 
 		return currentIncidentModel.getActivity();
 	}
-	
+
 	public synchronized static List<Activity> getIncidentModelActivities(IncidentDiagram incidentModel) {
 
 		if (incidentModel == null) {
@@ -324,12 +346,12 @@ public class ModelsHandler {
 
 		return incidentModel.getEntity(entityName);
 	}
-	
-	public synchronized  static void setCurrentIncidentModel(IncidentDiagram currentIncidentModel) {
+
+	public synchronized static void setCurrentIncidentModel(IncidentDiagram currentIncidentModel) {
 		ModelsHandler.currentIncidentModel = currentIncidentModel;
 	}
 
-	public synchronized  static EnvironmentDiagram getCurrentSystemModel() {
+	public synchronized static EnvironmentDiagram getCurrentSystemModel() {
 		return currentSystemModel;
 	}
 
@@ -344,12 +366,12 @@ public class ModelsHandler {
 	public synchronized static void setCurrentActivityPattern(ActivityPattern newCurrentActivityPattern) {
 		ModelsHandler.currentActivityPattern = newCurrentActivityPattern;
 	}
-	
+
 	public synchronized static void clearAll() {
 		currentActivityPattern = null;
 		currentIncidentModel = null;
 		currentSystemModel = null;
-		
+
 		incidentModels.clear();
 		systemModels.clear();
 		activityPatterns.clear();

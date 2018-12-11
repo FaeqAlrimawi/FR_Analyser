@@ -90,6 +90,11 @@ public class SystemInstanceHandler {
 		sysID = id;
 	}
 
+	public long getSysID() {
+		
+		return sysID;
+	}
+	
 	public void setLogger(Logger logger) {
 		this.logger = logger;
 	}
