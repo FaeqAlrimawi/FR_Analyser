@@ -90,7 +90,7 @@ public class GraphPathsAnalyser {
 
 		// parallelism based functionalities
 		//
-		 getShortestPaths();
+//		 getShortestPaths();
 		// getLongestPaths();
 
 		// sets the percentage of the frequency that the actio
@@ -872,7 +872,7 @@ public class GraphPathsAnalyser {
 				for (int i = indexStart; i < indexEnd; i++) {
 
 					List<String> visited = new LinkedList<String>();
-					actions = paths.get(i).getPathActions(transitionSystem);
+					actions = paths.get(i).getTransitionActions();
 
 					for (String action : actions) {
 
@@ -1048,7 +1048,7 @@ public class GraphPathsAnalyser {
 			//all actions in a transition should satisfy the operation (i.e. actions_freq OP specified_freq is true)
 			Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
 
-				LinkedList<String> pathActions = paths.get(i).getPathActions(transitionSystem);
+				LinkedList<String> pathActions = paths.get(i).getTransitionActions();
 				// boolean isTopPath = false;
 				for (String action : pathActions) {
 
@@ -1083,7 +1083,7 @@ public class GraphPathsAnalyser {
 
 			Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
 
-				LinkedList<String> pathActions = paths.get(i).getPathActions(transitionSystem);
+				LinkedList<String> pathActions = paths.get(i).getTransitionActions();
 
 				int most = (int) Math.ceil(pathActions.size() * satisfactionFactor);
 
@@ -1130,7 +1130,7 @@ public class GraphPathsAnalyser {
 			// at least 1 actions)
 			Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
 
-				LinkedList<String> pathActions = paths.get(i).getPathActions(transitionSystem);
+				LinkedList<String> pathActions = paths.get(i).getTransitionActions();
 				boolean isTopPath = false;
 				for (String action : pathActions) {
 
@@ -1272,7 +1272,7 @@ public class GraphPathsAnalyser {
 				// all actions have a frequency >= to the specified one
 				if (isExact) {
 					for (int i = indexStart; i < indexEnd; i++) {
-						pathActions = paths.get(i).getPathActions(transitionSystem);
+						pathActions = paths.get(i).getTransitionActions();
 
 						if (pathActions.size() != actions.size()) {
 							continue;
@@ -1286,7 +1286,7 @@ public class GraphPathsAnalyser {
 					// contains the given action (could have more actions
 				} else {
 					for (int i = indexStart; i < indexEnd; i++) {
-						pathActions = paths.get(i).getPathActions(transitionSystem);
+						pathActions = paths.get(i).getTransitionActions();
 
 						// if the path contains all common actions then the path
 						// is considered a top one

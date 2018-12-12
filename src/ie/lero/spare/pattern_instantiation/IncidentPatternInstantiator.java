@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -15,8 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
@@ -29,7 +32,6 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
-import choco.cp.model.preprocessor.ModelDetectorFactory;
 import cyberPhysical_Incident.IncidentDiagram;
 import environment.CyberPhysicalSystemPackage;
 import environment.EnvironmentDiagram;
@@ -42,6 +44,8 @@ import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.Signature;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 //import it.uniud.mads.jlibbig.core.util.StopWatch;
+import net.sf.saxon.expr.instruct.Block;
+import net.sf.saxon.expr.instruct.Fork;
 
 public class IncidentPatternInstantiator {
 
@@ -652,7 +656,7 @@ public class IncidentPatternInstantiator {
 			logger.putMessage("Execution time: " + duration + "ms [" + hours2 + "h:" + mins2 + "m:" + secs2 + "s:"
 					+ secMils2 + "ms]");
 
-			//clear models and system states
+			// clear models and system states
 			clearData();
 
 		} catch (InterruptedException e) {
@@ -774,14 +778,15 @@ public class IncidentPatternInstantiator {
 
 	protected void clearData() {
 
-//		// Run the garbage collector
-//		Runtime runtime = Runtime.getRuntime();
-//
-//		runtime.gc();
-//		// Calculate the used memory
-//		long memory = runtime.totalMemory() - runtime.freeMemory();
+		// // Run the garbage collector
+		// Runtime runtime = Runtime.getRuntime();
+		//
+		// runtime.gc();
+		// // Calculate the used memory
+		// long memory = runtime.totalMemory() - runtime.freeMemory();
 
-//		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory before: " + memory + "Bytes");
+		// logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory
+		// before: " + memory + "Bytes");
 
 		if (mainPool != null && !mainPool.isShutdown()) {
 			mainPool.shutdownNow();
@@ -810,10 +815,11 @@ public class IncidentPatternInstantiator {
 		systemModel = null;
 		incidentModel = null;
 
-//		runtime.gc();
-//		memory = runtime.totalMemory() - runtime.freeMemory();
-//
-//		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory after: " + memory + "Bytes");
+		// runtime.gc();
+		// memory = runtime.totalMemory() - runtime.freeMemory();
+		//
+		// logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Used memory
+		// after: " + memory + "Bytes");
 
 	}
 
@@ -1046,7 +1052,7 @@ public class IncidentPatternInstantiator {
 					// Files.newBufferedWriter(threadFile.toPath())) {
 					// writer.write(obj.toString(4));
 					// }
-					//
+
 					// logger.putMessage(instanceName + "Analysis result is
 					// stored in:" + analyseFileName);
 					/**********************/
@@ -1266,7 +1272,14 @@ public class IncidentPatternInstantiator {
 		private int threadID;
 		public static final String instanceSaverNameGLobal = "InstanceSaver";
 		private String instanceSaverName;
-		// private ForkJoinPool mainPool;
+		private BlockingQueue<String> instancesQ;
+
+		public static final String INCIDENT_ENTITY_NAME = "incident_entity_name";
+		public static final String SYSTEM_ASSET_NAME = "system_asset_name";
+		public static final String POTENTIAL_INCIDENT_ISNTANCES = "potential_incident_instances";
+		public static final String INSTNACES_COUNT = "instances_count";
+		public static final String ISNTANCES = "instances";
+		public static final String MAP = "maps";
 
 		public InstancesSaver(int threadID, String file, String[] entityNames, String[] astNames,
 				List<GraphPath> paths) {
@@ -1276,6 +1289,7 @@ public class IncidentPatternInstantiator {
 			incidentEntityNames = entityNames;
 			systemAssetNames = astNames;
 			this.paths = paths;
+			instancesQ = new ArrayBlockingQueue<String>(4000);
 
 			instanceSaverName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
 					+ Logger.SEPARATOR_BTW_INSTANCES + instanceSaverNameGLobal + Logger.SEPARATOR_BTW_INSTANCES;
@@ -1286,14 +1300,17 @@ public class IncidentPatternInstantiator {
 		@Override
 		public Integer call() throws Exception {
 
-			File threadFile = new File(outputFileName);
-			// BufferedWriter threadWriter;
-			// FileWriter fw;
-			StringBuilder jsonStr = new StringBuilder();
-
 			try {
 
 				logger.putMessage(instanceSaverName + "Storing generated instances...");
+
+				File threadFile = new File(outputFileName);
+
+				if (!threadFile.exists()) {
+					threadFile.createNewFile();
+				}
+
+				StringBuilder jsonStr = new StringBuilder();
 
 				// fw = new FileWriter(threadFile.getAbsoluteFile());
 
@@ -1301,68 +1318,104 @@ public class IncidentPatternInstantiator {
 
 				// add the map between incident entities to system assets
 
-				jsonStr.append("{\"map\":[");
+				jsonStr.append("{\"").append(MAP).append("\":[");
 
 				for (int i = 0; i < systemAssetNames.length; i++) {
-					jsonStr.append("{\"incident_entity_name\":\"").append(incidentEntityNames[i]).append("\",")
-							.append("\"system_asset_name\":\"").append(systemAssetNames[i]).append("\"}");
+					jsonStr.append("{\"").append(INCIDENT_ENTITY_NAME).append("\":\"").append(incidentEntityNames[i])
+							.append("\",").append("\"").append(SYSTEM_ASSET_NAME).append("\":\"")
+							.append(systemAssetNames[i]).append("\"}");
 
 					if (i < systemAssetNames.length - 1) {
 						jsonStr.append(",");
 					}
 
 				}
+
 				jsonStr.append("],");
 
 				int size = paths.size();
 
 				// add instances generated. Format:
 				// {instance_id:1,transitions:[{source:3,target:4,action:"enter"},...,{...}]}
-				jsonStr.append("\"potential_incident_instances\":{").append("\"instances_count\":").append(size)
-						.append(",").append("\"instances\":[");
+				jsonStr.append("\"").append(POTENTIAL_INCIDENT_ISNTANCES).append("\":{").append("\"")
+						.append(INSTNACES_COUNT).append("\":").append(size).append(",").append("\"").append(ISNTANCES)
+						.append("\":[");
 
-				/*
-				 * for(int i=0; i<size;i++) {
-				 * jsonStr.append("{\"instance_id\":").append(i).append(",")
-				 * .append(paths.get(i).toJSON()) .append("}"); if(i < size-1) {
-				 * jsonStr.append(","); }
-				 * 
-				 * }
-				 */
+				BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath());
 
-				String result = mainPool.invoke(new GraphPathsToStringConverter(0, size, paths));
+				// write meta information (# of instance, entity-asset map)
+				writer.write(jsonStr.toString());
+
+				ForkJoinTask<String> result = mainPool
+						.submit(new GraphPathsToStringConverter(0, size, paths, instancesQ));
+
+				int cnt = 0;
+
+				// stopping the queue is based on the conditions: either the
+				// forkjoin taks is completed or the count reachs the size of
+				// the instances (the count is not accurate, it takes more than
+				// there are instances)
+				while (!result.isDone() && cnt < size) {
+
+					// write chunck of instances (based on the threshold in the
+					// graphPathsToStringConverter)
+					writer.write(instancesQ.take());
+
+					if (!instancesQ.isEmpty()) {
+						writer.write(",");
+					}
+
+					cnt++;
+				}
+
+				// if there are still isntances to write then write them
+				while (!instancesQ.isEmpty()) {
+
+					writer.write(instancesQ.take());
+
+					if (!instancesQ.isEmpty()) {
+						writer.write(",");
+					}
+				}
+
+				if (result != null && result.isCompletedAbnormally()) {
+					logger.putError(instanceSaverName + "Something went wrong while storing generated instances.");
+					writer.close();
+					return -1;
+				}
+				
+				writer.write("]}}");
 
 				// System.out.println("result string generated");
 				// logger.putMessage(instanceSaverName + "JSON string is
 				// generated");
-				jsonStr.append(result);
+				// jsonStr.append(result);
 
 				// remove the last comma at the end of the string
-				jsonStr.deleteCharAt(jsonStr.length() - 1);
+				// jsonStr.deleteCharAt(jsonStr.length() - 1);
 
-				jsonStr.append("]}}");
+				// jsonStr.append("]}}");
 
-				JSONObject obj = new JSONObject(jsonStr.toString());
+				// JSONObject obj = new JSONObject(jsonStr.toString());
 
 				// logger.putMessage(instanceSaverName + "JSON Object is
 				// created");
 
-				if (!threadFile.exists()) {
-					threadFile.createNewFile();
-				}
-
 				// write paths to a file
-				try (final BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath())) {
-					writer.write(obj.toString(4));
-				}
+				// try (final BufferedWriter writer =
+				// Files.newBufferedWriter(threadFile.toPath())) {
+				// writer.write(obj.toString(4));
+				// }
 
 				// threadWriter.write(obj.toString(4));
 				// threadWriter.close();
 
 				logger.putMessage(instanceSaverName + "Instances are stored in file: " + threadFile.getAbsolutePath());
 
-				obj = null;
+				// obj = null;
 				result = null;
+
+				writer.close();
 
 				Runtime.getRuntime().gc();
 
@@ -1396,12 +1449,16 @@ public class IncidentPatternInstantiator {
 		private static final int THRESHOLD = 100;
 		private List<GraphPath> paths;
 		private StringBuilder result;
+		private static final String INSTANCE_id = "instance_id";
+		private BlockingQueue<String> queue;
 
-		public GraphPathsToStringConverter(int start, int end, List<GraphPath> paths) {
+		public GraphPathsToStringConverter(int start, int end, List<GraphPath> paths, BlockingQueue<String> q) {
 			this.paths = paths;
 			this.indexStart = start;
 			this.indexEnd = end;
+			queue = q;
 			result = new StringBuilder();
+
 		}
 
 		@Override
@@ -1431,11 +1488,22 @@ public class IncidentPatternInstantiator {
 			} else {
 
 				for (int i = indexStart; i < indexEnd; i++) {
-					result.append("{\"instance_id\":").append(i).append(",")
-							.append(paths.get(i).toJSON(transitionSystem)).append("}");
+					result.append("{\"").append(INSTANCE_id).append("\":").append(i).append(",")
+							.append(paths.get(i).toJSONCompact()).append("}");
 					result.append(",");
 				}
-				return result.toString();
+
+				result.deleteCharAt(result.length() - 1);
+				queue.add(result.toString());
+
+				// for (int i = indexStart; i < indexEnd; i++) {
+				// result.append("{\"").append(INSTANCE_id).append("\":").append(i).append(",")
+				// .append(paths.get(i).toJSONCompact()).append("}");
+				// result.append(",");
+				// }
+
+				// return result.toString();
+				return "";
 			}
 		}
 
@@ -1445,8 +1513,8 @@ public class IncidentPatternInstantiator {
 
 			int mid = (indexStart + indexEnd) / 2;
 
-			dividedTasks.add(new GraphPathsToStringConverter(indexStart, mid, paths));
-			dividedTasks.add(new GraphPathsToStringConverter(mid, indexEnd, paths));
+			dividedTasks.add(new GraphPathsToStringConverter(indexStart, mid, paths, queue));
+			dividedTasks.add(new GraphPathsToStringConverter(mid, indexEnd, paths, queue));
 
 			return dividedTasks;
 		}

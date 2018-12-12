@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -41,7 +40,7 @@ public class Logger implements Runnable {
 	
 	private Timer timer;
 	private String newDayMessage = "";
-	private static final int DAY = 100;//86400000;
+	private static final int DAY = 86400000;
 	
 	public static final String SEPARATOR_BTW_INSTANCES = ">>";
 

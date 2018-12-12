@@ -104,46 +104,46 @@ public class IncidentPath {
 	 * @return GraphPath object that contains the state transitions from initial
 	 *         activity to the final
 	 */
-	public GraphPath getRandomPath() {
-
-		if (distinctPaths == null || distinctPaths.size() == 0) {
-			return null;
-		}
-
-		GraphPath p = new GraphPath();
-		GraphPath p2 = new GraphPath();
-		Random rand = new Random();
-		int tries = 0;
-		boolean isPathSelected = false;
-
-		LinkedList<GraphPath> tmpPath = distinctPaths.get(0)
-				.get(predicateHandler.getInitialActivity().getNextActivities()
-						.get(rand.nextInt(predicateHandler.getInitialActivity().getNextActivities().size())).getName());
-
-		p2 = tmpPath.get(rand.nextInt(tmpPath.size()));
-
-		for (int i = 1; i < distinctPaths.size(); i++) {
-			for (LinkedList<GraphPath> pa : distinctPaths.get(i).values()) {
-				while (!isPathSelected && tries < 10000) {
-					p = pa.get(rand.nextInt(pa.size()));
-					if (p2.getStateTransitions().size() > 0
-							&& p2.getStateTransitions().getLast().compareTo(p.getStateTransitions().getFirst()) == 0) {
-						p2 = p2.combine(p);
-						isPathSelected = true;
-					} else if (p2.getStateTransitions().size() == 0) {
-						p2 = p2.combine(p);
-					} else {
-						tries++;
-					}
-				}
-				isPathSelected = false;
-				tries = 0;
-				break;
-			}
-		}
-
-		return p2;
-	}
+//	public GraphPath getRandomPath() {
+//
+//		if (distinctPaths == null || distinctPaths.size() == 0) {
+//			return null;
+//		}
+//
+//		GraphPath p = new GraphPath();
+//		GraphPath p2 = new GraphPath();
+//		Random rand = new Random();
+//		int tries = 0;
+//		boolean isPathSelected = false;
+//
+//		LinkedList<GraphPath> tmpPath = distinctPaths.get(0)
+//				.get(predicateHandler.getInitialActivity().getNextActivities()
+//						.get(rand.nextInt(predicateHandler.getInitialActivity().getNextActivities().size())).getName());
+//
+//		p2 = tmpPath.get(rand.nextInt(tmpPath.size()));
+//
+//		for (int i = 1; i < distinctPaths.size(); i++) {
+//			for (LinkedList<GraphPath> pa : distinctPaths.get(i).values()) {
+//				while (!isPathSelected && tries < 10000) {
+//					p = pa.get(rand.nextInt(pa.size()));
+//					if (p2.getStateTransitions().size() > 0
+//							&& p2.getStateTransitions().getLast().compareTo(p.getStateTransitions().getFirst()) == 0) {
+//						p2 = p2.combine(p);
+//						isPathSelected = true;
+//					} else if (p2.getStateTransitions().size() == 0) {
+//						p2 = p2.combine(p);
+//					} else {
+//						tries++;
+//					}
+//				}
+//				isPathSelected = false;
+//				tries = 0;
+//				break;
+//			}
+//		}
+//
+//		return p2;
+//	}
 
 	/**
 	 * From each activity a set of state transitions are combined with the next
@@ -296,91 +296,91 @@ public class IncidentPath {
 		}
 	}
 
-	public GraphPath getPath(GraphPath initialPath) {
+//	public GraphPath getPath(GraphPath initialPath) {
+//
+//		if (distinctPaths == null || distinctPaths.size() == 0) {
+//			return null;
+//		}
+//
+//		GraphPath p = new GraphPath();
+//		GraphPath p2 = new GraphPath();
+//		Random rand = new Random();
+//		int tries = 0;
+//		boolean isPathSelected = false;
+//
+//		p2 = initialPath;
+//
+//		for (int i = 1; i < distinctPaths.size(); i++) {
+//			for (LinkedList<GraphPath> pa : distinctPaths.get(i).values()) {
+//				while (!isPathSelected && tries < 10000) {
+//					p = pa.get(rand.nextInt(pa.size()));
+//					if (p2.getStateTransitions().size() > 0
+//							&& p2.getStateTransitions().getLast().compareTo(p.getStateTransitions().getFirst()) == 0) {
+//						p2 = p2.combine(p);
+//						isPathSelected = true;
+//					} else if (p2.getStateTransitions().size() == 0) {
+//						p2 = p2.combine(p);
+//					} else {
+//						tries++;
+//					}
+//				}
+//				isPathSelected = false;
+//				tries = 0;
+//				break;
+//			}
+//		}
+//
+//		return p2;
+//	}
 
-		if (distinctPaths == null || distinctPaths.size() == 0) {
-			return null;
-		}
-
-		GraphPath p = new GraphPath();
-		GraphPath p2 = new GraphPath();
-		Random rand = new Random();
-		int tries = 0;
-		boolean isPathSelected = false;
-
-		p2 = initialPath;
-
-		for (int i = 1; i < distinctPaths.size(); i++) {
-			for (LinkedList<GraphPath> pa : distinctPaths.get(i).values()) {
-				while (!isPathSelected && tries < 10000) {
-					p = pa.get(rand.nextInt(pa.size()));
-					if (p2.getStateTransitions().size() > 0
-							&& p2.getStateTransitions().getLast().compareTo(p.getStateTransitions().getFirst()) == 0) {
-						p2 = p2.combine(p);
-						isPathSelected = true;
-					} else if (p2.getStateTransitions().size() == 0) {
-						p2 = p2.combine(p);
-					} else {
-						tries++;
-					}
-				}
-				isPathSelected = false;
-				tries = 0;
-				break;
-			}
-		}
-
-		return p2;
-	}
-
-	public LinkedList<GraphPath> getRandomIncidentPath() {
-
-		if (distinctPaths == null || distinctPaths.size() == 0) {
-			return null;
-		}
-
-		GraphPath p = new GraphPath();
-		// GraphPath p2 = new GraphPath();
-		Random rand = new Random();
-		int tries = 0;
-		boolean isPathSelected = false;
-		LinkedList<GraphPath> initials = new LinkedList<GraphPath>();
-		// get random initial path
-		/*
-		 * while (!isPathSelected && tries < 10000) {
-		 * 
-		 * }
-		 */
-
-		for (LinkedList<GraphPath> ls : ((IncidentActivity)predicateHandler.getInitialActivity()).getPathsToNextActivities().values()) {
-			initials.add(getPath(ls.get(rand.nextInt(ls.size()))));
-		}
-
-		for (int j = 0; j < initials.size(); j++) {
-			for (int i = 1; i < distinctPaths.size(); i++) {
-				for (LinkedList<GraphPath> pa : distinctPaths.get(i).values()) {
-
-					while (!isPathSelected && tries < 10000) {
-						p = pa.get(rand.nextInt(pa.size()));
-						if (initials.get(j).getStateTransitions().getLast()
-								.compareTo(p.getStateTransitions().getFirst()) == 0) {
-							initials.add(initials.get(j).combine(pa.get(rand.nextInt(pa.size()))));
-							isPathSelected = true;
-						} else {
-							tries++;
-						}
-					}
-					isPathSelected = false;
-					tries = 0;
-					// break;
-				}
-			}
-
-		}
-
-		for (GraphPath pa : incidentPath) {
-			System.out.println(pa);
-		}
-		return incidentPath;
-	}
+//	public LinkedList<GraphPath> getRandomIncidentPath() {
+//
+//		if (distinctPaths == null || distinctPaths.size() == 0) {
+//			return null;
+//		}
+//
+//		GraphPath p = new GraphPath();
+//		// GraphPath p2 = new GraphPath();
+//		Random rand = new Random();
+//		int tries = 0;
+//		boolean isPathSelected = false;
+//		LinkedList<GraphPath> initials = new LinkedList<GraphPath>();
+//		// get random initial path
+//		/*
+//		 * while (!isPathSelected && tries < 10000) {
+//		 * 
+//		 * }
+//		 */
+//
+//		for (LinkedList<GraphPath> ls : ((IncidentActivity)predicateHandler.getInitialActivity()).getPathsToNextActivities().values()) {
+//			initials.add(getPath(ls.get(rand.nextInt(ls.size()))));
+//		}
+//
+//		for (int j = 0; j < initials.size(); j++) {
+//			for (int i = 1; i < distinctPaths.size(); i++) {
+//				for (LinkedList<GraphPath> pa : distinctPaths.get(i).values()) {
+//
+//					while (!isPathSelected && tries < 10000) {
+//						p = pa.get(rand.nextInt(pa.size()));
+//						if (initials.get(j).getStateTransitions().getLast()
+//								.compareTo(p.getStateTransitions().getFirst()) == 0) {
+//							initials.add(initials.get(j).combine(pa.get(rand.nextInt(pa.size()))));
+//							isPathSelected = true;
+//						} else {
+//							tries++;
+//						}
+//					}
+//					isPathSelected = false;
+//					tries = 0;
+//					// break;
+//				}
+//			}
+//
+//		}
+//
+//		for (GraphPath pa : incidentPath) {
+//			System.out.println(pa);
+//		}
+//		return incidentPath;
+//	}
 }

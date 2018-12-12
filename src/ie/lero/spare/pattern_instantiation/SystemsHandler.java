@@ -1,7 +1,5 @@
 package ie.lero.spare.pattern_instantiation;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -54,8 +52,7 @@ public class SystemsHandler {
 	}
 	
 	public static SystemInstanceHandler getCurrentSystemHandler() {
-//		return currentSystemHandler;
-		return null;
+		return currentSystemHandler;
 	}
 	
 	public synchronized static SystemInstanceHandler getSystemHandler(long id) {
