@@ -43,6 +43,7 @@ public class Logger implements Runnable {
 	private static final int DAY = 86400000;
 	
 	public static final String SEPARATOR_BTW_INSTANCES = ">>";
+	public static final String SEPARATOR_BTW_INSTANCES_COLOURED = ConsoleColors.BLUE+SEPARATOR_BTW_INSTANCES+ConsoleColors.RESET;
 
 	public Logger() {
 

@@ -1312,12 +1312,6 @@ public class IncidentPatternInstantiator {
 
 				StringBuilder jsonStr = new StringBuilder();
 
-				// fw = new FileWriter(threadFile.getAbsoluteFile());
-
-				// threadWriter = new BufferedWriter(fw);
-
-				// add the map between incident entities to system assets
-
 				jsonStr.append("{\"").append(MAP).append("\":[");
 
 				for (int i = 0; i < systemAssetNames.length; i++) {
@@ -1335,8 +1329,6 @@ public class IncidentPatternInstantiator {
 
 				int size = paths.size();
 
-				// add instances generated. Format:
-				// {instance_id:1,transitions:[{source:3,target:4,action:"enter"},...,{...}]}
 				jsonStr.append("\"").append(POTENTIAL_INCIDENT_ISNTANCES).append("\":{").append("\"")
 						.append(INSTNACES_COUNT).append("\":").append(size).append(",").append("\"").append(ISNTANCES)
 						.append("\":[");
@@ -1345,7 +1337,10 @@ public class IncidentPatternInstantiator {
 
 				// write meta information (# of instance, entity-asset map)
 				writer.write(jsonStr.toString());
-
+				writer.newLine();
+				
+				jsonStr.setLength(0);
+				
 				ForkJoinTask<String> result = mainPool
 						.submit(new GraphPathsToStringConverter(0, size, paths, instancesQ));
 
@@ -1353,30 +1348,9 @@ public class IncidentPatternInstantiator {
 				// #-of-transitions/Threshold
 				int numOfPartitions = size / GraphPathsToStringConverter.THRESHOLD;
 
-				logger.putMessage(instanceSaverName + "Number of partitions = " + numOfPartitions);
+//				logger.putMessage(instanceSaverName + "Number of partitions = " + numOfPartitions);
 
 				int cnt = 0;
-
-				// stopping the queue is based on the conditions: either the
-				// forkjoin taks is completed or the count reachs the size of
-				// the instances (the count is not accurate, it takes more than
-				// there are instances)
-
-				// get first instances chunck
-				// writer.write(instancesQ.take());
-
-				// while (!result.isDone() && cnt < size) {
-				//
-				// // write chunck of instances (based on the threshold in the
-				// // graphPathsToStringConverter)
-				// writer.write(instancesQ.take());
-				//
-				// if (!instancesQ.isEmpty()) {
-				// writer.write(",");
-				// }
-				//
-				// cnt++;
-				// }
 
 				while (cnt < numOfPartitions-1) {
 
@@ -1385,6 +1359,7 @@ public class IncidentPatternInstantiator {
 					
 					writer.write(instancesQ.take());
 					writer.write(",");
+					writer.newLine();
 
 					cnt++;
 				}
@@ -1392,16 +1367,6 @@ public class IncidentPatternInstantiator {
 				//get last chunck
 				writer.write(instancesQ.take());
 				
-//				// if there are still isntances to write then write them
-//				while (!instancesQ.isEmpty()) {
-//
-//					writer.write(instancesQ.take());
-//
-//					if (!instancesQ.isEmpty()) {
-//						writer.write(",");
-//					}
-//				}
-
 				if (result != null && result.isCompletedAbnormally()) {
 					logger.putError(instanceSaverName + "Something went wrong while storing generated instances.");
 					writer.close();
@@ -1410,48 +1375,12 @@ public class IncidentPatternInstantiator {
 
 				writer.write("]}}");
 
-				// System.out.println("result string generated");
-				// logger.putMessage(instanceSaverName + "JSON string is
-				// generated");
-				// jsonStr.append(result);
-
-				// remove the last comma at the end of the string
-				// jsonStr.deleteCharAt(jsonStr.length() - 1);
-
-				// jsonStr.append("]}}");
-
-				// JSONObject obj = new JSONObject(jsonStr.toString());
-
-				// logger.putMessage(instanceSaverName + "JSON Object is
-				// created");
-
-				// write paths to a file
-				// try (final BufferedWriter writer =
-				// Files.newBufferedWriter(threadFile.toPath())) {
-				// writer.write(obj.toString(4));
-				// }
-
-				// threadWriter.write(obj.toString(4));
-				// threadWriter.close();
-
 				logger.putMessage(instanceSaverName + "Instances are stored in file: " + threadFile.getAbsolutePath());
-
-				// obj = null;
-				result = null;
 
 				writer.close();
 
 				Runtime.getRuntime().gc();
-
-				// mainPool.shutdown();
-				//
-				// // if it returns false then maximum waiting time is reached
-				// if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
-				// logger.putMessage("Time out! saving instances took more than
-				// specified maximum time ["
-				// + maxWaitingTime + " " + timeUnit + "]");
-				// }
-
+				
 				return 1;
 
 			} catch (IOException e) {
@@ -1590,25 +1519,22 @@ public class IncidentPatternInstantiator {
 		}
 
 		
-		for (int i = 4; i < 5; i++) {
+		for (int i = 7; i < 8; i++) {
 
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);
 
-			// reset
-
-			// System.out.println("Waiting 3s...");
 			Runtime.getRuntime().gc();
 			System.out.println("Complete...");
 			System.out.println("\n\n");
 
 			// wait 3 seconds
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(3000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 
 		}
 
