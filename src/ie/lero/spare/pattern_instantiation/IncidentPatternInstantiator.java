@@ -1464,15 +1464,12 @@ public class IncidentPatternInstantiator {
 
 	class GraphPathsToStringConverter extends RecursiveTask<String> {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		private int indexStart;
 		private int indexEnd;
-		public static final int THRESHOLD = 2;
+		public static final int THRESHOLD = 100;
 		private List<GraphPath> paths;
-		private StringBuilder result;
+//		private StringBuilder result;
 		private static final String INSTANCE_id = "instance_id";
 		private BlockingQueue<String> queue;
 		private int residue;
@@ -1482,7 +1479,7 @@ public class IncidentPatternInstantiator {
 			this.indexStart = start;
 			this.indexEnd = end;
 			queue = q;
-			result = new StringBuilder();
+//			result = new StringBuilder();
 			residue = (int) Math.ceil(paths.size() % (THRESHOLD * 1.0));
 
 		}
@@ -1511,6 +1508,7 @@ public class IncidentPatternInstantiator {
 
 			} else {
 
+				StringBuilder result = new StringBuilder();
 				for (int i = indexStart; i < indexEnd; i++) {
 					result.append("{\"").append(INSTANCE_id).append("\":").append(i).append(",")
 							.append(paths.get(i).toJSONCompact()).append("}");
@@ -1523,6 +1521,8 @@ public class IncidentPatternInstantiator {
 					
 					queue.put(result.toString());
 
+					result.setLength(0);
+					
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1590,7 +1590,7 @@ public class IncidentPatternInstantiator {
 		}
 
 		
-		for (int i = 3; i < 4; i++) {
+		for (int i = 4; i < 5; i++) {
 
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);
