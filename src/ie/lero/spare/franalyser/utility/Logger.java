@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -35,13 +36,13 @@ public class Logger implements Runnable {
 	private static String terminatingString = "LoggingDone";
 	private static String terminatingStringWithDelimiter = terminatingString + msgTypeDelimiter + MSG_INFO;
 
-	private static final int DAY = 86400000;
-	private static final String SEPARATOR = "*=========================================================================================================*";
-	private Timer timer;
 	
-	// private ScheduledExecutorService scheduledExecutor =
-	// Executors.newSingleThreadScheduledExecutor();
-
+	private static final String SEPARATOR = "*=========================================================================================================*";
+	
+	private Timer timer;
+	private String newDayMessage = "";
+	private static final int DAY = 100;//86400000;
+	
 	public static final String SEPARATOR_BTW_INSTANCES = ">>";
 
 	public Logger() {
@@ -122,8 +123,20 @@ public class Logger implements Runnable {
 
 				@Override
 				public void run() {
-
+					
 					dtfTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+					newDayMessage = "** A Day passed! it's "+ LocalDateTime.now().getDayOfWeek().toString();
+					putMessage(newDayMessage);
+					
+					//some time to allow the message to be printed in Date format above
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+					dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
 				}
 			}, DAY);
 
