@@ -18,7 +18,7 @@ public class GraphPath {
 	public static final String ACTION_STRING = "action";
 	public static final String TRANSITIONS_STRING = "transitions";
 	public static final String ACTIONS_STRING = "actions";
-	
+
 	public GraphPath() {
 		stateTransitions = new LinkedList<Integer>();
 		// systemHandler = SystemsHandler.getCurrentSystemHandler();
@@ -166,80 +166,96 @@ public class GraphPath {
 	}
 
 	/**
-	 * Return a json representation of this graph path. It's compact because the transition is represented as an array in the json
+	 * Return a json representation of this graph path. It's compact because the
+	 * transition is represented as an array in the json
+	 * 
 	 * @return
 	 */
 	public String toJSONCompact() {
 
-		StringBuilder res = new StringBuilder();
-		StringBuilder res2 = new StringBuilder();
+//		StringBuilder res = new StringBuilder();
+//		StringBuilder res2 = new StringBuilder();
+//
+//		String action;
+//
+//		res.append("\"").append(TRANSITIONS_STRING).append("\":[");
+//		res2.append("\"").append(ACTIONS_STRING).append("\":[");
+//
+//		int i = 0;
+//		for (i = 0; i < stateTransitions.size() - 1; i++) {
+//			action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
+//			action = action == null ? "NULL" : action;
+//
+//			res.append(stateTransitions.get(i)).append(",");
+//
+//			res2.append("\"").append(action).append("\",");
+//		}
+//
+//		// for states. Add last one
+//		res.append(stateTransitions.get(i));
+//		res.append("],");
+//
+//		// for actions
+//		res2.deleteCharAt(res2.length() - 1);
+//		res2.append("]");
+//
+//		res.append(res2.toString());
+//
+//		return res.toString();
 		
-		String action;
-
-		res.append("\"").append(TRANSITIONS_STRING).append("\":[");
-		res2.append("\"").append(ACTIONS_STRING).append("\":[");
+		boolean isConvertAction = true;
+		String res = toJSONCompact(isConvertAction);
 		
-		int i =0;
-		for ( i = 0; i < stateTransitions.size() - 1; i++) {
-			action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
-			res.append(stateTransitions.get(i)).append(",");
-					res2.append("\"").append(action).append("\",");
-		}
-
-		//for states. Add last one
-		res.append(stateTransitions.get(i));
-		res.append("],");
-		
-		//for actions
-		res2.deleteCharAt(res.length() - 1);
-		res2.append("]");
-		
-		res.append(res2.toString());
-		
-		return res.toString();
+		return res;
 	}
-	
+
 	public String toJSONCompact(boolean isconvertAction) {
 
-		StringBuilder res = new StringBuilder();
-		StringBuilder res2 = new StringBuilder();
-		
+		StringBuilder resState = new StringBuilder();
+		StringBuilder resAction = new StringBuilder();
+
 		String action;
 
-		res.append("\"").append(TRANSITIONS_STRING).append("\":[");
-		
-		if(isconvertAction) {
-			res2.append("\"").append(ACTIONS_STRING).append("\":[");	
-		}
-		
-		int i =0;
-		for ( i = 0; i < stateTransitions.size() - 1; i++) {
-			
-			if(isconvertAction) {
-			action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
-			res2.append("\"").append(action).append("\",");
-			}
-			
-			res.append(stateTransitions.get(i)).append(",");
-					
+		resState.append("\"").append(TRANSITIONS_STRING).append("\":[");
+
+		if (isconvertAction) {
+			resAction.append("\"").append(ACTIONS_STRING).append("\":[");
 		}
 
-		//for states
-		res.deleteCharAt(res.length() - 1);
-		res.append("],");
-		
-		if(isconvertAction) {
-		//for actions
-		res2.deleteCharAt(res.length() - 1);
-		res2.append("]");
+		int i = 0;
+		for (i = 0; i < stateTransitions.size() - 1; i++) {
+
+			if (isconvertAction) {
+				action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
+				resAction.append("\"").append(action).append("\",");
+			}
+
+			resState.append(stateTransitions.get(i)).append(",");
+
 		}
+
+		// for states. Add last one
+		resState.append(stateTransitions.get(i));
 		
-		if(isconvertAction) {
-		res.append(res2.toString());
-		
-		} 
-		
-		return res.toString();
+
+		if (isconvertAction) {
+			resState.append("],");
+			
+			// for actions
+			resAction.deleteCharAt(resAction.length() - 1);
+			resAction.append("]");
+			
+			resState.append(resAction.toString());
+		} else {
+			resState.append("]");
+		}
+
+//		if (isconvertAction) {
+//			resState.append(resAction.toString());
+//
+//		}
+
+		return resState.toString();
 	}
 
 	public boolean isSubPath(GraphPath path) {

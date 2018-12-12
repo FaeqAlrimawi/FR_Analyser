@@ -1270,7 +1270,7 @@ public class IncidentPatternInstantiator {
 		private String[] incidentEntityNames;
 		private List<GraphPath> paths;
 		private int threadID;
-		public static final String instanceSaverNameGLobal = "InstanceSaver";
+		public static final String instanceSaverNameGLobal = "Instance-Saver";
 		private String instanceSaverName;
 		private BlockingQueue<String> instancesQ;
 
@@ -1349,41 +1349,65 @@ public class IncidentPatternInstantiator {
 				ForkJoinTask<String> result = mainPool
 						.submit(new GraphPathsToStringConverter(0, size, paths, instancesQ));
 
+				// number of paritions =
+				// #-of-transitions/Threshold
+				int numOfPartitions = size / GraphPathsToStringConverter.THRESHOLD;
+
+				logger.putMessage(instanceSaverName + "Number of partitions = " + numOfPartitions);
+
 				int cnt = 0;
 
 				// stopping the queue is based on the conditions: either the
 				// forkjoin taks is completed or the count reachs the size of
 				// the instances (the count is not accurate, it takes more than
 				// there are instances)
-				while (!result.isDone() && cnt < size) {
+
+				// get first instances chunck
+				// writer.write(instancesQ.take());
+
+				// while (!result.isDone() && cnt < size) {
+				//
+				// // write chunck of instances (based on the threshold in the
+				// // graphPathsToStringConverter)
+				// writer.write(instancesQ.take());
+				//
+				// if (!instancesQ.isEmpty()) {
+				// writer.write(",");
+				// }
+				//
+				// cnt++;
+				// }
+
+				while (cnt < numOfPartitions-1) {
 
 					// write chunck of instances (based on the threshold in the
 					// graphPathsToStringConverter)
+					
 					writer.write(instancesQ.take());
-
-					if (!instancesQ.isEmpty()) {
-						writer.write(",");
-					}
+					writer.write(",");
 
 					cnt++;
 				}
 
-				// if there are still isntances to write then write them
-				while (!instancesQ.isEmpty()) {
-
-					writer.write(instancesQ.take());
-
-					if (!instancesQ.isEmpty()) {
-						writer.write(",");
-					}
-				}
+				//get last chunck
+				writer.write(instancesQ.take());
+				
+//				// if there are still isntances to write then write them
+//				while (!instancesQ.isEmpty()) {
+//
+//					writer.write(instancesQ.take());
+//
+//					if (!instancesQ.isEmpty()) {
+//						writer.write(",");
+//					}
+//				}
 
 				if (result != null && result.isCompletedAbnormally()) {
 					logger.putError(instanceSaverName + "Something went wrong while storing generated instances.");
 					writer.close();
 					return -1;
 				}
-				
+
 				writer.write("]}}");
 
 				// System.out.println("result string generated");
@@ -1446,11 +1470,12 @@ public class IncidentPatternInstantiator {
 		private static final long serialVersionUID = 1L;
 		private int indexStart;
 		private int indexEnd;
-		private static final int THRESHOLD = 100;
+		public static final int THRESHOLD = 2;
 		private List<GraphPath> paths;
 		private StringBuilder result;
 		private static final String INSTANCE_id = "instance_id";
 		private BlockingQueue<String> queue;
+		private int residue;
 
 		public GraphPathsToStringConverter(int start, int end, List<GraphPath> paths, BlockingQueue<String> q) {
 			this.paths = paths;
@@ -1458,32 +1483,31 @@ public class IncidentPatternInstantiator {
 			this.indexEnd = end;
 			queue = q;
 			result = new StringBuilder();
+			residue = (int) Math.ceil(paths.size() % (THRESHOLD * 1.0));
 
 		}
 
 		@Override
 		protected String compute() {
 
-			if ((indexEnd - indexStart) > THRESHOLD) {
+			if ((indexEnd - indexStart) > (THRESHOLD + residue)) {
 
-				result = ForkJoinTask.invokeAll(createSubTasks()).stream()
-						.map(new Function<GraphPathsToStringConverter, StringBuilder>() {
+				return ForkJoinTask.invokeAll(createSubTasks()).stream()
+						.map(new Function<GraphPathsToStringConverter, String>() {
 
 							@Override
-							public StringBuilder apply(GraphPathsToStringConverter arg0) {
-								return arg0.result;
+							public String apply(GraphPathsToStringConverter arg0) {
+								return null;
 							}
 
-						}).reduce(result, new BinaryOperator<StringBuilder>() {
+						}).reduce(null, new BinaryOperator<String>() {
 
 							@Override
-							public StringBuilder apply(StringBuilder arg0, StringBuilder arg1) {
+							public String apply(String arg0, String arg1) {
 
-								return arg0.append(arg1.toString());
+								return arg0;
 							}
 						});
-
-				return result.toString();
 
 			} else {
 
@@ -1494,16 +1518,17 @@ public class IncidentPatternInstantiator {
 				}
 
 				result.deleteCharAt(result.length() - 1);
-				queue.add(result.toString());
+				
+				try {
+					
+					queue.put(result.toString());
 
-				// for (int i = indexStart; i < indexEnd; i++) {
-				// result.append("{\"").append(INSTANCE_id).append("\":").append(i).append(",")
-				// .append(paths.get(i).toJSONCompact()).append("}");
-				// result.append(",");
-				// }
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 
-				// return result.toString();
-				return "";
+				return null;
 			}
 		}
 
@@ -1511,12 +1536,17 @@ public class IncidentPatternInstantiator {
 
 			List<GraphPathsToStringConverter> dividedTasks = new LinkedList<GraphPathsToStringConverter>();
 
-			int mid = (indexStart + indexEnd) / 2;
+			int part = (indexEnd - indexStart) / THRESHOLD;
 
-			dividedTasks.add(new GraphPathsToStringConverter(indexStart, mid, paths, queue));
-			dividedTasks.add(new GraphPathsToStringConverter(mid, indexEnd, paths, queue));
+			for (int i = 0; i < part - 1; i++) {
+				dividedTasks.add(new GraphPathsToStringConverter(indexStart, indexStart + THRESHOLD, paths, queue));
+				indexStart += THRESHOLD;
+			}
 
+			dividedTasks.add(new GraphPathsToStringConverter(indexStart, indexEnd, paths, queue));
+			
 			return dividedTasks;
+
 		}
 	}
 
@@ -1559,8 +1589,8 @@ public class IncidentPatternInstantiator {
 			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
 		}
 
-		// states[0] ="/D:/Bigrapher data/lero/lero100";
-		for (int i = 0; i < 1; i++) {
+		
+		for (int i = 3; i < 4; i++) {
 
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);
