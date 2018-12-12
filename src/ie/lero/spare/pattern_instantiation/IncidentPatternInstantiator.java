@@ -1519,7 +1519,7 @@ public class IncidentPatternInstantiator {
 		}
 
 		
-		for (int i = 7; i < 8; i++) {
+		for (int i = 0; i < 1; i++) {
 
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);
