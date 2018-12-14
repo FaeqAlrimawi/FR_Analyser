@@ -1686,7 +1686,7 @@ public class PredicateHandler {
 			this.preState = preState;
 			result = new LinkedList<GraphPath>();
 
-			preIntraState = new LinkedList<Integer>();
+//			preIntraState = new LinkedList<Integer>();
 			activities = acts;
 			// nodeHistory = new LinkedList<Integer>();
 			preIntraStates = preconditionStatesWithTransitions != null ? preconditionStatesWithTransitions.get(preState)
@@ -1852,6 +1852,9 @@ public class PredicateHandler {
 			queue.add(transition);
 			visited.add(preState);
 
+			//add all precondition states that the preState has a transition to
+//			visited.addAll(preIntraStates);
+			
 			while (!queue.isEmpty()) {
 
 				List<Integer> trans = queue.poll();
