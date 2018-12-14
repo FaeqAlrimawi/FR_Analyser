@@ -1748,19 +1748,25 @@ public class PredicateHandler {
 			localResult = new LinkedList<GraphPath>();
 
 			v.add(preState);
-			this.endState = desState;
+//			this.endState = desState;
 
+			List<Integer> allVisited = new LinkedList<Integer>();
+			
+			allVisited.add(preState);
+			
 			// find all possible transitions
-//			depthFirst(v);
+//			depthFirst(v, allVisited);
 			breadthFirst(desState);
 
 			return localResult;
 		}
 
-		private void depthFirst(LinkedList<Integer> visited) {
+		private void depthFirst(Integer endState, LinkedList<Integer> transition, List<Integer> allVisited) {
 
-			List<Integer> nodes = transitionDigraph.outboundNeighborsForTransitionGeneration(visited.getLast());
+			List<Integer> nodes = transitionDigraph.outboundNeighborsForTransitionGeneration(transition.getLast());
 
+			boolean isAdded = false;
+			
 			// examine adjacent nodes
 			// for (Integer node : nodes) {
 			// if (visited.contains(node)) {
@@ -1780,24 +1786,14 @@ public class PredicateHandler {
 				// continue;
 				// }
 
-				if (visited.contains(node)) {
+//				if (visited.contains(node)) {
+//					continue;
+//				}
+				
+				if(allVisited.contains(node)) {
 					continue;
 				}
-
-				if (node.equals(endState)) {
-					visited.add(node);
-
-					// identified transition satisfies other activities
-					// conditions
-					// if(conditionIndex >= orderedConditions.size()) {
-					addTransitiontoList(visited);
-					// }
-
-					visited.removeLast();
-
-					continue;
-				}
-
+				
 				/**
 				 * Check if current node has a transition to the start node
 				 * 
@@ -1811,7 +1807,7 @@ public class PredicateHandler {
 				if (preIntraStates != null && preIntraStates.contains(node)) {
 					continue;
 				}
-
+			
 				// check if node satisfies current condition
 				// if(conditionIndex < orderedConditions.size()) {
 				// Predicate tmp = orderedConditions.get(conditionIndex);
@@ -1827,11 +1823,38 @@ public class PredicateHandler {
 				// }
 				/*****************************/
 
-				visited.addLast(node);
-				depthFirst(visited);
+				if (node.equals(endState)) {
+					transition.add(node);
 
-				visited.removeLast();
+					// identified transition satisfies other activities
+					// conditions
+					// if(conditionIndex >= orderedConditions.size()) {
+					addTransitiontoList(transition);
+					
+					// }
 
+					transition.removeLast();
+
+					continue;
+				}
+
+				
+				transition.addLast(node);
+				
+				if(!isAdded) {
+				allVisited.addAll(nodes);
+					isAdded = true;
+				}
+				
+				depthFirst(endState, transition, allVisited);
+
+				transition.removeLast();
+				
+				if(isAdded) {
+					allVisited.removeAll(nodes);
+					isAdded = false;
+					}
+				
 				// if(!nodeHistory.isEmpty() &&
 				// nodeHistory.getLast().equals(tmpState)) {
 				// conditionIndex--;
@@ -1839,6 +1862,9 @@ public class PredicateHandler {
 				// }
 
 			}
+			
+			
+				
 		}
 
 		private void breadthFirst(Integer endState) {
@@ -1882,7 +1908,7 @@ public class PredicateHandler {
 						if (preIntraStates != null && preIntraStates.contains(neighborState)) {
 							continue;
 						}
-
+ 
 						if (!visited.contains(neighborState)) {
 							List<Integer> newTrans = new LinkedList<Integer>(trans);
 							newTrans.add(neighborState);
@@ -1902,7 +1928,9 @@ public class PredicateHandler {
 			if (!analyseTransition(transition)) {
 				return;
 			}
-
+			
+			logger.putMessage(transition.toString());
+			
 			LinkedList<Integer> newList = new LinkedList<Integer>(transition);
 			GraphPath path = new GraphPath(transitionSystem);
 
@@ -1923,6 +1951,8 @@ public class PredicateHandler {
 				return;
 			}
 
+			logger.putMessage(transition.toString());
+			
 //			LinkedList<Integer> newList = new LinkedList<Integer>(transition);
 			GraphPath path = new GraphPath(transitionSystem);
 
