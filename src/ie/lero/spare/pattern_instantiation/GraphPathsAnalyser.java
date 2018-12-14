@@ -90,7 +90,7 @@ public class GraphPathsAnalyser {
 
 		// parallelism based functionalities
 		//
-//		 getShortestPaths();
+		 getShortestPaths();
 		// getLongestPaths();
 
 		// sets the percentage of the frequency that the actio
@@ -100,11 +100,10 @@ public class GraphPathsAnalyser {
 		AnalyserOperation operation = AnalyserOperation.GTE;
 
 		// sets if all/most/any actions in the path has the sepcified frequency
-		// in
-		// percentageFrequency variable
+		// in percentageFrequency variable
 		ActionsToSatisfy actionsToSatisfy = ActionsToSatisfy.ALL;
 
-		getTopPaths(percentageFrequency, operation, actionsToSatisfy);
+//		getTopPaths(percentageFrequency, operation, actionsToSatisfy);
 
 		mainPool.shutdown();
 
