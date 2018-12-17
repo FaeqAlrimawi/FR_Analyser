@@ -20,8 +20,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import cyberPhysical_Incident.Activity;
+import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
+import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.PotentialIncidentInstance;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
 import it.uniud.mads.jlibbig.core.std.Matcher;
@@ -38,7 +41,7 @@ public class BigraphAnalyser {
 	private boolean isThreading = true;
 
 	// determine if predicates should run in parallel
-	private boolean isPredicateThreading = true;
+	private boolean isPredicateThreading = false;
 
 	// determines how many activities should be threaded
 	private int numberofActivityParallelExecution = 1; // set by the
@@ -61,23 +64,26 @@ public class BigraphAnalyser {
 	private int threshold;
 	private int thresholdResidue;
 	private static final int Adjust_Threshold_State_Number = 1000;
-	
-	//1.25%, this is related to having 2 threads available in a system (i.e. 2 CPUs available) 
-	private static final double PERCENTAGE__OF_STATES = 0.0125; 
-	
+
+	// 1.25%, this is related to having 2 threads available in a system (i.e. 2
+	// CPUs available)
+	private static final double PERCENTAGE__OF_STATES = 0.0125;
+
 	private static final int DEFAULT_THRESHOLD = 100;
 	private static final int MINIMUM_THRESHOLD = 10;
-	
-	//system handler
+
+	// system handler
 	private SystemInstanceHandler systemHandler;
-	
+	private TransitionSystem transitionSystem;
+
+	// used to reduce the number of states to match against
+	List<Integer> statesWithNoEdges;
+
 	// using forkjoin threading for dividing the matching process of states to a
 	// condition
 	private ForkJoinPool mainPool;
 
 	private boolean isTestingTime = true;
-
-//	private StopWatch timer = new StopWatch();
 
 	private String bigraphAnalyserInstanceName;
 	public static final String BIGRAPH_ANALYSER_NAME = "Bigraph-Analyser";
@@ -94,29 +100,33 @@ public class BigraphAnalyser {
 
 	public BigraphAnalyser(PredicateHandler predHandler) {
 		this(predHandler, -1);
-		
+
 	}
 
 	public BigraphAnalyser(PredicateHandler predHandler, int threadID) {
 
 		this(predHandler, threadID, null);
 	}
-	
+
 	public BigraphAnalyser(PredicateHandler predHandler, int threadID, Logger logger) {
 
 		this(predHandler, threadID, logger, SystemsHandler.getCurrentSystemHandler());
 	}
-	
-	public BigraphAnalyser(PredicateHandler predHandler, int threadID, Logger logger, SystemInstanceHandler sysHandler) {
+
+	public BigraphAnalyser(PredicateHandler predHandler, int threadID, Logger logger,
+			SystemInstanceHandler sysHandler) {
 
 		systemHandler = sysHandler;
+		transitionSystem = systemHandler != null ? systemHandler.getTransitionSystem() : null;
 		states = systemHandler.getStates();
 		matcher = new Matcher();
 		this.logger = logger;
 		predicateHandler = predHandler;
 		this.threadID = threadID;
+		statesWithNoEdges = new LinkedList<Integer>();
 
-		bigraphAnalyserInstanceName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME+"["+threadID+"]"+Logger.SEPARATOR_BTW_INSTANCES+BIGRAPH_ANALYSER_NAME + Logger.SEPARATOR_BTW_INSTANCES;
+		bigraphAnalyserInstanceName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
+				+ Logger.SEPARATOR_BTW_INSTANCES + BIGRAPH_ANALYSER_NAME + Logger.SEPARATOR_BTW_INSTANCES;
 	}
 
 	public int getNumberofActivityParallelExecution() {
@@ -134,7 +144,7 @@ public class BigraphAnalyser {
 	public void setNumberofParallelActivity(int numberofActivityParallelExecution) {
 		this.numberofActivityParallelExecution = numberofActivityParallelExecution;
 	}
-	
+
 	protected void setThreshold() {
 
 		/**
@@ -146,63 +156,67 @@ public class BigraphAnalyser {
 			numberOfPartitions = 1;
 		}
 
-		// double the number of threads 
-//		numberOfPartitions*=2;
+		// double the number of threads
+		// numberOfPartitions*=2;
 
 		threshold = (int) Math.floor(states.size() / (1.0 * numberOfPartitions));
 
-		if(threshold != 0) {
-			
-		double percentage = (threshold/(states.size()*1.0));
-		
-		while(percentage > PERCENTAGE__OF_STATES && threshold > MINIMUM_THRESHOLD) {
-			
-			//increase number of partitions
-			numberOfPartitions+=numberOfPartitions;
-			
-			//calcualte new threshold value
-			threshold = (int) Math.floor(states.size() / (1.0 * numberOfPartitions));
-			
-			//update percentage
-			percentage = (threshold/(states.size()*1.0));
-		}
-		
-		if(threshold < MINIMUM_THRESHOLD) {
-			threshold = MINIMUM_THRESHOLD;
-		}
-		//threshold is zero (because you have a lot of threads, or something went
-		//then threshold is set to a fixed minimum value
-		} else { 
-			
-			//machine has a lot of threads available
-			if(numberOfPartitions >= states.size()) {
+		if (threshold != 0) {
+
+			double percentage = (threshold / (states.size() * 1.0));
+
+			while (percentage > PERCENTAGE__OF_STATES && threshold > MINIMUM_THRESHOLD) {
+
+				// increase number of partitions
+				numberOfPartitions += numberOfPartitions;
+
+				// calcualte new threshold value
+				threshold = (int) Math.floor(states.size() / (1.0 * numberOfPartitions));
+
+				// update percentage
+				percentage = (threshold / (states.size() * 1.0));
+			}
+
+			if (threshold < MINIMUM_THRESHOLD) {
 				threshold = MINIMUM_THRESHOLD;
-			} 
-			//something went wrong
+			}
+			// threshold is zero (because you have a lot of threads, or
+			// something went
+			// then threshold is set to a fixed minimum value
+		} else {
+
+			// machine has a lot of threads available
+			if (numberOfPartitions >= states.size()) {
+				threshold = MINIMUM_THRESHOLD;
+			}
+			// something went wrong
 			else {
-				//then threshold is set to fixed value
+				// then threshold is set to fixed value
 				threshold = DEFAULT_THRESHOLD;
 			}
-			
-			numberOfPartitions = (int)Math.ceil(states.size()/(threshold*1.0));
+
+			numberOfPartitions = (int) Math.ceil(states.size() / (threshold * 1.0));
 		}
-		
-		// ****to apply this, the bigraph matching functionality should be changed
+
+		// ****to apply this, the bigraph matching functionality should be
+		// changed
 		// accordingly (i.e. use createPartitions function)
-		
+
 		/**********************************************/
 
 		/** Threshold is fixed and # of partitions are dynamics **/
-//		threshold = DEFAULT_THRESHOLD;
-//		if (states.size() > threshold) {
-////			numberOfPartitions = (int) Math.pow(2,
-////					Math.ceil(32 - Integer.numberOfLeadingZeros(states.size() / threshold)));
-//			numberOfPartitions = states.size()/threshold;
-//		} else {
-//			numberOfPartitions = 1;
-//		}
+		// threshold = DEFAULT_THRESHOLD;
+		// if (states.size() > threshold) {
+		//// numberOfPartitions = (int) Math.pow(2,
+		//// Math.ceil(32 - Integer.numberOfLeadingZeros(states.size() /
+		// threshold)));
+		// numberOfPartitions = states.size()/threshold;
+		// } else {
+		// numberOfPartitions = 1;
+		// }
 
-		// ****to apply this, the bigraph matching functionality should be changed
+		// ****to apply this, the bigraph matching functionality should be
+		// changed
 		// accordingly (i.e. use createSubTask function)
 		/*******************************************************/
 
@@ -210,70 +224,71 @@ public class BigraphAnalyser {
 		 * Threshold is set to be a percentage of the # of states (e.g., 5%),
 		 * hence, # of partitions is fixed
 		 **/
-//		threshold = (int) Math.ceil(states.size() * PERCENTAGE__OF_STATES);
-//
-//		if(threshold == 0) {
-//			threshold = states.size();
-//		}
-//		
-//		if (states.size() > threshold) {
-////			numberOfPartitions = (int) Math.pow(2,
-////					Math.ceil(32 - Integer.numberOfLeadingZeros(states.size() / threshold)));
-//			numberOfPartitions = states.size()/threshold;
-//		} else {
-//			numberOfPartitions = 1;
-//		}
-		// ****to apply this, the bigraph matching functionality should be changed
-		// accordingly (i.e. use createSubTask function) 
+		// threshold = (int) Math.ceil(states.size() * PERCENTAGE__OF_STATES);
+		//
+		// if(threshold == 0) {
+		// threshold = states.size();
+		// }
+		//
+		// if (states.size() > threshold) {
+		//// numberOfPartitions = (int) Math.pow(2,
+		//// Math.ceil(32 - Integer.numberOfLeadingZeros(states.size() /
+		// threshold)));
+		// numberOfPartitions = states.size()/threshold;
+		// } else {
+		// numberOfPartitions = 1;
+		// }
+		// ****to apply this, the bigraph matching functionality should be
+		// changed
+		// accordingly (i.e. use createSubTask function)
 
 		/*******************************************************/
 
 		// update threshold residue
 		thresholdResidue = (int) Math.ceil(states.size() % (threshold * 1.0));
-		
+
 	}
 
 	public PredicateHandler analyse() {
-		
+
 		int numberOfThreads = Runtime.getRuntime().availableProcessors();
-		
+
 		return analyse(numberOfThreads);
 	}
-	
+
 	public void setLogger(Logger logger) {
 		this.logger = logger;
 	}
-	
+
 	public PredicateHandler analyse(int numberOfThreads) {
 
 		try {
 
 			long startTime = Calendar.getInstance().getTimeInMillis();
-			
+
 			if (isThreading) {
 
 				mainPool = new ForkJoinPool(numberOfThreads);
-				
+
 				setThreshold();
 
 				if (isTestingTime) {
-					logger.putMessage(bigraphAnalyserInstanceName+"number of states: " + states.size()
-							+ ", state percentage for threshold [fixed]:" + PERCENTAGE__OF_STATES*100 + "%"
-							+ ", minimum threshold: " + MINIMUM_THRESHOLD
-							+ ", default threshold: " + DEFAULT_THRESHOLD
-							+ ", calculated threshold: " + threshold + " (" + (int) ((threshold * 1.0 / states.size()) * 10000) / 100.0 + "%)"
-							+ ", number of partitions: " + numberOfPartitions 
-							+ ", Number of parallel activities: " + numberofActivityParallelExecution 
-							+ ", Parallelism for matching: " + mainPool.getParallelism());
+					logger.putMessage(bigraphAnalyserInstanceName + "number of states: " + states.size()
+							+ ", state percentage for threshold [fixed]:" + PERCENTAGE__OF_STATES * 100 + "%"
+							+ ", minimum threshold: " + MINIMUM_THRESHOLD + ", default threshold: " + DEFAULT_THRESHOLD
+							+ ", calculated threshold: " + threshold + " ("
+							+ (int) ((threshold * 1.0 / states.size()) * 10000) / 100.0 + "%)"
+							+ ", number of partitions: " + numberOfPartitions + ", Number of parallel activities: "
+							+ numberofActivityParallelExecution + ", Parallelism for matching: "
+							+ mainPool.getParallelism());
 				}
 
-
-				logger.putMessage(bigraphAnalyserInstanceName+"Identifying states...");
+				logger.putMessage(bigraphAnalyserInstanceName + "Identifying states...");
 
 				// this method runs predicate in parallel if
 				// isPredicateThreading is set to true
-				identifyRelevantStatesWithThreading();
-
+				// identifyRelevantStatesWithThreading();
+				identifyRelevantStatesWithThreadingOrdered();
 				// this method runs the predicates in series
 				// identifyRelevantStatesWithThreadingArray();
 
@@ -281,17 +296,19 @@ public class BigraphAnalyser {
 				mainPool.shutdown();
 
 				if (!predicateExecutor.awaitTermination(maxWaitingTime, timeUnit)) {
-					logger.putError(bigraphAnalyserInstanceName+"Time out! tasks took more than specified maximum time [" + maxWaitingTime + " "
-							+ timeUnit + "]");
+					logger.putError(
+							bigraphAnalyserInstanceName + "Time out! tasks took more than specified maximum time ["
+									+ maxWaitingTime + " " + timeUnit + "]");
 				}
 
 				if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
-					logger.putError(bigraphAnalyserInstanceName+"Time out! tasks took more than specified maximum time [" + maxWaitingTime + " "
-							+ timeUnit + "]");
+					logger.putError(
+							bigraphAnalyserInstanceName + "Time out! tasks took more than specified maximum time ["
+									+ maxWaitingTime + " " + timeUnit + "]");
 				}
 
 			} else {
-				logger.putMessage(bigraphAnalyserInstanceName+"Identifying states...");
+				logger.putMessage(bigraphAnalyserInstanceName + "Identifying states...");
 				identifyRelevantStates();
 			}
 
@@ -301,9 +318,9 @@ public class BigraphAnalyser {
 			if (isTestingTime) {
 				// averageTime /=numberOfConditions;
 				long endTime = Calendar.getInstance().getTimeInMillis();
-				
+
 				long totalTime = endTime - startTime;
-				
+
 				int maxHours = (int) (totalTime / 3600000) % 60;
 				int maxMins = (int) (totalTime / 60000) % 60;
 				int maxSecs = (int) (totalTime / 1000) % 60;
@@ -321,10 +338,10 @@ public class BigraphAnalyser {
 				int avgSecs = (int) (avgTime / 1000) % 60;
 				int avgMils = (int) avgTime % 1000;
 
-				logger.putMessage(bigraphAnalyserInstanceName+"Total matching time of conditions = "
-						+ totalTime + "ms [" + maxHours + "h:" + maxMins + "m:" + maxSecs + "s:" + maxMils + "ms]");
-				logger.putMessage(bigraphAnalyserInstanceName+"Average matching time of conditions = "
-						+ avgTime + "ms [" + avgHours + "h:" + avgMins + "m:" + avgSecs + "s:" + avgMils + "ms]");
+				logger.putMessage(bigraphAnalyserInstanceName + "Total matching time of conditions = " + totalTime
+						+ "ms [" + maxHours + "h:" + maxMins + "m:" + maxSecs + "s:" + maxMils + "ms]");
+				logger.putMessage(bigraphAnalyserInstanceName + "Average matching time of conditions = " + avgTime
+						+ "ms [" + avgHours + "h:" + avgMins + "m:" + avgSecs + "s:" + avgMils + "ms]");
 
 			}
 
@@ -337,6 +354,16 @@ public class BigraphAnalyser {
 
 		return predicateHandler;
 
+	}
+
+	protected synchronized void addStateWithNoEdges(Integer state) {
+
+		statesWithNoEdges.add(state);
+	}
+
+	protected synchronized boolean hasStateWithNoEdges(Integer state) {
+
+		return statesWithNoEdges.contains(state);
 	}
 
 	public PredicateHandler getPredicateHandler() {
@@ -364,12 +391,12 @@ public class BigraphAnalyser {
 	protected PredicateHandler identifyRelevantStatesWithThreading() {
 
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
-		
+
 		try {
 
 			int cnt = 0;
 			for (int i = 0; i < activitiesName.size(); i++) {
-				
+
 				identifyRelevantStatesWithThreading(activitiesName.get(i));
 
 				// used to determine when to stop parallelism of activities and
@@ -418,7 +445,7 @@ public class BigraphAnalyser {
 				if ((cnt % numberofActivityParallelExecution == 0) || (i == activitiesName.size() - 1)) {
 					for (int j = 0; j < predicateResults.size(); j++) {
 						Future<Integer> future = predicateResults.get(j);
-						if (future!= null && !future.isDone()) {
+						if (future != null && !future.isDone()) {
 							future.get();
 						}
 
@@ -452,8 +479,7 @@ public class BigraphAnalyser {
 		// LinkedList<Future<Integer>>();
 		for (int i = 0; i < preds.size(); i++) {
 
-			logger.putMessage(bigraphAnalyserInstanceName+
-					"Executing condition: " + preds.get(i).getName());
+			logger.putMessage(bigraphAnalyserInstanceName + "Executing condition: " + preds.get(i).getName());
 
 			identifyRelevantStates(preds.get(i));
 		}
@@ -473,8 +499,7 @@ public class BigraphAnalyser {
 			 * true; }
 			 */
 
-			logger.putMessage(bigraphAnalyserInstanceName+
-					"Executing condition: " + preds.get(i).getName());
+			logger.putMessage(bigraphAnalyserInstanceName + "Executing condition: " + preds.get(i).getName());
 
 			if (isPredicateThreading) {
 
@@ -487,6 +512,142 @@ public class BigraphAnalyser {
 				// identifyRelevantStates(preds.get(i));
 				try {
 					predicateExecutor.submit(new PredicateMatcher(preds.get(i))).get();
+				} catch (InterruptedException | ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		}
+
+	}
+
+	protected void identifyRelevantStatesWithThreadingOrdered() {
+
+		// ArrayList<String> activitiesNames =
+		// predicateHandler.getActivitNames();
+		// List<Activity> activites = new LinkedList<IncidentActivity>();
+		// activitiesNames.add(predicateHandler.getInitialActivity().getName());
+		Activity initialAct = predicateHandler.getInitialActivity();
+		Activity currentAct = initialAct;
+		ConditionPosition conPosition;
+
+		try {
+
+			int cnt = 0;
+
+			while (currentAct != null) {
+
+				if (currentAct == initialAct) {
+					conPosition = ConditionPosition.FIRST_ACTIVITY;
+				} else if (currentAct.getNextActivities() == null || currentAct.getNextActivities().isEmpty()) {
+					conPosition = ConditionPosition.LAST_ACTIVITY;
+				} else {
+					conPosition = ConditionPosition.INTERMIDATE_ACTIVITY;
+				}
+
+				identifyRelevantStatesWithThreadingOrdered(currentAct.getName(), conPosition);
+
+				// used to determine when to stop parallelism of activities and
+				// wait for current tasks to finish (determined by the number of
+				// activities to parallel)
+				cnt++;
+
+				if ((cnt % numberofActivityParallelExecution == 0)
+						|| (currentAct.getNextActivities() == null || currentAct.getNextActivities().isEmpty())) {
+					for (int j = 0; j < predicateResults.size(); j++) {
+						Future<Integer> future = predicateResults.get(j);
+						if (future != null && !future.isDone()) {
+							future.get();
+						}
+
+					}
+					cnt = 0;
+					predicateResults.clear();
+				}
+
+				currentAct = (currentAct.getNextActivities() != null && !currentAct.getNextActivities().isEmpty())
+						? currentAct.getNextActivities().get(0) : null;
+			}
+
+			// for (int i = 0; i < activitiesNames.size(); i++) {
+			//
+			// identifyRelevantStatesWithThreading(activitiesNames.get(i));
+			//
+			// // used to determine when to stop parallelism of activities and
+			// // wait for current tasks to finish (determined by the number of
+			// // activities to parallel)
+			// cnt++;
+			//
+			// if ((cnt % numberofActivityParallelExecution == 0) || (i ==
+			// activitiesNames.size() - 1)) {
+			// for (int j = 0; j < predicateResults.size(); j++) {
+			// Future<Integer> future = predicateResults.get(j);
+			// if (future != null && !future.isDone()) {
+			// future.get();
+			// }
+			//
+			// }
+			// cnt = 0;
+			// predicateResults.clear();
+			// }
+			//
+			// }
+
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	protected void identifyRelevantStatesWithThreadingOrdered(String activityName, ConditionPosition conPosition) {
+
+		ArrayList<Predicate> preds = predicateHandler.getActivityPredicates(activityName);
+		ConditionPosition conditionPos = null;
+
+		for (int i = 0; i < preds.size(); i++) {
+
+			Predicate pred = preds.get(i);
+
+			if (pred == null) {
+				logger.putWarning(bigraphAnalyserInstanceName + "A condition of " + activityName + " is NULL");
+				continue;
+			}
+
+			PredicateType type = pred.getPredicateType();
+
+			if (conPosition.equals(ConditionPosition.INTERMIDATE_ACTIVITY)) {
+				if (type.equals(PredicateType.Precondition)) {
+					conditionPos = ConditionPosition.INTERMIDATE_PRECONDITION;
+				} else if (type.equals(PredicateType.Postcondition))
+					conditionPos = ConditionPosition.INTERMIDATE_POSTCONDITION;
+			} else if (conPosition.equals(ConditionPosition.FIRST_ACTIVITY)) {
+				if (type != null && type.equals(PredicateType.Precondition)) {
+					conditionPos = ConditionPosition.FIRST_PRECONDITION;
+				} else if (type != null && type.equals(PredicateType.Postcondition))
+					conditionPos = ConditionPosition.FIRST_POSTCONDITION;
+			} else if (conPosition.equals(ConditionPosition.LAST_ACTIVITY)) {
+				if (type.equals(PredicateType.Precondition)) {
+					conditionPos = ConditionPosition.LAST_PRECONDITION;
+				} else if (type.equals(PredicateType.Postcondition))
+					conditionPos = ConditionPosition.LAST_POSTCONDITION;
+			} else {
+				conditionPos = ConditionPosition.INTERMIDATE_ACTIVITY;
+			}
+
+			logger.putMessage(bigraphAnalyserInstanceName + "Executing condition: " + pred.getName());
+
+			if (isPredicateThreading) {
+
+				// parallelism
+				predicateResults.add(predicateExecutor.submit(new PredicateMatcher(pred, conditionPos)));
+
+			} else {
+
+				// series
+				// identifyRelevantStates(preds.get(i));
+				try {
+					predicateExecutor.submit(new PredicateMatcher(pred, conditionPos)).get();
 				} catch (InterruptedException | ExecutionException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -518,7 +679,7 @@ public class BigraphAnalyser {
 		boolean areStatesIdentified = false;
 
 		long startTime = 0;
-		
+
 		if (isTestingTime) {
 			startTime = Calendar.getInstance().getTimeInMillis();
 		}
@@ -536,7 +697,6 @@ public class BigraphAnalyser {
 		// divide the states array for mult-threading
 		LinkedList<Integer> statesResults;
 
-		
 		statesResults = new LinkedList<Integer>();
 
 		for (int i = 0; i < states.size(); i++) {
@@ -548,8 +708,8 @@ public class BigraphAnalyser {
 		// set bigraph states in the conditions
 		pred.setBigraphStates(statesResults);
 
-		logger.putMessage(bigraphAnalyserInstanceName
-				 + pred.getName() + "-states ("+pred.getBigraphStates().size()+"): " + pred.getBigraphStates());
+		logger.putMessage(bigraphAnalyserInstanceName + pred.getName() + "-states (" + pred.getBigraphStates().size()
+				+ "): " + pred.getBigraphStates());
 
 		if (isTestingTime) {
 			long endTime = Calendar.getInstance().getTimeInMillis();
@@ -562,9 +722,8 @@ public class BigraphAnalyser {
 			int secMils = (int) timePassed % 1000;
 
 			// execution time
-			logger.putMessage(bigraphAnalyserInstanceName+
-					"Condition [" + pred.getName() + "] matching time: "
-							+ timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
+			logger.putMessage(bigraphAnalyserInstanceName + "Condition [" + pred.getName() + "] matching time: "
+					+ timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
 			// averageTime += timePassed;
 			numberOfConditions++;
 		}
@@ -611,6 +770,7 @@ public class BigraphAnalyser {
 		// private LinkedList<Bigraph> states;
 		private Bigraph redex;
 		private LinkedList<Integer> matchedStates;
+		private ConditionPosition conditionPos;
 
 		// for testing
 		// protected int numOfParts = 0;
@@ -622,11 +782,19 @@ public class BigraphAnalyser {
 			matchedStates = new LinkedList<Integer>();
 		}
 
+		public BigraphMatcher(int indexStart, int indexEnd, Bigraph redex, ConditionPosition conPos) {
+			this.indexStart = indexStart;
+			this.indexEnd = indexEnd;
+			this.redex = redex;
+			matchedStates = new LinkedList<Integer>();
+			conditionPos = conPos;
+		}
+
 		@Override
 		protected LinkedList<Integer> compute() {
 			// TODO Auto-generated method stub
 
-			/**creates a number of partitions based on threshold size**/
+			/** creates a number of partitions based on threshold size **/
 			if ((indexEnd - indexStart) > (threshold + thresholdResidue)) {
 				return ForkJoinTask.invokeAll(createPartitions()).stream()
 						.map(new Function<BigraphMatcher, LinkedList<Integer>>() {
@@ -648,35 +816,52 @@ public class BigraphAnalyser {
 
 						});
 			}
-			/**Divides the current task in half**/
-//			 if ((indexEnd - indexStart) > threshold) {
-//			 return ForkJoinTask.invokeAll(createSubTasks()).stream()
-//			 .map(new Function<BigraphMatcher, LinkedList<Integer>>() {
-//			
-//			 @Override
-//			 public LinkedList<Integer> apply(BigraphMatcher arg0) {
-//			 // TODO Auto-generated method stub
-//			 return arg0.matchedStates;
-//			 }
-//			
-//			 }).reduce(matchedStates, new
-//			 BinaryOperator<LinkedList<Integer>>() {
-//			
-//			 @Override
-//			 public LinkedList<Integer> apply(LinkedList<Integer> arg0,
-//			 LinkedList<Integer> arg1) {
-//			 // TODO Auto-generated method stub
-//			 arg0.addAll(arg1);
-//			 return arg0;
-//			 }
-//			
-//			 });
-//			
-//			 }
-			
+			/** Divides the current task in half **/
+			// if ((indexEnd - indexStart) > threshold) {
+			// return ForkJoinTask.invokeAll(createSubTasks()).stream()
+			// .map(new Function<BigraphMatcher, LinkedList<Integer>>() {
+			//
+			// @Override
+			// public LinkedList<Integer> apply(BigraphMatcher arg0) {
+			// // TODO Auto-generated method stub
+			// return arg0.matchedStates;
+			// }
+			//
+			// }).reduce(matchedStates, new
+			// BinaryOperator<LinkedList<Integer>>() {
+			//
+			// @Override
+			// public LinkedList<Integer> apply(LinkedList<Integer> arg0,
+			// LinkedList<Integer> arg1) {
+			// // TODO Auto-generated method stub
+			// arg0.addAll(arg1);
+			// return arg0;
+			// }
+			//
+			// });
+			//
+			// }
+
 			/** Do the matching for the given size [indexStart - indexEnd) **/
 			else {
+				Digraph<Integer> graph = transitionSystem != null ? transitionSystem.getDigraph() : null;
+
 				for (int i = indexStart; i < indexEnd; i++) {
+
+					// if the codnition being checked is not the last and the
+					// current state has no edges, then skip it
+					if (conditionPos != null && !conditionPos.equals(ConditionPosition.LAST_POSTCONDITION)) {
+//						if(hasStateWithNoEdges(i)) {
+//							continue;
+//						} else 
+							if(graph != null && graph.outDegree(i) == 0) {
+//							addStateWithNoEdges(i);
+							continue;
+						}
+						// logger.putMessage(bigraphAnalyserInstanceName +
+						// "Skipping state-" + i);
+//						continue;
+					}
 					if (matcher.match(states.get(i), redex).iterator().hasNext()) {
 						matchedStates.add(i);
 					}
@@ -692,8 +877,8 @@ public class BigraphAnalyser {
 			int mid = (indexStart + indexEnd) / 2;
 			// int startInd = indexEnd - endInd1;
 
-			dividedTasks.add(new BigraphMatcher(indexStart, mid, redex));
-			dividedTasks.add(new BigraphMatcher(mid, indexEnd, redex));
+			dividedTasks.add(new BigraphMatcher(indexStart, mid, redex, conditionPos));
+			dividedTasks.add(new BigraphMatcher(mid, indexEnd, redex, conditionPos));
 
 			return dividedTasks;
 		}
@@ -707,7 +892,7 @@ public class BigraphAnalyser {
 
 			// create partitions
 			for (i = 0; i < localParts - 1; i++) {
-				dividedTasks.add(new BigraphMatcher(index, index + threshold, redex));
+				dividedTasks.add(new BigraphMatcher(index, index + threshold, redex, conditionPos));
 				// logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" +
 				// index+"->"+(index+threshold)+")");
 				index = index + threshold;
@@ -715,7 +900,7 @@ public class BigraphAnalyser {
 			}
 
 			// last partition
-			dividedTasks.add(new BigraphMatcher(index, indexEnd, redex));
+			dividedTasks.add(new BigraphMatcher(index, indexEnd, redex, conditionPos));
 			// logger.putMessage("Thread["+threadID+"]>> part ["+i+"] = [" +
 			// index+"->"+indexEnd+")");
 			// logger.putMessage("Thread["+threadID+"]>>Number of partitions = "
@@ -729,10 +914,16 @@ public class BigraphAnalyser {
 
 		private Predicate pred;
 		private Matcher matcher;
+		private ConditionPosition conPosition;
 
-		public PredicateMatcher(Predicate pred) {
+		public PredicateMatcher(Predicate pred, ConditionPosition conPosition) {
 			this.pred = pred;
 			matcher = new Matcher();
+			this.conPosition = conPosition;
+		}
+
+		public PredicateMatcher(Predicate pred) {
+			this(pred, ConditionPosition.INTERMIDATE_ACTIVITY);
 		}
 
 		@Override
@@ -758,7 +949,7 @@ public class BigraphAnalyser {
 			// divide the states array for mult-threading
 			if (isThreading) {
 
-				BigraphMatcher bigraphMatcher = new BigraphMatcher(0, states.size(), redex);
+				BigraphMatcher bigraphMatcher = new BigraphMatcher(0, states.size(), redex, conPosition);
 				statesResults = mainPool.invoke(bigraphMatcher);
 
 			}
@@ -776,7 +967,8 @@ public class BigraphAnalyser {
 			// set result
 			pred.setBigraphStates(statesResults);
 
-			logger.putMessage(bigraphAnalyserInstanceName + pred.getName() + "-states ("+pred.getBigraphStates().size()+")");
+			logger.putMessage(
+					bigraphAnalyserInstanceName + pred.getName() + "-states (" + pred.getBigraphStates().size() + ")");
 
 			if (isTestingTime) {
 				long endTime = Calendar.getInstance().getTimeInMillis();
@@ -789,9 +981,8 @@ public class BigraphAnalyser {
 				int secMils = (int) timePassed % 1000;
 
 				// execution time
-				logger.putMessage(bigraphAnalyserInstanceName+
-						"Condition [" + pred.getName() + "] matching time: "
-								+ timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
+				logger.putMessage(bigraphAnalyserInstanceName + "Condition [" + pred.getName() + "] matching time: "
+						+ timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
 				// averageTime += timePassed;
 				numberOfConditions++;
 
@@ -800,6 +991,10 @@ public class BigraphAnalyser {
 			return 1;
 		}
 
+	}
+
+	enum ConditionPosition {
+		FIRST_ACTIVITY, LAST_ACTIVITY, INTERMIDATE_ACTIVITY, FIRST_PRECONDITION, LAST_PRECONDITION, FIRST_POSTCONDITION, LAST_POSTCONDITION, INTERMIDATE_PRECONDITION, INTERMIDATE_POSTCONDITION;
 	}
 
 	/**
@@ -913,8 +1108,8 @@ public class BigraphAnalyser {
 		@Override
 		public Integer call() throws Exception {
 
-			long startTime =0;
-			
+			long startTime = 0;
+
 			if (isTestingTime) {
 				startTime = Calendar.getInstance().getTimeInMillis();
 			}
@@ -925,7 +1120,8 @@ public class BigraphAnalyser {
 				Bigraph redex = pred.getBigraphPredicate();
 
 				if (redex == null) {
-					logger.putError(bigraphAnalyserInstanceName+"Redex for condition [" + pred.getName() + "] is NULL");
+					logger.putError(
+							bigraphAnalyserInstanceName + "Redex for condition [" + pred.getName() + "] is NULL");
 					continue;
 				}
 
@@ -946,8 +1142,7 @@ public class BigraphAnalyser {
 
 				pred.setBigraphStates(statesResults.get(i));
 
-				logger.putMessage(bigraphAnalyserInstanceName+pred.getName() + "-states: "
-						+ pred.getBigraphStates());
+				logger.putMessage(bigraphAnalyserInstanceName + pred.getName() + "-states: " + pred.getBigraphStates());
 
 				str.append(pred.getName()).append(", ");
 			}
@@ -963,10 +1158,9 @@ public class BigraphAnalyser {
 				int secMils = (int) timePassed % 1000;
 
 				// execution time
-				logger.putMessage(bigraphAnalyserInstanceName+
-						"Conditions [" + str.toString() + "] matching time: "
-								+ timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
-		
+				logger.putMessage(bigraphAnalyserInstanceName + "Conditions [" + str.toString() + "] matching time: "
+						+ timePassed + "ms [" + hours + "h:" + mins + "m:" + secs + "s:" + secMils + "ms]");
+
 				numberOfConditions++;
 
 			}

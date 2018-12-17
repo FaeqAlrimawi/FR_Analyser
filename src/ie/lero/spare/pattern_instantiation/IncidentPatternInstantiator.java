@@ -556,7 +556,7 @@ public class IncidentPatternInstantiator {
 				}
 			}
 
-			// logger.putMessage(transitionSystem.getDigraph().toString());
+//			 logger.putMessage(transitionSystem.getDigraph().toString());
 
 			logger.putMessage(
 					Logger.SEPARATOR_BTW_INSTANCES + "Number of States= " + transitionSystem.getNumberOfStates());
@@ -1518,8 +1518,7 @@ public class IncidentPatternInstantiator {
 			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
 		}
 
-		
-		for (int i = 2; i < 3; i++) {
+		for (int i = 1; i < 2; i++) {
 
 			IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 			ins.executeScenario(interruptionPatternWin, leroSystemModelWin, BRS_fileWin, states[i]);

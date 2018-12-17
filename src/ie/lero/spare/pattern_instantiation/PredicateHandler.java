@@ -1755,7 +1755,7 @@ public class PredicateHandler {
 			allVisited.add(preState);
 			
 			// find all possible transitions
-//			depthFirst(v, allVisited);
+//			depthFirst(desState, v, allVisited);
 			breadthFirst(desState);
 
 			return localResult;
@@ -1841,19 +1841,19 @@ public class PredicateHandler {
 				
 				transition.addLast(node);
 				
-				if(!isAdded) {
+//				if(!isAdded) {
 				allVisited.addAll(nodes);
-					isAdded = true;
-				}
+//					isAdded = true;
+//				}
 				
 				depthFirst(endState, transition, allVisited);
 
 				transition.removeLast();
 				
-				if(isAdded) {
+//				if(isAdded) {
 					allVisited.removeAll(nodes);
-					isAdded = false;
-					}
+//					isAdded = false;
+//					}
 				
 				// if(!nodeHistory.isEmpty() &&
 				// nodeHistory.getLast().equals(tmpState)) {
@@ -1888,14 +1888,14 @@ public class PredicateHandler {
 				Integer state = trans.get(trans.size()-1);
 				
 				// check if its the endState
-				if (state.equals(endState)) {
-
-					// add found transitions to the list
-					addTransitiontoListBFS(trans);
-		
-					//not interested in any neighbours if final reached
-					continue;
-				}
+//				if (state.equals(endState)) {
+//
+//					// add found transitions to the list
+//					addTransitiontoListBFS(trans);
+//		
+//					//not interested in any neighbours if final reached
+//					continue;
+//				}
 
 				List<Integer> states = transitionDigraph.outboundNeighborsForTransitionGeneration(state);
 
@@ -1912,8 +1912,14 @@ public class PredicateHandler {
 						if (!visited.contains(neighborState)) {
 							List<Integer> newTrans = new LinkedList<Integer>(trans);
 							newTrans.add(neighborState);
-							queue.add(newTrans);
-							 visited.add(neighborState);
+							
+							if(neighborState.equals(endState)) {
+								addTransitiontoListBFS(newTrans);
+							} else {
+								visited.add(neighborState);
+								queue.add(newTrans);
+							}
+							 
 						}
 					}
 				}

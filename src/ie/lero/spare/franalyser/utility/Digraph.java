@@ -127,11 +127,11 @@ public class Digraph<V> {
         neighbors.get(from).add(new Edge<V>(to, probability, label));
     }
 
-    public int outDegree(int vertex) {
+    public synchronized int outDegree(int vertex) {
         return neighbors.get(vertex).size();
     }
 
-    public int inDegree(V vertex) {
+    public synchronized int inDegree(V vertex) {
        return inboundNeighbors(vertex).size();
     }
 
