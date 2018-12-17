@@ -1935,7 +1935,7 @@ public class PredicateHandler {
 				return;
 			}
 			
-			logger.putMessage(transition.toString());
+//			logger.putMessage(transition.toString());
 			
 			LinkedList<Integer> newList = new LinkedList<Integer>(transition);
 			GraphPath path = new GraphPath(transitionSystem);
@@ -1957,7 +1957,7 @@ public class PredicateHandler {
 				return;
 			}
 
-			logger.putMessage(transition.toString());
+//			logger.putMessage(transition.toString());
 			
 //			LinkedList<Integer> newList = new LinkedList<Integer>(transition);
 			GraphPath path = new GraphPath(transitionSystem);
