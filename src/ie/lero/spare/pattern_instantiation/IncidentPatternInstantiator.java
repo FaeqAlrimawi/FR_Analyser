@@ -30,6 +30,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import javax.management.InstanceNotFoundException;
+
 import org.json.JSONObject;
 
 import cyberPhysical_Incident.IncidentDiagram;
@@ -1356,16 +1358,18 @@ public class IncidentPatternInstantiator {
 
 					// write chunck of instances (based on the threshold in the
 					// graphPathsToStringConverter)
-					
-					writer.write(instancesQ.take());
+					String tmp  =instancesQ.take();
+					writer.write(tmp);
 					writer.write(",");
 					writer.newLine();
-
+//					logger.putMessage(instanceSaverName+tmp);
 					cnt++;
 				}
 
 				//get last chunck
-				writer.write(instancesQ.take());
+				String tmp  =instancesQ.take();
+				writer.write(tmp);
+				tmp = null;
 				
 				if (result != null && result.isCompletedAbnormally()) {
 					logger.putError(instanceSaverName + "Something went wrong while storing generated instances.");
@@ -1402,7 +1406,9 @@ public class IncidentPatternInstantiator {
 		private static final String INSTANCE_id = "instance_id";
 		private BlockingQueue<String> queue;
 		private int residue;
-
+		public static final String GRAPH_PATHS_STRING = "Graph-Paths-String";
+		private String instanceName;
+		
 		public GraphPathsToStringConverter(int start, int end, List<GraphPath> paths, BlockingQueue<String> q) {
 			this.paths = paths;
 			this.indexStart = start;
@@ -1410,7 +1416,7 @@ public class IncidentPatternInstantiator {
 			queue = q;
 //			result = new StringBuilder();
 			residue = (int) Math.ceil(paths.size() % (THRESHOLD * 1.0));
-
+			instanceName = GRAPH_PATHS_STRING;
 		}
 
 		@Override
@@ -1437,6 +1443,7 @@ public class IncidentPatternInstantiator {
 
 			} else {
 
+//				logger.putMessage(instanceName+"Creating a part [" + indexStart+", "+indexEnd+"]");
 				StringBuilder result = new StringBuilder();
 				for (int i = indexStart; i < indexEnd; i++) {
 					result.append("{\"").append(INSTANCE_id).append("\":").append(i).append(",")

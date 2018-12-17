@@ -148,6 +148,12 @@ public class Digraph<V> {
        
     }
     
+    public void deleteNeighborNodesMap() {
+        
+    	neighborNodes.clear();
+       
+    }
+    
     public void generateNeighborNodesMap() {
     	
     	for(V node : getNodes()) {
