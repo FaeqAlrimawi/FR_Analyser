@@ -249,13 +249,14 @@ public class IncidentPatternExtractor {
 		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
 		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
 		String rogueLocationSetupFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
-
+		String contentSpoofing = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/contentSpoofing.cpi";
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
-		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+//		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+		ModelsHandler.addActivityPattern(contentSpoofing);
 		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
 		// ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
 		// ModelsHandler.addActivityPattern(collectDataPatternFileName2);

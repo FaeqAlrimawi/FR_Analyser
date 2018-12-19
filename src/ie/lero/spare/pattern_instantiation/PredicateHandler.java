@@ -1141,7 +1141,8 @@ public class PredicateHandler {
 		// set minimum number of actions for a transition = # of activies in
 		// pattern
 		minimumNumberOfActions = incidentActivities.size();
-
+		maxLevel = minimumNumberOfActions*2;
+		
 		logger.putMessage(instanceName + "Minimum nmber of actions = " + minimumNumberOfActions);
 		// create thread pool
 		mainPool = new ForkJoinPool();
@@ -1302,9 +1303,9 @@ public class PredicateHandler {
 		logger.putMessage(instanceName + "# of postconditions states with intra transitions = " + result.size()
 				+ ". Total states = " + conStates.size());
 
-		for(Entry<Integer, List<Integer>> entry : result.entrySet()) {
-			logger.putMessage(instanceName+ "state-"+entry.getKey()+": "+entry.getValue());
-		}
+//		for(Entry<Integer, List<Integer>> entry : result.entrySet()) {
+//			logger.putMessage(instanceName+ "state-"+entry.getKey()+": "+entry.getValue());
+//		}
 		return result;
 	}
 
