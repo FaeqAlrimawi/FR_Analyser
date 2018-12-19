@@ -4,19 +4,26 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
+import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.testng.internal.collections.Ints;
 
 import choco.cp.solver.search.task.profile.ProbabilisticProfile;
+import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
 import ie.lero.spare.franalyser.utility.Digraph.Edge;
+import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.PredicateType;
+import ie.lero.spare.franalyser.utility.TransitionSystem;
 import ie.lero.spare.pattern_instantiation.GraphPath;
+import ie.lero.spare.pattern_instantiation.SystemInstanceHandler;
+import ie.lero.spare.pattern_instantiation.SystemsHandler;
 
 public class TransitionFinderAlgorithmsTester {
 
@@ -234,6 +241,8 @@ public class TransitionFinderAlgorithmsTester {
 
 	public static void main(String[] args) {
 
+		testDigraphWalksGeneration();
+		
 		TransitionFinderAlgorithmsTester tester = new TransitionFinderAlgorithmsTester();
 
 		Digraph<Integer> g = new Digraph<Integer>();
@@ -259,68 +268,80 @@ public class TransitionFinderAlgorithmsTester {
 		g.add(3, 2, -1);
 
 		// System.out.println(g);
-		tester.transitionDigraph = g;
-		g.generateNeighborNodesMap();
-
-		tester.preState = 0;
-		Integer endState = 3;
-
-		// test BFS
-		System.out.println("BFS");
-		// tester.breadthFirst(endState);
-
-		// test DFS
-		LinkedList<Integer> v = new LinkedList<Integer>();
-		v.add(tester.preState);
-		System.out.println("\nDFS");
-
-		// tester.depthFirst(endState, v, new LinkedList<Integer>());
-
-		int graph[][] = new int[][] { { 0, 0, 1, 1, 1 }, { 0, 0, 0, 0, 1 }, { 0, 0, 0, 1, 0 }, { 0, 0, 0, 0, 0 },
-				{ 0, 0, 0, 1, 0 } };
-		Map<Integer, List<Integer>> ne = new HashMap<Integer, List<Integer>>();
-
-		ne.put(0, new LinkedList<Integer>(Ints.asList(new int[] { 2, 3, 4 })));
-		ne.put(1, new LinkedList<Integer>(Ints.asList(new int[] { 4 })));
-		ne.put(2, new LinkedList<Integer>(Ints.asList(new int[] { 3 })));
-		ne.put(3, new LinkedList<Integer>(Ints.asList(new int[] {})));
-		ne.put(4, new LinkedList<Integer>(Ints.asList(new int[] { 3 })));
-		int u = 1;
-		int vi = 3;
-		int k = 2;
-		V = 5;
+//		tester.transitionDigraph = g;
+//		g.generateNeighborNodesMap();
+//
+//		tester.preState = 0;
+//		Integer endState = 3;
+//
+//		// test BFS
+//		System.out.println("BFS");
+//		// tester.breadthFirst(endState);
+//
+//		// test DFS
+//		LinkedList<Integer> v = new LinkedList<Integer>();
+//		v.add(tester.preState);
+//		System.out.println("\nDFS");
+//
+//		// tester.depthFirst(endState, v, new LinkedList<Integer>());
+//
+//		int length = 10;
+//		//testing walks
+////		int walks[][][] = g.countwalks(length);
+////		int walks2[][][] = g.countwalksList(length);
+//		
+//		int src = 0;
+//		int des = 6;
+//		int len = 10;
+//		
+//		System.out.println(walks[src][des][len]);
+//		System.out.println(walks2[src][des][len]);
+//		
+//		int graph[][] = new int[][] { { 0, 0, 1, 1, 1 }, { 0, 0, 0, 0, 1 }, { 0, 0, 0, 1, 0 }, { 0, 0, 0, 0, 0 },
+//				{ 0, 0, 0, 1, 0 } };
+//		Map<Integer, List<Integer>> ne = new HashMap<Integer, List<Integer>>();
+//
+//		ne.put(0, new LinkedList<Integer>(Ints.asList(new int[] { 2, 3, 4 })));
+//		ne.put(1, new LinkedList<Integer>(Ints.asList(new int[] { 4 })));
+//		ne.put(2, new LinkedList<Integer>(Ints.asList(new int[] { 3 })));
+//		ne.put(3, new LinkedList<Integer>(Ints.asList(new int[] {})));
+//		ne.put(4, new LinkedList<Integer>(Ints.asList(new int[] { 3 })));
+//		int u = 1;
+//		int vi = 3;
+//		int k = 2;
+//		V = 5;
 
 		// KPaths p = new KPaths();
 //		System.out.println("tester: " + tester.countwalks(graph, u, vi, k));
 //		System.out.println("tester-modeified: " + tester.countwalksModified(ne, u, vi, k));
 		
-		testJGraphT();
+//		testJGraphT();
 	}
 
 	 static void testJGraphT() {
 
 		 TransitionFinderAlgorithmsTester tester = new TransitionFinderAlgorithmsTester();
-		 DefaultDirectedWeightedGraph<Integer, MyEdge> newGraph = new DefaultDirectedWeightedGraph<Integer, MyEdge>(MyEdge.class);
+		 DefaultDirectedGraph<Integer, DefaultEdge> newGraph = new DefaultDirectedGraph<Integer, DefaultEdge>(DefaultEdge.class);
 		// newGraph.add
 
-		MyEdge edge1 = tester.new MyEdge(-1, "enter");
-		MyEdge edge2 = tester.new MyEdge(-1, "exit");
+		DefaultEdge edge1 = new DefaultEdge();//tester.new MyEdge(-1, "enter");
+		DefaultEdge edge2 = new DefaultEdge();//tester.new MyEdge(-1, "exit");
 		newGraph.addVertex(0);
 		newGraph.addVertex(1);
 		newGraph.addVertex(2);
 		newGraph.addEdge(0, 1, edge1);
-		newGraph.setEdgeWeight(edge1, 0.5);
+//		newGraph.setEdgeWeight(edge1, 0.5);
 		newGraph.addEdge(1, 2, edge2);
-		newGraph.setEdgeWeight(edge2, 0.4);
+//		newGraph.setEdgeWeight(edge2, 0.4);
 		
 		//some issue in getting type???
 		newGraph.getType();
 		
-		AllDirectedPaths<Integer, MyEdge> paths = new AllDirectedPaths<>(newGraph);
+		AllDirectedPaths<Integer, DefaultEdge> paths = new AllDirectedPaths<>(newGraph);
 		
-		List<org.jgrapht.GraphPath<Integer, MyEdge>> result = paths.getAllPaths(0,2, true, null);
+		List<org.jgrapht.GraphPath<Integer, DefaultEdge>> result = paths.getAllPaths(0,2, true, null);
 		
-		for(org.jgrapht.GraphPath<Integer, MyEdge> res : result) {
+		for(org.jgrapht.GraphPath<Integer, DefaultEdge> res : result) {
 			System.out.println(res.toString());
 		}
 		
@@ -351,6 +372,82 @@ public class TransitionFinderAlgorithmsTester {
 		}
 	}
 	
-	
+	static void testDigraphWalksGeneration() {
+		
+//		String interruptionPatternWin = "D:/Bigrapher data/incident patterns/collectData-pattern.cpi";
+
+//		String leroSystemModelWin = "D:/Bigrapher data/lero/lero.cps";
+
+		String BRS_fileWin = "D:/Bigrapher data/lero/lero.big";
+
+		String[] states = new String[10];
+
+		for (int i = 0; i < states.length; i++) {
+
+			states[i] = "/D:/Bigrapher data/lero/lero" + (i + 1);
+		}
+
+		String folder = states[4];
+		
+		Logger logger =  runLogger(true, false, folder);
+		
+		SystemInstanceHandler sysHandler = new SystemInstanceHandler();
+		
+		BigrapherHandler brsExecutor = new BigrapherHandler(BRS_fileWin, folder);
+
+		// read states from the output folder then create Bigraph signature and
+		// convert states from JSON objects to Bigraph (from LibBig library)
+		// objects
+		sysHandler.setLogger(logger);
+		sysHandler.setExecutor(brsExecutor);
+
+		boolean isDone = sysHandler.analyseBRS();
+
+		if (isDone) {
+			TransitionSystem transitionSystem = sysHandler.getTransitionSystem();
+			Digraph<Integer> digraph = transitionSystem.getDigraph();
+			
+			int numOfNodes = digraph.getNumberOfNodes();
+			
+			logger.putMessage("Testing walk functionality for "+ numOfNodes);
+			
+			Random rand = new Random();
+			int len = 10;
+			int src = rand.nextInt(numOfNodes);
+			int des = rand.nextInt(numOfNodes);
+			int length = rand.nextInt(len);
+			
+			//too long!
+//			int walksMap[][][] = digraph.countwalksList(len);
+			
+			int walks[][][] = digraph.countwalks(len);
+			
+			logger.putMessage("Matrix: walks from ("+src+") to (" + des + ") of length ["+ length +"] = "+ walks[src][des][length]);
+			
+			
+//			logger.putMessage("Map: walks from ("+src+") to (" + des + ") of length ["+ length +"] = "+ walksMap[src][des][length]);
+			// add to the list of system handlers for other objects to access
+//			SystemsHandler.addSystemHandler(systemHandler);
+		}
+		
+		logger.putMessage("Done!");
+		logger.terminateLogging();
+	}
+
+	static Logger runLogger(boolean isPrintToScreen, boolean isSaveLog, String outputFolder) {
+
+		Logger logger = new Logger();
+
+		logger.setListener(null);
+		logger.setPrintToScreen(isPrintToScreen);
+		logger.setSaveLog(isSaveLog);
+		logger.setLogFolder(outputFolder + "/log");
+
+		logger.createLogFile();
+
+		logger.start();
+
+		return logger;
+	}
 
 }

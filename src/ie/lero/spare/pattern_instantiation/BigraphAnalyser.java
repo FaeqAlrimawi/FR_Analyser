@@ -145,6 +145,11 @@ public class BigraphAnalyser {
 		this.numberofActivityParallelExecution = numberofActivityParallelExecution;
 	}
 
+	public synchronized Bigraph getBigraphState(int state) {
+		
+		 return states.get(state);
+	}
+	
 	protected void setThreshold() {
 
 		/**
@@ -862,7 +867,8 @@ public class BigraphAnalyser {
 						// "Skipping state-" + i);
 //						continue;
 					}
-					if (matcher.match(states.get(i), redex).iterator().hasNext()) {
+					Bigraph bigState = getBigraphState(i);
+					if (matcher.match(bigState, redex).iterator().hasNext()) {
 						matchedStates.add(i);
 					}
 				}
@@ -1062,7 +1068,7 @@ public class BigraphAnalyser {
 			} else {
 				for (int i = indexStart; i < indexEnd; i++) {
 					for (int j = 0; j < redexes.size(); j++) {
-						if (matcher.match(states.get(i), redexes.get(j)).iterator().hasNext()) {
+						if (matcher.match(getBigraphState(i), redexes.get(j)).iterator().hasNext()) {
 							// if (matchedStates.containsKey(j)) {
 							// matchedStates.get(j).add(i);
 							// } else {

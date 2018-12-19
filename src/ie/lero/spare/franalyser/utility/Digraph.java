@@ -1,6 +1,7 @@
 package ie.lero.spare.franalyser.utility;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,8 @@ public class Digraph<V> {
 
     private Map<V, List<Edge<V>>> neighbors = new HashMap<V, List<Edge<V>>>();
     private Map<V, List<V>> neighborNodes = new HashMap<V, List<V>>();
-
+    private int[][] adjacencyMatrix;
+    
     private int nr_edges;
 
     
@@ -142,7 +144,7 @@ public class Digraph<V> {
         return list;
     }
 
-    public List<V> outboundNeighborsForTransitionGeneration(V vertex) {
+    public synchronized List<V> outboundNeighborsForTransitionGeneration(V vertex) {
         
     	return neighborNodes.get(vertex);
        
@@ -215,4 +217,164 @@ public class Digraph<V> {
         }
     }
     
+    protected void createAdjacencyMatrix() {
+    	
+    	int numOfNodes = neighbors.size();
+    	adjacencyMatrix = new int[numOfNodes][numOfNodes];
+    	
+    	generateNeighborNodesMap();
+    	
+    	for(int i=0;i<numOfNodes;i++) {
+    		for(int j=0;j<numOfNodes;j++) {
+    			if(neighborNodes.get(i).contains(j)) {
+    				adjacencyMatrix[i][j] = 1;
+    			}
+    		}
+    	}
+    }
+    
+
+    /**
+     * Returns number of possible walks for all nodes to all nodes
+     * @param graph
+     * @param u
+     * @param v
+     * @param k
+     * @return
+     */
+	public int[][][] countwalks(int k) {
+		// Table to be filled up using DP. The value count[i][j][e]
+		// will/ store count of possible walks from i to j with
+		// exactly k edges
+		int V = neighbors.size(); //V is number of node;
+		
+		long startTime = Calendar.getInstance().getTimeInMillis();
+		
+		System.out.println("creating adjacency matrix...");
+		
+		if(adjacencyMatrix == null) {
+			createAdjacencyMatrix();
+		}
+		
+		
+		int count[][][] = new int[V][V][k + 1];
+		
+		System.out.println("findin all possbile paths...");
+		
+		// Loop for number of edges from 0 to k
+		for (int e = 0; e <= k; e++) {
+			for (int i = 0; i < V; i++) // for source
+			{
+				for (int j = 0; j < V; j++) // for destination
+				{
+					// initialize value
+					count[i][j][e] = 0;
+
+					// from base cases
+					if (e == 0 && i == j)
+						count[i][j][e] = 1;
+					if (e == 1 && adjacencyMatrix[i][j] != 0)
+						count[i][j][e] = 1;
+
+					// go to adjacent only when number of edges
+					// is more than 1
+					if (e > 1) {
+						for (int a = 0; a < V; a++) // adjacent of i
+							if (adjacencyMatrix[i][a] != 0)
+								count[i][j][e] += count[a][j][e - 1];
+					}
+				}
+			}
+		}
+
+		long endTime = Calendar.getInstance().getTimeInMillis();
+		
+		long duration = endTime - startTime;
+
+		int secMils2 = (int) duration % 1000;
+		int hours2 = (int) (duration / 3600000) % 60;
+		int mins2 = (int) (duration / 60000) % 60;
+		int secs2 = (int) (duration / 1000) % 60;
+
+		// execution time
+		System.out.println("Time to calculate walks: "
+						+ duration + "ms [" + hours2 + "h:" + mins2 + "m:" + secs2 + "s:" + secMils2 + "ms]");
+
+		
+//		for (int i = 0; i < count[0][v].length; i++) {
+//			System.out.println(count[0][v][i]);
+//		}
+
+		return count;
+	}
+	
+	public int[][][] countwalksList(int k) {
+		// Table to be filled up using DP. The value count[i][j][e]
+		// will/ store count of possible walks from i to j with
+		// exactly k edges
+		int V = neighbors.size(); //V is number of node;
+		
+		long startTime = Calendar.getInstance().getTimeInMillis();
+		
+		
+		
+//		if(adjacencyMatrix == null) {
+//			createAdjacencyMatrix();
+//		}
+		
+		if(neighborNodes == null || neighborNodes.isEmpty()) {
+			System.out.println("creating neighbours lists...");
+			generateNeighborNodesMap();
+		}
+		
+		int count[][][] = new int[V][V][k + 1];
+		
+		System.out.println("findin all possbile paths...");
+		
+		// Loop for number of edges from 0 to k
+		for (int e = 0; e <= k; e++) {
+			for (int i = 0; i < V; i++) // for source
+			{
+				for (int j = 0; j < V; j++) // for destination
+				{
+					// initialize value
+					count[i][j][e] = 0;
+
+					// from base cases
+					if (e == 0 && i == j)
+						count[i][j][e] = 1;
+					if (e == 1 && neighborNodes.get(i).contains(j))
+						count[i][j][e] = 1;
+
+					// go to adjacent only when number of edges
+					// is more than 1
+					if (e > 1) {
+						for (int a = 0; a < V; a++) // adjacent of i
+							if (neighborNodes.get(i).contains(a))
+								count[i][j][e] += count[a][j][e - 1];
+					}
+				}
+			}
+		}
+
+		long endTime = Calendar.getInstance().getTimeInMillis();
+		
+		long duration = endTime - startTime;
+
+		int secMils2 = (int) duration % 1000;
+		int hours2 = (int) (duration / 3600000) % 60;
+		int mins2 = (int) (duration / 60000) % 60;
+		int secs2 = (int) (duration / 1000) % 60;
+
+		// execution time
+		System.out.println("Time to calculate walks: "
+						+ duration + "ms [" + hours2 + "h:" + mins2 + "m:" + secs2 + "s:" + secMils2 + "ms]");
+
+		
+//		for (int i = 0; i < count[0][v].length; i++) {
+//			System.out.println(count[0][v][i]);
+//		}
+
+		return count;
+	}
 }
