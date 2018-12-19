@@ -154,13 +154,13 @@ public class PredicateHandler {
 		return res.toString();
 	}
 
-	public boolean validatePredicates() {
-		boolean isValid = true;
-		// to be done...how to validate them against bigrapher file (e.g.,
-		// controls available, connections)
-
-		return isValid;
-	}
+//	public boolean validatePredicates() {
+//		boolean isValid = true;
+//		// to be done...how to validate them against bigrapher file (e.g.,
+//		// controls available, connections)
+//
+//		return isValid;
+//	}
 
 	public String insertPredicatesIntoBigraphFile(String fileName) {
 
@@ -1119,6 +1119,16 @@ public class PredicateHandler {
 		}
 	}
 
+	protected synchronized List<Integer> getIntraInboundStates(Integer state) {
+		
+		return postconditionStatesInBoundTransitions!=null?postconditionStatesInBoundTransitions.get(state):null;
+	}
+	
+	protected synchronized List<Integer> getIntraOutboundStates(Integer state) {
+	
+		return preconditionStatesWithTransitions!=null?preconditionStatesWithTransitions.get(state):null;
+	}
+	
 	public List<GraphPath> findTransitions(int threadID) {
 
 		long startTime = Calendar.getInstance().getTimeInMillis();
@@ -1176,15 +1186,6 @@ public class PredicateHandler {
 
 		// identify inbound transitions between states of postcondition
 		postconditionStatesInBoundTransitions= findIntraInBoundStatesTransitions(postconditionStates);
-			
-		/****/
-		if(true){
-			return null;
-		}
-		
-		/***/
-		
-		
 		
 		PreconditionMatcher preMatcher = new PreconditionMatcher(0, preconditionStates.size(), activities);
 
@@ -2056,8 +2057,7 @@ public class PredicateHandler {
 			// preIntraState = new LinkedList<Integer>();
 			activities = acts;
 			// nodeHistory = new LinkedList<Integer>();
-			preIntraStates = preconditionStatesWithTransitions != null ? preconditionStatesWithTransitions.get(preState)
-					: null;
+			preIntraStates = getIntraOutboundStates(preState);
 		}
 
 		@Override
@@ -2241,7 +2241,10 @@ public class PredicateHandler {
 			transition.add(preState);
 			queue.add(transition);
 			visited.add(preState);
-
+			
+			//holds the list of states that have transition to the end state
+			List<Integer> intraInboundStates = getIntraInboundStates(endState);
+			
 			// add all precondition states that the preState has a transition to
 			// visited.addAll(preIntraStates);
 
@@ -2273,6 +2276,11 @@ public class PredicateHandler {
 							continue;
 						}
 
+						//if the neighbour state has a transition to the end state then skip this neigbour state
+						if(intraInboundStates!= null && intraInboundStates.contains(neighborState)) {
+							continue;
+						}
+						
 						if (!visited.contains(neighborState)) {
 							List<Integer> newTrans = new LinkedList<Integer>(trans);
 							newTrans.add(neighborState);
@@ -2561,20 +2569,20 @@ public class PredicateHandler {
 
 	}
 
-	class DepthFirstSearcher implements Callable<GraphPath> {
-
-		public DepthFirstSearcher(Integer start, Integer endState) {
-
-		}
-
-		@Override
-		public GraphPath call() throws Exception {
-			// TODO Auto-generated method stub
-
-			return null;
-		}
-
-	}
+//	class DepthFirstSearcher implements Callable<GraphPath> {
+//
+//		public DepthFirstSearcher(Integer start, Integer endState) {
+//
+//		}
+//
+//		@Override
+//		public GraphPath call() throws Exception {
+//			// TODO Auto-generated method stub
+//
+//			return null;
+//		}
+//
+//	}
 
 	class TransitionAnalyser extends RecursiveTask<List<GraphPath>> {
 
