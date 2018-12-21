@@ -1144,12 +1144,19 @@ public class BigrapherHandler implements SystemExecutor {
 					state = (JSONObject) parser.parse(r);
 					Bigraph bigraph = convertJSONtoBigraph(state);
 					states.put(i, bigraph);
+					state = null;
 					r.close();
 				} catch (IOException | ParseException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			
+			//clean
+			state = null;
+			parser = null;
+			
+			Runtime.getRuntime().gc();
 		}
 
 		/**

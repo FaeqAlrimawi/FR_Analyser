@@ -355,6 +355,20 @@ public class BigraphAnalyser {
 			e.printStackTrace();
 			predicateExecutor.shutdownNow();
 			mainPool.shutdownNow();
+		} finally{
+			if(predicateExecutor!=null) {
+				predicateExecutor.shutdownNow();
+			}
+			
+			if(mainPool!=null) {
+				mainPool.shutdownNow();
+			}
+			
+			if(matcher!=null){
+				matcher = null;
+			}
+			
+			Runtime.getRuntime().gc();
 		}
 
 		return predicateHandler;
