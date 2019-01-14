@@ -19,5 +19,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/incidentpatternB"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/environment.v1"/>
 	<classpathentry kind="lib" path="lib/jgrapht1.3/jgrapht-core-1.3.0.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/DataMiningTester"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

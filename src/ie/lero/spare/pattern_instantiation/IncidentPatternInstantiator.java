@@ -40,6 +40,7 @@ import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.FileManipulator;
 import ie.lero.spare.franalyser.utility.FileNames;
+import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
@@ -1276,11 +1277,11 @@ public class IncidentPatternInstantiator {
 		private String instanceSaverName;
 		private BlockingQueue<String> instancesQ;
 
-		public static final String INCIDENT_ENTITY_NAME = "incident_entity_name";
-		public static final String SYSTEM_ASSET_NAME = "system_asset_name";
-		public static final String POTENTIAL_INCIDENT_ISNTANCES = "potential_incident_instances";
-		public static final String INSTNACES_COUNT = "instances_count";
-		public static final String ISNTANCES = "instances";
+		public static final String INCIDENT_ENTITY_NAME = JSONTerms.INSTANCE_MAP_INCIDENT_ENTITY_NAME;
+		public static final String SYSTEM_ASSET_NAME = JSONTerms.INSTANCE_MAP_SYSTEM_ASSET_NAME;
+		public static final String POTENTIAL_INCIDENT_ISNTANCES = JSONTerms.INSTANCE_POTENTIAL;
+		public static final String INSTNACES_COUNT = JSONTerms.INSTANCE_POTENTIAL_COUNT;
+		public static final String INSTANCES = JSONTerms.INSTANCE_POTENTIAL_INSTANCES;
 		public static final String MAP = "maps";
 
 		public InstancesSaver(int threadID, String file, String[] entityNames, String[] astNames,
@@ -1332,7 +1333,7 @@ public class IncidentPatternInstantiator {
 				int size = paths.size();
 
 				jsonStr.append("\"").append(POTENTIAL_INCIDENT_ISNTANCES).append("\":{").append("\"")
-						.append(INSTNACES_COUNT).append("\":").append(size).append(",").append("\"").append(ISNTANCES)
+						.append(INSTNACES_COUNT).append("\":").append(size).append(",").append("\"").append(INSTANCES)
 						.append("\":[");
 
 				BufferedWriter writer = Files.newBufferedWriter(threadFile.toPath());
@@ -1403,7 +1404,7 @@ public class IncidentPatternInstantiator {
 		public static final int THRESHOLD = 100;
 		private List<GraphPath> paths;
 //		private StringBuilder result;
-		private static final String INSTANCE_id = "instance_id";
+		private static final String INSTANCE_id = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_ID;
 		private BlockingQueue<String> queue;
 		private int residue;
 		public static final String GRAPH_PATHS_STRING = "Graph-Paths-String";

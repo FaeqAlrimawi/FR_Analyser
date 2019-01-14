@@ -25,7 +25,9 @@ public class JSONTerms {
 	public static final String INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_TARGET = "target";
 	public static final String INSTANCE_MAP = "map";
 	public static final String INSTANCE_MAP_SYSTEM_ASSET_NAME = "system_asset_name";
-	public static final String INSTANCE_MAP_INCIDENT_ENTITY_NAME= "incident_entity_name";
+	public static final String INSTANCE_MAP_INCIDENT_ENTITY_NAME= "incident_entity_name";	
+	//compact format
+	public static final String INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS = "actions";
 	
 	//bigrapher state
 	public static final String BIGRAPHER_PLACE_GRAPH = "place_graph";

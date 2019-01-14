@@ -2,7 +2,9 @@ package ie.lero.spare.pattern_instantiation;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
+import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 
@@ -11,13 +13,18 @@ public class GraphPath {
 	private Predicate predicateSrc;
 	private Predicate predicateDes;
 	private LinkedList<Integer> stateTransitions;
+	private int instanceID;
+	
 	// private SystemInstanceHandler systemHandler;
 	public TransitionSystem transitionSystem;
-	public static final String SRC_STRING = "source";
-	public static final String DES_STRING = "target";
-	public static final String ACTION_STRING = "action";
-	public static final String TRANSITIONS_STRING = "transitions";
-	public static final String ACTIONS_STRING = "actions";
+	public static final String SRC_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_SOURCE;
+	public static final String DES_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_TARGET;
+	public static final String ACTION_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTION;
+	public static final String TRANSITIONS_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS;
+	
+	// used for short version of the JSON file i.e. transitions = [1,2,3,4]
+	// instead of src-des format
+	public static final String ACTIONS_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS;
 
 	public GraphPath() {
 		stateTransitions = new LinkedList<Integer>();
@@ -44,6 +51,15 @@ public class GraphPath {
 		return predicateSrc;
 	}
 
+	public int getInstanceID() {
+		return instanceID;
+	}
+	
+	public void setInstanceID(int id) {
+		instanceID = id;	
+	}
+	
+	
 	public void setPredicateSrc(Predicate predicateSrc) {
 		this.predicateSrc = predicateSrc;
 	}
@@ -60,8 +76,8 @@ public class GraphPath {
 		return stateTransitions;
 	}
 
-	public void setStateTransitions(LinkedList<Integer> stateTransition) {
-		this.stateTransitions = stateTransition;
+	public void setStateTransitions(List<Integer> stateTransition) {
+		this.stateTransitions = new LinkedList<Integer>(stateTransition);
 	}
 
 	public Integer getStartState() {
@@ -173,39 +189,40 @@ public class GraphPath {
 	 */
 	public String toJSONCompact() {
 
-//		StringBuilder res = new StringBuilder();
-//		StringBuilder res2 = new StringBuilder();
-//
-//		String action;
-//
-//		res.append("\"").append(TRANSITIONS_STRING).append("\":[");
-//		res2.append("\"").append(ACTIONS_STRING).append("\":[");
-//
-//		int i = 0;
-//		for (i = 0; i < stateTransitions.size() - 1; i++) {
-//			action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
-//			action = action == null ? "NULL" : action;
-//
-//			res.append(stateTransitions.get(i)).append(",");
-//
-//			res2.append("\"").append(action).append("\",");
-//		}
-//
-//		// for states. Add last one
-//		res.append(stateTransitions.get(i));
-//		res.append("],");
-//
-//		// for actions
-//		res2.deleteCharAt(res2.length() - 1);
-//		res2.append("]");
-//
-//		res.append(res2.toString());
-//
-//		return res.toString();
-		
+		// StringBuilder res = new StringBuilder();
+		// StringBuilder res2 = new StringBuilder();
+		//
+		// String action;
+		//
+		// res.append("\"").append(TRANSITIONS_STRING).append("\":[");
+		// res2.append("\"").append(ACTIONS_STRING).append("\":[");
+		//
+		// int i = 0;
+		// for (i = 0; i < stateTransitions.size() - 1; i++) {
+		// action = transitionSystem.getLabel(stateTransitions.get(i),
+		// stateTransitions.get(i + 1));
+		// action = action == null ? "NULL" : action;
+		//
+		// res.append(stateTransitions.get(i)).append(",");
+		//
+		// res2.append("\"").append(action).append("\",");
+		// }
+		//
+		// // for states. Add last one
+		// res.append(stateTransitions.get(i));
+		// res.append("],");
+		//
+		// // for actions
+		// res2.deleteCharAt(res2.length() - 1);
+		// res2.append("]");
+		//
+		// res.append(res2.toString());
+		//
+		// return res.toString();
+
 		boolean isConvertAction = true;
 		String res = toJSONCompact(isConvertAction);
-		
+
 		return res;
 	}
 
@@ -236,24 +253,23 @@ public class GraphPath {
 
 		// for states. Add last one
 		resState.append(stateTransitions.get(i));
-		
 
 		if (isconvertAction) {
 			resState.append("],");
-			
+
 			// for actions
 			resAction.deleteCharAt(resAction.length() - 1);
 			resAction.append("]");
-			
+
 			resState.append(resAction.toString());
 		} else {
 			resState.append("]");
 		}
 
-//		if (isconvertAction) {
-//			resState.append(resAction.toString());
-//
-//		}
+		// if (isconvertAction) {
+		// resState.append(resAction.toString());
+		//
+		// }
 
 		return resState.toString();
 	}
