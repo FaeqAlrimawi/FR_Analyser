@@ -24,7 +24,7 @@ public class IncidentInstancesClusterGenerator {
 	String convertedInstancesFileName;
 	int numberOFClusters =10;
 	DistanceFunction distanceFunction;
-	AlgoKMeans kmean;
+//	AlgoKMeans kmean;
 
 	public final static String DATA_SEPARATOR = " "; // space is the separator
 	public final static int PADDING_STATE = -10000; // cloud be the number of
@@ -53,12 +53,7 @@ public class IncidentInstancesClusterGenerator {
 			return;
 		}
 
-		// for (GraphPath p : instances) {
-		// System.out.println(p.getInstanceID());
-		// System.out.println(p.getStateTransitions() + "\n");
-		// }
-
-		System.out.println(">>Converting instances to miner format...");
+		System.out.println(">>Converting instances to data mining tech format...");
 		convertedInstancesFileName = convertInstancesToMinerFormat();
 
 		distanceFunction = new DistanceEuclidian();
@@ -66,19 +61,10 @@ public class IncidentInstancesClusterGenerator {
 		// apply cluster algorithm (K-mean)
 		generateClustersUsingKMean();
 		// printClusters();
-		kmean.printStatistics();
-
-		clustersOutputFileName = clustersOutputFolder + "/" + clustersOutputFileName;
-		try {
-			kmean.saveToFile(clustersOutputFileName);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
 		// apply cluster algorithm (BiSect implementation)
-		// generateClustersUsingKMeanUsingBiSect();
-		 printClusters();
+//		 generateClustersUsingKMeanUsingBiSect();
+//		 printClusters();
 
 		System.out.println("\n>>DONE");
 
@@ -96,21 +82,31 @@ public class IncidentInstancesClusterGenerator {
 			outputFolder.mkdir();
 
 		}
-
+		
+		clustersOutputFileName = clustersOutputFolder + "/" + clustersOutputFileName;
+		convertedInstancesFile = clustersOutputFolder + "/" + convertedInstancesFile;
 		generateClusters();
 
 	}
 
 	public void generateClustersUsingKMean() {
 
-		kmean = new AlgoKMeans();
+		AlgoKMeans kmean = new AlgoKMeans();
 
 		try {
 			System.out.println(">>Generating clusters using K-mean algorithm" + " with K = " + numberOFClusters
 					+ ", distance function is " + distanceFunction.getName());
+			
+			//generate clusters
 			clusters = kmean.runAlgorithm(convertedInstancesFileName, numberOFClusters, distanceFunction,
 					DATA_SEPARATOR);
 
+			//store clusters (each line is a cluster in the output file)
+			kmean.saveToFile(clustersOutputFileName);
+			
+			
+			kmean.printStatistics();
+			
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,14 +116,18 @@ public class IncidentInstancesClusterGenerator {
 
 	public void generateClustersUsingKMeanUsingBiSect() {
 
-		kmean = new AlgoBisectingKMeans();
+		AlgoBisectingKMeans kmean = new AlgoBisectingKMeans();
 
+		int iteratorForSplit = numberOFClusters*2;
+		
 		try {
 			System.out.println(">>Generating clusters using K-mean algorithm with K = " + numberOFClusters
 					+ ", distance function is " + distanceFunction.getName());
-			clusters = kmean.runAlgorithm(convertedInstancesFileName, numberOFClusters, distanceFunction,
+			clusters = kmean.runAlgorithm(convertedInstancesFileName, numberOFClusters, distanceFunction, iteratorForSplit,
 					DATA_SEPARATOR);
 
+			kmean.saveToFile(clustersOutputFileName);
+			
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -174,7 +174,7 @@ public class IncidentInstancesClusterGenerator {
 		 **/
 		// create a text file to hold the data
 
-		String outputFileName = clustersOutputFolder + "/" + convertedInstancesFile;
+		
 
 		String fileLinSeparator = System.getProperty("line.separator");
 
@@ -241,13 +241,13 @@ public class IncidentInstancesClusterGenerator {
 
 		try {
 			BufferedWriter writer = new BufferedWriter(
-					new OutputStreamWriter(new FileOutputStream(outputFileName), "utf-8"));
+					new OutputStreamWriter(new FileOutputStream(convertedInstancesFile), "utf-8"));
 
 			writer.write(builder.toString());
 
 			writer.close();
 
-			return outputFileName;
+			return convertedInstancesFile;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
