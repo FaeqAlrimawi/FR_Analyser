@@ -863,7 +863,7 @@ public class GraphPathsAnalyser {
 			} else {
 
 				// get actions frequency
-				LinkedList<String> actions;
+				List<String> actions;
 
 				// int cnt = 0;
 				int numOfActions = 0;
@@ -1047,7 +1047,7 @@ public class GraphPathsAnalyser {
 			//all actions in a transition should satisfy the operation (i.e. actions_freq OP specified_freq is true)
 			Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
 
-				LinkedList<String> pathActions = paths.get(i).getTransitionActions();
+				List<String> pathActions = paths.get(i).getTransitionActions();
 				// boolean isTopPath = false;
 				for (String action : pathActions) {
 
@@ -1082,7 +1082,7 @@ public class GraphPathsAnalyser {
 
 			Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
 
-				LinkedList<String> pathActions = paths.get(i).getTransitionActions();
+				List<String> pathActions = paths.get(i).getTransitionActions();
 
 				int most = (int) Math.ceil(pathActions.size() * satisfactionFactor);
 
@@ -1129,7 +1129,7 @@ public class GraphPathsAnalyser {
 			// at least 1 actions)
 			Outer_Loop: for (int i = indexStart; i < indexEnd; i++) {
 
-				LinkedList<String> pathActions = paths.get(i).getTransitionActions();
+				List<String> pathActions = paths.get(i).getTransitionActions();
 				boolean isTopPath = false;
 				for (String action : pathActions) {
 
@@ -1266,7 +1266,7 @@ public class GraphPathsAnalyser {
 
 			} else {
 
-				LinkedList<String> pathActions;
+				List<String> pathActions;
 
 				// all actions have a frequency >= to the specified one
 				if (isExact) {

@@ -5,12 +5,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceCorrelation;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceCosine;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceEuclidian;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;
+import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceJaccard;
 import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoBisectingKMeans;
 import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoKMeans;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
@@ -22,13 +25,17 @@ public class IncidentInstancesClusterGenerator {
 	List<GraphPath> instances;
 	String instanceFileName;
 	String convertedInstancesFileName;
-	int numberOFClusters =10;
+	int numberOFClusters = 10;
 	DistanceFunction distanceFunction;
-//	AlgoKMeans kmean;
+	// AlgoKMeans kmean;
 
-	public final static String DATA_SEPARATOR = " "; // space is the separator
-	public final static int PADDING_STATE = -10000; // cloud be the number of
-													// states
+	// space is the separator
+	public final static String DATA_SEPARATOR = " ";
+	// cloud be the number of states
+	public final static int PADDING_STATE = -10000;
+	//what value to give? probably larger would be better to get a noticable difference
+	public final static int ACTION_PERFORMED = 100;
+	public final static int ACTION_NOT_PERFORMED = 0;
 
 	String clusterFolder = "clusters generated";
 	String clustersOutputFileName = "clustersGenerated.txt";
@@ -38,7 +45,36 @@ public class IncidentInstancesClusterGenerator {
 
 	int longestTransition = -1;
 	int shortestTransition = -1;
-	
+
+	List<String> systemActions;
+
+	public IncidentInstancesClusterGenerator() {
+
+		systemActions = new LinkedList<String>();
+
+		// some actions
+		systemActions.add("EnterRoom");
+		systemActions.add("ConnectIPDevice");
+		systemActions.add("DisconnectIPDevice");
+		systemActions.add("ConnectBusDevice");
+		systemActions.add("DisconnectBusDevice");
+		systemActions.add("SendData");
+		systemActions.add("SendMalware");
+		systemActions.add("DisableHVAC");
+		systemActions.add("EnterRoomWithoutCardReader");
+		systemActions.add("ChangeAccessToCardRequired");
+		systemActions.add("ChangeAccessToCardNotRequired");
+		systemActions.add("ChangeContextToOutSideWorkingHours");
+		systemActions.add("ChangeContextToWorkingHours");
+		systemActions.add("TurnOnHVAC");
+		systemActions.add("TurnOffHVAC");
+		systemActions.add("TurnOnSmartTV");
+		systemActions.add("TurnOffSmartTV");
+		systemActions.add("GenerateData");
+		systemActions.add("CollectData");
+
+	}
+
 	// holds clusters generated
 	List<ClusterWithMean> clusters;
 
@@ -46,25 +82,28 @@ public class IncidentInstancesClusterGenerator {
 
 		System.out.println("reading instances from: " + instanceFileName);
 
-		instances = FileManipulator.readInstantiatorGeneratedIncidentInstancesFile(instanceFileName);
+		// load instances from file
+		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
 
+		// System.out.println(instances.get(0).getTransitionActions());
 		if (instances == null) {
 			System.out.println("Instances are null! Exiting");
 			return;
 		}
 
 		System.out.println(">>Converting instances to data mining tech format...");
-		convertedInstancesFileName = convertInstancesToMinerFormat();
+		convertedInstancesFileName = convertInstancesToMiningFormat();
 
-		distanceFunction = new DistanceEuclidian();
+		//jaccard distance function is used for vectors that has only 0,1 values
+		distanceFunction = new DistanceCosine();
 
 		// apply cluster algorithm (K-mean)
 		generateClustersUsingKMean();
-		// printClusters();
+		 printClusters();
 
 		// apply cluster algorithm (BiSect implementation)
-//		 generateClustersUsingKMeanUsingBiSect();
-//		 printClusters();
+		// generateClustersUsingKMeanUsingBiSect();
+		// printClusters();
 
 		System.out.println("\n>>DONE");
 
@@ -82,9 +121,10 @@ public class IncidentInstancesClusterGenerator {
 			outputFolder.mkdir();
 
 		}
-		
+
 		clustersOutputFileName = clustersOutputFolder + "/" + clustersOutputFileName;
 		convertedInstancesFile = clustersOutputFolder + "/" + convertedInstancesFile;
+		
 		generateClusters();
 
 	}
@@ -96,17 +136,16 @@ public class IncidentInstancesClusterGenerator {
 		try {
 			System.out.println(">>Generating clusters using K-mean algorithm" + " with K = " + numberOFClusters
 					+ ", distance function is " + distanceFunction.getName());
-			
-			//generate clusters
+
+			// generate clusters
 			clusters = kmean.runAlgorithm(convertedInstancesFileName, numberOFClusters, distanceFunction,
 					DATA_SEPARATOR);
 
-			//store clusters (each line is a cluster in the output file)
+			// store clusters (each line is a cluster in the output file)
 			kmean.saveToFile(clustersOutputFileName);
-			
-			
+
 			kmean.printStatistics();
-			
+
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -118,16 +157,16 @@ public class IncidentInstancesClusterGenerator {
 
 		AlgoBisectingKMeans kmean = new AlgoBisectingKMeans();
 
-		int iteratorForSplit = numberOFClusters*2;
-		
+		int iteratorForSplit = numberOFClusters * 2;
+
 		try {
 			System.out.println(">>Generating clusters using K-mean algorithm with K = " + numberOFClusters
 					+ ", distance function is " + distanceFunction.getName());
-			clusters = kmean.runAlgorithm(convertedInstancesFileName, numberOFClusters, distanceFunction, iteratorForSplit,
-					DATA_SEPARATOR);
+			clusters = kmean.runAlgorithm(convertedInstancesFileName, numberOFClusters, distanceFunction,
+					iteratorForSplit, DATA_SEPARATOR);
 
 			kmean.saveToFile(clustersOutputFileName);
-			
+
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -138,24 +177,25 @@ public class IncidentInstancesClusterGenerator {
 	public void printClusters() {
 
 		int id = 0;
-		
-		//used to print a few sets
+
+		// used to print a few sets
 		int length = 5;
+		Random rand = new Random();
 		
 		for (ClusterWithMean cluster : clusters) {
 			System.out.println("Cluster " + id++);
 			// For each data point: [first entry is the instance name]
 			List<DoubleArray> dataPoints = cluster.getVectors();
 			System.out.println("  number of instances = " + dataPoints.size());
-			
-			for (int i=0;i<length && i<dataPoints.size();i++) {
-				System.out.println("   " + dataPoints.get(i));
+
+			for (int i = 0; i < length && i < dataPoints.size(); i++) {
+				System.out.println("   " + dataPoints.get(rand.nextInt(dataPoints.size())));
 			}
 		}
 
 	}
 
-	public String convertInstancesToMinerFormat() {
+	public String convertInstancesToMiningFormat() {
 
 		// convert instances to a format compatible with that of the data mining
 		// library used (i.e. SPMF)
@@ -174,17 +214,15 @@ public class IncidentInstancesClusterGenerator {
 		 **/
 		// create a text file to hold the data
 
-		
-
 		String fileLinSeparator = System.getProperty("line.separator");
 
 		StringBuilder builder = new StringBuilder();
-	
-		if(instances!= null && !instances.isEmpty()) {
+
+		if (instances != null && !instances.isEmpty()) {
 			shortestTransition = instances.get(0).getStateTransitions().size();
 		}
-		
-		//find longest and shortest transitions
+
+		// find longest and shortest transitions
 		for (GraphPath path : instances) {
 			List<Integer> tmp = path.getStateTransitions();
 
@@ -195,16 +233,21 @@ public class IncidentInstancesClusterGenerator {
 			}
 		}
 
-		numberOFClusters = longestTransition - shortestTransition +1;
-		
-		//set attribute names
+		numberOFClusters = longestTransition - shortestTransition + 1;
+
+		// set attribute names for states
 		for (int i = 0; i < longestTransition; i++) {
 
 			// add attribute name e.g., "state-0 state-1 ..."
 			builder.append(attributeName).append(attributeState).append(i).append(fileLinSeparator);
 		}
-		
-		//set data
+
+		// set attribute names for actions (e.g., enterRoom)
+		for (String action : systemActions) {
+			builder.append(attributeName).append(action).append(fileLinSeparator);
+		}
+
+		// set data
 		for (GraphPath path : instances) {
 
 			// set instance name to be the instance id
@@ -213,8 +256,8 @@ public class IncidentInstancesClusterGenerator {
 			// set data to be the state transitions
 			List<Integer> states = path.getStateTransitions();
 
-
-			for (int i = 0; i < states.size() - 1; i++) {
+			int i =0;
+			for (i=0; i < states.size() - 1; i++) {
 				// add state
 				builder.append(states.get(i)).append(DATA_SEPARATOR);
 			}
@@ -226,7 +269,7 @@ public class IncidentInstancesClusterGenerator {
 
 				builder.append(DATA_SEPARATOR);
 
-				for (int i = 0; i < longestTransition - states.size() - 1; i++) {
+				for (i = 0; i < longestTransition - states.size() - 1; i++) {
 
 					builder.append(PADDING_STATE).append(DATA_SEPARATOR);
 				}
@@ -234,6 +277,32 @@ public class IncidentInstancesClusterGenerator {
 				builder.append(PADDING_STATE);
 			}
 
+			// add action data
+			// 0 for missing the action from the transition actions. 1 if it
+			// exists
+			List<String> transitionActions = path.getTransitionActions();
+
+			if (transitionActions != null && !transitionActions.isEmpty()) {
+
+				builder.append(DATA_SEPARATOR);
+
+				for (i = 0; i < systemActions.size()-1; i++) {
+
+					if (transitionActions.contains(systemActions.get(i))) {
+						builder.append(ACTION_PERFORMED).append(DATA_SEPARATOR);
+					} else {
+						builder.append(ACTION_NOT_PERFORMED).append(DATA_SEPARATOR);
+					}
+				}
+				
+				//check last action
+				if (transitionActions.contains(systemActions.get(i))) {
+					builder.append(ACTION_PERFORMED);
+				} else {
+					builder.append(ACTION_NOT_PERFORMED);
+				}
+			}
+			
 			builder.append(fileLinSeparator);
 		}
 

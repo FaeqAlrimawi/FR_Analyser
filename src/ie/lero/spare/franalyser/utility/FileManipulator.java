@@ -140,7 +140,7 @@ public class FileManipulator {
 		return result.toString().split("\n");
 	}
 
-	public static List<GraphPath> readInstantiatorGeneratedIncidentInstancesFile(String fileName) {
+	public static List<GraphPath> readInstantiatorInstancesFile(String fileName) {
 
 		if (fileName == null || fileName.isEmpty()) {
 			System.err.println("Error reading file: " + fileName + ". File name is empty.");
@@ -162,6 +162,8 @@ public class FileManipulator {
 		List<GraphPath> instances = new LinkedList<GraphPath>();
 
 		FileReader reader;
+		boolean isCompactFormat = true;
+
 		try {
 
 			reader = new FileReader(instancesFile);
@@ -203,24 +205,68 @@ public class FileManipulator {
 					while (instancesList.hasNext()) {
 						JSONObject instance = instancesList.next();
 
+						// get instance id
+						int instanceID = Integer
+								.parseInt(instance.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_ID).toString());
+
 						// get transitions
 						JSONArray transitions = (JSONArray) instance
 								.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS);
 
 						List<Integer> states = new LinkedList<Integer>();
-						
-						for(Object objState : transitions) {
-							Integer state = Integer.parseInt(objState.toString());
-							states.add(state);
+						List<String> actions = new LinkedList<String>();
+
+						for (Object objState : transitions) {
+
+							try {
+
+								if (isCompactFormat) {
+									Integer state = Integer.parseInt(objState.toString());
+									// compact format
+									states.add(state);
+								} else {
+									JSONObject objTransition = (JSONObject) objState;
+									// expanded format
+									// transition=[{src,trg, action}]
+									Integer srcState = Integer.parseInt(objTransition
+											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_SOURCE).toString());
+									Integer tgtState = Integer.parseInt(objTransition
+											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_TARGET).toString());
+									String actionState = objTransition
+											.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTION).toString();
+
+									if (!states.contains(srcState)) {
+										states.add(srcState);
+									}
+
+									if (!states.contains(tgtState)) {
+										states.add(tgtState);
+									}
+
+									// add action
+									actions.add(actionState);
+								}
+
+							} catch (NumberFormatException e) {
+								isCompactFormat = false;
+							}
 						}
-						
-						// get instance id
-						int instanceID = Integer.parseInt(instance.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_ID).toString());
+
+						// get actions
+						if (instance.containsKey(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS)) {
+							JSONArray actionsAry = (JSONArray) instance
+									.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS);
+
+							for (Object objAction : actionsAry) {
+								actions.add(objAction.toString());
+							}
+						}
 
 						// create a new path/incident
 						GraphPath tmpPath = new GraphPath();
-						tmpPath.setStateTransitions(states);
 						tmpPath.setInstanceID(instanceID);
+						tmpPath.setStateTransitions(states);
+						tmpPath.setTransitionActions(actions);
 
 						// add to the list
 						instances.add(tmpPath);
@@ -232,7 +278,7 @@ public class FileManipulator {
 		} catch (IOException | ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} 
+		}
 
 		return instances;
 

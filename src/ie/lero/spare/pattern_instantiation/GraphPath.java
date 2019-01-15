@@ -14,6 +14,7 @@ public class GraphPath {
 	private Predicate predicateDes;
 	private LinkedList<Integer> stateTransitions;
 	private int instanceID;
+	private List<String> transitionActions;
 	
 	// private SystemInstanceHandler systemHandler;
 	public TransitionSystem transitionSystem;
@@ -477,18 +478,34 @@ public class GraphPath {
 		return false;
 	}
 
-	public LinkedList<String> getTransitionActions() {
+	public List<String> getTransitionActions() {
 
-		LinkedList<String> actions = new LinkedList<String>();
-		// TransitionSystem t = TransitionSystem.getTransitionSystemInstance();
-
+		//if actions already identified then return them
+		if(transitionActions != null || !transitionActions.isEmpty()) {
+			return transitionActions;
+		}
+		
+		//if the transition system is not set then actions cannot be determines so return NULL
+		if(transitionSystem == null) {
+			return null;
+		}
+		
+		//find actions from the transition system
+		transitionActions = new LinkedList<String>();
+		
 		for (int i = 0; i < stateTransitions.size() - 1; i++) {
-			actions.add(transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1)));
+			transitionActions.add(transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1)));
 		}
 
-		return actions;
+		return transitionActions;
 	}
 
+	public void setTransitionActions(List<String> newActions) {
+	
+		transitionActions = new LinkedList<String>(newActions);
+
+	}
+	
 	public double getTransitionProbability() {
 
 		double prob = -1;
