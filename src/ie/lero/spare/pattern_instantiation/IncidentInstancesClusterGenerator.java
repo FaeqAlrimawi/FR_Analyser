@@ -101,7 +101,7 @@ public class IncidentInstancesClusterGenerator {
 		}
 
 		System.out.println(">>Converting instances to data mining tech format...");
-//		convertedInstancesFileName = convertInstancesToMiningFormat();
+		convertedInstancesFileName = convertInstancesToMiningFormat();
 
 		// jaccard distance function is used for vectors that has only 0,1
 		// values
@@ -124,9 +124,9 @@ public class IncidentInstancesClusterGenerator {
 		// printClustersOPTIC(clus);
 
 		// ======text based clustering
-		convertedInstancesFileName = convertInstancesToTextMiningFormat();
+//		convertedInstancesFileName = convertInstancesToTextMiningFormat();
 		
-		generateClustersUsingTextMining();
+//		generateClustersUsingTextMining();
 
 		System.out.println("\n>>DONE");
 
