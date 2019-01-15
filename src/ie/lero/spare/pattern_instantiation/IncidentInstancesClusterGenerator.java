@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceCorrelation;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceCosine;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceEuclidian;
@@ -16,6 +17,9 @@ import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceJaccard;
 import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoBisectingKMeans;
 import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoKMeans;
+import ca.pfv.spmf.algorithms.clustering.optics.AlgoOPTICS;
+import ca.pfv.spmf.algorithms.clustering.optics.DoubleArrayOPTICS;
+import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import ie.lero.spare.franalyser.utility.FileManipulator;
@@ -32,9 +36,9 @@ public class IncidentInstancesClusterGenerator {
 	// space is the separator
 	public final static String DATA_SEPARATOR = " ";
 	// cloud be the number of states
-	public final static int PADDING_STATE = -10000;
+	public final static int PADDING_STATE = -1;
 	//what value to give? probably larger would be better to get a noticable difference
-	public final static int ACTION_PERFORMED = 100;
+	public final static int ACTION_PERFORMED = 1;
 	public final static int ACTION_NOT_PERFORMED = 0;
 
 	String clusterFolder = "clusters generated";
@@ -48,6 +52,9 @@ public class IncidentInstancesClusterGenerator {
 
 	List<String> systemActions;
 
+	//prints a number of instances for each cluster
+	int lengthToPrint = 5;
+	
 	public IncidentInstancesClusterGenerator() {
 
 		systemActions = new LinkedList<String>();
@@ -85,6 +92,7 @@ public class IncidentInstancesClusterGenerator {
 		// load instances from file
 		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
 
+		System.out.println(instances.size());
 		// System.out.println(instances.get(0).getTransitionActions());
 		if (instances == null) {
 			System.out.println("Instances are null! Exiting");
@@ -98,13 +106,21 @@ public class IncidentInstancesClusterGenerator {
 		distanceFunction = new DistanceCosine();
 
 		// apply cluster algorithm (K-mean)
-		generateClustersUsingKMean();
-		 printClusters();
+//		clusters = generateClustersUsingKMean();
+//		 printClusters(clusters);
 
 		// apply cluster algorithm (BiSect implementation)
 		// generateClustersUsingKMeanUsingBiSect();
-		// printClusters();
+//		 printClusters();
 
+		 //using OPTIC algorithm to find clusters
+//		 List<Cluster> clus = generateClustersUsingOPTICS();
+//		 printClustersOPTIC(clus);
+		 
+		//using DBSCAN algorithm
+		List<Cluster> clus = generateClustersUsingDBSCAN();
+//		printClustersOPTIC(clus);
+		
 		System.out.println("\n>>DONE");
 
 	}
@@ -129,7 +145,7 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-	public void generateClustersUsingKMean() {
+	public List<ClusterWithMean> generateClustersUsingKMean() {
 
 		AlgoKMeans kmean = new AlgoKMeans();
 
@@ -146,14 +162,16 @@ public class IncidentInstancesClusterGenerator {
 
 			kmean.printStatistics();
 
+			return clusters;
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		return null;
 	}
 
-	public void generateClustersUsingKMeanUsingBiSect() {
+	public List<ClusterWithMean> generateClustersUsingKMeanUsingBiSect() {
 
 		AlgoBisectingKMeans kmean = new AlgoBisectingKMeans();
 
@@ -167,34 +185,78 @@ public class IncidentInstancesClusterGenerator {
 
 			kmean.saveToFile(clustersOutputFileName);
 
+			return clusters;
 		} catch (NumberFormatException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		return null;
 	}
 
-	public void printClusters() {
+	public List<Cluster> generateClustersUsingDBSCAN() {
 
-		int id = 0;
+		AlgoDBSCAN algo = new AlgoDBSCAN();
 
-		// used to print a few sets
-		int length = 5;
-		Random rand = new Random();
+		//minimum number of points/instances in a cluster
+		int minPoints = 10;
+		//distance between points/instances in a cluster
+		double epsilon = 10d;
+//		double epsilonPrime = epsilon;
 		
-		for (ClusterWithMean cluster : clusters) {
-			System.out.println("Cluster " + id++);
-			// For each data point: [first entry is the instance name]
-			List<DoubleArray> dataPoints = cluster.getVectors();
-			System.out.println("  number of instances = " + dataPoints.size());
+		try {
+			System.out.println(">>Generating clusters using DBSCAN algorithm");
 
-			for (int i = 0; i < length && i < dataPoints.size(); i++) {
-				System.out.println("   " + dataPoints.get(rand.nextInt(dataPoints.size())));
-			}
+			// generate clusters
+			List<Cluster> clusters = algo.runAlgorithm(convertedInstancesFileName, minPoints, epsilon, DATA_SEPARATOR);
+
+			// store clusters (each line is a cluster in the output file)
+			algo.saveToFile(clustersOutputFileName);
+
+			algo.printStatistics();
+
+			return clusters;
+		} catch (NumberFormatException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
+		return null;
 	}
+	
+	public List<Cluster> generateClustersUsingOPTICS() {
 
+		AlgoOPTICS algo = new AlgoOPTICS();
+
+		//minimum number of points/instances in a cluster
+		int minPoints = 10;
+		//distance between points/instances in a cluster
+		double epsilon = 2d;
+		double epsilonPrime = epsilon;
+		
+		try {
+			System.out.println(">>Generating clusters using OPTIC algorithm");
+
+			// generate clusters
+			List<DoubleArrayOPTICS> clusters = algo.computerClusterOrdering(convertedInstancesFileName, minPoints, epsilon, DATA_SEPARATOR);
+
+		//  generate dbscan clusters from the cluster ordering:
+			List<Cluster> dbScanClusters = algo.extractDBScan(minPoints,epsilonPrime);
+			
+			// store clusters (each line is a cluster in the output file)
+			algo.saveToFile(clustersOutputFileName);
+
+			algo.printStatistics();
+
+			return dbScanClusters;
+		} catch (NumberFormatException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
 	public String convertInstancesToMiningFormat() {
 
 		// convert instances to a format compatible with that of the data mining
@@ -235,19 +297,19 @@ public class IncidentInstancesClusterGenerator {
 
 		numberOFClusters = longestTransition - shortestTransition + 1;
 
-		// set attribute names for states
+		// ========states attributes (state-0, state-1, number of maximum states)
 		for (int i = 0; i < longestTransition; i++) {
 
 			// add attribute name e.g., "state-0 state-1 ..."
 			builder.append(attributeName).append(attributeState).append(i).append(fileLinSeparator);
 		}
 
-		// set attribute names for actions (e.g., enterRoom)
+		// ========actions attribute (actions names)
 		for (String action : systemActions) {
 			builder.append(attributeName).append(action).append(fileLinSeparator);
 		}
 
-		// set data
+		// ========set data
 		for (GraphPath path : instances) {
 
 			// set instance name to be the instance id
@@ -325,6 +387,59 @@ public class IncidentInstancesClusterGenerator {
 		return null;
 	}
 
+	/*******printers*********/
+	
+	public void printClusters(List<Cluster> clusters) {
+
+		int id = 0;
+
+		// used to print a few sets
+//		int length = 5;
+		Random rand = new Random();
+		
+		for (Cluster cluster : clusters) {
+			System.out.println("Cluster " + id++);
+			// For each data point: [first entry is the instance name]
+			List<DoubleArray> dataPoints = cluster.getVectors();
+			System.out.println("  number of instances = " + dataPoints.size());
+
+			for (int i = 0; i < lengthToPrint && i < dataPoints.size(); i++) {
+				System.out.println("   " + dataPoints.get(rand.nextInt(dataPoints.size())));
+			}
+			
+			if(dataPoints.size()>lengthToPrint) {
+			System.out.println("   ..." );
+			}
+		}
+
+	}
+	
+	public void printClustersOPTIC(List<Cluster> clusters) {
+
+		int id = 0;
+
+		// used to print a few sets
+//		int length = 5;
+		Random rand = new Random();
+		
+		for (Cluster cluster : clusters) {
+			System.out.println("Cluster " + id++);
+			// For each data point: [first entry is the instance name]
+			List<DoubleArray> dataPoints = cluster.getVectors();
+			System.out.println("  number of instances = " + dataPoints.size());
+
+			for (int i = 0; i < lengthToPrint && i < dataPoints.size(); i++) {
+				System.out.println("   " + dataPoints.get(rand.nextInt(dataPoints.size())));
+			}
+			
+			if(dataPoints.size()>lengthToPrint) {
+				System.out.println("   ..." );
+				}
+		}
+
+	}
+
+	
 	public static void main(String[] args) {
 
 		IncidentInstancesClusterGenerator tester = new IncidentInstancesClusterGenerator();
