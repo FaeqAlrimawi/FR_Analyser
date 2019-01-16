@@ -26,11 +26,16 @@ import ie.lero.spare.franalyser.utility.FileManipulator;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Cobweb;
 import weka.clusterers.EM;
+import weka.clusterers.SimpleKMeans;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.stemmers.LovinsStemmer;
+import weka.core.tokenizers.WordTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.attribute.StringToWordVector;
 
 public class IncidentInstancesClusterGenerator {
 
@@ -488,7 +493,7 @@ public class IncidentInstancesClusterGenerator {
 
 		// convert instances to ARFF (Attribute Relation File Format)
 		// generated file contains as the first field in a row the instance id
-		wekaInstancesFilePath = convertInstancesActionsToARFF(instances);
+		wekaInstancesFilePath = convertInstancesToARFF(instances);
 		
 
 		try {
@@ -510,11 +515,36 @@ public class IncidentInstancesClusterGenerator {
 			// new weka instances without the id field
 			wekaInstances = Filter.useFilter(wekaInstances, remove);
 
-			// ===== cluster using CobWeb algorithm
-//			generateClustersUsingCobWeb(wekaInstances);
+			//==== converts string to vector so that it can be processed by other algorithms
+//			StringToWordVector vector = new StringToWordVector();
 			
-			// ==== cluster using EM algorithm
-			generateClustersUsingEM(wekaInstances);
+//			String[] fliterOptions = Utils.splitOptions("-R first-last -W 5000 -prune-rate 20.0 -T -I -N 0 -L -stemmer weka" +
+//                    ".core.stemmers.NullStemmer -M 1 -tokenizer \"weka.core.tokenizers.WordTokenizer -delimiters \\\" \\\\r\\\\n\\\\t.,;:\\\\\\'\\\\\\\"()?!\\\"\"");
+			
+//			vector.setInputFormat(wekaInstances);
+//			vector.setOptions(fliterOptions);
+//			vector.setIDFTransform(true);
+//			vector.setLowerCaseTokens(true);
+//			vector.setStemmer(new LovinsStemmer());
+//			vector.setAttributeIndices("first-last");
+//			vector.setTokenizer(new WordTokenizer());
+	
+//			System.out.println(wekaInstances.get(0));
+//			System.out.println(wekaInstances.get(4));
+//			
+//			wekaInstances = Filter.useFilter(wekaInstances, vector);
+//			System.out.println(wekaInstances.get(0));
+//			System.out.println(wekaInstances.get(4));
+			
+			
+			// ===== cluster using CobWeb algorithm
+//			clusterUsingWekaCobWeb(wekaInstances);
+			
+			// ===== cluster using EM algorithm
+//			clusterUsingWekaEM(wekaInstances);
+			
+			// ===== cluster using KMEANS
+			clusterUsingWekaKMEANS(wekaInstances);
 			
 			
 		} catch (Exception e) {
@@ -525,7 +555,7 @@ public class IncidentInstancesClusterGenerator {
 		System.out.println("\n>>DONE");
 	}
 
-	void generateClustersUsingCobWeb(Instances wekaInstances) {
+	void clusterUsingWekaCobWeb(Instances wekaInstances) {
 
 		// ====== generate clusters using CobWeb algorithm
 		Cobweb cobWebClusterer = new Cobweb();
@@ -551,7 +581,7 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-	void generateClustersUsingEM(Instances wekaInstances) {
+	void clusterUsingWekaEM(Instances wekaInstances) {
 
 		// ====== generate clusters using EM (expectation maximisation)
 		EM emClusterer = new EM();
@@ -562,6 +592,7 @@ public class IncidentInstancesClusterGenerator {
 			
 			options[0] = "-I"; // iterations
 			options[1] = "100"; // -I 100 sets max iterations to 100
+			
 			emClusterer.setOptions(options);
 			
 			//generate clusters
@@ -574,6 +605,22 @@ public class IncidentInstancesClusterGenerator {
 			e.printStackTrace();
 		}
 
+	}
+	
+	void clusterUsingWekaKMEANS(Instances wekaInstances) {
+		
+		SimpleKMeans clusterer = new SimpleKMeans();
+		
+		try {
+			
+			clusterer.setNumClusters(numberOFClusters);
+			clusterer.buildClusterer(wekaInstances);
+			
+			System.out.println(clusterer);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void clusterUsingWeka(String fileName) {
