@@ -550,7 +550,7 @@ public class IncidentInstancesClusterGenerator {
 		// Create an instance of the algorithm with minsup = 50 %
 				AlgoPrefixSpan algo = new AlgoPrefixSpan(); 
 				
-				int minsup = 3; // we use a minimum support of 2 sequences.
+				int minsup = 5; // we use a minimum support of 2 sequences.
 				
 		        // if you set the following parameter to true, the sequence ids of the sequences where
 		        // each pattern appears will be shown in the result
