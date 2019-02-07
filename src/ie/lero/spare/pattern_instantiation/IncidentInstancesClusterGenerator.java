@@ -5,18 +5,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.PriorityQueue;
 import java.util.Random;
 
-import org.jgrapht.alg.matching.EdmondsMaximumCardinalityMatching;
-
 import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
-import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceCosine;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceEuclidian;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;
 import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoBisectingKMeans;
@@ -25,6 +23,16 @@ import ca.pfv.spmf.algorithms.clustering.optics.AlgoOPTICS;
 import ca.pfv.spmf.algorithms.clustering.optics.DoubleArrayOPTICS;
 import ca.pfv.spmf.algorithms.clustering.text_clusterer.TextClusterAlgo;
 import ca.pfv.spmf.algorithms.sequentialpatterns.prefixspan.AlgoPrefixSpan;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.AlgoSPADE;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.candidatePatternsGeneration.CandidateGenerator;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.candidatePatternsGeneration.CandidateGenerator_Qualitative;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.dataStructures.creators.AbstractionCreator;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.dataStructures.creators.AbstractionCreator_Qualitative;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.dataStructures.database.SequenceDatabase;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.idLists.creators.IdListCreator;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.idLists.creators.IdListCreator_FatBitmap;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spam.AlgoTKS;
+import ca.pfv.spmf.algorithms.sequentialpatterns.spam.PatternTKS;
 import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
@@ -34,15 +42,10 @@ import weka.clusterers.Clusterer;
 import weka.clusterers.Cobweb;
 import weka.clusterers.EM;
 import weka.clusterers.SimpleKMeans;
-import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
-import weka.core.stemmers.LovinsStemmer;
-import weka.core.tokenizers.WordTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.StringToWordVector;
 
 public class IncidentInstancesClusterGenerator {
 
@@ -152,9 +155,11 @@ public class IncidentInstancesClusterGenerator {
 			return;
 		}
 
-//		System.out.println(">>Converting instances to data mining tech format...");
+		// System.out.println(">>Converting instances to data mining tech
+		// format...");
 
-//		convertedInstancesFileName = convertInstancesToMiningFormat(instances);
+		// convertedInstancesFileName =
+		// convertInstancesToMiningFormat(instances);
 
 		// ==For text mining (i.e. clustering based on actions names)
 		// convertedInstancesFileName =
@@ -165,8 +170,8 @@ public class IncidentInstancesClusterGenerator {
 		distanceFunction = new DistanceEuclidian();
 
 		// apply cluster algorithm (K-mean)
-//		clusters = generateClustersUsingKMean();
-//		printClustersWithMean(clusters);
+		// clusters = generateClustersUsingKMean();
+		// printClustersWithMean(clusters);
 
 		// apply cluster algorithm (BiSect implementation)
 		// generateClustersUsingKMeanUsingBiSect();
@@ -184,9 +189,21 @@ public class IncidentInstancesClusterGenerator {
 		// convertedInstancesFileName = convertInstancesToTextMiningFormat();
 		// generateClustersUsingTextMining();
 
-		// ======Mioning Frequent sequential patterns using the prefixspan algo
-//		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
-		mineSequencesUsingPrefixSpanAlgo();
+		// ======Mine Frequent sequential patterns using the prefixspan algo
+		// convertedInstancesFileName =
+		// toSPMFsequentialPatternFormat(instances);
+		// mineSequencesUsingPrefixSpanAlgo();
+
+		// ======Mine Closed Frequent sequential patterns using the ClaSP
+		// algo
+		// mineClosedSequencesUsingClaSPAlgo();
+
+		// ======Mine Frequent sequential patterns using the SPADE algo
+//		mineSequentialPatternsUsingSPADE();
+		
+		// ======Mine Frequent sequential patterns using the TKS 
+		//finds top-k sequential patterns
+		mineSequentialPatternsUsingTKSAlgo();
 		
 		System.out.println("\n>>DONE");
 
@@ -542,45 +559,218 @@ public class IncidentInstancesClusterGenerator {
 		}
 	}
 
-	
 	protected void mineSequencesUsingPrefixSpanAlgo() {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
-		
+
 		// Create an instance of the algorithm with minsup = 50 %
-				AlgoPrefixSpan algo = new AlgoPrefixSpan(); 
-				
-				int minsup = 5; // we use a minimum support of 2 sequences.
-				
-		        // if you set the following parameter to true, the sequence ids of the sequences where
-		        // each pattern appears will be shown in the result
-		        algo.setShowSequenceIdentifiers(false);
-		        
-				// execute the algorithm
-				try {
-					
-					algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, minsup);
-					algo.printStatistics();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}    
-				
+		AlgoPrefixSpan algo = new AlgoPrefixSpan();
+
+		int minsup = 5; // we use a minimum support of 2 sequences.
+
+		// if you set the following parameter to true, the sequence ids of the
+		// sequences where
+		// each pattern appears will be shown in the result
+		algo.setShowSequenceIdentifiers(true);
+
+		// execute the algorithm
+		try {
+
+			algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, minsup);
+			algo.printStatistics();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	protected void mineClosedSequencesUsingClaSPAlgo() {
+
+		// convertedInstancesFileName =
+		// toSPMFsequentialPatternFormat(instances);
+		//
+		// // Load a sequence database
+		// double support = 0.2;
+		//
+		// boolean keepPatterns = true;
+		// boolean verbose = true;
+		// boolean findClosedPatterns = true;
+		// boolean executePruningMethods = true;
+		// // if you set the following parameter to true, the sequence ids of
+		// the sequences where
+		// // each pattern appears will be shown in the result
+		// boolean outputSequenceIdentifiers = false;
+		//
+		// AbstractionCreator abstractionCreator =
+		// AbstractionCreator_Qualitative.getInstance();
+		// IdListCreator idListCreator =
+		// IdListCreatorStandard_Map.getInstance();
+		//
+		// SequenceDatabase sequenceDatabase = new
+		// SequenceDatabase(abstractionCreator, idListCreator);
+		//
+		// //double relativeSupport =
+		// sequenceDatabase.loadFile(fileToPath("contextClaSP.txt"), support);
+		// double relativeSupport;
+		//
+		// try {
+		//
+		// relativeSupport =
+		// sequenceDatabase.loadFile(convertedInstancesFileName, support);
+		//
+		// //double relativeSupport =
+		// sequenceDatabase.loadFile(fileToPath("gazelle.txt"), support);
+		//
+		// AlgoClaSP algorithm = new AlgoClaSP(relativeSupport,
+		// abstractionCreator, findClosedPatterns, executePruningMethods);
+		//
+		//
+		// //System.out.println(sequenceDatabase.toString());
+		// algorithm.runAlgorithm(sequenceDatabase, keepPatterns, verbose,
+		// clustersOutputFileName,outputSequenceIdentifiers);
+		// System.out.println("Minsup (relative) : " + support);
+		// System.out.println(algorithm.getNumberOfFrequentPatterns() + "
+		// patterns found.");
+		//
+		// if (verbose && keepPatterns) {
+		// System.out.println(algorithm.printStatistics());
+		// }
+		//
+		// } catch (UnsupportedEncodingException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+
+	}
+
+	protected void mineSequentialPatternsUsingSPADE() {
+
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
+
+		String outputPath = clustersOutputFileName;
+		// Load a sequence database
+		double support = 0.01;
+
+		boolean keepPatterns = true;
+		boolean verbose = false;
+
+		AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
+		boolean dfs = true;
+
+		// if you set the following parameter to true, the sequence ids of the
+		// sequences where
+		// each pattern appears will be shown in the result
+		boolean outputSequenceIdentifiers = false;
+
+		IdListCreator idListCreator = IdListCreator_FatBitmap.getInstance();
+
+		CandidateGenerator candidateGenerator = CandidateGenerator_Qualitative.getInstance();
+
+		SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
+
+		try {
+
+			sequenceDatabase.loadFile(convertedInstancesFileName, support);
+
+			System.out.println(sequenceDatabase.toString());
+
+			AlgoSPADE algorithm = new AlgoSPADE(support, dfs, abstractionCreator);
+
+			algorithm.runAlgorithm(sequenceDatabase, candidateGenerator, keepPatterns, verbose, outputPath,
+					outputSequenceIdentifiers);
+			System.out.println("Minimum support (relative) = " + support);
+			System.out.println(algorithm.getNumberOfFrequentPatterns() + " frequent patterns.");
+
+			System.out.println(algorithm.printStatistics());
+
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	protected void mineSequentialPatternsUsingTKSAlgo() {
+	
+		/**
+		 * http://www.philippe-fournier-viger.com/spmf/TKS.php
+		 * fastest Top-K sequential pattern recognition algo
+		 */
+		
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
+		
+		// Load a sequence database
+		String input = convertedInstancesFileName;
+		String output = clustersOutputFileName;
+		
+		int k=10; //number of sequential patterns to find
+		
+		// Create an instance of the algorithm 
+		AlgoTKS algo = new AlgoTKS(); 
+		
+		// This optional parameter allows to specify the minimum pattern length:
+//		algo.setMinimumPatternLength(3);  // optional
+
+		// This optional parameter allows to specify the maximum pattern length:
+//		algo.setMaximumPatternLength(4);  // optional
+		
+		// This optional parameter allows to specify constraints that some
+		// items MUST appear in the patterns found by TKS
+		// E.g.: This requires that items 1 and 3 appears in every patterns found
+//		algo.setMustAppearItems(new int[] {63});
+		
+		// This optional parameter allows to specify the max gap between two
+		// itemsets in a pattern. If set to 1, only patterns of contiguous itemsets
+		// will be found (no gap).
+//		algo.setMaxGap(2);
+		
+	    // if you set the following parameter to true, the sequence ids of the sequences where
+        // each pattern appears will be shown in the result
+		algo.showSequenceIdentifiersInOutput(true);
+		
+		// execute the algorithm, which returns some patterns
+		try {
+			
+			PriorityQueue<PatternTKS> patterns = algo.runAlgorithm(input, output, k);
+
+			// save results to file
+			algo.writeResultTofile(output);   
+			algo.printStatistics();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  
+		
 	}
 	
+	
+	public static String fileToPath(String filename) throws UnsupportedEncodingException {
+		URL url = IncidentInstancesClusterGenerator.class.getResource(filename);
+		System.out.println("tst "+url.toExternalForm());
+		return java.net.URLDecoder.decode(url.getPath(), "UTF-8");
+	}
+
 	protected String toSPMFsequentialPatternFormat(List<GraphPath> instances) {
 
 		// the format is as follows:
 		// state-0 <space> -1 <space> state-1 ... state-n -2
 		// where: -1 is a separator between states and -2 indicates the end of
 		// sequence
-		
+
 		int stateSeparator = -1;
 		int sequenceEndIndicator = -2;
 		int i = 0;
 		String fileLinSeparator = System.getProperty("line.separator");
 		final String DATA_SEPARATOR = " ";
-		
+
 		StringBuilder str = new StringBuilder();
 
 		for (GraphPath sequence : instances) {
@@ -589,20 +779,18 @@ public class IncidentInstancesClusterGenerator {
 
 			for (i = 0; i < states.size(); i++) {
 				// add state
-				str.append(states.get(i)).append(DATA_SEPARATOR);
+				str.append(states.get(i)).append(DATA_SEPARATOR).append(stateSeparator).append(DATA_SEPARATOR);
 			}
 
 			// add end of sequence
 			str.append(sequenceEndIndicator).append(fileLinSeparator);
 		}
-		
+
 		writeToFile(str.toString(), convertedInstancesFileName);
-		
+
 		return convertedInstancesFileName;
 	}
 
-	
-	
 	/**************** WEKA *********************/
 	/*******************************************/
 
