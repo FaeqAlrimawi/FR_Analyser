@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -22,16 +21,14 @@ import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoKMeans;
 import ca.pfv.spmf.algorithms.clustering.optics.AlgoOPTICS;
 import ca.pfv.spmf.algorithms.clustering.optics.DoubleArrayOPTICS;
 import ca.pfv.spmf.algorithms.clustering.text_clusterer.TextClusterAlgo;
+import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.AlgoClaSP;
+import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.dataStructures.creators.AbstractionCreator;
+import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.dataStructures.creators.AbstractionCreator_Qualitative;
+import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.dataStructures.database.SequenceDatabase;
+import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.idlists.creators.IdListCreator;
+import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.idlists.creators.IdListCreatorStandard_Map;
 import ca.pfv.spmf.algorithms.sequentialpatterns.occur.AlgoOccur;
 import ca.pfv.spmf.algorithms.sequentialpatterns.prefixspan.AlgoPrefixSpan;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.AlgoSPADE;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.candidatePatternsGeneration.CandidateGenerator;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.candidatePatternsGeneration.CandidateGenerator_Qualitative;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.dataStructures.creators.AbstractionCreator;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.dataStructures.creators.AbstractionCreator_Qualitative;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.dataStructures.database.SequenceDatabase;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.idLists.creators.IdListCreator;
-import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.idLists.creators.IdListCreator_FatBitmap;
 import ca.pfv.spmf.algorithms.sequentialpatterns.spam.AlgoTKS;
 import ca.pfv.spmf.algorithms.sequentialpatterns.spam.PatternTKS;
 import ca.pfv.spmf.patterns.cluster.Cluster;
@@ -195,14 +192,15 @@ public class IncidentInstancesClusterGenerator {
 
 		// ======Mine Closed Frequent sequential patterns using the ClaSP
 		// algo
-		// mineClosedSequencesUsingClaSPAlgo();
+		 mineClosedSequencesUsingClaSPAlgo();
 
 		// ======Mine Frequent sequential patterns using the SPADE algo
-		// mineSequentialPatternsUsingSPADE();
+//		 mineSequentialPatternsUsingSPADE();
 
 		// ======Mine Frequent sequential patterns using the TKS
 		// finds top-k sequential patterns
-		mineSequentialPatternsUsingTKSAlgo();
+		//allows to find contiguous sequence patterns
+//		mineSequentialPatternsUsingTKSAlgo();
 
 		System.out.println("\n>>DONE");
 
@@ -596,118 +594,114 @@ public class IncidentInstancesClusterGenerator {
 
 	protected void mineClosedSequencesUsingClaSPAlgo() {
 
-		// convertedInstancesFileName =
-		// toSPMFsequentialPatternFormat(instances);
-		//
-		// // Load a sequence database
-		// double support = 0.2;
-		//
-		// boolean keepPatterns = true;
-		// boolean verbose = true;
-		// boolean findClosedPatterns = true;
-		// boolean executePruningMethods = true;
-		// // if you set the following parameter to true, the sequence ids of
-		// the sequences where
-		// // each pattern appears will be shown in the result
-		// boolean outputSequenceIdentifiers = false;
-		//
-		// AbstractionCreator abstractionCreator =
-		// AbstractionCreator_Qualitative.getInstance();
-		// IdListCreator idListCreator =
-		// IdListCreatorStandard_Map.getInstance();
-		//
-		// SequenceDatabase sequenceDatabase = new
-		// SequenceDatabase(abstractionCreator, idListCreator);
-		//
-		// //double relativeSupport =
-		// sequenceDatabase.loadFile(fileToPath("contextClaSP.txt"), support);
-		// double relativeSupport;
-		//
-		// try {
-		//
-		// relativeSupport =
-		// sequenceDatabase.loadFile(convertedInstancesFileName, support);
-		//
-		// //double relativeSupport =
-		// sequenceDatabase.loadFile(fileToPath("gazelle.txt"), support);
-		//
-		// AlgoClaSP algorithm = new AlgoClaSP(relativeSupport,
-		// abstractionCreator, findClosedPatterns, executePruningMethods);
-		//
-		//
-		// //System.out.println(sequenceDatabase.toString());
-		// algorithm.runAlgorithm(sequenceDatabase, keepPatterns, verbose,
-		// clustersOutputFileName,outputSequenceIdentifiers);
-		// System.out.println("Minsup (relative) : " + support);
-		// System.out.println(algorithm.getNumberOfFrequentPatterns() + "
-		// patterns found.");
-		//
-		// if (verbose && keepPatterns) {
-		// System.out.println(algorithm.printStatistics());
-		// }
-		//
-		// } catch (UnsupportedEncodingException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// }
+		 convertedInstancesFileName =
+		 toSPMFsequentialPatternFormat(instances);
+		
+		 // Load a sequence database
+		 double support = 0.1;
+		
+		 boolean keepPatterns = true;
+		 boolean verbose = true;
+		 boolean findClosedPatterns = true;
+		 boolean executePruningMethods = true;
+		 // if you set the following parameter to true, the sequence ids of the sequences where
+		 // each pattern appears will be shown in the result
+		 boolean outputSequenceIdentifiers = true;
+		
+		 AbstractionCreator abstractionCreator =
+		 AbstractionCreator_Qualitative.getInstance();
+		 IdListCreator idListCreator =
+		 IdListCreatorStandard_Map.getInstance();
+		
+		 SequenceDatabase sequenceDatabase = new
+		 SequenceDatabase(abstractionCreator, idListCreator);
+
+		 double relativeSupport;
+		
+		 try {
+		
+		 relativeSupport =
+		 sequenceDatabase.loadFile(convertedInstancesFileName, support);
+		
+		 //double relativeSupport =
+//		 sequenceDatabase.loadFile(fileToPath("gazelle.txt"), support);
+		
+		 AlgoClaSP algorithm = new AlgoClaSP(relativeSupport,
+		 abstractionCreator, findClosedPatterns, executePruningMethods);
+		
+		 
+		 algorithm.runAlgorithm(sequenceDatabase, keepPatterns, verbose,
+		 clustersOutputFileName,outputSequenceIdentifiers);
+	
+		 System.out.println("Minsup (relative) : " + support);
+		 System.out.println(algorithm.getNumberOfFrequentPatterns() + "patterns found.");
+		
+		 if (verbose && keepPatterns) {
+		 System.out.println(algorithm.printStatistics());
+		 }
+		
+		 } catch (UnsupportedEncodingException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 } catch (IOException e) {
+		 // TODO Auto-generated catch block
+		 e.printStackTrace();
+		 }
 
 	}
 
 	protected void mineSequentialPatternsUsingSPADE() {
 
-		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
-
-		String outputPath = clustersOutputFileName;
-		// Load a sequence database
-		double support = 0.01;
-
-		boolean keepPatterns = true;
-		boolean verbose = false;
-
-		AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
-		boolean dfs = true;
-
-		// if you set the following parameter to true, the sequence ids of the
-		// sequences where
-		// each pattern appears will be shown in the result
-		boolean outputSequenceIdentifiers = false;
-
-		IdListCreator idListCreator = IdListCreator_FatBitmap.getInstance();
-
-		CandidateGenerator candidateGenerator = CandidateGenerator_Qualitative.getInstance();
-
-		SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
-
-		try {
-
-			sequenceDatabase.loadFile(convertedInstancesFileName, support);
-
-			System.out.println(sequenceDatabase.toString());
-
-			AlgoSPADE algorithm = new AlgoSPADE(support, dfs, abstractionCreator);
-
-			algorithm.runAlgorithm(sequenceDatabase, candidateGenerator, keepPatterns, verbose, outputPath,
-					outputSequenceIdentifiers);
-			System.out.println("Minimum support (relative) = " + support);
-			System.out.println(algorithm.getNumberOfFrequentPatterns() + " frequent patterns.");
-
-			System.out.println(algorithm.printStatistics());
-
-			// analysis of the generated sequential patterns
-			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
-
-			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
-
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
+//
+//		String outputPath = clustersOutputFileName;
+//		// Load a sequence database
+//		double support = 0.01;
+//
+//		boolean keepPatterns = true;
+//		boolean verbose = false;
+//
+//		AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
+//		boolean dfs = true;
+//
+//		// if you set the following parameter to true, the sequence ids of the
+//		// sequences where
+//		// each pattern appears will be shown in the result
+//		boolean outputSequenceIdentifiers = true;
+//
+//		IdListCreator idListCreator = IdListCreator_FatBitmap.getInstance();
+//
+//		CandidateGenerator candidateGenerator = CandidateGenerator_Qualitative.getInstance();
+//
+//		SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
+//
+//		try {
+//
+//			sequenceDatabase.loadFile(convertedInstancesFileName, support);
+//
+////			System.out.println(sequenceDatabase.toString());
+//
+//			AlgoSPADE algorithm = new AlgoSPADE(support, dfs, abstractionCreator);
+//
+//			algorithm.runAlgorithm(sequenceDatabase, candidateGenerator, keepPatterns, verbose, outputPath,
+//					outputSequenceIdentifiers);
+//			System.out.println("Minimum support (relative) = " + support);
+//			System.out.println(algorithm.getNumberOfFrequentPatterns() + " frequent patterns.");
+//
+//			System.out.println(algorithm.printStatistics());
+//
+//			// analysis of the generated sequential patterns
+//			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
+//
+//			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
+//
+//		} catch (UnsupportedEncodingException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 	}
 
@@ -724,13 +718,13 @@ public class IncidentInstancesClusterGenerator {
 		String input = convertedInstancesFileName;
 		String output = clustersOutputFileName;
 
-		int k = 60; // number of sequential patterns to find
+		int k = 100; // number of sequential patterns to find
 
 		// Create an instance of the algorithm
 		AlgoTKS algo = new AlgoTKS();
 
 		// This optional parameter allows to specify the minimum pattern length:
-		// algo.setMinimumPatternLength(6); // optional
+		 algo.setMinimumPatternLength(3); // optional
 
 		// This optional parameter allows to specify the maximum pattern length:
 		// algo.setMaximumPatternLength(4); // optional
