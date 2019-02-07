@@ -22,6 +22,7 @@ import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoKMeans;
 import ca.pfv.spmf.algorithms.clustering.optics.AlgoOPTICS;
 import ca.pfv.spmf.algorithms.clustering.optics.DoubleArrayOPTICS;
 import ca.pfv.spmf.algorithms.clustering.text_clusterer.TextClusterAlgo;
+import ca.pfv.spmf.algorithms.sequentialpatterns.occur.AlgoOccur;
 import ca.pfv.spmf.algorithms.sequentialpatterns.prefixspan.AlgoPrefixSpan;
 import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.AlgoSPADE;
 import ca.pfv.spmf.algorithms.sequentialpatterns.spade_spam_AGP.candidatePatternsGeneration.CandidateGenerator;
@@ -190,8 +191,6 @@ public class IncidentInstancesClusterGenerator {
 		// generateClustersUsingTextMining();
 
 		// ======Mine Frequent sequential patterns using the prefixspan algo
-		// convertedInstancesFileName =
-		// toSPMFsequentialPatternFormat(instances);
 		// mineSequencesUsingPrefixSpanAlgo();
 
 		// ======Mine Closed Frequent sequential patterns using the ClaSP
@@ -199,12 +198,12 @@ public class IncidentInstancesClusterGenerator {
 		// mineClosedSequencesUsingClaSPAlgo();
 
 		// ======Mine Frequent sequential patterns using the SPADE algo
-//		mineSequentialPatternsUsingSPADE();
-		
-		// ======Mine Frequent sequential patterns using the TKS 
-		//finds top-k sequential patterns
+		// mineSequentialPatternsUsingSPADE();
+
+		// ======Mine Frequent sequential patterns using the TKS
+		// finds top-k sequential patterns
 		mineSequentialPatternsUsingTKSAlgo();
-		
+
 		System.out.println("\n>>DONE");
 
 	}
@@ -559,6 +558,9 @@ public class IncidentInstancesClusterGenerator {
 		}
 	}
 
+	/***********************************
+	 * SEQUENTIAL PATTERN MINING
+	 */
 	protected void mineSequencesUsingPrefixSpanAlgo() {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
@@ -566,7 +568,7 @@ public class IncidentInstancesClusterGenerator {
 		// Create an instance of the algorithm with minsup = 50 %
 		AlgoPrefixSpan algo = new AlgoPrefixSpan();
 
-		int minsup = 5; // we use a minimum support of 2 sequences.
+		int minsup = 13; // use a minimum support of x sequences.
 
 		// if you set the following parameter to true, the sequence ids of the
 		// sequences where
@@ -577,7 +579,14 @@ public class IncidentInstancesClusterGenerator {
 		try {
 
 			algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, minsup);
+
 			algo.printStatistics();
+
+			// analysis of the generated sequential patterns
+			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
+
+			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -687,6 +696,11 @@ public class IncidentInstancesClusterGenerator {
 
 			System.out.println(algorithm.printStatistics());
 
+			// analysis of the generated sequential patterns
+			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
+
+			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
+
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -698,65 +712,100 @@ public class IncidentInstancesClusterGenerator {
 	}
 
 	protected void mineSequentialPatternsUsingTKSAlgo() {
-	
+
 		/**
-		 * http://www.philippe-fournier-viger.com/spmf/TKS.php
-		 * fastest Top-K sequential pattern recognition algo
+		 * http://www.philippe-fournier-viger.com/spmf/TKS.php fastest Top-K
+		 * sequential pattern recognition algo
 		 */
-		
+
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
-		
+
 		// Load a sequence database
 		String input = convertedInstancesFileName;
 		String output = clustersOutputFileName;
-		
-		int k=10; //number of sequential patterns to find
-		
-		// Create an instance of the algorithm 
-		AlgoTKS algo = new AlgoTKS(); 
-		
+
+		int k = 60; // number of sequential patterns to find
+
+		// Create an instance of the algorithm
+		AlgoTKS algo = new AlgoTKS();
+
 		// This optional parameter allows to specify the minimum pattern length:
-//		algo.setMinimumPatternLength(3);  // optional
+		// algo.setMinimumPatternLength(6); // optional
 
 		// This optional parameter allows to specify the maximum pattern length:
-//		algo.setMaximumPatternLength(4);  // optional
-		
+		// algo.setMaximumPatternLength(4); // optional
+
 		// This optional parameter allows to specify constraints that some
 		// items MUST appear in the patterns found by TKS
-		// E.g.: This requires that items 1 and 3 appears in every patterns found
-//		algo.setMustAppearItems(new int[] {63});
-		
+		// E.g.: This requires that items 1 and 3 appears in every patterns
+		// found
+		// algo.setMustAppearItems(new int[] {63});
+
 		// This optional parameter allows to specify the max gap between two
-		// itemsets in a pattern. If set to 1, only patterns of contiguous itemsets
+		// itemsets in a pattern. If set to 1, only patterns of contiguous
+		// itemsets
 		// will be found (no gap).
-//		algo.setMaxGap(2);
-		
-	    // if you set the following parameter to true, the sequence ids of the sequences where
-        // each pattern appears will be shown in the result
+		 algo.setMaxGap(1);
+
+		// if you set the following parameter to true, the sequence ids of the
+		// sequences where
+		// each pattern appears will be shown in the result
 		algo.showSequenceIdentifiersInOutput(true);
-		
+
 		// execute the algorithm, which returns some patterns
 		try {
-			
+
 			PriorityQueue<PatternTKS> patterns = algo.runAlgorithm(input, output, k);
 
 			// save results to file
-			algo.writeResultTofile(output);   
+			algo.writeResultTofile(output);
 			algo.printStatistics();
-			
+
+			// analysis of the generated sequential patterns
+			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
+
+			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}  
-		
+		}
+
 	}
-	
-	
-	public static String fileToPath(String filename) throws UnsupportedEncodingException {
-		URL url = IncidentInstancesClusterGenerator.class.getResource(filename);
-		System.out.println("tst "+url.toExternalForm());
-		return java.net.URLDecoder.decode(url.getPath(), "UTF-8");
+
+	protected void analyseGeneratedSequencePatterns(String convertedInstancesFile, String patternsFile,
+			String outputFile) {
+
+		// post analysis of output generated by a sequential pattern mining
+		// algorithm such as PrefixSpan
+
+		// Create an instance of the algorithm with minsup = 50 %
+		AlgoOccur algo = new AlgoOccur();
+
+		// execute the algorithm
+		try {
+
+			File file = new File(outputFile);
+
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			algo.runAlgorithm(convertedInstancesFile, patternsFile, outputFile);
+			algo.printStatistics();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
+
+//	public static String fileToPath(String filename) throws UnsupportedEncodingException {
+//		URL url = IncidentInstancesClusterGenerator.class.getResource(filename);
+//		System.out.println("tst " + url.toExternalForm());
+//		return java.net.URLDecoder.decode(url.getPath(), "UTF-8");
+//	}
 
 	protected String toSPMFsequentialPatternFormat(List<GraphPath> instances) {
 
@@ -791,7 +840,9 @@ public class IncidentInstancesClusterGenerator {
 		return convertedInstancesFileName;
 	}
 
+	
 	/**************** WEKA *********************/
+	/*******************************************/
 	/*******************************************/
 
 	protected void clusterUsingWeka() {
@@ -1268,8 +1319,11 @@ public class IncidentInstancesClusterGenerator {
 
 		return null;
 	}
-
+	
 	/******* printers *********/
+	/**************************/
+	/**************************/
+	/**************************/
 
 	public void printClusters(List<Cluster> clusters) {
 
@@ -1350,7 +1404,7 @@ public class IncidentInstancesClusterGenerator {
 
 		IncidentInstancesClusterGenerator tester = new IncidentInstancesClusterGenerator();
 
-		String fileName = "D:/Bigrapher data/lero/output/2_4003.json";
+		String fileName = "D:/Bigrapher data/lero/output/2_10000.json";
 
 		// using SPMF library
 		tester.generateClusters(fileName);
