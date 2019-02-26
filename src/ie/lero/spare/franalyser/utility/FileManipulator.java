@@ -7,9 +7,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -140,7 +142,7 @@ public class FileManipulator {
 		return result.toString().split("\n");
 	}
 
-	public static List<GraphPath> readInstantiatorInstancesFile(String fileName) {
+	public static Map<Integer, GraphPath> readInstantiatorInstancesFile(String fileName) {
 
 		if (fileName == null || fileName.isEmpty()) {
 			System.err.println("Error reading file: " + fileName + ". File name is empty.");
@@ -159,7 +161,7 @@ public class FileManipulator {
 			return null;
 		}
 
-		List<GraphPath> instances = new LinkedList<GraphPath>();
+		Map<Integer, GraphPath> instances = new HashMap<Integer,GraphPath>();
 
 		FileReader reader;
 		boolean isCompactFormat = true;
@@ -269,7 +271,7 @@ public class FileManipulator {
 						tmpPath.setTransitionActions(actions);
 
 						// add to the list
-						instances.add(tmpPath);
+						instances.put(instanceID, tmpPath);
 					}
 
 					reader.close();

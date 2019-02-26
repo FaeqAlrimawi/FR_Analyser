@@ -2,11 +2,13 @@ package ie.lero.spare.pattern_instantiation;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoKMeans;
 import ca.pfv.spmf.algorithms.clustering.optics.AlgoOPTICS;
 import ca.pfv.spmf.algorithms.clustering.optics.DoubleArrayOPTICS;
 import ca.pfv.spmf.algorithms.clustering.text_clusterer.TextClusterAlgo;
+import ca.pfv.spmf.algorithms.frequentpatterns.fpgrowth.AlgoFPGrowth;
 import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.AlgoClaSP;
 import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.dataStructures.creators.AbstractionCreator;
 import ca.pfv.spmf.algorithms.sequentialpatterns.clasp_AGP.dataStructures.creators.AbstractionCreator_Qualitative;
@@ -47,7 +50,9 @@ import weka.filters.unsupervised.attribute.Remove;
 
 public class IncidentInstancesClusterGenerator {
 
-	List<GraphPath> instances;
+	//instances (traces). key is trace ID value is the trace as GraphPath object
+	Map<Integer, GraphPath> instances;
+	
 	String instanceFileName;
 	String convertedInstancesFileName = "convertedInstances.txt";
 	int numberOFClusters = 10;
@@ -77,6 +82,9 @@ public class IncidentInstancesClusterGenerator {
 
 	Map<String, Integer> systemActions;
 
+	// shortest traces
+	Map<Integer, GraphPath> shortestTraces;
+
 	// prints a number of instances for each cluster
 	int lengthToPrint = 5;
 
@@ -86,6 +94,8 @@ public class IncidentInstancesClusterGenerator {
 	public IncidentInstancesClusterGenerator() {
 
 		systemActions = new HashMap<String, Integer>();
+
+		shortestTraces = new HashMap<Integer, GraphPath>();
 
 		int numberOfStates = 10000;
 		// PADDING_ACTION = 0;
@@ -142,7 +152,7 @@ public class IncidentInstancesClusterGenerator {
 
 	void generateClusters() {
 
-		System.out.println("reading instances from: " + instanceFileName);
+		System.out.println(">>Reading instances from: " + instanceFileName);
 
 		// load instances from file
 		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
@@ -153,6 +163,9 @@ public class IncidentInstancesClusterGenerator {
 			return;
 		}
 
+		//find shortest traces to do analysis over
+		findShortestTraces();
+		
 		// System.out.println(">>Converting instances to data mining tech
 		// format...");
 
@@ -167,40 +180,45 @@ public class IncidentInstancesClusterGenerator {
 		// values
 		distanceFunction = new DistanceEuclidian();
 
-		// apply cluster algorithm (K-mean)
+		/** apply cluster algorithm (K-mean) **/
 		// clusters = generateClustersUsingKMean();
 		// printClustersWithMean(clusters);
 
-		// apply cluster algorithm (BiSect implementation)
+		/** apply cluster algorithm (BiSect implementation) **/
 		// generateClustersUsingKMeanUsingBiSect();
 		// printClusters();
 
-		// using OPTIC algorithm to find clusters
+		/** using OPTIC algorithm to find clusters **/
 		// List<Cluster> clus = generateClustersUsingOPTICS();
 		// printClustersOPTIC(clus);
 
-		// using DBSCAN algorithm
+		/** using DBSCAN algorithm **/
 		// List<Cluster> clus = generateClustersUsingDBSCAN();
 		// printClustersOPTIC(clus);
 
-		// ======text based clustering
+		/** ======text based clustering **/
 		// convertedInstancesFileName = convertInstancesToTextMiningFormat();
 		// generateClustersUsingTextMining();
 
-		// ======Mine Frequent sequential patterns using the prefixspan algo
+		/**
+		 * ======Mine Frequent sequential patterns using the prefixspan algo
+		 **/
 		// mineSequencesUsingPrefixSpanAlgo();
 
-		// ======Mine Closed Frequent sequential patterns using the ClaSP
+		/** ======Mine Closed Frequent sequential patterns using the ClaSP **/
 		// algo
-		 mineClosedSequencesUsingClaSPAlgo();
+		// mineClosedSequencesUsingClaSPAlgo();
 
-		// ======Mine Frequent sequential patterns using the SPADE algo
-//		 mineSequentialPatternsUsingSPADE();
+		/** ======Mine Frequent sequential patterns using the SPADE algo **/
+		// mineSequentialPatternsUsingSPADE();
 
-		// ======Mine Frequent sequential patterns using the TKS
+		/** ======Mine Frequent sequential patterns using the TKS **/
 		// finds top-k sequential patterns
-		//allows to find contiguous sequence patterns
-//		mineSequentialPatternsUsingTKSAlgo();
+		// allows to find contiguous sequence patterns
+		mineSequentialPatternsUsingTKSAlgo(shortestTraces.values());
+
+		/** ======Mine Frequent Itemsets using FP-Growth algo **/
+		// mineFrequentItemsetsUsingFP_GrowthAlgo();
 
 		System.out.println("\n>>DONE");
 
@@ -209,7 +227,7 @@ public class IncidentInstancesClusterGenerator {
 	void generateClusters(String fileName) {
 
 		instanceFileName = fileName;
-
+		
 		clustersOutputFolder = instanceFileName.substring(0, instanceFileName.lastIndexOf("/")) + "/" + clusterFolder;
 
 		File outputFolder = new File(clustersOutputFolder);
@@ -556,12 +574,13 @@ public class IncidentInstancesClusterGenerator {
 		}
 	}
 
-	/***********************************
-	 * SEQUENTIAL PATTERN MINING
-	 */
-	protected void mineSequencesUsingPrefixSpanAlgo() {
+	/**************************************/
+	/***** SEQUENTIAL PATTERN MINING ******/
+	/**************************************/
 
-		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
+	protected void mineSequencesUsingPrefixSpanAlgo(Collection<GraphPath> traces) {
+
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances.values());
 
 		// Create an instance of the algorithm with minsup = 50 %
 		AlgoPrefixSpan algo = new AlgoPrefixSpan();
@@ -592,139 +611,144 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-	protected void mineClosedSequencesUsingClaSPAlgo() {
+	protected void mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
 
-		 convertedInstancesFileName =
-		 toSPMFsequentialPatternFormat(instances);
-		
-		 // Load a sequence database
-		 double support = 0.1;
-		
-		 boolean keepPatterns = true;
-		 boolean verbose = true;
-		 boolean findClosedPatterns = true;
-		 boolean executePruningMethods = true;
-		 // if you set the following parameter to true, the sequence ids of the sequences where
-		 // each pattern appears will be shown in the result
-		 boolean outputSequenceIdentifiers = true;
-		
-		 AbstractionCreator abstractionCreator =
-		 AbstractionCreator_Qualitative.getInstance();
-		 IdListCreator idListCreator =
-		 IdListCreatorStandard_Map.getInstance();
-		
-		 SequenceDatabase sequenceDatabase = new
-		 SequenceDatabase(abstractionCreator, idListCreator);
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances.values());
 
-		 double relativeSupport;
-		
-		 try {
-		
-		 relativeSupport =
-		 sequenceDatabase.loadFile(convertedInstancesFileName, support);
-		
-		 //double relativeSupport =
-//		 sequenceDatabase.loadFile(fileToPath("gazelle.txt"), support);
-		
-		 AlgoClaSP algorithm = new AlgoClaSP(relativeSupport,
-		 abstractionCreator, findClosedPatterns, executePruningMethods);
-		
-		 
-		 algorithm.runAlgorithm(sequenceDatabase, keepPatterns, verbose,
-		 clustersOutputFileName,outputSequenceIdentifiers);
-	
-		 System.out.println("Minsup (relative) : " + support);
-		 System.out.println(algorithm.getNumberOfFrequentPatterns() + "patterns found.");
-		
-		 if (verbose && keepPatterns) {
-		 System.out.println(algorithm.printStatistics());
-		 }
-		
-		 } catch (UnsupportedEncodingException e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 } catch (IOException e) {
-		 // TODO Auto-generated catch block
-		 e.printStackTrace();
-		 }
+		// Load a sequence database
+		double support = 0.1;
+
+		boolean keepPatterns = true;
+		boolean verbose = true;
+		boolean findClosedPatterns = true;
+		boolean executePruningMethods = true;
+		// if you set the following parameter to true, the sequence ids of the
+		// sequences where
+		// each pattern appears will be shown in the result
+		boolean outputSequenceIdentifiers = true;
+
+		AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
+		IdListCreator idListCreator = IdListCreatorStandard_Map.getInstance();
+
+		SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
+
+		double relativeSupport;
+
+		try {
+
+			relativeSupport = sequenceDatabase.loadFile(convertedInstancesFileName, support);
+
+			// double relativeSupport =
+			// sequenceDatabase.loadFile(fileToPath("gazelle.txt"), support);
+
+			AlgoClaSP algorithm = new AlgoClaSP(relativeSupport, abstractionCreator, findClosedPatterns,
+					executePruningMethods);
+
+			algorithm.runAlgorithm(sequenceDatabase, keepPatterns, verbose, clustersOutputFileName,
+					outputSequenceIdentifiers);
+
+			System.out.println("Minsup (relative) : " + support);
+			System.out.println(algorithm.getNumberOfFrequentPatterns() + "patterns found.");
+
+			if (verbose && keepPatterns) {
+				System.out.println(algorithm.printStatistics());
+			}
+
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
-	protected void mineSequentialPatternsUsingSPADE() {
+	protected void mineSequentialPatternsUsingSPADE(Collection<GraphPath> traces) {
 
-//		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
-//
-//		String outputPath = clustersOutputFileName;
-//		// Load a sequence database
-//		double support = 0.01;
-//
-//		boolean keepPatterns = true;
-//		boolean verbose = false;
-//
-//		AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
-//		boolean dfs = true;
-//
-//		// if you set the following parameter to true, the sequence ids of the
-//		// sequences where
-//		// each pattern appears will be shown in the result
-//		boolean outputSequenceIdentifiers = true;
-//
-//		IdListCreator idListCreator = IdListCreator_FatBitmap.getInstance();
-//
-//		CandidateGenerator candidateGenerator = CandidateGenerator_Qualitative.getInstance();
-//
-//		SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
-//
-//		try {
-//
-//			sequenceDatabase.loadFile(convertedInstancesFileName, support);
-//
-////			System.out.println(sequenceDatabase.toString());
-//
-//			AlgoSPADE algorithm = new AlgoSPADE(support, dfs, abstractionCreator);
-//
-//			algorithm.runAlgorithm(sequenceDatabase, candidateGenerator, keepPatterns, verbose, outputPath,
-//					outputSequenceIdentifiers);
-//			System.out.println("Minimum support (relative) = " + support);
-//			System.out.println(algorithm.getNumberOfFrequentPatterns() + " frequent patterns.");
-//
-//			System.out.println(algorithm.printStatistics());
-//
-//			// analysis of the generated sequential patterns
-//			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
-//
-//			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
-//
-//		} catch (UnsupportedEncodingException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// convertedInstancesFileName =
+		// toSPMFsequentialPatternFormat(instances);
+		//
+		// String outputPath = clustersOutputFileName;
+		// // Load a sequence database
+		// double support = 0.01;
+		//
+		// boolean keepPatterns = true;
+		// boolean verbose = false;
+		//
+		// AbstractionCreator abstractionCreator =
+		// AbstractionCreator_Qualitative.getInstance();
+		// boolean dfs = true;
+		//
+		// // if you set the following parameter to true, the sequence ids of
+		// the
+		// // sequences where
+		// // each pattern appears will be shown in the result
+		// boolean outputSequenceIdentifiers = true;
+		//
+		// IdListCreator idListCreator = IdListCreator_FatBitmap.getInstance();
+		//
+		// CandidateGenerator candidateGenerator =
+		// CandidateGenerator_Qualitative.getInstance();
+		//
+		// SequenceDatabase sequenceDatabase = new
+		// SequenceDatabase(abstractionCreator, idListCreator);
+		//
+		// try {
+		//
+		// sequenceDatabase.loadFile(convertedInstancesFileName, support);
+		//
+		//// System.out.println(sequenceDatabase.toString());
+		//
+		// AlgoSPADE algorithm = new AlgoSPADE(support, dfs,
+		// abstractionCreator);
+		//
+		// algorithm.runAlgorithm(sequenceDatabase, candidateGenerator,
+		// keepPatterns, verbose, outputPath,
+		// outputSequenceIdentifiers);
+		// System.out.println("Minimum support (relative) = " + support);
+		// System.out.println(algorithm.getNumberOfFrequentPatterns() + "
+		// frequent patterns.");
+		//
+		// System.out.println(algorithm.printStatistics());
+		//
+		// // analysis of the generated sequential patterns
+		// String analysisFile = clustersOutputFolder +
+		// "/sequentialPatternAnalysis.txt";
+		//
+		// analyseGeneratedSequencePatterns(convertedInstancesFileName,
+		// clustersOutputFileName, analysisFile);
+		//
+		// } catch (UnsupportedEncodingException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 
 	}
 
-	protected void mineSequentialPatternsUsingTKSAlgo() {
+	protected void mineSequentialPatternsUsingTKSAlgo(Collection<GraphPath> traces) {
 
 		/**
 		 * http://www.philippe-fournier-viger.com/spmf/TKS.php fastest Top-K
 		 * sequential pattern recognition algo
 		 */
 
-		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances);
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
 
 		// Load a sequence database
 		String input = convertedInstancesFileName;
 		String output = clustersOutputFileName;
 
-		int k = 100; // number of sequential patterns to find
+		int k = 10; // number of sequential patterns to find
 
 		// Create an instance of the algorithm
 		AlgoTKS algo = new AlgoTKS();
 
 		// This optional parameter allows to specify the minimum pattern length:
-		 algo.setMinimumPatternLength(3); // optional
+		algo.setMinimumPatternLength(4); // optional
 
 		// This optional parameter allows to specify the maximum pattern length:
 		// algo.setMaximumPatternLength(4); // optional
@@ -739,7 +763,7 @@ public class IncidentInstancesClusterGenerator {
 		// itemsets in a pattern. If set to 1, only patterns of contiguous
 		// itemsets
 		// will be found (no gap).
-		 algo.setMaxGap(1);
+		algo.setMaxGap(1);
 
 		// if you set the following parameter to true, the sequence ids of the
 		// sequences where
@@ -795,13 +819,14 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-//	public static String fileToPath(String filename) throws UnsupportedEncodingException {
-//		URL url = IncidentInstancesClusterGenerator.class.getResource(filename);
-//		System.out.println("tst " + url.toExternalForm());
-//		return java.net.URLDecoder.decode(url.getPath(), "UTF-8");
-//	}
+	// public static String fileToPath(String filename) throws
+	// UnsupportedEncodingException {
+	// URL url = IncidentInstancesClusterGenerator.class.getResource(filename);
+	// System.out.println("tst " + url.toExternalForm());
+	// return java.net.URLDecoder.decode(url.getPath(), "UTF-8");
+	// }
 
-	protected String toSPMFsequentialPatternFormat(List<GraphPath> instances) {
+	protected String toSPMFsequentialPatternFormat(Collection<GraphPath> instances) {
 
 		// the format is as follows:
 		// state-0 <space> -1 <space> state-1 ... state-n -2
@@ -834,7 +859,71 @@ public class IncidentInstancesClusterGenerator {
 		return convertedInstancesFileName;
 	}
 
-	
+	/**************************************/
+	/****** FREQUENT ITEMSETS MINING *******/
+	/**************************************/
+
+	protected void mineFrequentItemsetsUsingFP_GrowthAlgo() {
+
+		convertedInstancesFileName = toSPMFFrequentItemsetsFormat(instances.values());
+
+		// percentage of traces in which the item set appears
+		// e.g., 10% in a 100 traces means that an item set should appear in at
+		// least 10 traces out of the 100
+		double minsup = 0.5; // means a minsup of 2 transaction (we used a
+								// relative support)
+
+		// Applying the FPGROWTH
+		AlgoFPGrowth algo = new AlgoFPGrowth();
+
+		// Uncomment the following line to set the maximum pattern length
+		// (number of items per itemset, e.g. 3 )
+		// algo.setMaximumPatternLength(3);
+
+		try {
+
+			algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, minsup);
+			algo.printStats();
+
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	protected String toSPMFFrequentItemsetsFormat(Collection<GraphPath> instances) {
+
+		// the format is as follows:
+		// state-0 <space> state-1 ... state-n
+
+		int i = 0;
+		String fileLinSeparator = System.getProperty("line.separator");
+		final String DATA_SEPARATOR = " ";
+
+		StringBuilder str = new StringBuilder();
+
+		for (GraphPath sequence : instances) {
+
+			List<Integer> states = sequence.getStateTransitions();
+
+			for (i = 0; i < states.size() - 1; i++) {
+				// add state
+				str.append(states.get(i)).append(DATA_SEPARATOR);
+			}
+
+			// add last state
+			str.append(states.get(i)).append(fileLinSeparator);
+		}
+
+		writeToFile(str.toString(), convertedInstancesFileName);
+
+		return convertedInstancesFileName;
+	}
+
 	/**************** WEKA *********************/
 	/*******************************************/
 	/*******************************************/
@@ -848,7 +937,7 @@ public class IncidentInstancesClusterGenerator {
 
 		// convert instances to ARFF (Attribute Relation File Format)
 		// generated file contains as the first field in a row the instance id
-		wekaInstancesFilePath = convertInstancesActionsToARFF(instances);
+		wekaInstancesFilePath = convertInstancesActionsToARFF(instances.values());
 
 		try {
 
@@ -1186,7 +1275,7 @@ public class IncidentInstancesClusterGenerator {
 		return null;
 	}
 
-	public String convertInstancesActionsToARFF(List<GraphPath> instances) {
+	public String convertInstancesActionsToARFF(Collection<GraphPath> instances) {
 
 		/**
 		 * Convert instances action into ARFF
@@ -1227,7 +1316,7 @@ public class IncidentInstancesClusterGenerator {
 		StringBuilder builder = new StringBuilder();
 
 		if (instances != null && !instances.isEmpty()) {
-			shortestTransition = instances.get(0).getStateTransitions().size();
+			shortestTransition = 100;//instances.get(0).getStateTransitions().size();
 		}
 
 		// find longest and shortest transitions
@@ -1313,7 +1402,70 @@ public class IncidentInstancesClusterGenerator {
 
 		return null;
 	}
-	
+
+	/********* Utilities *********/
+	/**************************/
+	/**************************/
+	/**************************/
+
+	void findShortestTraces() {
+
+		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
+
+		int numberOfStates = 4;
+
+		String separator = " ";
+		StringBuilder bldr = new StringBuilder();
+
+		// contains the ids separated by spaces
+		// String shortestTracesFileName =
+		// instanceFileName.substring(instanceFileName.lastIndexOf("/")+1);
+
+		// remove .json and add extension .txt
+		String shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
+
+		File file = new File(shortestTracesFileName);
+
+		// if shortest traces already defined for the given traces then read the
+		// file
+		if (file.isFile()) {
+
+			// read shortest traces file (contains ids separated by space)
+			System.out.println(">>Loading shortest traces IDs from [" + shortestTracesFileName+"]");
+			String[] tracesIDs = FileManipulator.readFileNewLine(shortestTracesFileName);
+			
+			tracesIDs = tracesIDs[0].split(separator);
+			
+			for(String id : tracesIDs) {
+				int idInt = Integer.parseInt(id);
+				
+				shortestTraces.put(idInt, instances.get(idInt));
+			}
+			
+			System.out.println(shortestTraces.size());
+			
+		} else {
+			System.out.println(">>Identifying shortest traces in [" + instanceFileName +"]");
+			for (GraphPath trace : instances.values()) {
+
+				if (trace.getStateTransitions().size() == numberOfStates) {
+					shortestTraces.put(trace.getInstanceID(), trace);
+					bldr.append(trace.getInstanceID()).append(separator);
+				}
+			}
+
+			if (bldr.length() > 0) {
+				bldr.deleteCharAt(bldr.length() - 1);//remove extra space
+			}
+			
+			//store to file
+			writeToFile(bldr.toString(), shortestTracesFileName);
+			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName +"]");
+		}
+		
+
+	}
+
 	/******* printers *********/
 	/**************************/
 	/**************************/
