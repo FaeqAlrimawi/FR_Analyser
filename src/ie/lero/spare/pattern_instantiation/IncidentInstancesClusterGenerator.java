@@ -16,7 +16,6 @@ import java.util.PriorityQueue;
 import java.util.Random;
 
 import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
-import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceEuclidian;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;
 import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoBisectingKMeans;
 import ca.pfv.spmf.algorithms.clustering.kmeans.AlgoKMeans;
@@ -50,9 +49,10 @@ import weka.filters.unsupervised.attribute.Remove;
 
 public class IncidentInstancesClusterGenerator {
 
-	//instances (traces). key is trace ID value is the trace as GraphPath object
+	// instances (traces). key is trace ID value is the trace as GraphPath
+	// object
 	Map<Integer, GraphPath> instances;
-	
+
 	String instanceFileName;
 	String convertedInstancesFileName = "convertedInstances.txt";
 	int numberOFClusters = 10;
@@ -90,6 +90,13 @@ public class IncidentInstancesClusterGenerator {
 
 	// weka attributes
 	String wekaInstancesFilePath = "wekaInstances.arff";
+
+	// holds clusters generated
+	List<ClusterWithMean> clusters;
+
+	boolean isAlreadyChecked = false;
+
+	String shortestTracesFileName;
 
 	public IncidentInstancesClusterGenerator() {
 
@@ -147,25 +154,12 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-	// holds clusters generated
-	List<ClusterWithMean> clusters;
-
 	void generateClusters() {
 
-		System.out.println(">>Reading instances from: " + instanceFileName);
+		// loads instances(or traces) from given file name 
+		// and finds shortest transitions
+		readTracesFromFile();
 
-		// load instances from file
-		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
-
-		// System.out.println(instances.get(0).getTransitionActions());
-		if (instances == null) {
-			System.out.println("Instances are null! Exiting");
-			return;
-		}
-
-		//find shortest traces to do analysis over
-		findShortestTraces();
-		
 		// System.out.println(">>Converting instances to data mining tech
 		// format...");
 
@@ -178,7 +172,7 @@ public class IncidentInstancesClusterGenerator {
 
 		// jaccard distance function is used for vectors that has only 0,1
 		// values
-		distanceFunction = new DistanceEuclidian();
+//		distanceFunction = new DistanceEuclidian();
 
 		/** apply cluster algorithm (K-mean) **/
 		// clusters = generateClustersUsingKMean();
@@ -207,7 +201,7 @@ public class IncidentInstancesClusterGenerator {
 
 		/** ======Mine Closed Frequent sequential patterns using the ClaSP **/
 		// algo
-		// mineClosedSequencesUsingClaSPAlgo();
+		mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
 
 		/** ======Mine Frequent sequential patterns using the SPADE algo **/
 		// mineSequentialPatternsUsingSPADE();
@@ -215,7 +209,7 @@ public class IncidentInstancesClusterGenerator {
 		/** ======Mine Frequent sequential patterns using the TKS **/
 		// finds top-k sequential patterns
 		// allows to find contiguous sequence patterns
-		mineSequentialPatternsUsingTKSAlgo(shortestTraces.values());
+		// mineSequentialPatternsUsingTKSAlgo(shortestTraces.values());
 
 		/** ======Mine Frequent Itemsets using FP-Growth algo **/
 		// mineFrequentItemsetsUsingFP_GrowthAlgo();
@@ -227,7 +221,7 @@ public class IncidentInstancesClusterGenerator {
 	void generateClusters(String fileName) {
 
 		instanceFileName = fileName;
-		
+
 		clustersOutputFolder = instanceFileName.substring(0, instanceFileName.lastIndexOf("/")) + "/" + clusterFolder;
 
 		File outputFolder = new File(clustersOutputFolder);
@@ -237,10 +231,101 @@ public class IncidentInstancesClusterGenerator {
 
 		}
 
-		clustersOutputFileName = clustersOutputFolder + "/" + clustersOutputFileName;
-		convertedInstancesFileName = clustersOutputFolder + "/" + convertedInstancesFileName;
+		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
+																							// clustersOutputFileName;
+		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
+																									// +
+		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
 
 		generateClusters();
+
+	}
+
+	void readTracesFromFile() {
+
+		File fileConvertedInstances = new File(convertedInstancesFileName);
+		File fileShortestInstances = new File(shortestTracesFileName);
+
+		// if the traces already read before and converted instances are
+		// generated as a file then skip loading
+		if (fileConvertedInstances.exists() && fileShortestInstances.exists()) {
+			isAlreadyChecked = true;
+			System.out.println(">>Traces were loaded before and shortest traces are identified."
+					+ "\n>>Converted traces from [" + convertedInstancesFileName + "] will be used."
+					+ "\n>>Shortest traces from [" + shortestTracesFileName + "] will be used");
+			return;
+		}
+
+		System.out.println(">>Reading instances from [" + instanceFileName + "]");
+
+		// load instances from file
+		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
+
+		// System.out.println(instances.get(0).getTransitionActions());
+		if (instances == null) {
+			System.out.println("Instances are null! Exiting");
+			return;
+		}
+
+		findShortestTraces();
+
+	}
+
+	void findShortestTraces() {
+
+		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
+
+		int numberOfStates = 4;
+
+		String separator = " ";
+		StringBuilder bldr = new StringBuilder();
+
+		// contains the ids separated by spaces
+		// String shortestTracesFileName =
+		// instanceFileName.substring(instanceFileName.lastIndexOf("/")+1);
+
+		// remove .json and add extension .txt
+		// String shortestTracesFileName = instanceFileName.replace(".json",
+		// "_shortestTracesIDs.txt");
+
+		File file = new File(shortestTracesFileName);
+
+		// if shortest traces already defined for the given traces then read the
+		// file
+		if (file.isFile()) {
+
+			// read shortest traces file (contains ids separated by space)
+			System.out.println(">>Loading shortest traces IDs from [" + shortestTracesFileName + "]");
+			String[] tracesIDs = FileManipulator.readFileNewLine(shortestTracesFileName);
+
+			tracesIDs = tracesIDs[0].split(separator);
+
+			for (String id : tracesIDs) {
+				int idInt = Integer.parseInt(id);
+
+				shortestTraces.put(idInt, instances.get(idInt));
+			}
+
+			System.out.println(shortestTraces.size());
+
+		} else {
+			System.out.println(">>Identifying shortest traces in [" + instanceFileName + "]");
+			for (GraphPath trace : instances.values()) {
+
+				if (trace.getStateTransitions().size() == numberOfStates) {
+					shortestTraces.put(trace.getInstanceID(), trace);
+					bldr.append(trace.getInstanceID()).append(separator);
+				}
+			}
+
+			if (bldr.length() > 0) {
+				bldr.deleteCharAt(bldr.length() - 1);// remove extra space
+			}
+
+			// store to file
+			writeToFile(bldr.toString(), shortestTracesFileName);
+			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName + "]");
+		}
 
 	}
 
@@ -580,7 +665,7 @@ public class IncidentInstancesClusterGenerator {
 
 	protected void mineSequencesUsingPrefixSpanAlgo(Collection<GraphPath> traces) {
 
-		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances.values());
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
 
 		// Create an instance of the algorithm with minsup = 50 %
 		AlgoPrefixSpan algo = new AlgoPrefixSpan();
@@ -613,10 +698,12 @@ public class IncidentInstancesClusterGenerator {
 
 	protected void mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
 
-		convertedInstancesFileName = toSPMFsequentialPatternFormat(instances.values());
+		if (!isAlreadyChecked) {
+			convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
+		}
 
 		// Load a sequence database
-		double support = 0.1;
+		double support = 0.02;
 
 		boolean keepPatterns = true;
 		boolean verbose = true;
@@ -638,6 +725,7 @@ public class IncidentInstancesClusterGenerator {
 
 			relativeSupport = sequenceDatabase.loadFile(convertedInstancesFileName, support);
 
+			
 			// double relativeSupport =
 			// sequenceDatabase.loadFile(fileToPath("gazelle.txt"), support);
 
@@ -647,13 +735,18 @@ public class IncidentInstancesClusterGenerator {
 			algorithm.runAlgorithm(sequenceDatabase, keepPatterns, verbose, clustersOutputFileName,
 					outputSequenceIdentifiers);
 
+			if(isAlreadyChecked) {
 			System.out.println("Minsup (relative) : " + support);
+			} else {
+				System.out.println("Minsup (relative) : " + support + " [" + support*traces.size()+"]");
+			}
+			
 			System.out.println(algorithm.getNumberOfFrequentPatterns() + "patterns found.");
 
 			if (verbose && keepPatterns) {
 				System.out.println(algorithm.printStatistics());
 			}
-
+			
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -667,7 +760,7 @@ public class IncidentInstancesClusterGenerator {
 	protected void mineSequentialPatternsUsingSPADE(Collection<GraphPath> traces) {
 
 		// convertedInstancesFileName =
-		// toSPMFsequentialPatternFormat(instances);
+		// toSPMFsequentialPatternFormat(traces);
 		//
 		// String outputPath = clustersOutputFileName;
 		// // Load a sequence database
@@ -1316,7 +1409,7 @@ public class IncidentInstancesClusterGenerator {
 		StringBuilder builder = new StringBuilder();
 
 		if (instances != null && !instances.isEmpty()) {
-			shortestTransition = 100;//instances.get(0).getStateTransitions().size();
+			shortestTransition = 100;// instances.get(0).getStateTransitions().size();
 		}
 
 		// find longest and shortest transitions
@@ -1408,64 +1501,6 @@ public class IncidentInstancesClusterGenerator {
 	/**************************/
 	/**************************/
 
-	void findShortestTraces() {
-
-		// shortest trace is set to be 3 actions (or 4 states (i.e. actions+1)
-
-		int numberOfStates = 4;
-
-		String separator = " ";
-		StringBuilder bldr = new StringBuilder();
-
-		// contains the ids separated by spaces
-		// String shortestTracesFileName =
-		// instanceFileName.substring(instanceFileName.lastIndexOf("/")+1);
-
-		// remove .json and add extension .txt
-		String shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
-
-		File file = new File(shortestTracesFileName);
-
-		// if shortest traces already defined for the given traces then read the
-		// file
-		if (file.isFile()) {
-
-			// read shortest traces file (contains ids separated by space)
-			System.out.println(">>Loading shortest traces IDs from [" + shortestTracesFileName+"]");
-			String[] tracesIDs = FileManipulator.readFileNewLine(shortestTracesFileName);
-			
-			tracesIDs = tracesIDs[0].split(separator);
-			
-			for(String id : tracesIDs) {
-				int idInt = Integer.parseInt(id);
-				
-				shortestTraces.put(idInt, instances.get(idInt));
-			}
-			
-			System.out.println(shortestTraces.size());
-			
-		} else {
-			System.out.println(">>Identifying shortest traces in [" + instanceFileName +"]");
-			for (GraphPath trace : instances.values()) {
-
-				if (trace.getStateTransitions().size() == numberOfStates) {
-					shortestTraces.put(trace.getInstanceID(), trace);
-					bldr.append(trace.getInstanceID()).append(separator);
-				}
-			}
-
-			if (bldr.length() > 0) {
-				bldr.deleteCharAt(bldr.length() - 1);//remove extra space
-			}
-			
-			//store to file
-			writeToFile(bldr.toString(), shortestTracesFileName);
-			System.out.println(">>Shortest traces IDs are stored in [" + shortestTracesFileName +"]");
-		}
-		
-
-	}
-
 	/******* printers *********/
 	/**************************/
 	/**************************/
@@ -1550,7 +1585,7 @@ public class IncidentInstancesClusterGenerator {
 
 		IncidentInstancesClusterGenerator tester = new IncidentInstancesClusterGenerator();
 
-		String fileName = "D:/Bigrapher data/lero/output/2_10000.json";
+		String fileName = "D:/Bigrapher data/lero/lero100K/output/2_20000.json";
 
 		// using SPMF library
 		tester.generateClusters(fileName);
