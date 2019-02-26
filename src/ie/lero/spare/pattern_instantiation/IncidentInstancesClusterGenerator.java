@@ -703,7 +703,7 @@ public class IncidentInstancesClusterGenerator {
 		}
 
 		// Load a sequence database
-		double support = 0.02;
+		double support = 0.013;
 
 		boolean keepPatterns = true;
 		boolean verbose = true;
@@ -735,10 +735,11 @@ public class IncidentInstancesClusterGenerator {
 			algorithm.runAlgorithm(sequenceDatabase, keepPatterns, verbose, clustersOutputFileName,
 					outputSequenceIdentifiers);
 
+			String msg = "Minimum percentage of traces to appear in: ";
 			if(isAlreadyChecked) {
-			System.out.println("Minsup (relative) : " + support);
+			System.out.println(msg + support);
 			} else {
-				System.out.println("Minsup (relative) : " + support + " [" + support*traces.size()+"]");
+				System.out.println(msg + support + " [" + Math.ceil(support*traces.size())+"]");
 			}
 			
 			System.out.println(algorithm.getNumberOfFrequentPatterns() + "patterns found.");
@@ -1585,7 +1586,7 @@ public class IncidentInstancesClusterGenerator {
 
 		IncidentInstancesClusterGenerator tester = new IncidentInstancesClusterGenerator();
 
-		String fileName = "D:/Bigrapher data/lero/lero100K/output/2_20000.json";
+		String fileName = "D:/Bigrapher data/lero/lero100K/output/2_30000.json";
 
 		// using SPMF library
 		tester.generateClusters(fileName);
