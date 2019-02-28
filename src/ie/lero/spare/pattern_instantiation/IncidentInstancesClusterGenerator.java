@@ -197,14 +197,16 @@ public class IncidentInstancesClusterGenerator {
 		/**
 		 * ======Mine Frequent sequential patterns using the prefixspan algo
 		 **/
-		mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
-		
-//		int minimumNumOfTracesForPattern = 5;
-//		mineSequencesUsingPrefixSpanAlgo(shortestTraces.values(),minimumNumOfTracesForPattern);
+		 mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
+
+		// int minimumNumOfTracesForPattern = 5;
+		// mineSequencesUsingPrefixSpanAlgo(shortestTraces.values(),minimumNumOfTracesForPattern);
 
 		/** ======Mine Closed Frequent sequential patterns using the ClaSP **/
-		// algo
-		// mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
+//		mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
+		
+//		 int minimumNumOfTracesForPattern =1000;
+//		mineClosedSequencesUsingClaSPAlgo(instances.values(), minimumNumOfTracesForPattern);
 
 		/** ======Mine Frequent sequential patterns using the SPADE algo **/
 		// mineSequentialPatternsUsingSPADE();
@@ -246,8 +248,8 @@ public class IncidentInstancesClusterGenerator {
 
 	void readTracesFromFile() {
 
-		File fileConvertedInstances = new File(convertedInstancesFileName);
-		File fileShortestInstances = new File(shortestTracesFileName);
+//		File fileConvertedInstances = new File(convertedInstancesFileName);
+//		File fileShortestInstances = new File(shortestTracesFileName);
 
 		// if the traces already read before and converted instances are
 		// generated as a file then skip loading
@@ -299,7 +301,7 @@ public class IncidentInstancesClusterGenerator {
 		// String shortestTracesFileName = instanceFileName.replace(".json",
 		// "_shortestTracesIDs.txt");
 
-		File file = new File(shortestTracesFileName);
+//		File file = new File(shortestTracesFileName);
 
 		// if shortest traces already defined for the given traces then read the
 		// file
@@ -683,35 +685,20 @@ public class IncidentInstancesClusterGenerator {
 		// Create an instance of the algorithm with minsup = 50 %
 		AlgoPrefixSpan algo = new AlgoPrefixSpan();
 
-		int minsup = 6; // use a minimum support of x sequences.
-
-		// if you set the following parameter to true, the sequence ids of the
-		// sequences where
-		// each pattern appears will be shown in the result
-		algo.setShowSequenceIdentifiers(true);
-
-		// execute the algorithm
 		try {
 
 			// run several times till you find max minsup that which after there
 			// will be no result
 
-			minsup = traces.size() / 2; // start value
 			boolean isMaxFound = false;
-			int tries = 1000;
+			int tries = traces.size() / 2 + 1;
 
 			// binary search
 			int left = 0;
 			int right = traces.size() - 1;
 			int mid = -1;
-			int midPrevious = -1;
-			
-			// while (!isMaxFound & tries > 0) {
-			while ((left <= right) & tries > 0) {
 
-//				if (left == right) {
-//					break;
-//				}
+			while ((left <= right) & tries > 0) {
 
 				mid = (int) Math.floor((left + right) / 2);
 
@@ -720,40 +707,41 @@ public class IncidentInstancesClusterGenerator {
 
 				// if there is output, then increase minsup. Else, decrease
 				if (lines != null && lines.length > 0 && !lines[0].isEmpty()) {
-					// minsup++;
-					// minsup= minsup+minsup/2;
 					left = mid + 1;
-					System.out.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = "+right);
+					System.out
+							.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
 					isMaxFound = true;
 				} else {
-					// minsup--;
-					// minsup= minsup-minsup/2;
-					 isMaxFound = false;
+					isMaxFound = false;
 					right = mid - 1;
-					System.out.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = "+right);
+					System.out
+							.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
 				}
+				
+				tries--;
 			}
 
-			//if the last mid (or minimum trace/minsup) has zero patterns, then decrement till a value is returned
-			if(!isMaxFound) {
-			while(mid > 0) {
-				
-				mid--;
-				
-				algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, mid);
-				String[] lines = FileManipulator.readFileNewLine(clustersOutputFileName);
+			// if the last mid (or minimum trace/minsup) has zero patterns, then
+			// decrement till a value is returned
+			if (!isMaxFound) {
+				while (mid > 0) {
 
-				// if there is output, then increase minsup. Else, decrease
-				if (lines != null && lines.length > 0 && !lines[0].isEmpty()) {
-					break;
+					mid--;
+
+					algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, mid);
+					String[] lines = FileManipulator.readFileNewLine(clustersOutputFileName);
+
+					// if there is output, then increase minsup. Else, decrease
+					if (lines != null && lines.length > 0 && !lines[0].isEmpty()) {
+						break;
+					}
 				}
-			}
-			} // else increase mid until there's no output. 
+			} // else increase mid until there's no output.
 			else {
-				while(mid < right) {
-					
+				while (mid < right) {
+
 					mid++;
-					
+
 					algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, mid);
 					String[] lines = FileManipulator.readFileNewLine(clustersOutputFileName);
 
@@ -764,17 +752,22 @@ public class IncidentInstancesClusterGenerator {
 					}
 				}
 			}
-			
+
 			System.out.println(">>Minimum traces is " + mid);
-			algo.runAlgorithm(convertedInstancesFileName, clustersOutputFileName, mid);
-			algo.printStatistics();
+			// algo.runAlgorithm(convertedInstancesFileName,
+			// clustersOutputFileName, mid);
+			// algo.printStatistics();
+			//
+			// // analysis of the generated sequential patterns
+			// String analysisFile = clustersOutputFolder +
+			// "/sequentialPatternAnalysis.txt";
+			//
+			// analyseGeneratedSequencePatterns(convertedInstancesFileName,
+			// clustersOutputFileName, analysisFile);
+			//
+			// getTracesIDsFromOutputFile(clustersOutputFileName);
 
-			// analysis of the generated sequential patterns
-			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
-
-			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
-
-			getTracesIDsFromOutputFile(clustersOutputFileName);
+			mineSequencesUsingPrefixSpanAlgo(traces, mid);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -785,9 +778,12 @@ public class IncidentInstancesClusterGenerator {
 
 	protected void mineSequencesUsingPrefixSpanAlgo(Collection<GraphPath> traces, int minimumTraces) {
 
-		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
+		File file = new File(convertedInstancesFileName);
 
-		// Create an instance of the algorithm with minsup = 50 %
+		if (!file.exists()) {
+			convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
+		}
+
 		AlgoPrefixSpan algo = new AlgoPrefixSpan();
 
 		int minsup = minimumTraces; // use a minimum support of x sequences.
@@ -817,13 +813,11 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-	protected void mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
+	protected void mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces, int minimumTraces) {
 
-		if (!isAlreadyChecked) {
-			convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
-		}
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
 
-		int numberOfTraces = 5;
+		int numberOfTraces = minimumTraces;
 
 		// Load a sequence database
 		double support = numberOfTraces * 1.0 / traces.size();
@@ -872,6 +866,194 @@ public class IncidentInstancesClusterGenerator {
 
 			// extracts traces ids from generated file
 			getTracesIDsFromOutputFile(clustersOutputFileName);
+
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	protected void mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
+
+		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
+
+		// Load a sequence database
+		 double support = 0;
+
+		boolean keepPatterns = true;
+		boolean verbose = false;
+		boolean findClosedPatterns = true;
+		boolean executePruningMethods = true;
+		// if you set the following parameter to true, the sequence ids of the
+		// sequences where
+		// each pattern appears will be shown in the result
+		boolean outputSequenceIdentifiers = true;
+
+
+		double relativeSupport;
+
+		int size = traces.size();
+		try {
+
+			// run several times till you find max minsup that which after there
+			// will be no result
+
+			boolean isMaxFound = false;
+			int tries = traces.size() / 2 + 1;
+
+			// binary search
+			int left = 0;
+			int right = traces.size() - 1;
+			int mid = -1;
+
+			while ((left <= right) & tries > 0) {
+
+				mid = (int) Math.floor((left + right) / 2);
+
+				support = mid * 1.0 / size;
+				
+				AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
+				IdListCreator idListCreator = IdListCreatorStandard_Map.getInstance();
+
+				SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
+
+				relativeSupport = sequenceDatabase.loadFile(convertedInstancesFileName, support);
+
+				AlgoClaSP algo = new AlgoClaSP(relativeSupport, abstractionCreator, findClosedPatterns,
+						executePruningMethods);
+
+				algo.runAlgorithm(sequenceDatabase, keepPatterns, verbose, clustersOutputFileName,
+						outputSequenceIdentifiers);
+//				String[] lines = FileManipulator.readFileNewLine(clustersOutputFileName);
+//
+//				// if there is output, then increase minsup. Else, decrease
+//				if (lines != null && lines.length > 0 && !lines[0].isEmpty()) {
+//					left = mid + 1;
+//					System.out
+//							.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+//					isMaxFound = true;
+//				} else {
+//					isMaxFound = false;
+//					right = mid - 1;
+//					System.out
+//							.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+//				}
+				
+				if(findClosedPatterns) {
+					if(algo.getNumberOfFrequentClosedPatterns() > 0) {
+						left = mid + 1;
+						System.out
+								.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+						isMaxFound = true;	
+					} else {
+						isMaxFound = false;
+						right = mid - 1;
+						System.out
+								.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+					}
+				} else {
+					if(algo.getNumberOfFrequentPatterns() > 0) {
+						left = mid + 1;
+						System.out
+								.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+						isMaxFound = true;	
+					} else {
+						isMaxFound = false;
+						right = mid - 1;
+						System.out
+								.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+					}
+				}
+
+				tries--;
+			}
+
+			// if the last mid (or minimum trace/minsup) has zero patterns, then
+			// decrement till a value is returned
+			if (!isMaxFound) {
+				while (mid > 0) {
+
+					mid--;
+
+					support = mid * 1.0 / size;
+					
+					AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
+					IdListCreator idListCreator = IdListCreatorStandard_Map.getInstance();
+
+					SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
+
+					relativeSupport = sequenceDatabase.loadFile(convertedInstancesFileName, support);
+
+					AlgoClaSP algo = new AlgoClaSP(relativeSupport, abstractionCreator, findClosedPatterns,
+							executePruningMethods);
+
+					algo.runAlgorithm(sequenceDatabase, keepPatterns, verbose, clustersOutputFileName,
+							outputSequenceIdentifiers);
+					String[] lines = FileManipulator.readFileNewLine(clustersOutputFileName);
+
+					// if there is output, then increase minsup. Else, decrease
+					if (lines != null && lines.length > 0 && !lines[0].isEmpty()) {
+						break;
+					}
+				}
+			} // else increase mid until there's no output.
+			else {
+				while (mid < right) {
+
+					mid++;
+
+					support = mid * 1.0 / size;
+					
+					AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
+					IdListCreator idListCreator = IdListCreatorStandard_Map.getInstance();
+
+					SequenceDatabase sequenceDatabase = new SequenceDatabase(abstractionCreator, idListCreator);
+
+					relativeSupport = sequenceDatabase.loadFile(convertedInstancesFileName, support);
+
+					AlgoClaSP algo = new AlgoClaSP(relativeSupport, abstractionCreator, findClosedPatterns,
+							executePruningMethods);
+
+					algo.runAlgorithm(sequenceDatabase, keepPatterns, verbose, clustersOutputFileName,
+							outputSequenceIdentifiers);
+					String[] lines = FileManipulator.readFileNewLine(clustersOutputFileName);
+
+					// if there is output, then increase minsup. Else, decrease
+					if (lines == null || lines.length == 0 || lines[0].isEmpty()) {
+						mid--;
+						break;
+					}
+				}
+			}
+
+			System.out.println(">>Minimum traces is " + mid);
+
+			mineClosedSequencesUsingClaSPAlgo(traces, mid);
+			// algo.runAlgorithm(sequenceDatabase, keepPatterns, verbose,
+			// clustersOutputFileName,
+			// outputSequenceIdentifiers);
+			//
+			// String msg = "Minimum percentage of traces to appear in: ";
+			// if (isAlreadyChecked) {
+			// System.out.println(msg + support);
+			// } else {
+			// System.out.println(msg + support + " [" + Math.ceil(support *
+			// traces.size()) + "]");
+			// }
+			//
+			// System.out.println(algo.getNumberOfFrequentPatterns() + "patterns
+			// found.");
+			//
+			// if (verbose && keepPatterns) {
+			// System.out.println(algo.printStatistics());
+			// }
+			//
+			// // extracts traces ids from generated file
+			// getTracesIDsFromOutputFile(clustersOutputFileName);
 
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -1757,7 +1939,7 @@ public class IncidentInstancesClusterGenerator {
 
 		IncidentInstancesClusterGenerator tester = new IncidentInstancesClusterGenerator();
 
-		String fileName = "D:/Bigrapher data/lero/lero100K/output/2_10000.json";
+		String fileName = "D:/Bigrapher data/lero/lero100K/output/2_60000.json";
 
 		// using SPMF library
 		tester.generateClusters(fileName);
