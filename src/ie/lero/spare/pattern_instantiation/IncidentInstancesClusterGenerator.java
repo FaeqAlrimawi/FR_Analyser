@@ -10,10 +10,12 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;
@@ -37,6 +39,7 @@ import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import ie.lero.spare.franalyser.utility.FileManipulator;
+import javafx.scene.shape.Line;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
 import weka.clusterers.Cobweb;
@@ -154,7 +157,76 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-	void generateClusters() {
+	boolean checkFile(String fileName) {
+		
+		if (fileName == null || fileName.isEmpty()) {
+			System.err.println("Given file name is NULL");
+			return false;
+		}
+
+		if (!fileName.endsWith("json")) {
+			System.err.println("file should be in JSON format (i.e. *.json)");
+			return false;
+		}
+
+		File file = new File(fileName);
+
+		if (!file.exists()) {
+			System.err.println("file [" + fileName + "] does NOT exist");
+			return false;
+		}
+
+		if (!file.isFile()) {
+			System.err.println("[" + fileName + "] is NOT a file");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	void generateClustersFromFolder(String folderPath) {
+
+		File inputFolder = new File(folderPath);
+
+		for (File file : inputFolder.listFiles()) {
+
+			if (file.isFile()) {
+				String filePath = file.getAbsolutePath();
+
+				if (filePath.endsWith(".json")) {
+					System.out.println("###### Generating clusters ######");
+					System.out.println("*File: " + filePath);
+
+					generateClustersFromFile(filePath);
+
+					System.out.println("\n");
+				}
+
+			}
+		}
+	}
+	
+	
+	void generateClustersFromFile(String fileName) {
+
+		if(!checkFile(fileName)){
+		
+			return;
+		}
+		
+		instanceFileName = fileName;
+		
+		File outputFolder = new File(clustersOutputFolder);
+		
+		if(!outputFolder.exists()) {
+			outputFolder.mkdir();
+		}
+		
+		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
+		// clustersOutputFileName;
+		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
+		// +
+		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
 
 		// loads instances(or traces) from given file name
 		// and finds shortest transitions
@@ -194,19 +266,113 @@ public class IncidentInstancesClusterGenerator {
 		// convertedInstancesFileName = convertInstancesToTextMiningFormat();
 		// generateClustersUsingTextMining();
 
+		System.out.println("\n>>DONE");
+
+	}
+
+	void generateClusters(String fileName) {
+
+		// instanceFileName = fileName;
+
+		File inputFile = new File(fileName);
+
+		if (inputFile.isFile()) {
+			clustersOutputFolder = fileName.substring(0, fileName.lastIndexOf("/")) + "/" + clusterFolder;
+
+			instanceFileName = fileName;
+			generateClustersFromFile(fileName);
+
+		} else if (inputFile.isDirectory()) {
+			clustersOutputFolder = fileName + "/" + clusterFolder;
+			generateClustersFromFolder(fileName);
+
+		} else {
+			System.err.println(fileName + " given file name is niether a FILE nor a FOLDER. Exiting");
+			return;
+		}
+
+
+	}
+
+	/**
+	 * Identify relevant traces (currently defined as shortest and has common patterns)
+	 * @param fileName given file path (*.json or a folder containing JSON files)
+	 */
+	void identifyRelevantTraces(String fileName) {
+
+		File inputFile = new File(fileName);
+
+		if (inputFile.isFile()) {
+			
+			identifyRelevantTracesFromFile(fileName);
+		
+		} else if (inputFile.isDirectory()) {
+		
+			identifyRelevantTracesFromFolder(fileName);
+
+		} else {
+			System.err.println(fileName + " given file name is niether a FILE nor a FOLDER. Exiting");
+			return;
+		}
+
+	}
+
+	void identifyRelevantTracesFromFolder(String folderPath) {
+
+		File inputFolder = new File(folderPath);
+
+		for (File file : inputFolder.listFiles()) {
+
+			if (file.isFile()) {
+				String filePath = file.getAbsolutePath();
+
+				if (filePath.endsWith(".json")) {
+					System.out.println("###### Identifying Relevant Traces ######");
+					System.out.println("*File: " + filePath);
+
+					identifyRelevantTracesFromFile(filePath);
+
+					System.out.println("\n");
+				}
+
+			}
+		}
+	}
+
+	void identifyRelevantTracesFromFile(String fileName) {
+
+		if(!checkFile(fileName)) {
+			return;
+		}
+
+		instanceFileName = fileName;
+
+		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
+		// clustersOutputFileName;
+		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
+		// +
+		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
+
+		// loads instances(or traces) from given file name
+		// and finds shortest transitions
+		readTracesFromFile();
+
+		//find shortest traces
+		findShortestTraces();
+		
 		/**
 		 * ======Mine Frequent sequential patterns using the prefixspan algo
 		 **/
-		 mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
+		// mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
 
-		// int minimumNumOfTracesForPattern = 5;
+		// int minimumNumOfTracesForPattern = 4;
 		// mineSequencesUsingPrefixSpanAlgo(shortestTraces.values(),minimumNumOfTracesForPattern);
 
 		/** ======Mine Closed Frequent sequential patterns using the ClaSP **/
-//		mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
-		
-//		 int minimumNumOfTracesForPattern =1000;
-//		mineClosedSequencesUsingClaSPAlgo(instances.values(), minimumNumOfTracesForPattern);
+		// mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
+
+		int minimumNumOfTracesForPattern = 5;
+		mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumNumOfTracesForPattern);
 
 		/** ======Mine Frequent sequential patterns using the SPADE algo **/
 		// mineSequentialPatternsUsingSPADE();
@@ -223,33 +389,10 @@ public class IncidentInstancesClusterGenerator {
 
 	}
 
-	void generateClusters(String fileName) {
-
-		instanceFileName = fileName;
-
-		clustersOutputFolder = instanceFileName.substring(0, instanceFileName.lastIndexOf("/")) + "/" + clusterFolder;
-
-		File outputFolder = new File(clustersOutputFolder);
-
-		if (!outputFolder.exists()) {
-			outputFolder.mkdir();
-
-		}
-
-		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
-																							// clustersOutputFileName;
-		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
-																									// +
-		shortestTracesFileName = instanceFileName.replace(".json", "_shortestTracesIDs.txt");
-
-		generateClusters();
-
-	}
-
 	void readTracesFromFile() {
 
-//		File fileConvertedInstances = new File(convertedInstancesFileName);
-//		File fileShortestInstances = new File(shortestTracesFileName);
+		// File fileConvertedInstances = new File(convertedInstancesFileName);
+		// File fileShortestInstances = new File(shortestTracesFileName);
 
 		// if the traces already read before and converted instances are
 		// generated as a file then skip loading
@@ -270,17 +413,12 @@ public class IncidentInstancesClusterGenerator {
 		// load instances from file
 		instances = FileManipulator.readInstantiatorInstancesFile(instanceFileName);
 
-		System.out.println("\n>>Size = " + instances.size() + " .......................\n");
+		System.out.println(">>Number of instances read = " + instances.size());
 		// System.out.println(instances.get(0).getTransitionActions());
 		if (instances == null) {
 			System.out.println("Instances are null! Exiting");
 			return;
 		}
-
-		findShortestTraces();
-
-		// System.out.println("\n>>shortest traces num =
-		// "+shortestTraces.size()+" .......................\n");
 
 	}
 
@@ -293,6 +431,10 @@ public class IncidentInstancesClusterGenerator {
 		String separator = " ";
 		StringBuilder bldr = new StringBuilder();
 
+		if(shortestTraces != null) {
+			shortestTraces.clear();
+		}
+		
 		// contains the ids separated by spaces
 		// String shortestTracesFileName =
 		// instanceFileName.substring(instanceFileName.lastIndexOf("/")+1);
@@ -301,7 +443,7 @@ public class IncidentInstancesClusterGenerator {
 		// String shortestTracesFileName = instanceFileName.replace(".json",
 		// "_shortestTracesIDs.txt");
 
-//		File file = new File(shortestTracesFileName);
+		// File file = new File(shortestTracesFileName);
 
 		// if shortest traces already defined for the given traces then read the
 		// file
@@ -717,7 +859,7 @@ public class IncidentInstancesClusterGenerator {
 					System.out
 							.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
 				}
-				
+
 				tries--;
 			}
 
@@ -882,7 +1024,7 @@ public class IncidentInstancesClusterGenerator {
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
 
 		// Load a sequence database
-		 double support = 0;
+		double support = 0;
 
 		boolean keepPatterns = true;
 		boolean verbose = false;
@@ -892,7 +1034,6 @@ public class IncidentInstancesClusterGenerator {
 		// sequences where
 		// each pattern appears will be shown in the result
 		boolean outputSequenceIdentifiers = true;
-
 
 		double relativeSupport;
 
@@ -915,7 +1056,7 @@ public class IncidentInstancesClusterGenerator {
 				mid = (int) Math.floor((left + right) / 2);
 
 				support = mid * 1.0 / size;
-				
+
 				AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
 				IdListCreator idListCreator = IdListCreatorStandard_Map.getInstance();
 
@@ -928,44 +1069,48 @@ public class IncidentInstancesClusterGenerator {
 
 				algo.runAlgorithm(sequenceDatabase, keepPatterns, verbose, clustersOutputFileName,
 						outputSequenceIdentifiers);
-//				String[] lines = FileManipulator.readFileNewLine(clustersOutputFileName);
-//
-//				// if there is output, then increase minsup. Else, decrease
-//				if (lines != null && lines.length > 0 && !lines[0].isEmpty()) {
-//					left = mid + 1;
-//					System.out
-//							.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
-//					isMaxFound = true;
-//				} else {
-//					isMaxFound = false;
-//					right = mid - 1;
-//					System.out
-//							.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
-//				}
-				
-				if(findClosedPatterns) {
-					if(algo.getNumberOfFrequentClosedPatterns() > 0) {
+				// String[] lines =
+				// FileManipulator.readFileNewLine(clustersOutputFileName);
+				//
+				// // if there is output, then increase minsup. Else, decrease
+				// if (lines != null && lines.length > 0 && !lines[0].isEmpty())
+				// {
+				// left = mid + 1;
+				// System.out
+				// .println(">>[L] trying min-traces (i.e. minsup) " + mid + " l
+				// = " + left + " r = " + right);
+				// isMaxFound = true;
+				// } else {
+				// isMaxFound = false;
+				// right = mid - 1;
+				// System.out
+				// .println(">>[R] trying min-traces (i.e. minsup) " + mid + " l
+				// = " + left + " r = " + right);
+				// }
+
+				if (findClosedPatterns) {
+					if (algo.getNumberOfFrequentClosedPatterns() > 0) {
 						left = mid + 1;
-						System.out
-								.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
-						isMaxFound = true;	
+						System.out.println(
+								">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+						isMaxFound = true;
 					} else {
 						isMaxFound = false;
 						right = mid - 1;
-						System.out
-								.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+						System.out.println(
+								">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
 					}
 				} else {
-					if(algo.getNumberOfFrequentPatterns() > 0) {
+					if (algo.getNumberOfFrequentPatterns() > 0) {
 						left = mid + 1;
-						System.out
-								.println(">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
-						isMaxFound = true;	
+						System.out.println(
+								">>[L] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+						isMaxFound = true;
 					} else {
 						isMaxFound = false;
 						right = mid - 1;
-						System.out
-								.println(">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
+						System.out.println(
+								">>[R] trying min-traces (i.e. minsup) " + mid + " l = " + left + " r = " + right);
 					}
 				}
 
@@ -980,7 +1125,7 @@ public class IncidentInstancesClusterGenerator {
 					mid--;
 
 					support = mid * 1.0 / size;
-					
+
 					AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
 					IdListCreator idListCreator = IdListCreatorStandard_Map.getInstance();
 
@@ -1007,7 +1152,7 @@ public class IncidentInstancesClusterGenerator {
 					mid++;
 
 					support = mid * 1.0 / size;
-					
+
 					AbstractionCreator abstractionCreator = AbstractionCreator_Qualitative.getInstance();
 					IdListCreator idListCreator = IdListCreatorStandard_Map.getInstance();
 
@@ -1074,10 +1219,9 @@ public class IncidentInstancesClusterGenerator {
 		String[] lines = FileManipulator.readFileNewLine(fileName);
 
 		StringBuilder str = new StringBuilder();
-		String separator = " ";
+		// String separator = " ";
 		String fileLinSeparator = System.getProperty("line.separator");
-
-		int numOfTraceIDs = 0;
+		List<Integer> traceIDs = new LinkedList<Integer>();
 
 		str.append("trace-ID").append(fileLinSeparator);
 
@@ -1096,16 +1240,19 @@ public class IncidentInstancesClusterGenerator {
 			String[] tracesIDs = tracesIDsSet.trim().split(" ");
 
 			for (String id : tracesIDs) {
-				str.append(id).append(fileLinSeparator);
-				numOfTraceIDs++;
-			}
+				int idInt = Integer.parseInt(id);
 
-			// System.out.println(Arrays.toString(tracesIDs));
+				if (!traceIDs.contains(idInt)) {
+					traceIDs.add(idInt);
+					str.append(id).append(fileLinSeparator);
+				}
+
+			}
 		}
 
 		System.out
 				.println(">>Number of traces identified as relevant (Shortest & has common partial-traces or states) = "
-						+ numOfTraceIDs);
+						+ traceIDs.size());
 
 		writeToFile(str.toString(), outputFile);
 
@@ -1939,10 +2086,10 @@ public class IncidentInstancesClusterGenerator {
 
 		IncidentInstancesClusterGenerator tester = new IncidentInstancesClusterGenerator();
 
-		String fileName = "D:/Bigrapher data/lero/lero100K/output/2_60000.json";
+		String fileName = "D:/Bigrapher data/lero/lero100K/output";
 
 		// using SPMF library
-		tester.generateClusters(fileName);
+		tester.identifyRelevantTraces(fileName);
 
 		// using Weka
 		// tester.clusterUsingWeka(fileName);
