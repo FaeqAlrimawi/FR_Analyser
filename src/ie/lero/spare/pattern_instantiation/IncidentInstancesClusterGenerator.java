@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
-import java.util.concurrent.LinkedBlockingDeque;
+
+import com.beust.jcommander.internal.Lists;
 
 import ca.pfv.spmf.algorithms.clustering.dbscan.AlgoDBSCAN;
 import ca.pfv.spmf.algorithms.clustering.distanceFunctions.DistanceFunction;
@@ -39,7 +40,6 @@ import ca.pfv.spmf.patterns.cluster.Cluster;
 import ca.pfv.spmf.patterns.cluster.ClusterWithMean;
 import ca.pfv.spmf.patterns.cluster.DoubleArray;
 import ie.lero.spare.franalyser.utility.FileManipulator;
-import javafx.scene.shape.Line;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
 import weka.clusterers.Cobweb;
@@ -101,6 +101,8 @@ public class IncidentInstancesClusterGenerator {
 
 	String shortestTracesFileName;
 
+	List<Integer> traceIDs;
+
 	public IncidentInstancesClusterGenerator() {
 
 		systemActions = new HashMap<String, Integer>();
@@ -158,7 +160,7 @@ public class IncidentInstancesClusterGenerator {
 	}
 
 	boolean checkFile(String fileName) {
-		
+
 		if (fileName == null || fileName.isEmpty()) {
 			System.err.println("Given file name is NULL");
 			return false;
@@ -180,10 +182,10 @@ public class IncidentInstancesClusterGenerator {
 			System.err.println("[" + fileName + "] is NOT a file");
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	void generateClustersFromFolder(String folderPath) {
 
 		File inputFolder = new File(folderPath);
@@ -205,23 +207,22 @@ public class IncidentInstancesClusterGenerator {
 			}
 		}
 	}
-	
-	
+
 	void generateClustersFromFile(String fileName) {
 
-		if(!checkFile(fileName)){
-		
+		if (!checkFile(fileName)) {
+
 			return;
 		}
-		
+
 		instanceFileName = fileName;
-		
+
 		File outputFolder = new File(clustersOutputFolder);
-		
-		if(!outputFolder.exists()) {
+
+		if (!outputFolder.exists()) {
 			outputFolder.mkdir();
 		}
-		
+
 		clustersOutputFileName = instanceFileName.replace(".json", "_relevantTraces.txt");// clustersOutputFolder
 		// clustersOutputFileName;
 		convertedInstancesFileName = instanceFileName.replace(".json", "_convertedInstances.txt");// clustersOutputFolder
@@ -255,8 +256,8 @@ public class IncidentInstancesClusterGenerator {
 		// printClusters();
 
 		/** using OPTIC algorithm to find clusters **/
-		// List<Cluster> clus = generateClustersUsingOPTICS();
-		// printClustersOPTIC(clus);
+		List<Cluster> clus = generateClustersUsingOPTICS();
+		printClustersOPTIC(clus);
 
 		/** using DBSCAN algorithm **/
 		// List<Cluster> clus = generateClustersUsingDBSCAN();
@@ -291,23 +292,25 @@ public class IncidentInstancesClusterGenerator {
 			return;
 		}
 
-
 	}
 
 	/**
-	 * Identify relevant traces (currently defined as shortest and has common patterns)
-	 * @param fileName given file path (*.json or a folder containing JSON files)
+	 * Identify relevant traces (currently defined as shortest and has common
+	 * patterns)
+	 * 
+	 * @param fileName
+	 *            given file path (*.json or a folder containing JSON files)
 	 */
 	void identifyRelevantTraces(String fileName) {
 
 		File inputFile = new File(fileName);
 
 		if (inputFile.isFile()) {
-			
+
 			identifyRelevantTracesFromFile(fileName);
-		
+
 		} else if (inputFile.isDirectory()) {
-		
+
 			identifyRelevantTracesFromFolder(fileName);
 
 		} else {
@@ -321,6 +324,20 @@ public class IncidentInstancesClusterGenerator {
 
 		File inputFolder = new File(folderPath);
 
+		StringBuilder content = new StringBuilder();
+
+		// numberOfRelevantTraces = new LinkedList<Integer>();
+
+		String linSeparator = System.getProperty("line.separator");
+
+		content.append("*Summary containing relevant traces (shortest & have common sequential patterns) identified from each file in folder [" + folderPath + "]*")
+				.append(linSeparator).append(linSeparator);
+		content.append("Format: ").append(linSeparator);
+		content.append("[File-name]").append(linSeparator);
+		content.append("[# of relevant traces]").append(linSeparator);
+		content.append("[relevant traces IDs]").append(linSeparator).append(linSeparator);
+		
+		int numOfRelevantTraces = 0;
 		for (File file : inputFolder.listFiles()) {
 
 			if (file.isFile()) {
@@ -329,21 +346,37 @@ public class IncidentInstancesClusterGenerator {
 				if (filePath.endsWith(".json")) {
 					System.out.println("###### Identifying Relevant Traces ######");
 					System.out.println("*File: " + filePath);
-
-					identifyRelevantTracesFromFile(filePath);
-
 					System.out.println("\n");
-				}
 
+					//identify relevant traces
+					numOfRelevantTraces = identifyRelevantTracesFromFile(filePath);
+
+					//file path
+					content.append("#").append(filePath).append(linSeparator)
+					//number of relevant traces
+					.append(numOfRelevantTraces).append(linSeparator);
+					//IDs
+					Integer[] ary = traceIDs.toArray(new Integer[traceIDs.size()]);
+					content.append(Arrays.toString(ary)).append(linSeparator).append(linSeparator);
+					
+				}
 			}
 		}
+
+		// store a summary into file
+		String outputFile = folderPath + "/relevantTraces_Summary.txt";
+
+		writeToFile(content.toString(), outputFile);
+	
 	}
 
-	void identifyRelevantTracesFromFile(String fileName) {
+	public int identifyRelevantTracesFromFile(String fileName) {
 
-		if(!checkFile(fileName)) {
-			return;
+		if (!checkFile(fileName)) {
+			return -1;
 		}
+
+		int numOfRelevantTraces = 0;
 
 		instanceFileName = fileName;
 
@@ -357,22 +390,22 @@ public class IncidentInstancesClusterGenerator {
 		// and finds shortest transitions
 		readTracesFromFile();
 
-		//find shortest traces
+		// find shortest traces
 		findShortestTraces();
-		
+
 		/**
 		 * ======Mine Frequent sequential patterns using the prefixspan algo
 		 **/
-		// mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
+//		numOfRelevantTraces = mineSequencesUsingPrefixSpanAlgo(shortestTraces.values());
 
-		// int minimumNumOfTracesForPattern = 4;
-		// mineSequencesUsingPrefixSpanAlgo(shortestTraces.values(),minimumNumOfTracesForPattern);
+//		 int minimumNumOfTracesForPattern = 5;
+//		 numOfRelevantTraces = mineSequencesUsingPrefixSpanAlgo(shortestTraces.values(),minimumNumOfTracesForPattern);
 
 		/** ======Mine Closed Frequent sequential patterns using the ClaSP **/
-		// mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
+//		numOfRelevantTraces = mineClosedSequencesUsingClaSPAlgo(shortestTraces.values());
 
 		int minimumNumOfTracesForPattern = 5;
-		mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumNumOfTracesForPattern);
+		numOfRelevantTraces = mineClosedSequencesUsingClaSPAlgo(shortestTraces.values(), minimumNumOfTracesForPattern);
 
 		/** ======Mine Frequent sequential patterns using the SPADE algo **/
 		// mineSequentialPatternsUsingSPADE();
@@ -386,6 +419,8 @@ public class IncidentInstancesClusterGenerator {
 		// mineFrequentItemsetsUsingFP_GrowthAlgo();
 
 		System.out.println("\n>>DONE");
+
+		return numOfRelevantTraces;
 
 	}
 
@@ -431,10 +466,10 @@ public class IncidentInstancesClusterGenerator {
 		String separator = " ";
 		StringBuilder bldr = new StringBuilder();
 
-		if(shortestTraces != null) {
+		if (shortestTraces != null) {
 			shortestTraces.clear();
 		}
-		
+
 		// contains the ids separated by spaces
 		// String shortestTracesFileName =
 		// instanceFileName.substring(instanceFileName.lastIndexOf("/")+1);
@@ -820,7 +855,7 @@ public class IncidentInstancesClusterGenerator {
 	/***** SEQUENTIAL PATTERN MINING ******/
 	/**************************************/
 
-	protected void mineSequencesUsingPrefixSpanAlgo(Collection<GraphPath> traces) {
+	public int mineSequencesUsingPrefixSpanAlgo(Collection<GraphPath> traces) {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
 
@@ -896,29 +931,18 @@ public class IncidentInstancesClusterGenerator {
 			}
 
 			System.out.println(">>Minimum traces is " + mid);
-			// algo.runAlgorithm(convertedInstancesFileName,
-			// clustersOutputFileName, mid);
-			// algo.printStatistics();
-			//
-			// // analysis of the generated sequential patterns
-			// String analysisFile = clustersOutputFolder +
-			// "/sequentialPatternAnalysis.txt";
-			//
-			// analyseGeneratedSequencePatterns(convertedInstancesFileName,
-			// clustersOutputFileName, analysisFile);
-			//
-			// getTracesIDsFromOutputFile(clustersOutputFileName);
-
-			mineSequencesUsingPrefixSpanAlgo(traces, mid);
+			
+			return mineSequencesUsingPrefixSpanAlgo(traces, mid);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		return 0;
 	}
 
-	protected void mineSequencesUsingPrefixSpanAlgo(Collection<GraphPath> traces, int minimumTraces) {
+	public int mineSequencesUsingPrefixSpanAlgo(Collection<GraphPath> traces, int minimumTraces) {
 
 		File file = new File(convertedInstancesFileName);
 
@@ -942,24 +966,26 @@ public class IncidentInstancesClusterGenerator {
 			algo.printStatistics();
 
 			// analysis of the generated sequential patterns
-			String analysisFile = clustersOutputFolder + "/sequentialPatternAnalysis.txt";
+			String analysisFile = instanceFileName.replace(".json", "_PerfixSpan_analysis.txt");
 
 			analyseGeneratedSequencePatterns(convertedInstancesFileName, clustersOutputFileName, analysisFile);
 
-			getTracesIDsFromOutputFile(clustersOutputFileName);
+			return getTracesIDsFromOutputFile(clustersOutputFileName);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+		return 0;
 	}
 
-	protected void mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces, int minimumTraces) {
+	public int mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces, int minimumTraces) {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
 
 		int numberOfTraces = minimumTraces;
+		int numOfRelevantTraces = 0;
 
 		// Load a sequence database
 		double support = numberOfTraces * 1.0 / traces.size();
@@ -1007,7 +1033,7 @@ public class IncidentInstancesClusterGenerator {
 			}
 
 			// extracts traces ids from generated file
-			getTracesIDsFromOutputFile(clustersOutputFileName);
+			numOfRelevantTraces = getTracesIDsFromOutputFile(clustersOutputFileName);
 
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -1017,9 +1043,11 @@ public class IncidentInstancesClusterGenerator {
 			e.printStackTrace();
 		}
 
+		return numOfRelevantTraces;
+
 	}
 
-	protected void mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
+	public int mineClosedSequencesUsingClaSPAlgo(Collection<GraphPath> traces) {
 
 		convertedInstancesFileName = toSPMFsequentialPatternFormat(traces);
 
@@ -1177,28 +1205,7 @@ public class IncidentInstancesClusterGenerator {
 
 			System.out.println(">>Minimum traces is " + mid);
 
-			mineClosedSequencesUsingClaSPAlgo(traces, mid);
-			// algo.runAlgorithm(sequenceDatabase, keepPatterns, verbose,
-			// clustersOutputFileName,
-			// outputSequenceIdentifiers);
-			//
-			// String msg = "Minimum percentage of traces to appear in: ";
-			// if (isAlreadyChecked) {
-			// System.out.println(msg + support);
-			// } else {
-			// System.out.println(msg + support + " [" + Math.ceil(support *
-			// traces.size()) + "]");
-			// }
-			//
-			// System.out.println(algo.getNumberOfFrequentPatterns() + "patterns
-			// found.");
-			//
-			// if (verbose && keepPatterns) {
-			// System.out.println(algo.printStatistics());
-			// }
-			//
-			// // extracts traces ids from generated file
-			// getTracesIDsFromOutputFile(clustersOutputFileName);
+			return mineClosedSequencesUsingClaSPAlgo(traces, mid);
 
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -1208,9 +1215,10 @@ public class IncidentInstancesClusterGenerator {
 			e.printStackTrace();
 		}
 
+		return 0;
 	}
 
-	void getTracesIDsFromOutputFile(String fileName) {
+	protected int getTracesIDsFromOutputFile(String fileName) {
 
 		// read the file generated by sequence pattern mining algorithm
 
@@ -1221,7 +1229,7 @@ public class IncidentInstancesClusterGenerator {
 		StringBuilder str = new StringBuilder();
 		// String separator = " ";
 		String fileLinSeparator = System.getProperty("line.separator");
-		List<Integer> traceIDs = new LinkedList<Integer>();
+		traceIDs = new LinkedList<Integer>();
 
 		str.append("trace-ID").append(fileLinSeparator);
 
@@ -1255,6 +1263,8 @@ public class IncidentInstancesClusterGenerator {
 						+ traceIDs.size());
 
 		writeToFile(str.toString(), outputFile);
+
+		return traceIDs.size();
 
 	}
 

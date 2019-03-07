@@ -39,6 +39,8 @@ public class Logger implements Runnable {
 	private static final String SEPARATOR = "*=========================================================================================================*";
 	
 	private Timer timer;
+	private boolean isNewDay = false;
+	
 	private String newDayMessage = "";
 	private static final int DAY = 86400000;
 	
@@ -119,32 +121,18 @@ public class Logger implements Runnable {
 
 			// schedule a task to change format of timing after one day
 			timer = new Timer();
-			timer.schedule(new TimerTask() {
-
-				@Override
-				public void run() {
-					
-					dtfTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
-					newDayMessage = "** A Day passed! it's "+ LocalDateTime.now().getDayOfWeek().toString();
-					putMessage(newDayMessage);
-					
-					//some time to allow the message to be printed in Date format above
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
-				}
-			}, DAY);
-
+			scheduleNewDayTask("** Started logging, ", 5);
+			
 			String msg = (String) this.msgQ.take();
 
 			// terminating message ends wirting and closes the file
 			while (!msg.equals(Logger.terminatingStringWithDelimiter)) {
 
+				if(isNewDay) {
+					isNewDay = false;
+					scheduleNewDayTask("** A Day passed! it's ",DAY);
+				}
+				
 				if (isSaveLog || isPrintToScreen) {
 
 					print(msg);
@@ -167,6 +155,34 @@ public class Logger implements Runnable {
 		}
 
 	}
+	
+	protected void scheduleNewDayTask(String msg, int timeMilSec){
+		
+		timer.schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				
+				dtfTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss:SSS");
+//				newDayMessage = "** A Day passed! it's "+ LocalDateTime.now().getDayOfWeek().toString();
+				
+				putMessage(msg + LocalDateTime.now().getDayOfWeek().toString());
+				
+				//some time to allow the message to be printed in Date format above
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				dtfTime = DateTimeFormatter.ofPattern("HH:mm:ss:SSS");
+				isNewDay = true;
+			}
+		}, timeMilSec);
+		
+	}
+	
 
 	private void print(String msg) {
 
