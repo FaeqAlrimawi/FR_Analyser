@@ -707,7 +707,7 @@ public class IncidentPatternInstantiator {
 			}
 
 			// remove [get] at the beginning
-			// if it contains __ then it is not a class its an attribut
+			// if it contains __ then it is not a class its an attribute
 			if (className.startsWith("get")) {
 				className = className.replace("get", "");
 			}
@@ -715,7 +715,7 @@ public class IncidentPatternInstantiator {
 			// create a class from the name
 			String fullClassName = "environment.impl." + className + "Impl";
 
-			int numOfLevels = 10;
+			int numOfLevels = 100;
 
 			try {
 

@@ -171,6 +171,62 @@ public class ModelsHandler {
 
 	}
 
+	public synchronized static boolean isValidIncidentModel(IncidentDiagram incidentModel) {
+
+		try {
+
+			String filePath = saveIncidentModel(incidentModel);
+
+			if (filePath != null) {
+
+				IncidentDiagram inc = loadIncidentModel(filePath);
+
+				// remove tmp (i.e. the copy) file File tmpFile = new
+				File tmpFile = new File(filePath);
+				if (tmpFile.exists()) {
+					tmpFile.delete();
+				}
+
+				if (inc != null) {
+					return true;
+				}
+
+			}
+
+		} catch (Exception e) {
+			return false;
+		}
+
+		return false;
+
+	}
+
+	public synchronized static boolean isValidIncidentModel(String incidentfilePath) {
+
+		try {
+
+			int tries = 1000;
+			String pathCopy = incidentfilePath;
+
+			while (pathCopy.contains("\\") && tries > 0) {
+				pathCopy = pathCopy.replace("\\", "/");
+				tries--;
+			}
+
+			IncidentDiagram inc = IncidentModelHandler.loadIncidentFromFile(pathCopy);
+
+			if (inc != null) {
+				return true;
+			}
+
+		} catch (Exception e) {
+			return false;
+		}
+
+		return false;
+
+	}
+
 	public synchronized static Map<String, EnvironmentDiagram> getSystemModels() {
 		return systemModels;
 	}
@@ -247,6 +303,35 @@ public class ModelsHandler {
 		}
 	}
 
+	// public synchronized static IncidentDiagram
+	// cloneSystemModel(EnvironmentDiagram systemModel) {
+	//
+	// try {
+	//
+	// boolean isSaved = saveSystemModel(systemModel);
+	//
+	// if (isSaved) {
+	//
+	// EnvironmentDiagram clone = loadSystemModel(filePath);
+	//
+	// // remove tmp (i.e. the copy) file File tmpFile = new
+	// File tmpFile = new File(filePath);
+	// if (tmpFile.exists()) {
+	// tmpFile.delete();
+	// }
+	//
+	// return inc;
+	// }
+	//
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// return null;
+	// }
+	//
+	// return null;
+	//
+	// }
+
 	public synchronized static Map<String, ActivityPattern> getActivityPatterns() {
 		return activityPatterns;
 	}
@@ -278,7 +363,7 @@ public class ModelsHandler {
 		ActivityPattern pattern = null;
 
 		pattern = ActivityPatternModelHandler.loadActivityPatternFromFile(filePath);
-		
+
 		activityPatterns.put(getEncryption(filePath), pattern);
 
 		if (activityPatterns.size() == 1) {

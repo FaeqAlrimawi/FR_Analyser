@@ -26,9 +26,9 @@ public class SystemModelHandler {
 	private static final String MODEL_PACKAGE_ENS_URI = CyberPhysicalSystemPackage.eNS_URI;
 	
 	/**
-	 * Load an incident model from the given file name
-	 * @param fileName the XMI file of the incident model
-	 * @return an IncidentDigram object containing the model information
+	 * Load a system model from the given file name
+	 * @param fileName the XMI file of the system model
+	 * @return an EnvironmentDiagram object containing the model information
 	 */
 	public static EnvironmentDiagram loadSystemFromFile(String fileName) {
 	

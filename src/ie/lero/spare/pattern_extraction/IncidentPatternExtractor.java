@@ -197,20 +197,37 @@ public class IncidentPatternExtractor {
 
 	public IncidentDiagram extract(String incidentFilepath, String systemFilePath) {
 
-		IncidentDiagram incidentModel = ModelsHandler.addIncidentModel(incidentFilepath);
-
-		EnvironmentDiagram systemModel = ModelsHandler.addSystemModel(systemFilePath);
-
 		originalIncidentFilePath = incidentFilepath;
 		this.systemFilePath = systemFilePath;
-		originalIncidentModel = incidentModel;
+//		originalIncidentModel = incidentModel;
+		
+		int tries = 1000;
+		//update slashes
+		while(originalIncidentFilePath.contains("\\") && tries >0) {
+			originalIncidentFilePath = originalIncidentFilePath.replace("\\", "/");
+			tries--;
+		}
+		
+		tries = 1000;
+		while(systemFilePath.contains("\\") && tries >0) {
+			systemFilePath = systemFilePath.replace("\\", "/");
+			tries--;
+		}
+		
+		IncidentDiagram incidentModel = ModelsHandler.addIncidentModel(originalIncidentFilePath);
+
+		EnvironmentDiagram systemModel = ModelsHandler.addSystemModel(this.systemFilePath);
+
 		this.systemModel = systemModel;
 
+		
 		return extract();
 	}
 
 	public IncidentDiagram extract() {
 
+		runLogger();
+		
 		if (originalIncidentModel == null) {
 			logger.putError("Incident model is null");
 			return null;
@@ -221,8 +238,7 @@ public class IncidentPatternExtractor {
 			return null;
 		}
 
-		runLogger();
-
+	
 		// start timing
 		long startTime = Calendar.getInstance().getTimeInMillis();
 
@@ -702,6 +718,14 @@ public class IncidentPatternExtractor {
 
 	}
 
+	/**
+	 * Core function for matching activity pattern condition to an incident instance model activity condition
+	 * @param patternActivity
+	 * @param incidentActivity
+	 * @param comparePrecondition
+	 * @param comparePostCondition
+	 * @return
+	 */
 	protected boolean comparePatternIncidentActivities(Activity patternActivity, Activity incidentActivity,
 			boolean comparePrecondition, boolean comparePostCondition) {
 
@@ -729,7 +753,7 @@ public class IncidentPatternExtractor {
 
 		// if the pattern activity has an action that is not equal to the action
 		// in the incident activity then return false
-		if (ptrActAction != null && !ptrActAction.equals(incActAction)) {
+		if (ptrActAction != null && !ptrActAction.isEmpty() && !ptrActAction.equals(incActAction)) {
 			return false;
 		}
 
@@ -882,7 +906,7 @@ public class IncidentPatternExtractor {
 
 					}
 
-				}
+				} 
 			} else {
 				if (!entityMap.containsKey(ptrExploitedAssetName)) {
 					entityMap.put(ptrExploitedAssetName, incExploitedAsset.getName());
@@ -2056,13 +2080,13 @@ public class IncidentPatternExtractor {
 			absCrimeScript.setCategory(ScriptCategory.PATTERN); // least
 																// abstract
 			break;
-		case ScriptCategory.PATTERN_VALUE:
-			absCrimeScript.setCategory(ScriptCategory.PROTOPATTERN);
-			break;
-		case ScriptCategory.PROTOPATTERN_VALUE:
-			absCrimeScript.setCategory(ScriptCategory.METAPATTERN); // most
-																	// abstract
-			break;
+//		case ScriptCategory.PATTERN_VALUE:
+//			absCrimeScript.setCategory(ScriptCategory.PROTOPATTERN);
+//			break;
+//		case ScriptCategory.PROTOPATTERN_VALUE:
+//			absCrimeScript.setCategory(ScriptCategory.METAPATTERN); // most
+//																	// abstract
+//			break;
 		default:
 			absCrimeScript.setCategory(ScriptCategory.PATTERN); // default state
 		}
