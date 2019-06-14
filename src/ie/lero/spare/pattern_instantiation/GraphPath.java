@@ -15,14 +15,14 @@ public class GraphPath {
 	private LinkedList<Integer> stateTransitions;
 	private int instanceID;
 	private List<String> transitionActions;
-	
+
 	// private SystemInstanceHandler systemHandler;
 	public TransitionSystem transitionSystem;
 	public static final String SRC_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_SOURCE;
 	public static final String DES_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_TARGET;
 	public static final String ACTION_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTION;
 	public static final String TRANSITIONS_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS;
-	
+
 	// used for short version of the JSON file i.e. transitions = [1,2,3,4]
 	// instead of src-des format
 	public static final String ACTIONS_STRING = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS;
@@ -55,12 +55,11 @@ public class GraphPath {
 	public int getInstanceID() {
 		return instanceID;
 	}
-	
+
 	public void setInstanceID(int id) {
-		instanceID = id;	
+		instanceID = id;
 	}
-	
-	
+
 	public void setPredicateSrc(Predicate predicateSrc) {
 		this.predicateSrc = predicateSrc;
 	}
@@ -171,7 +170,14 @@ public class GraphPath {
 		}
 
 		for (int i = 0; i < stateTransitions.size() - 1; i++) {
-			action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
+			if (transitionSystem != null) {
+				action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
+			} else {
+				action = getTransitionActions().get(i);
+			}
+
+			// action = transitionSystem.getLabel(stateTransitions.get(i),
+			// stateTransitions.get(i + 1));
 			res.append("{\"").append(SRC_STRING).append("\":").append(stateTransitions.get(i)).append(",").append("\"")
 					.append(DES_STRING).append("\":").append(stateTransitions.get(i + 1)).append(",").append("\"")
 					.append(ACTION_STRING).append("\":\"").append(action).append("\"},");
@@ -244,7 +250,12 @@ public class GraphPath {
 		for (i = 0; i < stateTransitions.size() - 1; i++) {
 
 			if (isconvertAction) {
-				action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
+				if (transitionSystem != null) {
+					action = transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1));
+				} else {
+					action = getTransitionActions().get(i);
+				}
+
 				resAction.append("\"").append(action).append("\",");
 			}
 
@@ -480,19 +491,20 @@ public class GraphPath {
 
 	public List<String> getTransitionActions() {
 
-		//if actions already identified then return them
-		if(transitionActions != null || !transitionActions.isEmpty()) {
+		// if actions already identified then return them
+		if (transitionActions != null || !transitionActions.isEmpty()) {
 			return transitionActions;
 		}
-		
-		//if the transition system is not set then actions cannot be determines so return NULL
-		if(transitionSystem == null) {
+
+		// if the transition system is not set then actions cannot be determines
+		// so return NULL
+		if (transitionSystem == null) {
 			return null;
 		}
-		
-		//find actions from the transition system
+
+		// find actions from the transition system
 		transitionActions = new LinkedList<String>();
-		
+
 		for (int i = 0; i < stateTransitions.size() - 1; i++) {
 			transitionActions.add(transitionSystem.getLabel(stateTransitions.get(i), stateTransitions.get(i + 1)));
 		}
@@ -501,11 +513,11 @@ public class GraphPath {
 	}
 
 	public void setTransitionActions(List<String> newActions) {
-	
+
 		transitionActions = new LinkedList<String>(newActions);
 
 	}
-	
+
 	public double getTransitionProbability() {
 
 		double prob = -1;

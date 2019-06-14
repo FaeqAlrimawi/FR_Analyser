@@ -178,8 +178,9 @@ public class IncidentPatternInstantiator {
 
 		try {
 
+			System.out.println(BRS_statesFolder);
 			// currently creates a folder named "log" where the states folder is
-			outputFolder = BRS_statesFolder.substring(0, BRS_statesFolder.lastIndexOf("/"));
+			outputFolder = BRS_statesFolder.substring(0, BRS_statesFolder.lastIndexOf(File.separator));
 
 			runLogger();
 
@@ -211,11 +212,16 @@ public class IncidentPatternInstantiator {
 
 			// if there are incident assets with no matches from space model
 			// then exit
-			if (am.hasEntitiesWithNoMatch()) {
-				logger.putMessage(">>Some incident entities have no matches in the system assets. These are:");
-				// getIncidetnAssetWithNoMatch method has some issues
-				List<String> asts = am.getIncidentAssetsWithNoMatch();
-				logger.putMessage(asts.toString());
+			if (am == null || am.hasEntitiesWithNoMatch()) {
+				if(am!=null) {
+					logger.putMessage(">>Some incident entities have no matches in the system assets. These are:");
+					// getIncidetnAssetWithNoMatch method has some issues
+					List<String> asts = am.getIncidentAssetsWithNoMatch();
+					logger.putMessage(asts.toString());
+				} else {
+					logger.putMessage(">>Some incident entities have no matches in the system assets. Exiting execution.");
+				}
+				
 				return; // execution stops if there are incident entities with
 						// no matching
 			}
@@ -559,7 +565,7 @@ public class IncidentPatternInstantiator {
 				}
 			}
 
-//			 logger.putMessage(transitionSystem.getDigraph().toString());
+			// logger.putMessage(transitionSystem.getDigraph().toString());
 
 			logger.putMessage(
 					Logger.SEPARATOR_BTW_INSTANCES + "Number of States= " + transitionSystem.getNumberOfStates());
@@ -1266,7 +1272,7 @@ public class IncidentPatternInstantiator {
 	// this.matchingThreshold = matchingThreshold;
 	// }
 
-	class InstancesSaver implements Callable<Integer> {
+	public class InstancesSaver implements Callable<Integer> {
 
 		private String outputFileName;
 		private String[] systemAssetNames;
@@ -1283,6 +1289,9 @@ public class IncidentPatternInstantiator {
 		public static final String INSTNACES_COUNT = JSONTerms.INSTANCE_POTENTIAL_COUNT;
 		public static final String INSTANCES = JSONTerms.INSTANCE_POTENTIAL_INSTANCES;
 		public static final String MAP = "maps";
+
+		public static final int SUCCESSFUL = 1;
+		public static final int UNSUCCESSFUL = -1;
 
 		public InstancesSaver(int threadID, String file, String[] entityNames, String[] astNames,
 				List<GraphPath> paths) {
@@ -1305,7 +1314,9 @@ public class IncidentPatternInstantiator {
 
 			try {
 
-				logger.putMessage(instanceSaverName + "Storing generated instances...");
+				if (logger != null) {
+					logger.putMessage(instanceSaverName + "Storing generated instances...");
+				}
 
 				File threadFile = new File(outputFileName);
 
@@ -1341,9 +1352,9 @@ public class IncidentPatternInstantiator {
 				// write meta information (# of instance, entity-asset map)
 				writer.write(jsonStr.toString());
 				writer.newLine();
-				
+
 				jsonStr.setLength(0);
-				
+
 				ForkJoinTask<String> result = mainPool
 						.submit(new GraphPathsToStringConverter(0, size, paths, instancesQ));
 
@@ -1351,47 +1362,55 @@ public class IncidentPatternInstantiator {
 				// #-of-transitions/Threshold
 				int numOfPartitions = size / GraphPathsToStringConverter.THRESHOLD;
 
-//				logger.putMessage(instanceSaverName + "Number of partitions = " + numOfPartitions);
+				// logger.putMessage(instanceSaverName + "Number of partitions =
+				// " + numOfPartitions);
 
 				int cnt = 0;
 
-				while (cnt < numOfPartitions-1) {
+				while (cnt < numOfPartitions - 1) {
 
 					// write chunck of instances (based on the threshold in the
 					// graphPathsToStringConverter)
-					String tmp  =instancesQ.take();
+					String tmp = instancesQ.take();
 					writer.write(tmp);
 					writer.write(",");
 					writer.newLine();
-//					logger.putMessage(instanceSaverName+tmp);
+					// logger.putMessage(instanceSaverName+tmp);
 					cnt++;
+					
 				}
 
-				//get last chunck
-				String tmp  =instancesQ.take();
+				// get last chunck
+				String tmp = instancesQ.take();
 				writer.write(tmp);
 				tmp = null;
+				cnt++;
 				
 				if (result != null && result.isCompletedAbnormally()) {
-					logger.putError(instanceSaverName + "Something went wrong while storing generated instances.");
+					if (logger != null) {
+						logger.putError(instanceSaverName + "Something went wrong while storing generated instances.");
+					}
 					writer.close();
-					return -1;
+					return UNSUCCESSFUL;
 				}
 
 				writer.write("]}}");
 
-				logger.putMessage(instanceSaverName + "Instances are stored in file: " + threadFile.getAbsolutePath());
+				if (logger != null) {
+					logger.putMessage(
+							instanceSaverName + "Instances are stored in file: " + threadFile.getAbsolutePath());
+				}
 
 				writer.close();
-
-				Runtime.getRuntime().gc();
 				
-				return 1;
+				Runtime.getRuntime().gc();
+
+				return SUCCESSFUL;
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-				return -1;
+				return UNSUCCESSFUL;
 			}
 		}
 	}
@@ -1403,19 +1422,19 @@ public class IncidentPatternInstantiator {
 		private int indexEnd;
 		public static final int THRESHOLD = 100;
 		private List<GraphPath> paths;
-//		private StringBuilder result;
+		// private StringBuilder result;
 		private static final String INSTANCE_id = JSONTerms.INSTANCE_POTENTIAL_INSTANCES_ID;
 		private BlockingQueue<String> queue;
 		private int residue;
 		public static final String GRAPH_PATHS_STRING = "Graph-Paths-String";
 		private String instanceName;
-		
+
 		public GraphPathsToStringConverter(int start, int end, List<GraphPath> paths, BlockingQueue<String> q) {
 			this.paths = paths;
 			this.indexStart = start;
 			this.indexEnd = end;
 			queue = q;
-//			result = new StringBuilder();
+			// result = new StringBuilder();
 			residue = (int) Math.ceil(paths.size() % (THRESHOLD * 1.0));
 			instanceName = GRAPH_PATHS_STRING;
 		}
@@ -1444,22 +1463,24 @@ public class IncidentPatternInstantiator {
 
 			} else {
 
-//				logger.putMessage(instanceName+"Creating a part [" + indexStart+", "+indexEnd+"]");
+				// logger.putMessage(instanceName+"Creating a part [" +
+				// indexStart+", "+indexEnd+"]");
 				StringBuilder result = new StringBuilder();
 				for (int i = indexStart; i < indexEnd; i++) {
+					
 					result.append("{\"").append(INSTANCE_id).append("\":").append(i).append(",")
 							.append(paths.get(i).toJSONCompact()).append("}");
 					result.append(",");
+				
 				}
 
 				result.deleteCharAt(result.length() - 1);
-				
-				try {
-					
-					queue.put(result.toString());
 
+				try {
+
+					queue.put(result.toString());
 					result.setLength(0);
-					
+
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1481,7 +1502,7 @@ public class IncidentPatternInstantiator {
 			}
 
 			dividedTasks.add(new GraphPathsToStringConverter(indexStart, indexEnd, paths, queue));
-			
+
 			return dividedTasks;
 
 		}
@@ -1536,12 +1557,12 @@ public class IncidentPatternInstantiator {
 			System.out.println("\n\n");
 
 			// wait 3 seconds
-//			try {
-//				Thread.sleep(3000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			// try {
+			// Thread.sleep(3000);
+			// } catch (InterruptedException e) {
+			// // TODO Auto-generated catch block
+			// e.printStackTrace();
+			// }
 
 		}
 

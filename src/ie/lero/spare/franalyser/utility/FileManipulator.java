@@ -143,6 +143,11 @@ public class FileManipulator {
 	}
 
 	public static Map<Integer, GraphPath> readInstantiatorInstancesFile(String fileName) {
+		
+		return readInstantiatorInstancesFile(fileName, null, null);
+	}
+	
+	public static Map<Integer, GraphPath> readInstantiatorInstancesFile(String fileName, List<Integer> values, List<String> tracesActions) {
 
 		if (fileName == null || fileName.isEmpty()) {
 			System.err.println("Error reading file: " + fileName + ". File name is empty.");
@@ -163,6 +168,9 @@ public class FileManipulator {
 
 		Map<Integer, GraphPath> instances = new HashMap<Integer,GraphPath>();
 
+		int minTraceLength = 1000000;
+		int maxTraceLength = -1;
+		
 		FileReader reader;
 		boolean isCompactFormat = true;
 
@@ -260,7 +268,14 @@ public class FileManipulator {
 									.get(JSONTerms.INSTANCE_POTENTIAL_INSTANCES_TRANSITIONS_ACTIONS);
 
 							for (Object objAction : actionsAry) {
-								actions.add(objAction.toString());
+								
+								String tmp = objAction.toString();
+								actions.add(tmp);
+								
+								//add to the list of all actions
+								if(tracesActions != null && !tracesActions.contains(tmp)) {
+									tracesActions.add(tmp);
+								}
 							}
 						}
 
@@ -272,6 +287,20 @@ public class FileManipulator {
 
 						// add to the list
 						instances.put(instanceID, tmpPath);
+						
+						//set min trace length
+						if(values!= null ) {
+							int size = actions.size();
+							if(minTraceLength> size) {
+								minTraceLength = size;
+							}
+							
+							//set max
+							if(maxTraceLength < size) {
+								maxTraceLength = size;
+							}
+						}
+						
 					}
 
 					reader.close();
@@ -282,6 +311,12 @@ public class FileManipulator {
 			e.printStackTrace();
 		}
 
+		//set min & max trace lengths
+		if(values!=null) {
+			values.add(minTraceLength);
+			values.add(maxTraceLength);
+		}
+		
 		return instances;
 
 	}
