@@ -970,7 +970,7 @@ public class IncidentPatternInstantiator {
 			saver = new InstancesSaver(instanceID, outputFile, incidentAssetNames, assetNames, traces);
 
 			try {
-				int res = saver.call();
+				int res = mainPool.submit(saver).get();
 
 				if (res == InstancesSaver.SUCCESSFUL) {
 					return true;
@@ -1467,9 +1467,9 @@ public class IncidentPatternInstantiator {
 
 				jsonStr.setLength(0);
 
-				if (mainPool == null) {
-					mainPool = new ForkJoinPool();
-				}
+//				if (mainPool == null) {
+//					mainPool = new ForkJoinPool();
+//				}
 
 				ForkJoinTask<String> result = mainPool
 						.submit(new GraphPathsToStringConverter(0, size, paths, instancesQ));
