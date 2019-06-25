@@ -177,12 +177,30 @@ public class XqueryExecuter {
 		return conditions;
 	}
 
+	protected static String convertSlashToForward(String path) {
+		
+		if(path == null) {
+			return null;
+		}
+		
+		int count = 10000;
+		while(path.contains("\\")  && count>0) {
+			path = path.replace("\\", "/");
+			count--;
+		}
+		
+		return path;
+		
+		
+	}
 	public synchronized static JSONObject getBigraphConditions(String activityName, PredicateType type, String incidentDoc)
 			throws FileNotFoundException, XQException {
 
 		String res = null;
 		String query = null;
-
+		
+		incidentDoc = convertSlashToForward(incidentDoc);
+		
 		if (type == PredicateType.Precondition) {
 			query = NS_DECELERATION + "doc(\"" + incidentDoc + "\")//activity[@name=\"" + activityName + "\"]/"
 					+ "precondition/expression/entity";
@@ -193,6 +211,8 @@ public class XqueryExecuter {
 
 		}
 
+
+		
 		res = executeQuery(query);
 
 		JSONObject conditions = XML.toJSONObject(res);
@@ -206,9 +226,14 @@ public class XqueryExecuter {
 	public synchronized static String[] returnNextPreviousActivities(String incidentDoc) throws FileNotFoundException, XQException {
 		String[] nextActivities = null;
 		String res = null;
+		
+		incidentDoc = convertSlashToForward(incidentDoc);
+		
 		String query = NS_DECELERATION + "doc(\"" + incidentDoc + "\")//" + INCIDENT_ROOT_ELEMENT + "/activity"
 				+ "/concat(@name,\"##\", data(@nextActivities),\"!!\", data(@previousActivities), \"%%\")";
 
+	
+		
 		res = executeQuery(query);
 
 		if (res != null) {
@@ -223,9 +248,14 @@ public class XqueryExecuter {
 	public synchronized static String[] returnPreviousActivities(String incidentDoc) throws FileNotFoundException, XQException {
 		String[] previousActivities = null;
 		String res = null;
+		
+		incidentDoc = convertSlashToForward(incidentDoc);
+		
 		String query = NS_DECELERATION + "doc(\"" + incidentDoc + "\")//" + INCIDENT_ROOT_ELEMENT + "/activity"
 				+ "/concat(@name,\"##\", data(@previousActivities), \"%%\")";
 
+	
+		
 		res = executeQuery(query);
 
 		if (res != null) {
@@ -253,8 +283,11 @@ public class XqueryExecuter {
 
 	public synchronized static boolean isKnowledgePartial(String entityName, String incidentDoc) throws FileNotFoundException, XQException {
 
+		incidentDoc = convertSlashToForward(incidentDoc);
+		
 		String query = NS_DECELERATION + "doc(\"" + incidentDoc + "\")//asset[@name=\"" + entityName
 				+ "\"]/data(@knowledge)";
+
 
 		String res = executeQuery(query);
 

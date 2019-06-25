@@ -13,7 +13,7 @@ public class GraphPath {
 	private Predicate predicateSrc;
 	private Predicate predicateDes;
 	private LinkedList<Integer> stateTransitions;
-	private int instanceID;
+	private int instanceID = -1;
 	private List<String> transitionActions;
 
 	// private SystemInstanceHandler systemHandler;
@@ -492,7 +492,7 @@ public class GraphPath {
 	public List<String> getTransitionActions() {
 
 		// if actions already identified then return them
-		if (transitionActions != null || !transitionActions.isEmpty()) {
+		if (transitionActions != null && !transitionActions.isEmpty()) {
 			return transitionActions;
 		}
 

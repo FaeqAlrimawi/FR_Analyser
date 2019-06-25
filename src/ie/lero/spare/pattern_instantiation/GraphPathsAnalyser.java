@@ -63,6 +63,8 @@ public class GraphPathsAnalyser {
 	private String instanceName;
 	public static final String PATHS_ANALYSER_NAME = "Graph-Paths-Analyser";
 
+	private static int traceID  =0;
+	
 	public GraphPathsAnalyser(List<GraphPath> paths, TransitionSystem transSys) {
 		this.paths = paths;
 		transitionSystem = transSys;
@@ -74,6 +76,21 @@ public class GraphPathsAnalyser {
 		this.logger = logger;
 		instanceName = PotentialIncidentInstance.INSTANCE_GLOABAL_NAME + "[" + threadID + "]"
 				+ Logger.SEPARATOR_BTW_INSTANCES + PATHS_ANALYSER_NAME + Logger.SEPARATOR_BTW_INSTANCES;
+		
+		createIDs();
+	}
+	
+	protected void createIDs() {
+		
+		for(GraphPath trace : paths) {
+//			if(trace.getInstanceID() == -1) {
+//				trace.setInstanceID(traceID);
+//				traceID++;
+//			}
+			trace.setInstanceID(traceID);
+			traceID++;
+			
+		}
 	}
 
 	public String analyse() {

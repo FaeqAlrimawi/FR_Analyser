@@ -1,13 +1,11 @@
-
 package ie.lero.spare.pattern_instantiation;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
-import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -30,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
-import javax.management.InstanceNotFoundException;
-
 import org.json.JSONObject;
 
 import cyberPhysical_Incident.IncidentDiagram;
@@ -46,9 +42,6 @@ import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
 import it.uniud.mads.jlibbig.core.Signature;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
-//import it.uniud.mads.jlibbig.core.util.StopWatch;
-import net.sf.saxon.expr.instruct.Block;
-import net.sf.saxon.expr.instruct.Fork;
 
 public class IncidentPatternInstantiator {
 
@@ -109,7 +102,7 @@ public class IncidentPatternInstantiator {
 	// the first control is the one with the highest priority, if not found then
 	// the next is used
 	private Map<String, List<String>> assetControlMap;
-	private String systemControlMapFileName = "./" + FileNames.ASSET_CONTROL_MAP;
+	
 
 	// BRS executor
 	SystemExecutor brsExecutor;
@@ -174,188 +167,190 @@ public class IncidentPatternInstantiator {
 
 		listener = GUIlistener;
 
+		executeScenario(incidentPatternFile, systemModelFile, BRS_file, BRS_statesFolder);
 		// String xQueryMatcherFile = xqueryFile;
 
-		try {
-
-			System.out.println(BRS_statesFolder);
-			// currently creates a folder named "log" where the states folder is
-			outputFolder = BRS_statesFolder.substring(0, BRS_statesFolder.lastIndexOf(File.separator));
-
-			runLogger();
-
-			// XqueryExecuter.SPACE_DOC = systemModelFile;
-			// XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
-
-			// add the models to the ModelsHandler class (which can be used by
-			// other objects like the Mapper to
-			// access the models
-			ModelsHandler.addIncidentModel(incidentPatternFile);
-			ModelsHandler.addSystemModel(systemModelFile);
-
-			// StopWatch timer = new StopWatch();
-
-			logger.putMessage("////Executing Scenario1\\\\\\\\");
-			logger.putMessage("*Incident pattern file \"" + incidentPatternFile + "\"");
-			logger.putMessage("*System model file \"" + systemModelFile + "\"");
-			logger.putMessage("*BRS file \"" + BRS_file + "\" & states folder \"" + BRS_statesFolder + "\"");
-
-			// start a timer
-			// timer.start();
-
-			//// start executing the scenario \\\\
-			Mapper m = new Mapper();
-
-			logger.putMessage(">>Matching incident pattern entities to system assets");
-
-			AssetMap am = m.findMatches();
-
-			// if there are incident assets with no matches from space model
-			// then exit
-			if (am == null || am.hasEntitiesWithNoMatch()) {
-				if(am!=null) {
-					logger.putMessage(">>Some incident entities have no matches in the system assets. These are:");
-					// getIncidetnAssetWithNoMatch method has some issues
-					List<String> asts = am.getIncidentAssetsWithNoMatch();
-					logger.putMessage(asts.toString());
-				} else {
-					logger.putMessage(">>Some incident entities have no matches in the system assets. Exiting execution.");
-				}
-				
-				return; // execution stops if there are incident entities with
-						// no matching
-			}
-
-			// print matched assets
-			logger.putMessage(">>Number of Assets (also entities) =  " + am.getIncidentEntityNames().length);
-			logger.putMessage(">>Incident entities order: " + Arrays.toString(am.getIncidentEntityNames()));
-			logger.putMessage(">>Entity-Asset map:");
-			logger.putMessage(am.toString());
-			logger.putMessage(">>Generating asset sets..");
-
-			listener.updateAssetMapInfo(am.toStringCompact());
-
-			// generate sequences
-			boolean isStrict = true;
-			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict);
-
-			listener.updateProgress(10);
-			listener.updateAssetSetInfo(lst);
-
-			// checks if there are sequences generated or not. if not, then
-			// execution is terminated
-			// this can be loosened to allow same asset to be mapped to two
-			// entities
-			if (lst == null || lst.isEmpty()) {
-				logger.putMessage(">>No combinations found. Terminating execution");
-				return;
-			}
-
-			logger.putMessage(">>Asset sets (" + lst.size() + "):");
-
-			// print the sets only if there are less than 200. Else, print a 100
-			// but save the rest to a file
-			boolean oldIsPrintToScreen = isPrintToScreen;
-
-			// print the sets only if there are less than 200. Else, print a 100
-			// but save the rest to a file
-			for (int i = 0; i < lst.size(); i++) {// adjust the length
-				if (isPrintToScreen && i >= 100) {
-					isPrintToScreen = false;
-					System.out.println("-... [See log file (" + logger.getLogFolder() + "/" + logger.getLogFileName()
-							+ ") for the rest]");
-				}
-				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
-			}
-
-			isPrintToScreen = oldIsPrintToScreen;
-
-			logger.putMessage(
-					">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
-
-			// initialise the system (load states and transition system)
-			boolean isInitialised = initialiseBigraphSystem(BRS_file, BRS_statesFolder);
-
-			if (isInitialised) {
-				logger.putMessage(">>Initialisation completed successfully");
-			} else {
-				logger.putMessage(">>Initialisation was NOT completed successfully. Execution is terminated");
-			}
-
-			logger.putMessage(">>Number of States= " + transitionSystem.getNumberOfStates());
-			// logger.putMessage(">>State Transitions:");
-			// logger.putMessage(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
-
-			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
-
-			String[] incidentAssetNames = am.getIncidentEntityNames();
-
-			while (!isSetsSelected) {
-				// wait user input
-				Thread.sleep(100);
-			}
-
-			if (assetSetsSelected.size() > 0) {
-				incrementValue = (int) Math.ceil(90.0 / assetSetsSelected.size());
-			}
-
-			// create threads that handle each sequence generated from asset
-			// matching
-			executor = Executors.newFixedThreadPool(threadPoolSize);
-
-			logger.putMessage(">>Creating [" + assetSetsSelected.size() + "] threads for asset sets. [" + threadPoolSize
-					+ "] thread(s) are running in parallel.");
-
-			for (int i = 0; i < assetSetsSelected.size(); i++) {// adjust the
-																// length
-				incidentInstances[i] = new PotentialIncidentInstance(lst.get(assetSetsSelected.get(i)),
-						incidentAssetNames, i);
-				executor.submit(incidentInstances[i]);
-			}
-
-			try {
-				executor.shutdown();
-
-				// if it returns false then maximum waiting time is reached
-				if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
-					logger.putMessage("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " "
-							+ timeUnit + "]");
-				}
-
-				mainPool.shutdown();
-
-				// if it returns false then maximum waiting time is reached
-				if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
-					logger.putMessage("Time out! saving instances took more than specified maximum time ["
-							+ maxWaitingTime + " " + timeUnit + "]");
-				}
-
-			} catch (InterruptedException e) {
-
-				e.printStackTrace();
-			}
-
-			// timer.stop();
-
-			// long timePassed = timer.getEllapsedMillis();
-			// int hours = (int) (timePassed / 3600000) % 60;
-			// int mins = (int) (timePassed / 60000) % 60;
-			// int secs = (int) (timePassed / 1000) % 60;
-			// int secMils = (int) timePassed % 1000;
-
-			logger.putMessage("////Execution finished\\\\\\\\");
-			// execution time
-			// logger.putMessage("Execution time: " + timePassed + "ms [" +
-			// hours + "h:" + mins + "m:" + secs + "s:"
-			// + secMils + "ms]");
-
-			// logger.putMessage(Logger.terminatingString);
-			logger.terminateLogging();
-
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//
+//			// System.out.println(BRS_statesFolder);
+//			// currently creates a folder named "log" where the states folder is
+//			outputFolder = BRS_statesFolder.substring(0, BRS_statesFolder.lastIndexOf(File.separator));
+//
+//			runLogger();
+//
+//			// XqueryExecuter.SPACE_DOC = systemModelFile;
+//			// XqueryExecuter.INCIDENT_DOC = incidentPatternFile;
+//
+//			// add the models to the ModelsHandler class (which can be used by
+//			// other objects like the Mapper to
+//			// access the models
+//			ModelsHandler.addIncidentModel(incidentPatternFile);
+//			ModelsHandler.addSystemModel(systemModelFile);
+//
+//			// StopWatch timer = new StopWatch();
+//
+//			logger.putMessage("////Executing Scenario1\\\\\\\\");
+//			logger.putMessage("*Incident pattern file \"" + incidentPatternFile + "\"");
+//			logger.putMessage("*System model file \"" + systemModelFile + "\"");
+//			logger.putMessage("*BRS file \"" + BRS_file + "\" & states folder \"" + BRS_statesFolder + "\"");
+//
+//			// start a timer
+//			// timer.start();
+//
+//			//// start executing the scenario \\\\
+//			Mapper m = new Mapper();
+//
+//			logger.putMessage(">>Matching incident pattern entities to system assets");
+//
+//			AssetMap am = m.findMatches();
+//
+//			// if there are incident assets with no matches from space model
+//			// then exit
+//			if (am == null || am.hasEntitiesWithNoMatch()) {
+//				if (am != null) {
+//					logger.putMessage(">>Some incident entities have no matches in the system assets. These are:");
+//					// getIncidetnAssetWithNoMatch method has some issues
+//					List<String> asts = am.getIncidentAssetsWithNoMatch();
+//					logger.putMessage(asts.toString());
+//				} else {
+//					logger.putMessage(
+//							">>Some incident entities have no matches in the system assets. Exiting execution.");
+//				}
+//
+//				return; // execution stops if there are incident entities with
+//						// no matching
+//			}
+//
+//			// print matched assets
+//			logger.putMessage(">>Number of Assets (also entities) =  " + am.getIncidentEntityNames().length);
+//			logger.putMessage(">>Incident entities order: " + Arrays.toString(am.getIncidentEntityNames()));
+//			logger.putMessage(">>Entity-Asset map:");
+//			logger.putMessage(am.toString());
+//			logger.putMessage(">>Generating asset sets..");
+//
+//			listener.updateAssetMapInfo(am.toStringCompact());
+//
+//			// generate sequences
+//			boolean isStrict = true;
+//			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict);
+//
+//			listener.updateProgress(10);
+//			listener.updateAssetSetInfo(lst);
+//
+//			// checks if there are sequences generated or not. if not, then
+//			// execution is terminated
+//			// this can be loosened to allow same asset to be mapped to two
+//			// entities
+//			if (lst == null || lst.isEmpty()) {
+//				logger.putMessage(">>No combinations found. Terminating execution");
+//				return;
+//			}
+//
+//			logger.putMessage(">>Asset sets (" + lst.size() + "):");
+//
+//			// print the sets only if there are less than 200. Else, print a 100
+//			// but save the rest to a file
+//			boolean oldIsPrintToScreen = isPrintToScreen;
+//
+//			// print the sets only if there are less than 200. Else, print a 100
+//			// but save the rest to a file
+//			for (int i = 0; i < lst.size(); i++) {// adjust the length
+//				if (isPrintToScreen && i >= 100) {
+//					isPrintToScreen = false;
+//					System.out.println("-... [See log file (" + logger.getLogFolder() + "/" + logger.getLogFileName()
+//							+ ") for the rest]");
+//				}
+//				logger.putMessage("-Set[" + i + "]: " + Arrays.toString(lst.get(i)));
+//			}
+//
+//			isPrintToScreen = oldIsPrintToScreen;
+//
+//			logger.putMessage(
+//					">>Initialising the Bigraphical Reactive System (Loading states & creating the state transition graph)...");
+//
+//			// initialise the system (load states and transition system)
+//			boolean isInitialised = initialiseBigraphSystem(BRS_file, BRS_statesFolder);
+//
+//			if (isInitialised) {
+//				logger.putMessage(">>Initialisation completed successfully");
+//			} else {
+//				logger.putMessage(">>Initialisation was NOT completed successfully. Execution is terminated");
+//			}
+//
+//			logger.putMessage(">>Number of States= " + transitionSystem.getNumberOfStates());
+//			// logger.putMessage(">>State Transitions:");
+//			// logger.putMessage(TransitionSystem.getTransitionSystemInstance().getDigraph().toString());
+//
+//			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+//
+//			String[] incidentAssetNames = am.getIncidentEntityNames();
+//
+//			while (!isSetsSelected) {
+//				// wait user input
+//				Thread.sleep(100);
+//			}
+//
+//			if (assetSetsSelected.size() > 0) {
+//				incrementValue = (int) Math.ceil(90.0 / assetSetsSelected.size());
+//			}
+//
+//			// create threads that handle each sequence generated from asset
+//			// matching
+//			executor = Executors.newFixedThreadPool(threadPoolSize);
+//
+//			logger.putMessage(">>Creating [" + assetSetsSelected.size() + "] threads for asset sets. [" + threadPoolSize
+//					+ "] thread(s) are running in parallel.");
+//
+//			for (int i = 0; i < assetSetsSelected.size(); i++) {// adjust the
+//																// length
+//				incidentInstances[i] = new PotentialIncidentInstance(lst.get(assetSetsSelected.get(i)),
+//						incidentAssetNames, i);
+//				executor.submit(incidentInstances[i]);
+//			}
+//
+//			try {
+//				executor.shutdown();
+//
+//				// if it returns false then maximum waiting time is reached
+//				if (!executor.awaitTermination(maxWaitingTime, timeUnit)) {
+//					logger.putMessage("Time out! tasks took more than specified maximum time [" + maxWaitingTime + " "
+//							+ timeUnit + "]");
+//				}
+//
+//				mainPool.shutdown();
+//
+//				// if it returns false then maximum waiting time is reached
+//				if (!mainPool.awaitTermination(maxWaitingTime, timeUnit)) {
+//					logger.putMessage("Time out! saving instances took more than specified maximum time ["
+//							+ maxWaitingTime + " " + timeUnit + "]");
+//				}
+//
+//			} catch (InterruptedException e) {
+//
+//				e.printStackTrace();
+//			}
+//
+//			// timer.stop();
+//
+//			// long timePassed = timer.getEllapsedMillis();
+//			// int hours = (int) (timePassed / 3600000) % 60;
+//			// int mins = (int) (timePassed / 60000) % 60;
+//			// int secs = (int) (timePassed / 1000) % 60;
+//			// int secMils = (int) timePassed % 1000;
+//
+//			logger.putMessage("////Execution finished\\\\\\\\");
+//			// execution time
+//			// logger.putMessage("Execution time: " + timePassed + "ms [" +
+//			// hours + "h:" + mins + "m:" + secs + "s:"
+//			// + secMils + "ms]");
+//
+//			// logger.putMessage(Logger.terminatingString);
+//			logger.terminateLogging();
+//
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	/**
@@ -451,7 +446,13 @@ public class IncidentPatternInstantiator {
 		try {
 
 			// currently creates a folder named "log" where the states folder is
-			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
+//			int count = 10000;
+//			while(BRS_outputFolder.contains("\\")  && count>0) {
+//				BRS_outputFolder = BRS_outputFolder.replace("\\", File.separator);
+//				count--;
+//			}
+			
+			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf(File.separator));
 
 			// create output folder
 			File tmp = new File(outputFolder + "/output");
@@ -523,6 +524,10 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(am.toString());
 			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Generating asset sets..");
 
+			if (listener != null) {
+				listener.updateAssetMapInfo(am.toStringCompact());
+			}
+
 			// generate sequences. If isStrict is false then generated sequences
 			// is only based on having unique sets with unique assets mapped to
 			// an entities in each set. if isStrict is set to true, then
@@ -530,6 +535,11 @@ public class IncidentPatternInstantiator {
 			// considered when generating sequences
 			boolean isStrict = true;
 			LinkedList<String[]> lst = am.generateUniqueCombinations(isStrict, incidentModel, systemModel);
+
+			if (listener != null) {
+				listener.updateProgress(10);
+				listener.updateAssetSetInfo(lst);
+			}
 
 			// checks if there are sequences generated or not. if not, then
 			// execution is terminated
@@ -589,11 +599,27 @@ public class IncidentPatternInstantiator {
 			// load systemClass-Control map
 			loadAssetControlMap(BRS_file);
 
+			// check gui
+			int size = 0;
+
+			if (listener != null) {
+				while (!isSetsSelected) {
+					// wait user input
+					Thread.sleep(100);
+				}
+
+				if (assetSetsSelected.size() > 0) {
+					incrementValue = (int) Math.ceil(90.0 / assetSetsSelected.size());
+					size = assetSetsSelected.size();
+				}
+			} else {
+				size = lst.size();
+			}
 			// create threads that handle each sequence generated from asset
 			// matching
 			executor = Executors.newFixedThreadPool(threadPoolSize);
 
-			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[lst.size()];
+			PotentialIncidentInstance[] incidentInstances = new PotentialIncidentInstance[size];
 
 			String[] incidentAssetNames = am.getIncidentEntityNames();
 
@@ -611,17 +637,26 @@ public class IncidentPatternInstantiator {
 			memory = runtime.totalMemory() - runtime.freeMemory();
 			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Memory before executing sets: " + memory + "Bytes");
 
-			// for (int i = 0; i < lst.size(); i++) {// adjust the length
-			// incidentInstances[i] = new PotentialIncidentInstance(lst.get(i),
-			// incidentAssetNames, i);
-			// instances.add(executor.submit(incidentInstances[i]));
-			// }
+			if (listener == null) {// no gui
+				for (int i = 0; i < lst.size(); i++) {// adjust the length
+					incidentInstances[i] = new PotentialIncidentInstance(lst.get(i), incidentAssetNames, i);
+					instances.add(executor.submit(incidentInstances[i]));
+				}
+			} else {// with gui
+				for (int i = 0; i < size; i++) {
+					incidentInstances[i] = new PotentialIncidentInstance(lst.get(assetSetsSelected.get(i)),
+							incidentAssetNames, i);
+					executor.submit(incidentInstances[i]);
+				}
+			}
+			
 			/** for testing **/
 			// incidentInstances[1] = new PotentialIncidentInstance(lst.get(1),
 			// incidentAssetNames, 1);
 			// instances.add(executor.submit(incidentInstances[1]));
-			incidentInstances[2] = new PotentialIncidentInstance(lst.get(2), incidentAssetNames, 2);
-			instances.add(executor.submit(incidentInstances[2]));
+			// incidentInstances[2] = new PotentialIncidentInstance(lst.get(2),
+			// incidentAssetNames, 2);
+			// instances.add(executor.submit(incidentInstances[2]));
 
 			// for (Future<Integer> fut : instances) {
 			// if (fut != null && !fut.isDone()) {
@@ -839,7 +874,15 @@ public class IncidentPatternInstantiator {
 		List<String> unMatchedControls = new LinkedList<String>();
 		Signature signature = systemHandler.getGlobalBigraphSignature();
 
-		String[] lines = FileManipulator.readFileNewLine(systemControlMapFileName);
+		 URL systemControlMapFileName = IncidentPatternInstantiator.class.getClassLoader().getResource("ie/lero/spare/resources/" + FileNames.ASSET_CONTROL_MAP);
+		
+		if(systemControlMapFileName == null) {
+			logger.putError("System to Control map file ["+FileNames.ASSET_CONTROL_MAP+"] is not found");
+			return;
+		} 
+		
+		String path = systemControlMapFileName.getPath();
+		String[] lines = FileManipulator.readFileNewLine(path);
 
 		String assetClass = null;
 		String[] controlNames = null;
@@ -1039,7 +1082,7 @@ public class IncidentPatternInstantiator {
 					// /** Analyse generated transitions **/
 					// // create an analysis object for the identified paths
 					pathsAnalyser = new GraphPathsAnalyser(paths, transitionSystem, threadID, logger);
-					String result = pathsAnalyser.analyse();
+//					String result = pathsAnalyser.analyse();
 					//
 					// logger.putMessage(result);
 					//
@@ -1377,7 +1420,7 @@ public class IncidentPatternInstantiator {
 					writer.newLine();
 					// logger.putMessage(instanceSaverName+tmp);
 					cnt++;
-					
+
 				}
 
 				// get last chunck
@@ -1385,7 +1428,7 @@ public class IncidentPatternInstantiator {
 				writer.write(tmp);
 				tmp = null;
 				cnt++;
-				
+
 				if (result != null && result.isCompletedAbnormally()) {
 					if (logger != null) {
 						logger.putError(instanceSaverName + "Something went wrong while storing generated instances.");
@@ -1402,7 +1445,7 @@ public class IncidentPatternInstantiator {
 				}
 
 				writer.close();
-				
+
 				Runtime.getRuntime().gc();
 
 				return SUCCESSFUL;
@@ -1467,11 +1510,11 @@ public class IncidentPatternInstantiator {
 				// indexStart+", "+indexEnd+"]");
 				StringBuilder result = new StringBuilder();
 				for (int i = indexStart; i < indexEnd; i++) {
-					
+
 					result.append("{\"").append(INSTANCE_id).append("\":").append(i).append(",")
 							.append(paths.get(i).toJSONCompact()).append("}");
 					result.append(",");
-				
+
 				}
 
 				result.deleteCharAt(result.length() - 1);

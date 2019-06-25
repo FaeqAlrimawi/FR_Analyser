@@ -16,7 +16,7 @@ public class FileNames {
 	//System Classes to Controls Map file
 	//contains enteries in the format: SystemClass:Bigrapher-Control-1;Bigrapher-Control-2; ...; Bigrapher-Control-N
 	//e.g., SmartLight SmartLight ComputingDevice PhysicalAsset
-	public static final String ASSET_CONTROL_MAP = "asset-control map.txt";
+	public static final String ASSET_CONTROL_MAP = "asset-control_map.txt";
 	public static final String ASSET_CONTROL_SEPARATOR = ":";
 	public static final String CONTROLS_SEPARATOR = ";";
 	
