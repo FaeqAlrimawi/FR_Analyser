@@ -1,8 +1,11 @@
 package ie.lero.spare.pattern_instantiation;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.file.Files;
@@ -40,6 +43,7 @@ import ie.lero.spare.franalyser.utility.JSONTerms;
 import ie.lero.spare.franalyser.utility.Logger;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
+import ie.lero.spare.pattern_extraction.IncidentPatternExtractor;
 import ie.lero.spare.pattern_instantiation.IncidentPatternInstantiator.InstancesSaver;
 import it.uniud.mads.jlibbig.core.Signature;
 import it.uniud.mads.jlibbig.core.std.Bigraph;
@@ -122,6 +126,29 @@ public class IncidentPatternInstantiator {
 
 		logger.start();
 
+	}
+
+	/**
+	 * Maps given incident pattern to the given system model. Bigraph
+	 * representation of the system and generated states are considered to have
+	 * the same name as the system model file name
+	 * 
+	 * @param incidentPatternFile
+	 *            incident pattern file path
+	 * @param systemModelFile
+	 *            system model file path
+	 */
+	public void execute(String incidentPatternFile, String systemModelFile) {
+
+		// brs output folder (containing states) has the same name as the system
+		// model file name
+		String BRS_outputFolder = systemModelFile.substring(0, systemModelFile.lastIndexOf("."));
+
+		// brs file has the same name as the system model file name but with
+		// .big extension instead of .cps
+		String BRS_file = BRS_outputFolder + ".big";
+
+		execute(incidentPatternFile, systemModelFile, BRS_file, BRS_outputFolder, null);
 	}
 
 	/**
@@ -474,7 +501,13 @@ public class IncidentPatternInstantiator {
 			// count--;
 			// }
 
-			outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf(File.separator));
+			if (BRS_outputFolder.contains("\\")) {
+				outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("\\"));
+			} else if (BRS_outputFolder.contains("/")) {
+				outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf("/"));
+			} else {
+				outputFolder = BRS_outputFolder.substring(0, BRS_outputFolder.lastIndexOf(File.separator));
+			}
 
 			// create output folder
 			File tmp = new File(outputFolder + "/output");
@@ -897,33 +930,48 @@ public class IncidentPatternInstantiator {
 		List<String> unMatchedControls = new LinkedList<String>();
 		Signature signature = systemHandler.getGlobalBigraphSignature();
 
-		URL systemControlMapFileName = IncidentPatternInstantiator.class.getClassLoader()
-				.getResource("ie/lero/spare/resources/" + FileNames.ASSET_CONTROL_MAP);
+		InputStream systemControlMapFileName = IncidentPatternInstantiator.class.getClassLoader()
+				.getResourceAsStream("ie/lero/spare/resources/" + FileNames.ASSET_CONTROL_MAP);
+		// .getResource("ie/lero/spare/resources/" +
+		// FileNames.ASSET_CONTROL_MAP);
 
 		if (systemControlMapFileName == null) {
 			logger.putError("System to Control map file [" + FileNames.ASSET_CONTROL_MAP + "] is not found");
 			return;
 		}
 
-		String path = systemControlMapFileName.getPath();
-		String[] lines = FileManipulator.readFileNewLine(path);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(systemControlMapFileName));
+
+		// String path = systemControlMapFileName.getPath();
+		// String[] lines = FileManipulator.readFileNewLine(path);
 
 		String assetClass = null;
 		String[] controlNames = null;
 		String[] tmp;
+		String line = null;
 
-		for (String line : lines) {
-			tmp = line.split(FileNames.ASSET_CONTROL_SEPARATOR);
-			assetClass = tmp[0]; // system class
-			controlNames = tmp[1] != null ? tmp[1].split(FileNames.CONTROLS_SEPARATOR) : null; // bigrapher
-																								// controls
-			String primariyControl = controlNames.length > 0 ? controlNames[0] : null;
+		try {
+			while ((line = reader.readLine()) != null) {
+				tmp = line.split(FileNames.ASSET_CONTROL_SEPARATOR);
 
-			if (signature != null && signature.getByName(primariyControl) == null) {
-				unMatchedControls.add(primariyControl);
+				if (tmp.length < 2) {
+					continue;
+				}
+
+				assetClass = tmp[0]; // system class
+				controlNames = tmp[1] != null ? tmp[1].split(FileNames.CONTROLS_SEPARATOR) : null; // bigrapher
+																									// controls
+				String primariyControl = controlNames.length > 0 ? controlNames[0] : null;
+
+				if (signature != null && signature.getByName(primariyControl) == null) {
+					unMatchedControls.add(primariyControl);
+				}
+
+				assetControlMap.put(assetClass, Arrays.asList(controlNames));
 			}
-
-			assetControlMap.put(assetClass, Arrays.asList(controlNames));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "SystemClass<->Control map is created.");
@@ -1467,9 +1515,9 @@ public class IncidentPatternInstantiator {
 
 				jsonStr.setLength(0);
 
-//				if (mainPool == null) {
-//					mainPool = new ForkJoinPool();
-//				}
+				// if (mainPool == null) {
+				// mainPool = new ForkJoinPool();
+				// }
 
 				ForkJoinTask<String> result = mainPool
 						.submit(new GraphPathsToStringConverter(0, size, paths, instancesQ));
@@ -1636,7 +1684,8 @@ public class IncidentPatternInstantiator {
 		// ins.test1();
 
 		// test
-		test();
+		// test();
+		executeFromPrompt();
 		// lero10();
 		// test100K();
 	}
@@ -1739,6 +1788,184 @@ public class IncidentPatternInstantiator {
 		System.out.println("Complete...");
 		System.out.println("\n\n");
 
+	}
+
+	protected static void executeFromPrompt() {
+
+		// BufferedReader in = new BufferedReader(new
+		// InputStreamReader(System.in));
+		Scanner scan = new Scanner(System.in);
+
+		boolean isDone = false;
+		int scenID = -1;
+		List<Integer> scenarioIDs = new LinkedList<Integer>() {
+			{
+				add(1);
+				add(2);
+			}
+		};
+
+		int tries = 10;
+
+		System.out.println("Which scenario to execute: (1) pattern extraction, (2) pattern instantiation?");
+
+		loop: while (!isDone && tries > 0) {
+			try {
+
+				String input = scan.next();
+				input = input.trim();
+				scenID = Integer.parseInt(input);
+
+				if (scenarioIDs.contains(scenID)) {
+					isDone = true;
+				} else {
+					System.out.println("Please enter 1 for pattern extraction, or 2 for pattern instantiation");
+				}
+
+			} catch (NumberFormatException e) {
+				System.out.println("Please enter 1 for pattern extraction, or 2 for pattern instantiation");
+				continue loop;
+			} finally {
+				tries--;
+			}
+		}
+
+		switch (scenID) {
+		case 1:
+			// extraction
+			executeExtractionInRC1Scenario();
+			break;
+		case 2:
+			// instantiation
+			executeInstantionInRC2Scenario();
+			break;
+		default:
+			break;
+		}
+
+	}
+
+	protected static void executeInstantionInRC2Scenario() {
+
+		String incidentPatternName = "incidentPattern.cpi";
+		String systemModelName = "RC2.cps";
+		File incidentPatternFile = null;
+		File sysModelFile = null;
+		String incidentPatternFilePath = null;
+		String sysModelFilePath = null;
+
+		URL incidentPattern = IncidentPatternInstantiator.class
+				.getResource("../resources/scenario2_instantiation/" + incidentPatternName);
+		URL sysModel = IncidentPatternInstantiator.class
+				.getResource("../resources/scenario2_instantiation/" + systemModelName);
+
+		if (incidentPattern == null) {
+			// System.err.println("Incident pattern [" + incidentPatternName +
+			// "] is not found.");
+			incidentPatternFile = new File("./resources/scenario2_instantiation/" + incidentPatternName);
+
+			if (incidentPatternFile.exists()) {
+				incidentPatternFilePath = incidentPatternFile.getAbsolutePath();
+			} else {
+
+			}
+
+			// return;
+		} else {
+			incidentPatternFilePath = incidentPattern.getPath();
+		}
+
+		if (sysModel == null) {
+			System.err.println("System model [" + systemModelName + "] is not found.");
+			sysModelFile = new File("./resources/scenario2_instantiation/" + systemModelName);
+
+			if (sysModelFile.exists()) {
+				sysModelFilePath = sysModelFile.getAbsolutePath();
+			}
+			// return;
+		} else {
+			sysModelFilePath = sysModel.getPath();
+		}
+
+		IncidentPatternInstantiator instantiator = new IncidentPatternInstantiator();
+
+		instantiator.execute(incidentPatternFilePath, sysModelFilePath);
+
+	}
+
+	protected static void executeExtractionInRC1Scenario() {
+
+		String incidentInstanceName = "incidentInstance.cpi";
+		String systemModelName = "RC1.cps";
+		String activityPatternFolder = "activityPatterns/";
+		File incidentInstanceFile = null;
+		File sysModelFile = null;
+		String incidentInstanceFilePath = null;
+		String sysModelFilePath = null;
+
+		// String[] activityPatterns = new String[] { "collectDataPattern.cpi",
+		// "connectToNetworkPattern.cpi",
+		// "movePhysicallyPattern.cpi", "rogueLocationSetup.cpi",
+		// "usingMaliciousFiles.cpi" };
+
+		String[] activityPatterns = new String[] { "collectDataPattern.cpi", "connectToNetworkPattern.cpi",
+				"movePhysicallyPattern.cpi", "rogueLocationSetup.cpi", "usingMaliciousFiles.cpi" };
+
+		URL incidentInstance = IncidentPatternInstantiator.class
+				.getResource("../resources/scenario1_extraction/" + incidentInstanceName);
+		URL sysModel = IncidentPatternInstantiator.class
+				.getResource("../resources/scenario1_extraction/" + systemModelName);
+
+		if (incidentInstance == null) {
+
+			incidentInstanceFile = new File("./resources/scenario1_extraction/" + incidentInstanceName);
+
+			if (incidentInstanceFile.exists()) {
+				incidentInstanceFilePath = incidentInstanceFile.getAbsolutePath();
+			} else {
+				System.err.println("Incident instance [" + incidentInstanceName + "] is not found.");
+				return;
+			}
+		} else {
+			incidentInstanceFilePath = incidentInstance.getPath();
+		}
+
+		if (sysModel == null) {
+			// System.err.println("System model [" + systemModelName + "] is not
+			// found.");
+			sysModelFile = new File("./resources/scenario1_extraction/" + systemModelName);
+
+			if (sysModelFile.exists()) {
+				sysModelFilePath = sysModelFile.getAbsolutePath();
+			}
+			// return;
+		} else {
+			sysModelFilePath = sysModel.getPath();
+		}
+
+		// get activity patterns
+		for (String actPtrFile : activityPatterns) {
+			URL actPtrn = IncidentPatternInstantiator.class
+					.getResource("../resources/scenario1_extraction/" + activityPatternFolder + actPtrFile);
+
+			if (actPtrn != null) {
+				ModelsHandler.addActivityPattern(actPtrn.getPath());
+			} else {
+				
+				File file = new File("./resources/scenario1_extraction/" + activityPatternFolder + actPtrFile);
+				
+				if(file.exists()) {
+					ModelsHandler.addActivityPattern(file.getAbsolutePath());
+				} else {
+					System.err.println("Activity pattern [" + actPtrFile + "] is not found");	
+				}
+				
+			}
+		}
+
+		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
+
+		extractor.extract(incidentInstanceFilePath, sysModelFilePath);
 	}
 
 }

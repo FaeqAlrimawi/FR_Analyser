@@ -1,4 +1,4 @@
-//package ie.lero.spare.pattern_instantiation;
+package ie.lero.spare.pattern_instantiation;
 //
 //import java.io.BufferedWriter;
 //import java.io.File;
@@ -50,8 +50,9 @@
 //import weka.filters.Filter;
 //import weka.filters.unsupervised.attribute.Remove;
 //
-//public class IncidentInstancesClusterGenerator {
-//
+public class IncidentInstancesClusterGenerator {
+}
+	//
 //	// instances (traces). key is trace ID value is the trace as GraphPath
 //	// object
 //	Map<Integer, GraphPath> instances;

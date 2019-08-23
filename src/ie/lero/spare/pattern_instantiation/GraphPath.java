@@ -29,12 +29,14 @@ public class GraphPath {
 
 	public GraphPath() {
 		stateTransitions = new LinkedList<Integer>();
+		transitionActions = new LinkedList<String>();
 		// systemHandler = SystemsHandler.getCurrentSystemHandler();
 		transitionSystem = null;// systemHandler!=null?systemHandler.getTransitionSystem():null;
 	}
 
 	public GraphPath(TransitionSystem transitionSystem) {
 		stateTransitions = new LinkedList<Integer>();
+		transitionActions = new LinkedList<String>();
 		// systemHandler = sysHandler;
 		// transitionSystem =
 		// systemHandler!=null?systemHandler.getTransitionSystem():null;
@@ -48,6 +50,14 @@ public class GraphPath {
 		stateTransitions = transition;
 	}
 
+	public GraphPath(GraphPath trace) {
+		this();
+		stateTransitions = new LinkedList<Integer>(trace.getStateTransitions());
+		transitionSystem = trace.transitionSystem;
+		transitionActions = new LinkedList<String>(trace.getTransitionActions());
+		instanceID = trace.getInstanceID();
+	}
+	
 	public Predicate getPredicateSrc() {
 		return predicateSrc;
 	}
@@ -489,6 +499,10 @@ public class GraphPath {
 		return false;
 	}
 
+	public List<String> getTraceActions() {
+		return transitionActions;
+	}
+	
 	public List<String> getTransitionActions() {
 
 		// if actions already identified then return them

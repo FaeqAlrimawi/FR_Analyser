@@ -219,7 +219,7 @@ public class IncidentPatternExtractor {
 		EnvironmentDiagram systemModel = ModelsHandler.addSystemModel(this.systemFilePath);
 
 		this.systemModel = systemModel;
-
+		originalIncidentModel = incidentModel;
 		
 		return extract();
 	}
@@ -261,27 +261,7 @@ public class IncidentPatternExtractor {
 
 		// =======Load patterns====================
 		logger.putMessage("Load activity patterns...");
-		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
-		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
-		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
-		String rogueLocationSetupFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
-		String contentSpoofing = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/contentSpoofing.cpi";
-		String usingMaliciousFile = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/usingMaliciousFiles.cpi";
-		// add patterns to the map (key is file path and value is pattern) of
-		// patterns in the models handler class
-//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-//		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-		ModelsHandler.addActivityPattern(usingMaliciousFile);
-		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		// ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
-		// ModelsHandler.addActivityPattern(collectDataPatternFileName2);
-		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		// ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
-		// ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
-
+	
 		activityPatterns = new LinkedList<ActivityPattern>();
 
 		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
@@ -418,6 +398,7 @@ public class IncidentPatternExtractor {
 		return abstractIncidentModel;
 	}
 
+	
 	/**
 	 * Find an [optimal] solution to the pattern maps generated, then add
 	 * potential abstract activities, which correspond to the solution found, to
@@ -2702,8 +2683,30 @@ public class IncidentPatternExtractor {
 	public static void main(String[] args) {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
-		String incidentFilePath = "D:/Bigrapher data/NII/incident instances/incidentInstance_steal.cpi";
+		String incidentFilePath = "D:/Bigrapher data/NII/incident instances/incidentInstance.cpi";
 		String systemFilePath = "D:/Bigrapher data/NII/NII_ext.cps";
+
+		//need to add patterns
+		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
+		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
+		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
+		String rogueLocationSetupFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
+		String contentSpoofing = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/contentSpoofing.cpi";
+		String usingMaliciousFile = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/usingMaliciousFiles.cpi";
+		// add patterns to the map (key is file path and value is pattern) of
+		// patterns in the models handler class
+//		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+//		ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+//		ModelsHandler.addActivityPattern(usingMaliciousFile);
+		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		// ModelsHandler.addActivityPattern(rogueLocationSetupFileName);
+		// ModelsHandler.addActivityPattern(collectDataPatternFileName2);
+		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+//		 ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
+		// ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);
+		// ModelsHandler.addActivityPattern(movePhysicallyPatternFileName2);
 
 		extractor.extract(incidentFilePath, systemFilePath);
 

@@ -16,7 +16,7 @@ import ie.lero.spare.pattern_instantiation.Predicate;
 
 public class TransitionSystem {
 
-//	private TransitionSystem transitionSystem = null;
+	// private TransitionSystem transitionSystem = null;
 	private Digraph<Integer> transitionGraph;
 	private Integer startState;
 	private Integer endState;
@@ -25,45 +25,45 @@ public class TransitionSystem {
 	private LinkedList<GraphPath> paths;
 	private String fileName;
 	private int numberOfStates;
-	
-	//used to label transition system
-	private String [] actionNames; 
-	
+
+	// used to label transition system
+	private String[] actionNames;
+
 	public TransitionSystem() {
 		transitionGraph = new Digraph<Integer>();
 		numberOfStates = -1;
-		
-//		createDigraphFromJSON();
+
+		// createDigraphFromJSON();
 	}
-	
+
 	public TransitionSystem(String fileName) {
 		transitionGraph = new Digraph<Integer>();
 		numberOfStates = -1;
 		this.fileName = fileName;
 		createDigraphFromJSON();
 	}
-	
-//	public TransitionSystem(Digraph<Integer> digraph) {
-//		transitionGraph = new Digraph<Integer>(digraph);
-//		numberOfStates = -1;
-//
-//		// fileName = BigraphAnalyser.getBigrapherExecutionOutputFolder() +
-//		// "/transitions";
-////		createDigraph();
-//		createDigraphFromJSON();
-//	}
 
-//	public TransitionSystem getTransitionSystemInstance() {
-//
-//		if (transitionSystem != null) {
-//			return transitionSystem;
-//		}
-//
-//		transitionSystem = new TransitionSystem();
-//
-//		return transitionSystem;
-//
-//	}
+	// public TransitionSystem(Digraph<Integer> digraph) {
+	// transitionGraph = new Digraph<Integer>(digraph);
+	// numberOfStates = -1;
+	//
+	// // fileName = BigraphAnalyser.getBigrapherExecutionOutputFolder() +
+	// // "/transitions";
+	//// createDigraph();
+	// createDigraphFromJSON();
+	// }
+
+	// public TransitionSystem getTransitionSystemInstance() {
+	//
+	// if (transitionSystem != null) {
+	// return transitionSystem;
+	// }
+	//
+	// transitionSystem = new TransitionSystem();
+	//
+	// return transitionSystem;
+	//
+	// }
 
 	private void createDigraph() {
 
@@ -129,11 +129,11 @@ public class TransitionSystem {
 		try {
 			JSONArray ary;
 
-			if(fileName.endsWith(".txt")) {
+			if (fileName.endsWith(".txt")) {
 				createDigraph();
 				return;
 			}
-			
+
 			obj = (JSONObject) parser.parse(new FileReader(fileName));
 
 			// if the transitions come from a brs file
@@ -142,53 +142,55 @@ public class TransitionSystem {
 			// if the transitions come from pbrs
 			if (ary == null) {
 				ary = (JSONArray) obj.get(JSONTerms.TRANSITIONS__PROP_BRS);
-			}
+			} 
 
-			if (ary == null) {
+			if(ary == null){
 				ary = (JSONArray) obj.get(JSONTerms.TRANSITIONS__STOCHASTIC_BRS);
 			}
-		
-		// numberOfStates = new Integer(transitionsFileLines[0].split(" ")[0]);
-		// //gets the number of states
+
+			// numberOfStates = new Integer(transitionsFileLines[0].split("
+			// ")[0]);
+			// //gets the number of states
 
 			Iterator<JSONObject> iter = ary.iterator();
-			JSONObject tmpObj  = null;
+			JSONObject tmpObj = null;
 			Object objGeneral = null;
 			
-		while (iter.hasNext()) {
-			
-			tmpObj = iter.next();
-			
-			//source state
-			String srcState = tmpObj.get(JSONTerms.TRANSITIONS__SOURCE).toString();
-			st1 = srcState != null ? Integer.valueOf(srcState) : -1;
-			
-			//destination state
-			String desState = tmpObj.get(JSONTerms.TRANSITIONS__TARGET).toString();
-			st2 = desState != null ? Integer.valueOf(desState) : -1;
-			
-			//probability. If there's no probability then its set to -1
-			objGeneral = tmpObj.get(JSONTerms.TRANSITIONS__PROBABILITY);
-			probability = objGeneral!= null? Double.parseDouble(objGeneral.toString()) : -1;
-			
-			//label for action
-			objGeneral = tmpObj.get(JSONTerms.TRANSITIONS__LABEL);
-			label = objGeneral!=null? objGeneral.toString() : null;
-			
-			//if one of the states is not set to a proper state ( between 0 & Max-States-1)
-			if(st1 == -1 || st2 == -1) {
-				continue;
+			while (iter.hasNext()) {
+
+				tmpObj = iter.next();	
+
+				// source state
+				String srcState = tmpObj.get(JSONTerms.TRANSITIONS__SOURCE).toString();
+				st1 = srcState != null ? Integer.valueOf(srcState) : -1;
+
+				// destination state
+				String desState = tmpObj.get(JSONTerms.TRANSITIONS__TARGET).toString();
+				st2 = desState != null ? Integer.valueOf(desState) : -1;
+
+				// if one of the states is not set to a proper state ( between 0
+				// & Max-States-1)
+				if (st1 == -1 || st2 == -1) {
+					continue;
+				}
+
+				// probability. If there's no probability then its set to -1
+				objGeneral = tmpObj.get(JSONTerms.TRANSITIONS__PROBABILITY);
+				probability = objGeneral != null ? Double.parseDouble(objGeneral.toString()) : -1;
+
+				// label for action
+				objGeneral = tmpObj.get(JSONTerms.TRANSITIONS__LABEL);
+				label = objGeneral != null ? objGeneral.toString() : null;
+
+				// System.out.println(st1+" "+ st2+" "+label);
+				transitionGraph.add(st1, st2, probability, label);
 			}
-			
-			transitionGraph.add(st1, st2, probability, label);
-		}
-		
-		numberOfStates = transitionGraph.getNumberOfNodes();
-		
+
+			numberOfStates = transitionGraph.getNumberOfNodes();
+
 		} catch (Exception ie) {
 			ie.printStackTrace();
 		}
-
 
 	}
 
@@ -252,7 +254,8 @@ public class TransitionSystem {
 		return paths;
 	}
 
-	public synchronized LinkedList<GraphPath> getPaths(Predicate predSrc, Predicate predDes, boolean useSatisfiedStates) {
+	public synchronized LinkedList<GraphPath> getPaths(Predicate predSrc, Predicate predDes,
+			boolean useSatisfiedStates) {
 		LinkedList<Integer> v = new LinkedList<Integer>();
 		predicateSrc = predSrc;
 		predicateDes = predDes;
@@ -329,7 +332,7 @@ public class TransitionSystem {
 	}
 
 	private void depthFirst(Digraph<Integer> graph, LinkedList<Integer> visited) {
-		
+
 		List<Integer> nodes = graph.outboundNeighbors(visited.getLast());
 
 		// examine adjacent nodes
@@ -369,13 +372,13 @@ public class TransitionSystem {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
-		
+
 	}
 
 	public String getFileName() {
 		return fileName;
 	}
-	
+
 	public Digraph<Integer> getDigraph() {
 		return transitionGraph;
 	}
@@ -401,34 +404,35 @@ public class TransitionSystem {
 	public String toString() {
 		return transitionGraph.toString();
 	}
-	
-//	public static void main(String[]args) {
-//	
-//		TransitionSystem.setFileName("D:/Bigrapher data/scenario1/states_100/transitions.json");
-//		TransitionSystem tra = TransitionSystem.getTransitionSystemInstance();
-//		
-//		System.out.println(tra.getDigraph().toString());
-//		
-//	}
-	
-//	public static void setInstanceNull() {
-//		transitionSystem = null;
-//	}
-//	
-//	public void updateDigraphLabels(String[] actionNames) {
-//		
-//		LabelExtractor ext = new LabelExtractor();
-//		ext.updateDigraphLabels(actionNames);
-//	}
-	
-//	public String createNewLabelledTransitionFile(String [] actionNames) {
-//		
-//		LabelExtractor ext = new LabelExtractor();
-//		ext.updateDigraphLabels(actionNames);
-//		return ext.createNewLabelledTransitionFile();
-//	}
-	
-	public void setActionNames(String [] actionNames) {
+
+	// public static void main(String[]args) {
+	//
+	// TransitionSystem.setFileName("D:/Bigrapher
+	// data/scenario1/states_100/transitions.json");
+	// TransitionSystem tra = TransitionSystem.getTransitionSystemInstance();
+	//
+	// System.out.println(tra.getDigraph().toString());
+	//
+	// }
+
+	// public static void setInstanceNull() {
+	// transitionSystem = null;
+	// }
+	//
+	// public void updateDigraphLabels(String[] actionNames) {
+	//
+	// LabelExtractor ext = new LabelExtractor();
+	// ext.updateDigraphLabels(actionNames);
+	// }
+
+	// public String createNewLabelledTransitionFile(String [] actionNames) {
+	//
+	// LabelExtractor ext = new LabelExtractor();
+	// ext.updateDigraphLabels(actionNames);
+	// return ext.createNewLabelledTransitionFile();
+	// }
+
+	public void setActionNames(String[] actionNames) {
 		this.actionNames = Arrays.copyOf(actionNames, actionNames.length);
 	}
 }

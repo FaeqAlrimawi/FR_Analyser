@@ -53,6 +53,12 @@ public class LabelExtractor {
 
 	}
 
+	public LabelExtractor(TransitionSystem transitionSys, String outputFolderPath) {
+	
+		transitionSystem = transitionSys;
+		outputFolder = outputFolderPath;
+	}
+	
 	public LabelExtractor(String keywordsFileName) {
 		this();
 		this.rulesKeywordsFileName = keywordsFileName;
