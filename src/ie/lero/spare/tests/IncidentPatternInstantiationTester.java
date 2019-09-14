@@ -34,6 +34,7 @@ public class IncidentPatternInstantiationTester {
 		int tries = 10;
 
 		System.out.println("Enter 1 or 2 to execute incident pattern extraction (1) or incident pattern instantiation (2)");
+		System.out.println("** Data for executing the techniques should be contained under \"resources\" folder **");
 
 		loop: while (!isDone && tries > 0) {
 			try {
@@ -76,6 +77,9 @@ public class IncidentPatternInstantiationTester {
 	 */
 	protected static void executeInstantionInRC2Scenario() {
 
+		String internalTechsFolder = "../resources/DemoData/scenario2_instantiation/";
+		String extrnalTechsFolder = "./resources/scenario2_instantiation/";
+		
 		String incidentPatternName = "incidentPattern.cpi";
 		String systemModelName = "RC2.cps";
 		File incidentPatternFile = null;
@@ -84,14 +88,14 @@ public class IncidentPatternInstantiationTester {
 		String sysModelFilePath = null;
 
 		URL incidentPattern = IncidentPatternInstantiator.class
-				.getResource("../resources/scenario2_instantiation/" + incidentPatternName);
+				.getResource(internalTechsFolder + incidentPatternName);
 		URL sysModel = IncidentPatternInstantiator.class
-				.getResource("../resources/scenario2_instantiation/" + systemModelName);
+				.getResource(internalTechsFolder + systemModelName);
 
 		if (incidentPattern == null) {
 			// System.err.println("Incident pattern [" + incidentPatternName +
 			// "] is not found.");
-			incidentPatternFile = new File("./resources/scenario2_instantiation/" + incidentPatternName);
+			incidentPatternFile = new File(extrnalTechsFolder + incidentPatternName);
 
 			if (incidentPatternFile.exists()) {
 				incidentPatternFilePath = incidentPatternFile.getAbsolutePath();
@@ -106,8 +110,8 @@ public class IncidentPatternInstantiationTester {
 		}
 
 		if (sysModel == null) {
-			System.err.println("System model [" + systemModelName + "] is not found.");
-			sysModelFile = new File("./resources/scenario2_instantiation/" + systemModelName);
+//			System.err.println("System model [" + systemModelName + "] is not found.");
+			sysModelFile = new File(extrnalTechsFolder + systemModelName);
 
 			if (sysModelFile.exists()) {
 				sysModelFilePath = sysModelFile.getAbsolutePath();
@@ -131,6 +135,9 @@ public class IncidentPatternInstantiationTester {
 	 */
 	protected static void executeExtractionInRC1Scenario() {
 
+		String internalTechsFolder = "../resources/DemoData/scenario1_extraction/";
+		String extrnalTechsFolder = "./resources/scenario1_extraction/";
+		
 		String incidentInstanceName = "incidentInstance.cpi";
 		String systemModelName = "RC1.cps";
 		String activityPatternFolder = "activityPatterns/";
@@ -148,13 +155,13 @@ public class IncidentPatternInstantiationTester {
 				"movePhysicallyPattern.cpi", "rogueLocationSetup.cpi", "usingMaliciousFiles.cpi" };
 
 		URL incidentInstance = IncidentPatternInstantiator.class
-				.getResource("../resources/scenario1_extraction/" + incidentInstanceName);
+				.getResource(internalTechsFolder + incidentInstanceName);
 		URL sysModel = IncidentPatternInstantiator.class
-				.getResource("../resources/scenario1_extraction/" + systemModelName);
+				.getResource(internalTechsFolder + systemModelName);
 
 		if (incidentInstance == null) {
 
-			incidentInstanceFile = new File("./resources/scenario1_extraction/" + incidentInstanceName);
+			incidentInstanceFile = new File(extrnalTechsFolder + incidentInstanceName);
 
 			if (incidentInstanceFile.exists()) {
 				incidentInstanceFilePath = incidentInstanceFile.getAbsolutePath();
@@ -169,7 +176,7 @@ public class IncidentPatternInstantiationTester {
 		if (sysModel == null) {
 			// System.err.println("System model [" + systemModelName + "] is not
 			// found.");
-			sysModelFile = new File("./resources/scenario1_extraction/" + systemModelName);
+			sysModelFile = new File(extrnalTechsFolder + systemModelName);
 
 			if (sysModelFile.exists()) {
 				sysModelFilePath = sysModelFile.getAbsolutePath();
@@ -185,13 +192,13 @@ public class IncidentPatternInstantiationTester {
 		// get activity patterns
 		for (String actPtrFile : activityPatterns) {
 			URL actPtrn = IncidentPatternInstantiator.class
-					.getResource("../resources/scenario1_extraction/" + activityPatternFolder + actPtrFile);
+					.getResource(internalTechsFolder + activityPatternFolder + actPtrFile);
 
 			if (actPtrn != null) {
 				ModelsHandler.addActivityPattern(actPtrn.getPath());
 			} else {
 
-				File file = new File("./resources/scenario1_extraction/" + activityPatternFolder + actPtrFile);
+				File file = new File(extrnalTechsFolder + activityPatternFolder + actPtrFile);
 
 				if (file.exists()) {
 					ModelsHandler.addActivityPattern(file.getAbsolutePath());

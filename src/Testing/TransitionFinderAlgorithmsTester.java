@@ -1,29 +1,21 @@
 package Testing;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.jgrapht.Graph;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.graph.DefaultDirectedGraph;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
-import org.testng.internal.collections.Ints;
 
-import choco.cp.solver.search.task.profile.ProbabilisticProfile;
+//import choco.cp.solver.search.task.profile.ProbabilisticProfile;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
 import ie.lero.spare.franalyser.utility.Digraph;
-import ie.lero.spare.franalyser.utility.Digraph.Edge;
 import ie.lero.spare.franalyser.utility.Logger;
-import ie.lero.spare.franalyser.utility.PredicateType;
 import ie.lero.spare.franalyser.utility.TransitionSystem;
-import ie.lero.spare.pattern_instantiation.GraphPath;
 import ie.lero.spare.pattern_instantiation.SystemInstanceHandler;
-import ie.lero.spare.pattern_instantiation.SystemsHandler;
 
 public class TransitionFinderAlgorithmsTester {
 

@@ -267,6 +267,7 @@ public class IncidentPatternExtractor {
 		Map<String, ActivityPattern> ptrs = ModelsHandler.getActivityPatterns();
 
 		for (ActivityPattern ptr : ptrs.values()) {
+//			System.out.println(ptr.getName());
 			activityPatterns.add(ptr);
 		}
 
