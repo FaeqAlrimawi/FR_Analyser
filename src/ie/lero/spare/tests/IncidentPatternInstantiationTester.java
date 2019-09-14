@@ -77,8 +77,8 @@ public class IncidentPatternInstantiationTester {
 	 */
 	protected static void executeInstantionInRC2Scenario() {
 
-		String internalTechsFolder = "../resources/DemoData/scenario2_instantiation/";
-		String extrnalTechsFolder = "./resources/scenario2_instantiation/";
+		String internalTechsFolder = "../../../../executable_jar/DemoData/scenario2_instantiation/";
+		String extrnalTechsFolder = "./DemoData/scenario2_instantiation/";
 		
 		String incidentPatternName = "incidentPattern.cpi";
 		String systemModelName = "RC2.cps";
@@ -135,8 +135,8 @@ public class IncidentPatternInstantiationTester {
 	 */
 	protected static void executeExtractionInRC1Scenario() {
 
-		String internalTechsFolder = "../resources/DemoData/scenario1_extraction/";
-		String extrnalTechsFolder = "./resources/scenario1_extraction/";
+		String internalTechsFolder = "../../../../executable_jar/DemoData/scenario1_extraction/";
+		String extrnalTechsFolder = "./DemoData/scenario1_extraction/";
 		
 		String incidentInstanceName = "incidentInstance.cpi";
 		String systemModelName = "RC1.cps";
