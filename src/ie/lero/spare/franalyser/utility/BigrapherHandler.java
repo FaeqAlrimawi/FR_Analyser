@@ -229,10 +229,13 @@ public class BigrapherHandler implements SystemExecutor {
 					}
 				}
 				// remove comments
-				if (tmp.contains("#")) {
+				if(tmp.startsWith("#")) {
+					continue;
+				} else if (tmp.contains("#")) {
 					tmp = tmp.split("#")[0];
 
 				}
+				
 				// remove semicolon
 				tmp = tmp.replace(";", "");
 				tmp = tmp.trim();

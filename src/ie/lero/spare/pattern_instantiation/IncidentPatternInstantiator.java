@@ -113,7 +113,7 @@ public class IncidentPatternInstantiator {
 	// BRS executor
 	SystemExecutor brsExecutor;
 
-	private void runLogger() {
+	protected void runLogger() {
 
 		logger = new Logger();
 
@@ -1688,6 +1688,8 @@ public class IncidentPatternInstantiator {
 //		executeFromPrompt();
 		// lero10();
 		// test100K();
+		
+		testGenerateLabelledTransitionSystemFile();
 	}
 
 	public static void test() {
@@ -1739,9 +1741,9 @@ public class IncidentPatternInstantiator {
 
 		String leroSystemModel = "/home/faeq/Desktop/lero/lero.cps";
 
-		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
+		String BRS_file = "/D:/Bigrapher data/lero/big with unique action names/lero.big";
 		String[] states = new String[10];
-		String mainStatesFolder = "/home/faeq/Desktop/lero/lero100K/states";
+		String mainStatesFolder = "/D:/Bigrapher data/lero/big with unique action names/states20K/states";
 
 		for (int i = 0; i < states.length; i++) {
 
@@ -1773,6 +1775,37 @@ public class IncidentPatternInstantiator {
 
 	}
 
+	public static void testGenerateLabelledTransitionSystemFile() {
+		
+		String interruptionPattern = "/D:/Bigrapher data/lero/big with unique action names/collectData-pattern.cpi";
+
+		String leroSystemModel = "/D:/Bigrapher data/lero/big with unique action names/lero.cps";
+		
+		String BRS_file = "/D:/Bigrapher data/lero/big with unique action names/lero.big";
+	
+		String mainStatesFolder = "/D:/Bigrapher data/lero/big with unique action names/states20K/states";
+
+		
+		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+		
+		ins.execute(interruptionPattern, leroSystemModel, BRS_file, mainStatesFolder, null);
+//		ins.outputFolder = "/D:/Bigrapher data/lero/big with unique action names/logTemp";
+//		
+//		ins.runLogger();
+//		
+//		ins.initialiseBigraphSystem(BRS_file, mainStatesFolder);
+//		
+//		String[] actionNames = ins.brsExecutor!=null?ins.brsExecutor.getActionNames():null;
+//		
+//		String fileName = ins.createNewLabelledTransitionFile(actionNames);
+//		
+//		if(fileName != null) {
+//			System.out.println("Labelled transition file is created: " + fileName);
+//		} else {
+//			System.err.println("Failed to create a labelled transition file.");
+//		}
+	}
+	
 	public static void lero10() {
 
 		// setting tests
