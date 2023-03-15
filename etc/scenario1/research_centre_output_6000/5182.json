@@ -147,7 +147,7 @@
     {
       "node_id": 18,
       "control": {
-        "ctrl_name": "HVAC",
+        "ctrl_name": "SmartLight",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -155,7 +155,7 @@
     {
       "node_id": 19,
       "control": {
-        "ctrl_name": "SmartLight",
+        "ctrl_name": "HVAC",
         "ctrl_params": [],
         "ctrl_arity": 1
       }
@@ -1406,7 +1406,7 @@
         "target": 122
       },
       {
-        "source": 18,
+        "source": 19,
         "target": 20
       },
       {

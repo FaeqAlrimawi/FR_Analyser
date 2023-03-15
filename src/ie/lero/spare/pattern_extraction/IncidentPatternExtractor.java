@@ -2684,16 +2684,22 @@ public class IncidentPatternExtractor {
 	public static void main(String[] args) {
 
 		IncidentPatternExtractor extractor = new IncidentPatternExtractor();
-		String incidentFilePath = "D:/Bigrapher data/NII/incident instances/incidentInstance.cpi";
-		String systemFilePath = "D:/Bigrapher data/NII/NII_ext.cps";
+//		String incidentFilePath = "D:/Bigrapher data/NII/incident instances/incidentInstance.cpi";
+//		String systemFilePath = "D:/Bigrapher data/NII/NII_ext.cps";
+		
+		String incidentFilePath = "D:/bigrapher_files/ukrain/UkrainePowerPlant.cpi";
+		String systemFilePath = "D:/bigrapher_files/ukrain/UkrainianPlant.cps";
+		
 
+		String activityPAtternsFolder ="D:/runtime-EclipseApplication/activity-patterns/";
+		
 		//need to add patterns
-		String connectToNetworkPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/connectToNetworkPattern2.cpi";
-		String movePhysicallyPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/movePhysicallyPattern2.cpi";
-		String collectDataPatternFileName2 = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/collectDataPattern2.cpi";
-		String rogueLocationSetupFileName = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/rogueLocationSetup.cpi";
-		String contentSpoofing = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/contentSpoofing.cpi";
-		String usingMaliciousFile = "D:/runtime-EclipseApplication_design/activityPatterns/activity_patterns/usingMaliciousFiles.cpi";
+		String connectToNetworkPatternFileName2 = activityPAtternsFolder+"connectToNetworkPattern2.cpi";
+		String movePhysicallyPatternFileName2 = activityPAtternsFolder + "movePhysicallyPattern2.cpi";
+		String collectDataPatternFileName2 = activityPAtternsFolder + "collectDataPattern2.cpi";
+		String rogueLocationSetupFileName = activityPAtternsFolder + "rogueLocationSetup.cpi";
+		String contentSpoofing = activityPAtternsFolder + "contentSpoofing.cpi";
+		String usingMaliciousFile = activityPAtternsFolder + "usingMaliciousFiles.cpi";
 		// add patterns to the map (key is file path and value is pattern) of
 		// patterns in the models handler class
 //		ModelsHandler.addActivityPattern(connectToNetworkPatternFileName2);

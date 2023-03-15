@@ -102,13 +102,17 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 
 	public LinkedList<LinkedList<String>> iterateElements() {
 
+		
 		int tmp = count;
 		boolean isDuplicate = false;
 		LinkedList<String> value;
-		int num = calculateNumberOfElements();
+		long num = calculateNumberOfElements();
 		LinkedList<LinkedList<String>> results = new LinkedList<LinkedList<String>>();
-
+//		System.out.println("&&&&&&&&&&&&&&&&& ITERATE " + " num = " + num);
+		
 		for (; count < num; count++) {
+			
+			
 			isDuplicate = false;
 			tmp = count;
 			value = new LinkedList<String>();
@@ -124,8 +128,12 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 					isDuplicate = true;
 					break;
 				}
+				
+				
 				value.add(set[index]);
 				tmp /= radix;
+				
+//				System.out.println("cnt: " + num + " val: " + value);
 			}
 
 			if (!isDuplicate) {
@@ -144,9 +152,9 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 		return results;
 	}
 
-	private int calculateNumberOfElements() {
+	private long calculateNumberOfElements() {
 
-		int num = 1;
+		long num = 1;
 
 		for (int i = 0; i < sets.length; i++) {
 			num *= sets[i].length;
@@ -267,7 +275,7 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 		// assuming
 		int rows = 4;
 		// represents number of incident assets
-		int columns = 3;
+		int columns = 4;
 		// String [] a = {"a", "b", "c"};
 		// System.out.println(Arrays.toString(a));
 		String[][] tst = new String[rows][columns];

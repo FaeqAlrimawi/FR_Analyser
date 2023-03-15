@@ -578,8 +578,8 @@ public class Mapper {
 
 		Class potentialClass;
 		String typeName = entity.getType().getName();
-		AbstractionLevel entityTypeLevel = entity.getType().getAbstractionLevel();
-
+		AbstractionLevel entityTypeLevel = entity.getType().getAbstractionLevel();		
+		
 		try {
 			String potentialClassName = "environment.impl." + typeName;
 
@@ -589,6 +589,10 @@ public class Mapper {
 
 			potentialClass = Class.forName(potentialClassName);
 
+//			if (entity.getName().equalsIgnoreCase("breakers")) {
+//				System.out.println("inc-entity: " + entity.getName() + " abs-lvl: " + entityTypeLevel.getName() + "\npot-class: " + potentialClass.getSimpleName());	
+//			}
+			
 		} catch (ClassNotFoundException e) {
 			// type mismatch i.e. there is no type available in the
 			// system model
@@ -611,6 +615,7 @@ public class Mapper {
 		// desktop)
 		case ANYSUBCLASS:
 			if (potentialClass.isInstance(asset)) {
+
 				return true;
 			}
 			return false;
@@ -790,8 +795,10 @@ public class Mapper {
 
 	protected boolean isMobilityMatched(IncidentEntity entity, environment.Asset asset) {
 
+	
 		switch (entity.getMobility()) {
 
+		
 		case FIXED:
 			if (asset.getMobility() == environment.Mobility.FIXED) {
 				return true;

@@ -576,7 +576,7 @@ public class IncidentPatternInstantiator {
 			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Incident entities order: "
 					+ Arrays.toString(am.getIncidentEntityNames()));
 			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Entity-Asset map:");
-			logger.putMessage(am.toString());
+			logger.putMessage("\n"+am.toString());
 			logger.putMessage(Logger.SEPARATOR_BTW_INSTANCES + "Generating asset sets..");
 
 			if (listener != null) {
@@ -589,8 +589,18 @@ public class IncidentPatternInstantiator {
 			// relationships between entities in the incident pattern are
 			// considered when generating sequences
 			boolean isStrict = true;
-			combinations = am.generateUniqueCombinations(isStrict, incidentModel, systemModel);
-
+//			combinations = am.generateUniqueCombinations(isStrict, incidentModel, systemModel);
+			
+			IncidentEntitytoAssetSetSolver solver = new IncidentEntitytoAssetSetSolver();
+			Map<Integer, List<Integer>> solutions = solver.solve(am.getEntityAssetObjectMap(), true);
+			
+			if(solutions != null) {
+				System.out.println("&&&&&& SOLUTIONS: " + solutions.size());	
+			} else {
+				System.out.println("&&&&&& SOLUTIONS IS NULL");
+			}
+			
+				
 			if (listener != null) {
 				listener.updateProgress(10);
 				listener.updateAssetSetInfo(combinations);
@@ -1689,7 +1699,9 @@ public class IncidentPatternInstantiator {
 		// lero10();
 		// test100K();
 		
-		testGenerateLabelledTransitionSystemFile();
+//		testGenerateLabelledTransitionSystemFile();
+		executeUkrainianPowerPlant();
+		
 	}
 
 	public static void test() {
@@ -1816,6 +1828,29 @@ public class IncidentPatternInstantiator {
 		String BRS_file = "/home/faeq/Desktop/lero/lero.big";
 		String states = "/home/faeq/Desktop/lero/lero10";
 
+		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
+		ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states);
+		System.out.println("Complete...");
+		System.out.println("\n\n");
+
+	}
+	
+	
+	
+	public static void executeUkrainianPowerPlant() {
+
+		String folder = "D:/bigrapher_files/ukrain/";
+		
+		// setting tests
+		String interruptionPattern = folder + "UkrainePowerPlant.cpi";
+
+		String leroSystemModel = folder + "UkrainianPlant.cps";
+
+		String BRS_file = folder + "UkrainianPowerPlant.big";
+		String states = folder + "states";
+
+//		System.out.println("Executing Instantiation");
+		
 		IncidentPatternInstantiator ins = new IncidentPatternInstantiator();
 		ins.executeScenario(interruptionPattern, leroSystemModel, BRS_file, states);
 		System.out.println("Complete...");

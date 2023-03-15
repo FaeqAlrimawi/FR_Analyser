@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -17,6 +18,7 @@ import cyberPhysical_Incident.ConnectionState;
 import cyberPhysical_Incident.IncidentDiagram;
 import cyberPhysical_Incident.IncidentEntity;
 import cyberPhysical_Incident.Mobility;
+import environment.Asset;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.CartesianIterator;
 import ie.lero.spare.franalyser.utility.ModelsHandler;
@@ -26,6 +28,7 @@ public class AssetMap {
 	private String[] incidentEntityNames;
 	// private String[][] systemAssetMatches;
 	private HashMap<String, List<String>> matchedSystemAssets;
+	private HashMap<String, List<Asset>> matchedSystemObjAssets;
 	private LinkedList<String[]> uniqueCombinations;
 	public int numberOfSets;
 	// private static DateTimeFormatter dtf =
@@ -159,9 +162,11 @@ public class AssetMap {
 
 	public String toString() {
 		StringBuilder result = new StringBuilder();
-
+		int index = 1;
+		
 		for (Entry<String, List<String>> entity : matchedSystemAssets.entrySet()) {
-			result.append(entity.getKey()).append(" => ").append(entity.getValue()).append("\n");
+			result.append("[").append(index).append("] ").append(entity.getKey()).append(" (").append(entity.getValue().size()).append(")").append(" => ").append(entity.getValue()).append("\n");
+			index++;
 		}
 
 		return result.toString();
@@ -456,10 +461,12 @@ public class AssetMap {
 					tmpAry[j] = 0;
 				}
 
-				index++;
-				
 				//next property to check
 				j++;
+				
+				index++;
+				
+				
 			}
 		}
 	}
@@ -471,6 +478,7 @@ public class AssetMap {
 	public LinkedList<String[]> generateUniqueCombinations(boolean isStrict) {
 
 		String[][] systemAssetMatches = getDoubleArrayOfMatches();
+		
 		createIncidentEntitiesRules();
 		
 		setCriteriaStrict(isStrict);
@@ -494,13 +502,12 @@ public class AssetMap {
 	public LinkedList<String[]> generateUniqueCombinations(boolean isStrict, IncidentDiagram incidentModel, EnvironmentDiagram sysModel) {
 
 		String[][] systemAssetMatches = getDoubleArrayOfMatches();
-		
+	
 		createIncidentEntitiesRules(incidentModel);
 		
 		setCriteriaStrict(isStrict);
 		
 		CartesianIterator<String> it = new CartesianIterator<String>(systemAssetMatches, String[]::new, sysModel);
-
 		
 		uniqueCombinations = new LinkedList<String[]>();
 
@@ -637,6 +644,34 @@ public class AssetMap {
 		return uniqueCombinations;
 	}
 
+	public HashMap<String, List<Asset>> getEntityAssetObjectMap() {
+		
+		if(matchedSystemObjAssets != null && !matchedSystemObjAssets.isEmpty()) {
+			return matchedSystemObjAssets;
+		}
+
+		EnvironmentDiagram sysModel = ModelsHandler.getCurrentSystemModel();
+		
+		if (sysModel == null) {
+			System.err.println("AssetMap>>getEntityAssetObjectMap>>> No System Model Found");
+			return null;
+		}
+		
+		matchedSystemObjAssets = new HashMap<String, List<Asset>>();
+		
+		for (Entry<String, List<String>> entry: matchedSystemAssets.entrySet()) {
+			List<Asset> assetObjs = new LinkedList<Asset>()
+					;
+			for (String astName: entry.getValue()) {
+				assetObjs.add(sysModel.getAsset(astName));
+			}
+			matchedSystemObjAssets.put(entry.getKey(), assetObjs);
+		}
+		
+		return matchedSystemObjAssets;
+	}
+
+	
 	/*
 	 * public static void main(String [] args){
 	 * 
@@ -742,5 +777,7 @@ class SetsGeneratorThread implements Runnable {
 		}
 		return false;
 	}
+	
+	
 
 }
