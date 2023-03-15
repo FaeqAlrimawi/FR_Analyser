@@ -72,7 +72,7 @@ public class IncidentEntitytoAssetSetSolver {
 //		Map<Integer, Integer> monitorsCosts;
 
 		// isOptimal
-		boolean isOptimal = true;
+		boolean isOptimal = false;
 
 		// if true then it minimises the cost
 		boolean isMinimal = true;
