@@ -22,6 +22,7 @@ public class IncidentEntitytoAssetSetSolver {
 	public IncidentEntitytoAssetSetSolver(){
 	convertedMap = new HashMap<Integer, List<Integer>>();
 	assetToIDMap = new HashMap<Asset, Integer>();
+	assetToIDMapReverse  = new HashMap<Integer, Asset>();
 	allSolutions = new HashMap<Integer, List<Integer>>();
 //	solutionsFound = new LinkedList<MonitorSolution>();
 	entityToIDMap = new HashMap<Integer, String>();
@@ -48,6 +49,7 @@ public class IncidentEntitytoAssetSetSolver {
 		// key is a monitor and value is its id
 		Map<Asset, Integer> assetToIDMap;
 		
+		Map<Integer, Asset> assetToIDMapReverse;
 		
 		// result containing integer which indicates solution id and list of
 		// integers that
@@ -87,6 +89,9 @@ public class IncidentEntitytoAssetSetSolver {
 		// monitors variables
 		IntVar[] assetsVars = null;
 		
+		//maximum number of solutions
+		int maxNumOfSolutions = 1;
+		
 	
 	/**
 	 * Finds ALL solutions for the given actions and their monitors
@@ -104,7 +109,7 @@ public class IncidentEntitytoAssetSetSolver {
 	 *         information about the solution (e.g., id, a monitor for each action,
 	 *         and cost for the solution)
 	 */
-	public Map<Integer, List<Integer>> solve(Map<String, List<Asset>> incidentAssetMap, boolean allDifferent) {
+	public Map<Integer, List<Integer>> solve(Map<String, List<Asset>> incidentAssetMap, boolean allDifferent, int maxSolutions) {
 
 		if (incidentAssetMap == null || incidentAssetMap.isEmpty()) {
 			return null;
@@ -119,6 +124,8 @@ public class IncidentEntitytoAssetSetSolver {
 
 		this.assets = incidentAssetMap;
 
+		this.maxNumOfSolutions = maxSolutions;
+		
 		// ====create ids for actions and monitors
 		int entityID = 0;
 		int assetID = 0;
@@ -143,6 +150,9 @@ public class IncidentEntitytoAssetSetSolver {
 				if (!assetToIDMap.containsKey(ast)) {
 					assetToIDMap.put(ast, assetID);
 					entityAssetIDs.add(assetID);
+					
+					//used for reversed access
+					assetToIDMapReverse.put(assetID, ast);
 
 					// cost
 //					monitorsCosts.put(monitorID, (int) mon.getCost());
@@ -171,7 +181,7 @@ public class IncidentEntitytoAssetSetSolver {
 		// find solutions
 		// key is solution id, value is the id of the monitor
 
-//		printConvertedMap();
+		printConvertedMap();
 		
 		if (isOptimal) {
 			// optimal solution
@@ -197,13 +207,17 @@ public class IncidentEntitytoAssetSetSolver {
 
 		Model model = createSolverModel();
 
+		
 		solver = model.getSolver();
 		solutions = new LinkedList<Solution>();
 
-		while (solver.solve()) {
+		int numOfSolutions = 0;
+		while (solver.solve() && numOfSolutions < maxNumOfSolutions) {
 
+			
 			// add the current solution to the solutions list
 			solutions.add(new Solution(model).record());
+			numOfSolutions++;
 		}
 
 		analyseSolutions(solutions);
@@ -276,30 +290,30 @@ public class IncidentEntitytoAssetSetSolver {
 
 		// 2- A monitor in position X should match to a monitor that already can monitor
 		// the action in position X
-//		List<Constraint> consList = new LinkedList<Constraint>();
+		List<Constraint> consList = new LinkedList<Constraint>();
 		// essential: at least 1 map for each pattern
-//		for (int i = 0; i < monitorsVars.length; i++) {
-//			for (int j = 0; j < actionMonitorMatrix[i].length; j++) {
+		for (int i = 0; i < assetsVars.length; i++) {
+			for (int j = 0; j < entityAssetMatrix[i].length; j++) {
+
+				// pattern map should be a one of the found maps
+
+				Constraint correctActionMonitor = model.element(assetsVars[i], entityAssetMatrix[i],
+						model.intVar(j));
+
+				consList.add(correctActionMonitor);
+
+				// the severity of the pattern should equal to the pattern
+				// severity specified in the argument
+//				if (isMinimal) {
+//					model.ifThen(correctActionMonitor,
+//							model.arithm(monitorCost[i], "=", monitorsCosts.get(actionMonitorMatrix[i][j])));
+//				}
+			}
 //
-//				// pattern map should be a one of the found maps
-//
-//				Constraint correctActionMonitor = model.element(monitorsVars[i], actionMonitorMatrix[i],
-//						model.intVar(j));
-//
-//				consList.add(correctActionMonitor);
-//
-//				// the severity of the pattern should equal to the pattern
-//				// severity specified in the argument
-////				if (isMinimal) {
-////					model.ifThen(correctActionMonitor,
-////							model.arithm(monitorCost[i], "=", monitorsCosts.get(actionMonitorMatrix[i][j])));
-////				}
-//			}
-//
-//			Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
-//			model.or(res).post();
-//			consList.clear();
-//		}
+			Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
+			model.or(res).post();
+			consList.clear();
+		}
 
 		// 3- cost
 //		if (isMinimal) {
@@ -399,5 +413,31 @@ public class IncidentEntitytoAssetSetSolver {
 		for (Entry<Integer, List<Integer>> entry: convertedMap.entrySet()) {
 			System.out.println(entry.getKey() + " >> " + Arrays.toString(entry.getValue().toArray()));
 		}
+	}
+
+	public List<String[]> convertSolutionsToList() {
+		
+		if(allSolutions == null) {
+			return null;
+		}
+		
+		LinkedList<String[]> convertedSolutions = new LinkedList<String[]>();
+		
+		for(Entry<Integer, List<Integer>> entry: allSolutions.entrySet()) {
+			int arySize = entry.getValue().size();
+			String [] assetAry = new String[arySize];
+			int index = 0;
+			for(Integer astId : entry.getValue()) {
+				Asset astObj = assetToIDMapReverse.get(astId);
+				String astName = astObj != null? astObj.getName(): null;
+				assetAry[index] = astName;
+				index++;
+			}
+			
+			convertedSolutions.add(assetAry);
+		}
+		
+		return convertedSolutions;
+		
 	}
 }

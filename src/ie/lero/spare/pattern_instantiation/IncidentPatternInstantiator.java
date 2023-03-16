@@ -34,6 +34,7 @@ import java.util.function.Function;
 import org.json.JSONObject;
 
 import cyberPhysical_Incident.IncidentDiagram;
+import environment.Asset;
 import environment.CyberPhysicalSystemPackage;
 import environment.EnvironmentDiagram;
 import ie.lero.spare.franalyser.utility.BigrapherHandler;
@@ -592,7 +593,23 @@ public class IncidentPatternInstantiator {
 //			combinations = am.generateUniqueCombinations(isStrict, incidentModel, systemModel);
 			
 			IncidentEntitytoAssetSetSolver solver = new IncidentEntitytoAssetSetSolver();
-			Map<Integer, List<Integer>> solutions = solver.solve(am.getEntityAssetObjectMap(), true);
+			
+			int cutOffForAssets = 7;
+			int maxNumOfSolutions = 2;
+			
+			Map<String, List<Asset>> astObj = am.getEntityAssetObjectMap(cutOffForAssets);
+			Map<Integer, List<Integer>> solutions = solver.solve(astObj , true, maxNumOfSolutions);
+			List<String[]> converetedResults = solver.convertSolutionsToList();
+			
+			for (Entry<Integer, List<Integer>> entry: solutions.entrySet()) {
+				System.out.println("[" + entry.getKey() +"] ==> " + entry.getValue());
+			}
+			
+			int index = 0;
+			for(String[] astNames: converetedResults) {
+				System.out.println("[" + index +"] ==> " + Arrays.toString(astNames));
+				index++;
+			}
 			
 			if(solutions != null) {
 				System.out.println("&&&&&& SOLUTIONS: " + solutions.size());	

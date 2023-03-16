@@ -644,7 +644,7 @@ public class AssetMap {
 		return uniqueCombinations;
 	}
 
-	public HashMap<String, List<Asset>> getEntityAssetObjectMap() {
+	public HashMap<String, List<Asset>> getEntityAssetObjectMap(int cutOffForAssets) {
 		
 		if(matchedSystemObjAssets != null && !matchedSystemObjAssets.isEmpty()) {
 			return matchedSystemObjAssets;
@@ -660,10 +660,15 @@ public class AssetMap {
 		matchedSystemObjAssets = new HashMap<String, List<Asset>>();
 		
 		for (Entry<String, List<String>> entry: matchedSystemAssets.entrySet()) {
-			List<Asset> assetObjs = new LinkedList<Asset>()
-					;
+			List<Asset> assetObjs = new LinkedList<Asset>();
+			int cutOff = 0;
 			for (String astName: entry.getValue()) {
 				assetObjs.add(sysModel.getAsset(astName));
+				if (cutOff == cutOffForAssets) {
+					break;
+				}
+				
+				cutOff++;
 			}
 			matchedSystemObjAssets.put(entry.getKey(), assetObjs);
 		}
