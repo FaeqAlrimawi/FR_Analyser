@@ -415,7 +415,7 @@ public class IncidentEntitytoAssetSetSolver {
 		}
 	}
 
-	public List<String[]> convertSolutionsToList() {
+	public LinkedList<String[]> convertSolutionsToList() {
 		
 		if(allSolutions == null) {
 			return null;

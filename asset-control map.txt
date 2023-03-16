@@ -52,7 +52,7 @@ PhysicalConnection:PhysicalConnection
 Port:Port
 Credential:Credential
 ElectricityBreaker:ElectricityBreaker
-
+BreakersRoom:Room
 
 
 

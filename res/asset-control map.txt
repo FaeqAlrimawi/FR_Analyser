@@ -51,6 +51,8 @@ Walkway PhysicalConnection
 PhysicalConnection PhysicalConnection
 Port Port
 Credential Credential
+Room Room
+
 
 
 

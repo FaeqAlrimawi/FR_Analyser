@@ -595,18 +595,18 @@ public class IncidentPatternInstantiator {
 			IncidentEntitytoAssetSetSolver solver = new IncidentEntitytoAssetSetSolver();
 			
 			int cutOffForAssets = 7;
-			int maxNumOfSolutions = 2;
+			int maxNumOfSolutions = 1;
 			
 			Map<String, List<Asset>> astObj = am.getEntityAssetObjectMap(cutOffForAssets);
 			Map<Integer, List<Integer>> solutions = solver.solve(astObj , true, maxNumOfSolutions);
-			List<String[]> converetedResults = solver.convertSolutionsToList();
+			combinations = solver.convertSolutionsToList();
 			
 			for (Entry<Integer, List<Integer>> entry: solutions.entrySet()) {
 				System.out.println("[" + entry.getKey() +"] ==> " + entry.getValue());
 			}
 			
 			int index = 0;
-			for(String[] astNames: converetedResults) {
+			for(String[] astNames: combinations) {
 				System.out.println("[" + index +"] ==> " + Arrays.toString(astNames));
 				index++;
 			}
@@ -617,7 +617,12 @@ public class IncidentPatternInstantiator {
 				System.out.println("&&&&&& SOLUTIONS IS NULL");
 			}
 			
-				
+			
+			// FOR DEBUGGING
+//			if (true) {
+//				return;
+//			}
+			
 			if (listener != null) {
 				listener.updateProgress(10);
 				listener.updateAssetSetInfo(combinations);
@@ -1336,10 +1341,12 @@ public class IncidentPatternInstantiator {
 					continue;
 				}
 
-				String className = tmpAst.getClass().getSimpleName().replace("Impl", "");
+				String className = tmpAst.getClass().getSimpleName().replace("Impl", "").trim();
+				
 				List<String> controls = assetControlMap.get(className);
 
 				if (controls == null || controls.isEmpty()) {
+					System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW&&&&&&&&&&&&& " + systemAssetNames[i] +" class " + className);
 					unMatchedAssets.add(systemAssetNames[i] + "<<" + className + ">>");
 					continue;
 				}
@@ -1360,6 +1367,7 @@ public class IncidentPatternInstantiator {
 				// signature
 				// then add class to the unmatched assets
 				if (!isControlSet) {
+//					System.out.println("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW&&&&&&&&&&&&& " + systemAssetNames[i]);
 					unMatchedAssets.add(systemAssetNames[i] + "<<" + className + ">>");
 				}
 

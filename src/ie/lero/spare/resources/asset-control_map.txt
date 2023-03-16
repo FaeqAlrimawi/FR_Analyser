@@ -1,3 +1,4 @@
+Room:Room
 Office:Room
 Lab:Room
 Toilet:Room
@@ -51,6 +52,8 @@ Walkway:PhysicalConnection
 PhysicalConnection:PhysicalConnection
 Port:Port
 Credential:Credential
+DigitalAsset:DigitalAsset
+ElectricityBreaker:ElectricityBreaker
 
 
 
