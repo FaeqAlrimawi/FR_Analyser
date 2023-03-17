@@ -595,7 +595,7 @@ public class IncidentPatternInstantiator {
 			IncidentEntitytoAssetSetSolver solver = new IncidentEntitytoAssetSetSolver();
 			
 			int cutOffForAssets = 7;
-			int maxNumOfSolutions = 4;
+			int maxNumOfSolutions = 5;
 			
 			Map<String, List<Asset>> astObj = am.getEntityAssetObjectMap(cutOffForAssets);
 			Map<Integer, List<Integer>> solutions = solver.solve(astObj , true, maxNumOfSolutions);

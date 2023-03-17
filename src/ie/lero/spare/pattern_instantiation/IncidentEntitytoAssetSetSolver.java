@@ -93,7 +93,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		// monitors variables
 		IntVar[] assetsVars = null;
-		IntVar[] assetParentVars = null;
+		Map<Integer, IntVar> assetParentVars = null;
 		
 		//maximum number of solutions
 		int maxNumOfSolutions = 1;
@@ -261,7 +261,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		// ============Defining Variables======================//
 		assetsVars = new IntVar[numOfEntities];
-		assetParentVars = new IntVar[numOfEntities];
+		assetParentVars = new HashMap<Integer, IntVar>();
 
 //		System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
 		
@@ -271,7 +271,28 @@ public class IncidentEntitytoAssetSetSolver {
 			assetsVars[i] = model.intVar("asset-" + i, entityAssetMatrix[i]);
 			
 //			System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
-			assetParentVars[i] = model.intVar("assetParent-"+i, potentialParents);
+//			assetParentVars[i] = model.intVar("assetParent-"+i, potentialParents);
+			
+		}
+		
+		for (int i = 0; i < numOfEntities-1; i++) {
+//			assetsVars[i] = model.intVar("asset-" + i, entityAssetMatrix[i]);
+			Asset currentAsset = assetToIDMapReverse.get(assetsVars[i].getValue());
+			Asset currentAssetParent = currentAsset!=null? currentAsset.getParentAsset():null;
+			
+//			System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
+			if(currentAssetParent != null) {
+				Asset nextAsset = assetToIDMapReverse.get(assetsVars[i+1].getValue());
+				
+				if(nextAsset == currentAssetParent) {
+//					Constraint nxtAssetParentCons = model.allEqual(assetParentVars[i], assetsVars[i+1]);
+//					consList.add(nxtAssetParentCons);
+//					model.and(nxtAssetParentCons).post();
+					assetParentVars.put(i, model.intVar("assetParent-"+i, entityAssetMatrix[i+1]));
+				}
+		}
+			
+			
 			
 		}
 
@@ -300,7 +321,7 @@ public class IncidentEntitytoAssetSetSolver {
 				Asset nextAsset = assetToIDMapReverse.get(assetsVars[i+1].getValue());
 				
 				if(nextAsset == currentAssetParent) {
-					Constraint nxtAssetParentCons = model.allEqual(assetParentVars[i], assetsVars[i+1]);
+					Constraint nxtAssetParentCons = model.allEqual(assetParentVars.get(i), assetsVars[i+1]);
 					consList.add(nxtAssetParentCons);
 //					model.and(nxtAssetParentCons).post();
 				}
@@ -309,7 +330,7 @@ public class IncidentEntitytoAssetSetSolver {
 //		int size = consList.size();	
 		Constraint[] res = new Constraint[consList.size()];
 		consList.toArray(res);
-//		System.out.println(res.length);
+		System.out.println("LEEEEEE "+ res.length + " EEE " + res[0]);
 //		Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
 		model.and(res).post();
 		consList.clear();
