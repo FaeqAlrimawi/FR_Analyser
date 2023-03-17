@@ -595,7 +595,7 @@ public class IncidentPatternInstantiator {
 			IncidentEntitytoAssetSetSolver solver = new IncidentEntitytoAssetSetSolver();
 			
 			int cutOffForAssets = 7;
-			int maxNumOfSolutions = 1;
+			int maxNumOfSolutions = 4;
 			
 			Map<String, List<Asset>> astObj = am.getEntityAssetObjectMap(cutOffForAssets);
 			Map<Integer, List<Integer>> solutions = solver.solve(astObj , true, maxNumOfSolutions);
@@ -611,17 +611,17 @@ public class IncidentPatternInstantiator {
 				index++;
 			}
 			
-			if(solutions != null) {
-				System.out.println("&&&&&& SOLUTIONS: " + solutions.size());	
-			} else {
-				System.out.println("&&&&&& SOLUTIONS IS NULL");
-			}
+//			if(solutions != null) {
+//				System.out.println("&&&&&& SOLUTIONS: " + solutions.size());	
+//			} else {
+//				System.out.println("&&&&&& SOLUTIONS IS NULL");
+//			}
 			
 			
 			// FOR DEBUGGING
-//			if (true) {
-//				return;
-//			}
+			if (true) {
+				return;
+			}
 			
 			if (listener != null) {
 				listener.updateProgress(10);

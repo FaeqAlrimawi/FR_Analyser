@@ -13,7 +13,11 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 
-
+import cyberPhysical_Incident.Connection;
+import cyberPhysical_Incident.ConnectionState;
+import cyberPhysical_Incident.IncidentDiagram;
+import cyberPhysical_Incident.IncidentEntity;
+import cyberPhysical_Incident.Mobility;
 import environment.Asset;
 
 public class IncidentEntitytoAssetSetSolver {
@@ -48,6 +52,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		// key is a monitor and value is its id
 		Map<Asset, Integer> assetToIDMap;
+		int[] assetIDs;
 		
 		Map<Integer, Asset> assetToIDMapReverse;
 		
@@ -88,6 +93,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		// monitors variables
 		IntVar[] assetsVars = null;
+		IntVar[] assetParentVars = null;
 		
 		//maximum number of solutions
 		int maxNumOfSolutions = 1;
@@ -230,6 +236,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		Model model = null;
 		assetsVars = null;
+		assetParentVars = null;
 //		costSum = null;
 
 		int numOfEntities = entitySequence.size();
@@ -254,27 +261,18 @@ public class IncidentEntitytoAssetSetSolver {
 
 		// ============Defining Variables======================//
 		assetsVars = new IntVar[numOfEntities];
-//		IntVar[] monitorCost = new IntVar[numOfActions];
-		int[] coeffs = null;
+		assetParentVars = new IntVar[numOfEntities];
 
-		// monitor cost coeffs set to 1 if cost is needed
-//		if (isMinimal) {
-//			// used to update severity values
-//			coeffs = new int[numOfActions];
-//			Arrays.fill(coeffs, 1); // coeff is 1
-//
-//			// defines cost for a solution
-//			costSum = model.intVar("cost_sum", 0, sumCost);
-//		}
-
+//		System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
+		
+		int [] potentialParents = getAssetIDsAsArray();
 		// create monitor variables
 		for (int i = 0; i < numOfEntities; i++) {
 			assetsVars[i] = model.intVar("asset-" + i, entityAssetMatrix[i]);
-
-			// cost
-//			if (isMinimal) {
-//				monitorCost[i] = model.intVar("monitor_" + i + "_cost", actionMonitorCostMatrix[i]);
-//			}
+			
+//			System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
+			assetParentVars[i] = model.intVar("assetParent-"+i, potentialParents);
+			
 		}
 
 		// ============Defining Constraints======================//
@@ -292,28 +290,53 @@ public class IncidentEntitytoAssetSetSolver {
 		// the action in position X
 		List<Constraint> consList = new LinkedList<Constraint>();
 		// essential: at least 1 map for each pattern
-		for (int i = 0; i < assetsVars.length; i++) {
-			for (int j = 0; j < entityAssetMatrix[i].length; j++) {
-
-				// pattern map should be a one of the found maps
-
-				Constraint correctActionMonitor = model.element(assetsVars[i], entityAssetMatrix[i],
-						model.intVar(j));
-
-				consList.add(correctActionMonitor);
-
-				// the severity of the pattern should equal to the pattern
-				// severity specified in the argument
-//				if (isMinimal) {
-//					model.ifThen(correctActionMonitor,
-//							model.arithm(monitorCost[i], "=", monitorsCosts.get(actionMonitorMatrix[i][j])));
-//				}
+		
+		//CONTinment constraint: if the next asset is the parent of the previous then put this constraint
+		for (int i = 0; i < assetsVars.length-1; i++) {
+			Asset currentAsset = assetToIDMapReverse.get(assetsVars[i].getValue());
+			Asset currentAssetParent = currentAsset!=null? currentAsset.getParentAsset():null;
+			
+			if(currentAssetParent != null) {
+				Asset nextAsset = assetToIDMapReverse.get(assetsVars[i+1].getValue());
+				
+				if(nextAsset == currentAssetParent) {
+					Constraint nxtAssetParentCons = model.allEqual(assetParentVars[i], assetsVars[i+1]);
+					consList.add(nxtAssetParentCons);
+//					model.and(nxtAssetParentCons).post();
+				}
 			}
-//
-			Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
-			model.or(res).post();
-			consList.clear();
 		}
+//		int size = consList.size();	
+		Constraint[] res = new Constraint[consList.size()];
+		consList.toArray(res);
+//		System.out.println(res.length);
+//		Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
+		model.and(res).post();
+		consList.clear();
+		
+//		model.and(model.allDifferent(assetsVars)).post();
+//		for (int i = 0; i < assetsVars.length; i++) {
+//			for (int j = 0; j < entityAssetMatrix[i].length; j++) {
+//
+//				// pattern map should be a one of the found maps
+//
+//				Constraint correctActionMonitor = model.element(assetsVars[i], entityAssetMatrix[i],
+//						model.intVar(j));
+//
+//				consList.add(correctActionMonitor);
+//
+//				// the severity of the pattern should equal to the pattern
+//				// severity specified in the argument
+////				if (isMinimal) {
+////					model.ifThen(correctActionMonitor,
+////							model.arithm(monitorCost[i], "=", monitorsCosts.get(actionMonitorMatrix[i][j])));
+////				}
+//			}
+////
+//			Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
+//			model.or(res).post();
+//			consList.clear();
+//		}
 
 		// 3- cost
 //		if (isMinimal) {
@@ -365,6 +388,122 @@ public class IncidentEntitytoAssetSetSolver {
 
 	}
 	
+	private int[] getAssetIDsAsArray() {
+		
+		if(assetIDs != null && assetIDs.length>0) {
+			return assetIDs;
+		}
+		
+		if(assetToIDMap == null || assetToIDMap.isEmpty()) {
+			return null;
+		}
+		
+		assetIDs = new int[assetToIDMap.size()];
+		
+		int index = 0;
+		for(Integer value: assetToIDMap.values()) {
+			assetIDs[index] = value;
+			index++;
+		}
+		
+	
+		return assetIDs;
+		
+	}
+//	private void createIncidentEntitiesRules(IncidentDiagram incidentModel) {
+//
+////		IncidentDiagram incidentModel = ModelsHandler.getCurrentIncidentModel();
+//
+//		List<IncidentEntity> generalEntities = new LinkedList<IncidentEntity>();
+//
+//		for (String entityName : incidentEntityNames) {
+//			IncidentEntity ent = incidentModel.getEntity(entityName);
+//			generalEntities.add(ent);
+//		}
+//
+//		// rules for each asset are 4 currently: isSame? 0 or 1,
+//		// hasConnectivity? 0 or 1, isParent? 0 or 1, isChild? 0 or 1
+//		// the size of the rules array = rulesNum*neighbourhood*size of
+//		// generalAsset array (i.e. number of general assets)
+//		int numOfEntities = generalEntities.size();
+//
+//		IncidentEntity src, des;
+//
+//		rulesList = new LinkedList<int[]>();
+//
+//		for (int i = 0; i < numOfEntities - 1; i++) {
+//			int size = (numOfEntities - 1 - i) * rulesNum;
+//			rulesList.add(new int[size]);
+//		}
+//
+//		int index = 0;
+//
+//		// determine properties
+//		for (int i = 0; i < rulesList.size(); i++) {
+//			src = generalEntities.get(i);
+//
+//			index = i + 1;
+//			int[] tmpAry = rulesList.get(i);
+//			for (int j = 0; j < tmpAry.length;) {
+//				des = generalEntities.get(index);
+//
+////				System.out.println("check..." + src.getName() + " & " + des.getName());
+//
+//				// [1] isConnected
+//				for (Connection con : src.getConnections()) {
+//
+//					if(con.getState() == ConnectionState.TEMPORARY
+//							|| con.getState() == ConnectionState.UNKNOWN) {
+//						continue;
+//					}
+//					
+//					IncidentEntity ent1 = (cyberPhysical_Incident.IncidentEntity) con.getEntity1();
+//					IncidentEntity ent2 = (cyberPhysical_Incident.IncidentEntity) con.getEntity2();
+//
+//					if ((ent1 != null && ent1.getName().equals(des.getName()))
+//							|| (ent2 != null && ent2.getName().equals(des.getName()))) {
+//						tmpAry[j] = 1;// con.getType().ordinal();
+//						break;
+//					}
+//				}
+//
+//				if (tmpAry[j] != 1) {
+//					tmpAry[j] = 0;
+//				}
+//
+//				//next property to check
+//				j++;
+//				
+//				// [2] is the destination parent of source
+//				IncidentEntity srcParent = (IncidentEntity) src.getParentEntity();
+//				if (src.getMobility() == Mobility.FIXED && 
+//						srcParent != null && srcParent.getName().equals(des.getName())) {
+//					tmpAry[j] = 1;
+//				} else {
+//					tmpAry[j] = 0;
+//				}
+//
+//				//next property to check
+//				j++;
+//				
+//				// [3] is destination a child in source
+//				if (des.getMobility() == Mobility.FIXED &&
+//						src.getContainedEntities().contains(des)) {
+//					tmpAry[j] = 1;
+//				} else {
+//					tmpAry[j] = 0;
+//				}
+//
+//				//next property to check
+//				j++;
+//				
+//				index++;
+//				
+//				
+//			}
+//		}
+//	}
+
 	
 	protected Map<Integer, List<Integer>> analyseSolutions(List<Solution> solutions) {
 
