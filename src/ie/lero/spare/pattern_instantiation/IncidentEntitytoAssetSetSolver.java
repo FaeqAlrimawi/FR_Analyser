@@ -293,18 +293,13 @@ public class IncidentEntitytoAssetSetSolver {
 						int index = Integer.parseInt(id);
 
 //						System.out.println("astParentID: " + currentAssetParentID + " parentAssetName: " + currentAssetParent.getName() + " current Asset Name: "+currentAsset.getName());
-//						IntVar parentAsset = model.intVar("assetParent-" + index, currentAssetParentID);
-//						assetParentVars.put(index, parentAsset);
+						IntVar parentAsset = model.intVar("assetParent-" + index, currentAssetParentID);
+						assetParentVars.put(index, parentAsset);
 //
 //						// Create parent constraint
-//						Constraint nxtAssetParentCons = model.allEqual(parentAsset, potentialParentVar);
-//						consList.add(nxtAssetParentCons);
-						try {
-							model.
-						} catch (ContradictionException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}	
+						Constraint nxtAssetParentCons = model.allEqual(parentAsset, potentialParentVar);
+						consList.add(nxtAssetParentCons);
+					
 
 						break;
 					}
@@ -315,7 +310,12 @@ public class IncidentEntitytoAssetSetSolver {
 
 		Constraint[] res = new Constraint[consList.size()];
 		consList.toArray(res);
-		System.out.println("LEEEEEE " + res.length + " EEE " + res[0]);
+		System.out.println("Constraints #: " + res.length);
+		
+		for(int i=0;i<res.length;i++) {
+			System.out.println("con[" + i+"]: " + res[i]);
+		}
+		
 //		Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
 		model.and(res).post();
 		consList.clear();
