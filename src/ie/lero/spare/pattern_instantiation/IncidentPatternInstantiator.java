@@ -605,11 +605,11 @@ public class IncidentPatternInstantiator {
 				System.out.println("[" + entry.getKey() +"] ==> " + entry.getValue());
 			}
 			
-			int index = 0;
-			for(String[] astNames: combinations) {
-				System.out.println("[" + index +"] ==> " + Arrays.toString(astNames));
-				index++;
-			}
+//			int index = 0;
+//			for(String[] astNames: combinations) {
+//				System.out.println("[" + index +"] ==> " + Arrays.toString(astNames));
+//				index++;
+//			}
 			
 //			if(solutions != null) {
 //				System.out.println("&&&&&& SOLUTIONS: " + solutions.size());	

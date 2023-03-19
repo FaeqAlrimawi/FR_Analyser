@@ -11,6 +11,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
 import cyberPhysical_Incident.Connection;
@@ -21,84 +22,81 @@ import cyberPhysical_Incident.Mobility;
 import environment.Asset;
 
 public class IncidentEntitytoAssetSetSolver {
-	
-	
-	public IncidentEntitytoAssetSetSolver(){
-	convertedMap = new HashMap<Integer, List<Integer>>();
-	assetToIDMap = new HashMap<Asset, Integer>();
-	assetToIDMapReverse  = new HashMap<Integer, Asset>();
-	allSolutions = new HashMap<Integer, List<Integer>>();
+
+	public IncidentEntitytoAssetSetSolver() {
+		convertedMap = new HashMap<Integer, List<Integer>>();
+		assetToIDMap = new HashMap<Asset, Integer>();
+		assetToIDMapReverse = new HashMap<Integer, Asset>();
+		allSolutions = new HashMap<Integer, List<Integer>>();
 //	solutionsFound = new LinkedList<MonitorSolution>();
-	entityToIDMap = new HashMap<Integer, String>();
-	entitySequence = new LinkedList<String>();
+		entityToIDMap = new HashMap<Integer, String>();
+		entitySequence = new LinkedList<String>();
 //	monitorsCosts = new HashMap<Integer, Integer>();
 //	allSolutionsCost = new LinkedList<Integer>();
 	}
-	
 
 	// input
-		Map<String, List<Asset>> assets;
+	Map<String, List<Asset>> assets;
 
-		// convert the given map into a map that can be used by the solver
-		// key is an integer indicating the position (index) referring to action
-		// the value is a list containing monitor indices referring to all monitor that
-		// can monitor the given action index
-		Map<Integer, List<Integer>> convertedMap;
+	// convert the given map into a map that can be used by the solver
+	// key is an integer indicating the position (index) referring to action
+	// the value is a list containing monitor indices referring to all monitor that
+	// can monitor the given action index
+	Map<Integer, List<Integer>> convertedMap;
 
-		// the first index indicates an action and the second is the monitor. The value
-		// held is a monitor ID
-		int[][] entityAssetMatrix;
+	// the first index indicates an action and the second is the monitor. The value
+	// held is a monitor ID
+	int[][] entityAssetMatrix;
 //		int[][] actionMonitorCostMatrix;
 
-		// key is a monitor and value is its id
-		Map<Asset, Integer> assetToIDMap;
-		int[] assetIDs;
-		
-		Map<Integer, Asset> assetToIDMapReverse;
-		
-		// result containing integer which indicates solution id and list of
-		// integers that
-		// are the pattern maps
-		protected Map<Integer, List<Integer>> allSolutions;
+	// key is a monitor and value is its id
+	Map<Asset, Integer> assetToIDMap;
+	int[] assetIDs;
 
-		// list that contains the sum of cost for each solution
-		// index is a solution id and the integer value is the cost sum
+	Map<Integer, Asset> assetToIDMapReverse;
+
+	// result containing integer which indicates solution id and list of
+	// integers that
+	// are the pattern maps
+	protected Map<Integer, List<Integer>> allSolutions;
+
+	// list that contains the sum of cost for each solution
+	// index is a solution id and the integer value is the cost sum
 //		protected List<Integer> allSolutionsCost;
 
-		// all solutions. Same as allSolutions map but converted into MonitorSolution
-		// list
+	// all solutions. Same as allSolutions map but converted into MonitorSolution
+	// list
 //		List<String> solutionsFound;
 
-		// key is an action and the value is its id
-		Map<Integer, String> entityToIDMap;
+	// key is an action and the value is its id
+	Map<Integer, String> entityToIDMap;
 
-		// entity sequence that correspond to the sequence of assets in a solution
-		List<String> entitySequence;
+	// entity sequence that correspond to the sequence of assets in a solution
+	List<String> entitySequence;
 
-		// key is monitor id and value is cost
+	// key is monitor id and value is cost
 //		Map<Integer, Integer> monitorsCosts;
 
-		// isOptimal
-		boolean isOptimal = false;
+	// isOptimal
+	boolean isOptimal = false;
 
-		// if true then it minimises the cost
-		boolean isMinimal = true;
+	// if true then it minimises the cost
+	boolean isMinimal = true;
 
-		// if true then it finds different monitors for different actions
-		boolean isAllDifferent = true;
+	// if true then it finds different monitors for different actions
+	boolean isAllDifferent = true;
 
-		// variables used for finding a solution
-		// sum of cost of a solution
+	// variables used for finding a solution
+	// sum of cost of a solution
 //		IntVar costSum = null;
 
-		// monitors variables
-		IntVar[] assetsVars = null;
-		Map<Integer, IntVar> assetParentVars = null;
-		
-		//maximum number of solutions
-		int maxNumOfSolutions = 1;
-		
-	
+	// monitors variables
+	IntVar[] assetsVars = null;
+	Map<Integer, IntVar> assetParentVars = null;
+
+	// maximum number of solutions
+	int maxNumOfSolutions = 1;
+
 	/**
 	 * Finds ALL solutions for the given actions and their monitors
 	 * 
@@ -115,7 +113,8 @@ public class IncidentEntitytoAssetSetSolver {
 	 *         information about the solution (e.g., id, a monitor for each action,
 	 *         and cost for the solution)
 	 */
-	public Map<Integer, List<Integer>> solve(Map<String, List<Asset>> incidentAssetMap, boolean allDifferent, int maxSolutions) {
+	public Map<Integer, List<Integer>> solve(Map<String, List<Asset>> incidentAssetMap, boolean allDifferent,
+			int maxSolutions) {
 
 		if (incidentAssetMap == null || incidentAssetMap.isEmpty()) {
 			return null;
@@ -131,7 +130,7 @@ public class IncidentEntitytoAssetSetSolver {
 		this.assets = incidentAssetMap;
 
 		this.maxNumOfSolutions = maxSolutions;
-		
+
 		// ====create ids for actions and monitors
 		int entityID = 0;
 		int assetID = 0;
@@ -156,8 +155,8 @@ public class IncidentEntitytoAssetSetSolver {
 				if (!assetToIDMap.containsKey(ast)) {
 					assetToIDMap.put(ast, assetID);
 					entityAssetIDs.add(assetID);
-					
-					//used for reversed access
+
+					// used for reversed access
 					assetToIDMapReverse.put(assetID, ast);
 
 					// cost
@@ -188,7 +187,7 @@ public class IncidentEntitytoAssetSetSolver {
 		// key is solution id, value is the id of the monitor
 
 		printConvertedMap();
-		
+
 		if (isOptimal) {
 			// optimal solution
 //			findOptimalSolution();
@@ -201,8 +200,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		return allSolutions;
 	}
-	
-	
+
 	protected Map<Integer, List<Integer>> findSolutions() {
 
 		// ============Finding solutions======================//
@@ -213,14 +211,12 @@ public class IncidentEntitytoAssetSetSolver {
 
 		Model model = createSolverModel();
 
-		
 		solver = model.getSolver();
 		solutions = new LinkedList<Solution>();
 
 		int numOfSolutions = 0;
 		while (solver.solve() && numOfSolutions < maxNumOfSolutions) {
 
-			
 			// add the current solution to the solutions list
 			solutions.add(new Solution(model).record());
 			numOfSolutions++;
@@ -230,8 +226,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		return allSolutions;
 	}
-	
-	
+
 	protected Model createSolverModel() {
 
 		Model model = null;
@@ -264,37 +259,66 @@ public class IncidentEntitytoAssetSetSolver {
 		assetParentVars = new HashMap<Integer, IntVar>();
 
 //		System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
-		
-		int [] potentialParents = getAssetIDsAsArray();
+
+		int[] potentialParents = getAssetIDsAsArray();
 		// create monitor variables
 		for (int i = 0; i < numOfEntities; i++) {
 			assetsVars[i] = model.intVar("asset-" + i, entityAssetMatrix[i]);
 			
 //			System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
 //			assetParentVars[i] = model.intVar("assetParent-"+i, potentialParents);
-			
+
 		}
-		
-		for (int i = 0; i < numOfEntities-1; i++) {
+
+		List<Constraint> consList = new LinkedList<Constraint>();
+
+		for (IntVar assetVar : assetsVars) {
 //			assetsVars[i] = model.intVar("asset-" + i, entityAssetMatrix[i]);
-			Asset currentAsset = assetToIDMapReverse.get(assetsVars[i].getValue());
-			Asset currentAssetParent = currentAsset!=null? currentAsset.getParentAsset():null;
-			
+			Asset currentAsset = assetToIDMapReverse.get(assetVar.getValue());
+			Asset currentAssetParent = currentAsset != null ? currentAsset.getParentAsset() : null;
+
+			if (currentAssetParent != null) {
+				for (IntVar potentialParentVar : assetsVars) {
 //			System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
-			if(currentAssetParent != null) {
-				Asset nextAsset = assetToIDMapReverse.get(assetsVars[i+1].getValue());
-				
-				if(nextAsset == currentAssetParent) {
-//					Constraint nxtAssetParentCons = model.allEqual(assetParentVars[i], assetsVars[i+1]);
-//					consList.add(nxtAssetParentCons);
-//					model.and(nxtAssetParentCons).post();
-					assetParentVars.put(i, model.intVar("assetParent-"+i, entityAssetMatrix[i+1]));
+
+					Asset potentialAssetParent = assetToIDMapReverse.get(potentialParentVar.getValue());
+
+					if (potentialAssetParent == currentAssetParent
+							&& currentAsset.getMobility() == environment.Mobility.FIXED) {
+						int currentAssetParentID = assetToIDMap.get(potentialAssetParent);
+
+						String id = assetVar.getName().split("-")[1];
+//						System.out.println("IDDD: " + id);
+
+						int index = Integer.parseInt(id);
+
+//						System.out.println("astParentID: " + currentAssetParentID + " parentAssetName: " + currentAssetParent.getName() + " current Asset Name: "+currentAsset.getName());
+//						IntVar parentAsset = model.intVar("assetParent-" + index, currentAssetParentID);
+//						assetParentVars.put(index, parentAsset);
+//
+//						// Create parent constraint
+//						Constraint nxtAssetParentCons = model.allEqual(parentAsset, potentialParentVar);
+//						consList.add(nxtAssetParentCons);
+						try {
+							model.
+						} catch (ContradictionException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}	
+
+						break;
+					}
 				}
+			}
+
 		}
-			
-			
-			
-		}
+
+		Constraint[] res = new Constraint[consList.size()];
+		consList.toArray(res);
+		System.out.println("LEEEEEE " + res.length + " EEE " + res[0]);
+//		Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
+		model.and(res).post();
+		consList.clear();
 
 		// ============Defining Constraints======================//
 		// ===1- All different (if Alldifferent is true)
@@ -309,32 +333,33 @@ public class IncidentEntitytoAssetSetSolver {
 
 		// 2- A monitor in position X should match to a monitor that already can monitor
 		// the action in position X
-		List<Constraint> consList = new LinkedList<Constraint>();
+//		List<Constraint> consList = new LinkedList<Constraint>();
 		// essential: at least 1 map for each pattern
-		
-		//CONTinment constraint: if the next asset is the parent of the previous then put this constraint
-		for (int i = 0; i < assetsVars.length-1; i++) {
-			Asset currentAsset = assetToIDMapReverse.get(assetsVars[i].getValue());
-			Asset currentAssetParent = currentAsset!=null? currentAsset.getParentAsset():null;
-			
-			if(currentAssetParent != null) {
-				Asset nextAsset = assetToIDMapReverse.get(assetsVars[i+1].getValue());
-				
-				if(nextAsset == currentAssetParent) {
-					Constraint nxtAssetParentCons = model.allEqual(assetParentVars.get(i), assetsVars[i+1]);
-					consList.add(nxtAssetParentCons);
-//					model.and(nxtAssetParentCons).post();
-				}
-			}
-		}
+
+		// CONTinment constraint: if the next asset is the parent of the previous then
+		// put this constraint
+//		for (int i = 0; i < assetsVars.length - 1; i++) {
+//			Asset currentAsset = assetToIDMapReverse.get(assetsVars[i].getValue());
+//			Asset currentAssetParent = currentAsset != null ? currentAsset.getParentAsset() : null;
+//
+//			if (currentAssetParent != null) {
+//				Asset nextAsset = assetToIDMapReverse.get(assetsVars[i + 1].getValue());
+//
+//				if (nextAsset == currentAssetParent) {
+//					Constraint nxtAssetParentCons = model.allEqual(assetParentVars.get(i), assetsVars[i + 1]);
+//					consList.add(nxtAssetParentCons);
+////					model.and(nxtAssetParentCons).post();
+//				}
+//			}
+//		}
 //		int size = consList.size();	
-		Constraint[] res = new Constraint[consList.size()];
-		consList.toArray(res);
-		System.out.println("LEEEEEE "+ res.length + " EEE " + res[0]);
-//		Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
-		model.and(res).post();
-		consList.clear();
-		
+//		Constraint[] res = new Constraint[consList.size()];
+//		consList.toArray(res);
+//		System.out.println("LEEEEEE " + res.length + " EEE " + res[0]);
+////		Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
+//		model.and(res).post();
+//		consList.clear();
+
 //		model.and(model.allDifferent(assetsVars)).post();
 //		for (int i = 0; i < assetsVars.length; i++) {
 //			for (int j = 0; j < entityAssetMatrix[i].length; j++) {
@@ -368,7 +393,6 @@ public class IncidentEntitytoAssetSetSolver {
 		return model;
 	}
 
-	
 	/**
 	 * Generates a two-dimensional array that the first index indicates an actionID
 	 * (or its position in the sequence of actions, while the second index indicates
@@ -408,28 +432,27 @@ public class IncidentEntitytoAssetSetSolver {
 		}
 
 	}
-	
+
 	private int[] getAssetIDsAsArray() {
-		
-		if(assetIDs != null && assetIDs.length>0) {
+
+		if (assetIDs != null && assetIDs.length > 0) {
 			return assetIDs;
 		}
-		
-		if(assetToIDMap == null || assetToIDMap.isEmpty()) {
+
+		if (assetToIDMap == null || assetToIDMap.isEmpty()) {
 			return null;
 		}
-		
+
 		assetIDs = new int[assetToIDMap.size()];
-		
+
 		int index = 0;
-		for(Integer value: assetToIDMap.values()) {
+		for (Integer value : assetToIDMap.values()) {
 			assetIDs[index] = value;
 			index++;
 		}
-		
-	
+
 		return assetIDs;
-		
+
 	}
 //	private void createIncidentEntitiesRules(IncidentDiagram incidentModel) {
 //
@@ -525,7 +548,6 @@ public class IncidentEntitytoAssetSetSolver {
 //		}
 //	}
 
-	
 	protected Map<Integer, List<Integer>> analyseSolutions(List<Solution> solutions) {
 
 		for (int j = 0; j < solutions.size(); j++) {
@@ -554,7 +576,7 @@ public class IncidentEntitytoAssetSetSolver {
 
 		return allSolutions;
 	}
-	
+
 	protected void reset() {
 		allSolutions.clear();
 //		allSolutionsCost.clear();
@@ -567,37 +589,37 @@ public class IncidentEntitytoAssetSetSolver {
 		entityAssetMatrix = null;
 
 	}
-	
+
 	public void printConvertedMap() {
-		
-		for (Entry<Integer, List<Integer>> entry: convertedMap.entrySet()) {
+
+		for (Entry<Integer, List<Integer>> entry : convertedMap.entrySet()) {
 			System.out.println(entry.getKey() + " >> " + Arrays.toString(entry.getValue().toArray()));
 		}
 	}
 
 	public LinkedList<String[]> convertSolutionsToList() {
-		
-		if(allSolutions == null) {
+
+		if (allSolutions == null) {
 			return null;
 		}
-		
+
 		LinkedList<String[]> convertedSolutions = new LinkedList<String[]>();
-		
-		for(Entry<Integer, List<Integer>> entry: allSolutions.entrySet()) {
+
+		for (Entry<Integer, List<Integer>> entry : allSolutions.entrySet()) {
 			int arySize = entry.getValue().size();
-			String [] assetAry = new String[arySize];
+			String[] assetAry = new String[arySize];
 			int index = 0;
-			for(Integer astId : entry.getValue()) {
+			for (Integer astId : entry.getValue()) {
 				Asset astObj = assetToIDMapReverse.get(astId);
-				String astName = astObj != null? astObj.getName(): null;
+				String astName = astObj != null ? astObj.getName() : null;
 				assetAry[index] = astName;
 				index++;
 			}
-			
+
 			convertedSolutions.add(assetAry);
 		}
-		
+
 		return convertedSolutions;
-		
+
 	}
 }
