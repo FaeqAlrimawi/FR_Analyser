@@ -310,11 +310,11 @@ public class IncidentEntitytoAssetSetSolver {
 
 		Constraint[] res = new Constraint[consList.size()];
 		consList.toArray(res);
-		System.out.println("Constraints #: " + res.length);
+//		System.out.println("Constraints #: " + res.length);
 		
-		for(int i=0;i<res.length;i++) {
-			System.out.println("con[" + i+"]: " + res[i]);
-		}
+//		for(int i=0;i<res.length;i++) {
+//			System.out.println("con[" + i+"]: " + res[i]);
+//		}
 		
 //		Constraint[] res = consList.stream().toArray(size -> new Constraint[size]);
 		model.and(res).post();

@@ -54,7 +54,10 @@ Port:Port
 Credential:Credential
 DigitalAsset:DigitalAsset
 ElectricityBreaker:ElectricityBreaker
-
+File:File
+CLOSED:CLOSED
+OPEN:OPEN
+AssetStatus:Status
 
 
 

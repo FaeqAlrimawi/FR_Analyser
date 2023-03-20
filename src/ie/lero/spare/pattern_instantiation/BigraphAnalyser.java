@@ -398,6 +398,7 @@ public class BigraphAnalyser {
 
 		ArrayList<String> activitiesName = predicateHandler.getActivitNames();
 
+		
 		for (int i = 0; i < activitiesName.size(); i++) {
 
 			identifyRelevantStates(activitiesName.get(i));

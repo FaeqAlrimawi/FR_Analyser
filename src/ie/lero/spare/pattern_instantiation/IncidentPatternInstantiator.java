@@ -594,8 +594,8 @@ public class IncidentPatternInstantiator {
 			
 			IncidentEntitytoAssetSetSolver solver = new IncidentEntitytoAssetSetSolver();
 			
-			int cutOffForAssets = 7;
-			int maxNumOfSolutions = 5;
+			int cutOffForAssets = -1; //-1 to say all
+			int maxNumOfSolutions = 1;
 			
 			Map<String, List<Asset>> astObj = am.getEntityAssetObjectMap(cutOffForAssets);
 			Map<Integer, List<Integer>> solutions = solver.solve(astObj , true, maxNumOfSolutions);
@@ -619,9 +619,9 @@ public class IncidentPatternInstantiator {
 			
 			
 			// FOR DEBUGGING
-			if (true) {
-				return;
-			}
+//			if (true) {
+//				return;
+//			}
 			
 			if (listener != null) {
 				listener.updateProgress(10);
@@ -1865,6 +1865,7 @@ public class IncidentPatternInstantiator {
 	public static void executeUkrainianPowerPlant() {
 
 		String folder = "D:/bigrapher_files/ukrain/";
+		String statesSubFolder = "states10k";
 		
 		// setting tests
 		String interruptionPattern = folder + "UkrainePowerPlant.cpi";
@@ -1872,7 +1873,7 @@ public class IncidentPatternInstantiator {
 		String leroSystemModel = folder + "UkrainianPlant.cps";
 
 		String BRS_file = folder + "UkrainianPowerPlant.big";
-		String states = folder + "states";
+		String states = folder + statesSubFolder;
 
 //		System.out.println("Executing Instantiation");
 		
