@@ -499,7 +499,7 @@ public class AssetMap {
 		return uniqueCombinations;
 	}
 
-	public LinkedList<String[]> generateUniqueCombinations(boolean isStrict, IncidentDiagram incidentModel, EnvironmentDiagram sysModel) {
+	public LinkedList<String[]> generateUniqueCombinations(boolean isStrict, IncidentDiagram incidentModel, EnvironmentDiagram sysModel, int maxNumOfSolutions) {
 
 		String[][] systemAssetMatches = getDoubleArrayOfMatches();
 	
@@ -507,7 +507,7 @@ public class AssetMap {
 		
 		setCriteriaStrict(isStrict);
 		
-		CartesianIterator<String> it = new CartesianIterator<String>(systemAssetMatches, String[]::new, sysModel);
+		CartesianIterator<String> it = new CartesianIterator<String>(systemAssetMatches, String[]::new, sysModel, maxNumOfSolutions);
 		
 		uniqueCombinations = new LinkedList<String[]>();
 
@@ -660,7 +660,29 @@ public class AssetMap {
 		matchedSystemObjAssets = new HashMap<String, List<Asset>>();
 		
 		for (Entry<String, List<String>> entry: matchedSystemAssets.entrySet()) {
+			
 			List<Asset> assetObjs = new LinkedList<Asset>();
+			/*
+			 * FOR debugging {REMOVE LATER)
+			 */
+			if(entry.getKey().equalsIgnoreCase("room105")) {
+				assetObjs.add(sysModel.getAsset("EngDepartment"));
+				matchedSystemObjAssets.put(entry.getKey(), assetObjs);
+				continue;
+			}
+			
+			if(entry.getKey().equalsIgnoreCase("AttackerLaptop")) {
+				assetObjs.add(sysModel.getAsset("AttackerLaptop"));
+				matchedSystemObjAssets.put(entry.getKey(), assetObjs);
+				continue;
+			}
+			
+			if(entry.getKey().equalsIgnoreCase("InfectedMachine")) {
+				assetObjs.add(sysModel.getAsset("InfectedMachine"));
+				matchedSystemObjAssets.put(entry.getKey(), assetObjs);
+				continue;
+			}
+			
 			int cutOff = 0;
 			for (String astName: entry.getValue()) {
 				assetObjs.add(sysModel.getAsset(astName));
@@ -670,6 +692,7 @@ public class AssetMap {
 				
 				cutOff++;
 			}
+			
 			matchedSystemObjAssets.put(entry.getKey(), assetObjs);
 		}
 		

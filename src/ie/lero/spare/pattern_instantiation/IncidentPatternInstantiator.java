@@ -589,21 +589,22 @@ public class IncidentPatternInstantiator {
 			// an entities in each set. if isStrict is set to true, then
 			// relationships between entities in the incident pattern are
 			// considered when generating sequences
+			
 			boolean isStrict = true;
-//			combinations = am.generateUniqueCombinations(isStrict, incidentModel, systemModel);
+			int cutOffForAssets = -1; //-1 to say all
+			int maxNumOfSolutions = 1;
+//			combinations = am.generateUniqueCombinations(isStrict, incidentModel, systemModel, maxNumOfSolutions);
 			
 			IncidentEntitytoAssetSetSolver solver = new IncidentEntitytoAssetSetSolver();
 			
-			int cutOffForAssets = -1; //-1 to say all
-			int maxNumOfSolutions = 1;
-			
 			Map<String, List<Asset>> astObj = am.getEntityAssetObjectMap(cutOffForAssets);
 			Map<Integer, List<Integer>> solutions = solver.solve(astObj , true, maxNumOfSolutions);
+//			LinkedList<String[]> combinationsSolver = new LinkedList<String[]>();
 			combinations = solver.convertSolutionsToList();
 			
-			for (Entry<Integer, List<Integer>> entry: solutions.entrySet()) {
-				System.out.println("[" + entry.getKey() +"] ==> " + entry.getValue());
-			}
+//			for (Entry<Integer, List<Integer>> entry: solutions.entrySet()) {
+//				System.out.println("[" + entry.getKey() +"] ==> " + entry.getValue());
+//			}
 			
 			int index = 0;
 			for(String[] astNames: combinations) {
@@ -1865,7 +1866,7 @@ public class IncidentPatternInstantiator {
 	public static void executeUkrainianPowerPlant() {
 
 		String folder = "D:/bigrapher_files/ukrain/";
-		String statesSubFolder = "states10k";
+		String statesSubFolder = "states20k";
 		
 		// setting tests
 		String interruptionPattern = folder + "UkrainePowerPlant.cpi";

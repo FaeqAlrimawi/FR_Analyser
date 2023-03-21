@@ -24,7 +24,8 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 	private static DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 	private List<int[]> entitiesRules = AssetMap.rulesList;
 	private EnvironmentDiagram systemModel;
-	
+	private int maxNumOfSolutions;
+
 	// used to refine the matching to the incident entities
 	public static boolean isStrict = false;
 
@@ -46,6 +47,15 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 		systemModel = sysModel;
 	}
 
+	public CartesianIterator(String[][] sets, IntFunction<String[]> arrayConstructor, EnvironmentDiagram sysModel,
+			int maxNumOfSolutions) {
+
+		this(sets, arrayConstructor, sysModel);
+
+		this.maxNumOfSolutions = maxNumOfSolutions;
+
+	}
+
 	private static <T> String[][] copySets(String[][] sets) {
 		// If any of the arrays are empty, then the entire iterator is empty.
 		// This prevents division by zero in `hasNext`.
@@ -60,6 +70,9 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 
 	@Override
 	public boolean hasNext() {
+		
+	
+		
 		if (next != null) {
 			return true;
 		}
@@ -102,17 +115,24 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 
 	public LinkedList<LinkedList<String>> iterateElements() {
 
-		
 		int tmp = count;
 		boolean isDuplicate = false;
 		LinkedList<String> value;
 		long num = calculateNumberOfElements();
 		LinkedList<LinkedList<String>> results = new LinkedList<LinkedList<String>>();
 //		System.out.println("&&&&&&&&&&&&&&&&& ITERATE " + " num = " + num);
+
+//		long counter = 0;
+//		if (maxNumOfSolutions != -1 && maxNumOfSolutions < num) {
+//			counter = maxNumOfSolutions;
+//			
+//		} else {
+//			counter = num;
+//		}
+		
 		
 		for (; count < num; count++) {
-			
-			
+
 			isDuplicate = false;
 			tmp = count;
 			value = new LinkedList<String>();
@@ -128,11 +148,10 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 					isDuplicate = true;
 					break;
 				}
-				
-				
+
 				value.add(set[index]);
 				tmp /= radix;
-				
+
 //				System.out.println("cnt: " + num + " val: " + value);
 			}
 
@@ -269,39 +288,39 @@ public class CartesianIterator<T> implements Iterator<String[]> {
 		return rulesList;
 	}
 
-	public static void main(String[] args) {
-
-		// represents number of system assets that match each incident asset
-		// assuming
-		int rows = 4;
-		// represents number of incident assets
-		int columns = 4;
-		// String [] a = {"a", "b", "c"};
-		// System.out.println(Arrays.toString(a));
-		String[][] tst = new String[rows][columns];
-		int cnt = 0;
-		// generate dummy array assuming they are all unique
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < columns; j++) {
-				tst[i][j] = "" + j;// +""+j;//cnt;//dummy[rand.nextInt(dummy.length)];
-				cnt++;
-			}
-		}
-
-		for (String[] a : tst) {
-			System.out.println(Arrays.toString(a));
-		}
-		CartesianIterator<String> car = new CartesianIterator<String>(tst, String[]::new);
-
-		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a " + rows + "" + "*"
-				+ columns + "\nstatring time [" + dtf.format(LocalDateTime.now()) + "]");
-
-		LinkedList<LinkedList<String>> res = car.iterateElements();
-
-		for (LinkedList<String> lst : res) {
-			System.out.println(lst);
-		}
-		System.out.println("End time [" + dtf.format(LocalDateTime.now()) + "]");
-		System.out.println(res.size());
-	}
+//	public static void main(String[] args) {
+//
+//		// represents number of system assets that match each incident asset
+//		// assuming
+//		int rows = 4;
+//		// represents number of incident assets
+//		int columns = 4;
+//		// String [] a = {"a", "b", "c"};
+//		// System.out.println(Arrays.toString(a));
+//		String[][] tst = new String[rows][columns];
+//		int cnt = 0;
+//		// generate dummy array assuming they are all unique
+//		for (int i = 0; i < rows; i++) {
+//			for (int j = 0; j < columns; j++) {
+//				tst[i][j] = "" + j;// +""+j;//cnt;//dummy[rand.nextInt(dummy.length)];
+//				cnt++;
+//			}
+//		}
+//
+//		for (String[] a : tst) {
+//			System.out.println(Arrays.toString(a));
+//		}
+//		CartesianIterator<String> car = new CartesianIterator<String>(tst, String[]::new);
+//
+//		System.out.println("Testing [The generation of unqiue sequences WITHOUT threads] using a " + rows + "" + "*"
+//				+ columns + "\nstatring time [" + dtf.format(LocalDateTime.now()) + "]");
+//
+//		LinkedList<LinkedList<String>> res = car.iterateElements();
+//
+//		for (LinkedList<String> lst : res) {
+//			System.out.println(lst);
+//		}
+//		System.out.println("End time [" + dtf.format(LocalDateTime.now()) + "]");
+//		System.out.println(res.size());
+//	}
 }

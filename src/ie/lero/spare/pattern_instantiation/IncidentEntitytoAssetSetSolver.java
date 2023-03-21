@@ -260,9 +260,10 @@ public class IncidentEntitytoAssetSetSolver {
 
 //		System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
 
-		int[] potentialParents = getAssetIDsAsArray();
+//		int[] potentialParents = getAssetIDsAsArray();
 		// create monitor variables
 		for (int i = 0; i < numOfEntities; i++) {
+			
 			assetsVars[i] = model.intVar("asset-" + i, entityAssetMatrix[i]);
 			
 //			System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
@@ -273,10 +274,13 @@ public class IncidentEntitytoAssetSetSolver {
 		List<Constraint> consList = new LinkedList<Constraint>();
 
 		for (IntVar assetVar : assetsVars) {
-//			assetsVars[i] = model.intVar("asset-" + i, entityAssetMatrix[i]);
+
+			/*
+			 * Parent constraint
+			 */
 			Asset currentAsset = assetToIDMapReverse.get(assetVar.getValue());
 			Asset currentAssetParent = currentAsset != null ? currentAsset.getParentAsset() : null;
-
+			
 			if (currentAssetParent != null) {
 				for (IntVar potentialParentVar : assetsVars) {
 //			System.out.println("ARrray " + Arrays.toString(getAssetIDsAsArray()));
@@ -299,13 +303,20 @@ public class IncidentEntitytoAssetSetSolver {
 //						// Create parent constraint
 						Constraint nxtAssetParentCons = model.allEqual(parentAsset, potentialParentVar);
 						consList.add(nxtAssetParentCons);
-					
-
 						break;
 					}
 				}
 			}
+			/*
+			 * End parent constraint
+			 */
 
+			
+			/*
+			 * Connection Constraint
+			 */
+			
+			
 		}
 
 		Constraint[] res = new Constraint[consList.size()];
