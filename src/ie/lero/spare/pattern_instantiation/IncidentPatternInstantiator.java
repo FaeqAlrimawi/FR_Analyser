@@ -1866,14 +1866,14 @@ public class IncidentPatternInstantiator {
 	public static void executeUkrainianPowerPlant() {
 
 		String folder = "D:/bigrapher_files/ukrain/";
-		String statesSubFolder = "states20k";
+		String statesSubFolder = "states5k3";
 		
 		// setting tests
-		String interruptionPattern = folder + "UkrainePowerPlant.cpi";
+		String interruptionPattern = folder + "incident_plant.cpi";
 
-		String leroSystemModel = folder + "UkrainianPlant.cps";
+		String leroSystemModel = folder + "systemModel_plant.cps";
 
-		String BRS_file = folder + "UkrainianPowerPlant.big";
+		String BRS_file = folder + "systemBig_plant.big";
 		String states = folder + statesSubFolder;
 
 //		System.out.println("Executing Instantiation");
